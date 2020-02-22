@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Rosario:400' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../css/main.css">
+    <title>{{.Title}}</title>
+</head>
+<body>
+
+<nav>
+    <ul>
+        <li><a href="/">Back</a></li>
+        <li><a {{if eq .VendorShort "CK"}}class="active"{{end}} href="arbit?seller={{.SellerShort}}{{if ne .SellerShort "CK"}}&vendor=CK{{end}}">Cardkingdom</a></li>
+        <li><a {{if eq .VendorShort "MM"}}class="active"{{end}} href="arbit?seller={{.SellerShort}}{{if ne .SellerShort "MM"}}&vendor=MM{{end}}">Miniature Market</a></li>
+        <li><a {{if eq .VendorShort "SZ"}}class="active"{{end}} href="arbit?seller={{.SellerShort}}{{if ne .SellerShort "SZ"}}&vendor=SZ{{end}}">Strikezone</a></li>
+        <li><a {{if eq .VendorShort "CFB"}}class="active"{{end}} href="arbit?seller={{.SellerShort}}{{if ne .SellerShort "CFB"}}&vendor=CFB{{end}}">Channel Fireball</a></li>
+        <li><a {{if eq .VendorShort "ABU"}}class="active"{{end}} href="arbit?seller={{.SellerShort}}{{if ne .SellerShort "ABU"}}&vendor=ABU{{end}}">ABUGames</a></li>
+    </ul>
+</nav>
+
+<div class="mainbody">
+    {{if ne .Message ""}}
+        <h1>{{.Message}}</h1>
+    {{else if eq .VendorShort .SellerShort}}
+        <h1>Welcome to {{.SellerFull}} Arbitrage</h1>
+        <div class="indent">
+            <p>Please use the top bar to navigate across vendors.</p>
+
+            <h2>Instructions</h2>
+            <ul class="indent">
+                <li>Data is refreshed every 6 hours.</li>
+                <li>There is a minimum 25% spread and $0.2 difference for a card to be considered arbitrage.</li>
+                <li>Always check validity of prices before committing anything.</li>
+                <li>You may download a standardized version of the buylist in CSV format, mapped to a <a href="www.mtgjson.com">MTGJSON database</a>.</li>
+                <li>In case of mistakes of incongruities, please notify the devs in the BAN Discord.</li>
+                <li>Should you find this content useful, consider clicking on one of the provided links to make a purchase on the website, and directly support BAN.</li>
+            </ul>
+            <a class="btn normal" href="arbit?seller={{.SellerShort}}&action=dlbl" download="{{.LastUpdate}}_{{.SellerShort}}_Buylist.csv">Download CSV</a>
+        </div>
+    {{else}}
+        <h1>Arbitrage from {{.SellerFull}} to {{.VendorFull}}</h1>
+        <div class="indent">
+            {{if eq .SellerShort "CK"}}
+                <form target="_blank" id="build-cart" method="POST" action="https://www.cardkingdom.com/builder?utm_source={{.CKPartner}}&utm_medium=deck&utm_campaign={{.CKPartner}}">
+                    <button name="cart" class="btn normal" value="value" type="text" onClick="document.forms[0].submit();">Build a Cart with this selection</button>
+                    <input type="hidden" name="c" id="cart-list" value="">
+                    <input type="hidden" name="partner" value="{{.CKPartner}}">
+                </form>
+            {{end}}
+
+            <table>
+                <tr>
+                    <th>Card Name</th>
+                    <th>Edition</th>
+                    <th>F/NF</th>
+                    <th>Conditions</th>
+                    <th>Sell Price</th>
+                    <th>Buy Price</th>
+                    <th>Trade Price</th>
+                    <th>Difference</th>
+                    <th>Spread</th>
+                    <th>Price Ratio</th>
+                    {{if eq .SellerShort "CK"}}
+                        <th><center>URL</center></th>
+                    {{end}}
+                </tr>
+                {{range .Arb}}
+                    <tr>
+                        <td>
+                            {{.BuylistEntry.Card.Name}}
+                            {{if eq $.SellerShort "CK"}}
+                                <script type='text/javascript'>
+                                    document.getElementById('cart-list').value += "{{.BuylistEntry.Card.Name}}||"
+                                </script>
+                            {{end}}
+                        </td>
+                        <td>
+                            {{.BuylistEntry.Card.Set}}
+                        </td>
+                        <td>
+                            {{if .BuylistEntry.Card.Foil}}FOIL{{end}}
+                        </td>
+                        <td>
+                            <center>{{.InventoryEntry.Conditions}}</center>
+                        </td>
+                        <td>
+                            $ {{.InventoryEntry.Price}}
+                        </td>
+                        <td>
+                            $ {{.BuylistEntry.BuyPrice}}
+                        </td>
+                        <td>
+                            $ <script type='text/javascript'>
+                                document.write(Math.floor({{.BuylistEntry.TradePrice}} * 100)/100)
+                            </script>
+                        </td>
+                        <td>
+                            $ <script type='text/javascript'>
+                                document.write(Math.floor({{.Difference}} * 100)/100)
+                            </script>
+                        </td>
+                        <td>
+                            <script type='text/javascript'>
+                                document.write(Math.floor({{.Spread}} * 100)/100)
+                            </script>%
+                        </td>
+                        <td>
+                            <center>
+                            <script type='text/javascript'>
+                                document.write(Math.floor({{.BuylistEntry.PriceRatio}} * 100)/100)
+                            </script>%
+                            </center>
+                        </td>
+                        {{if eq $.SellerShort "CK"}}
+                            <td>
+                                <a class="btn normal" href="{{.InventoryEntry.Notes}}" target="_blank">Buy</a>
+                            </td>
+                        {{end}}
+                    </tr>
+                {{end}}
+            </table>
+        <a class="btn normal" href="arbit?seller={{.SellerShort}}&vendor={{.VendorShort}}&action=csv" download="{{.LastUpdate}}_{{.SellerShort}}-to-{{.VendorShort}}_Arbitrage.csv">Download CSV</a>
+        </div>
+        <br>
+        <p>
+            Last updated: {{.LastUpdate}}<br>
+            {{if eq .SellerShort "CK"}}
+            By visiting Card Kingdom through the links on this page you're supporting the continuos development of this site ♥
+            {{end}}
+        </p>
+        <br>
+    {{end}}
+</div>
+</body>
+</html>
