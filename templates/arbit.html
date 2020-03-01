@@ -60,9 +60,7 @@
                     <th>Difference</th>
                     <th>Spread</th>
                     <th>Price Ratio</th>
-                    {{if eq .SellerShort "CK"}}
-                        <th><center>URL</center></th>
-                    {{end}}
+                    <th><center>Quicklinks</center></th>
                 </tr>
                 {{range .Arb}}
                     <tr>
@@ -111,11 +109,16 @@
                             </script>%
                             </center>
                         </td>
-                        {{if eq $.SellerShort "CK"}}
-                            <td>
-                                <a class="btn normal" href="{{.InventoryEntry.Notes}}" target="_blank">Buy</a>
-                            </td>
-                        {{end}}
+                        <td>
+                            <center>
+                                {{if ne .InventoryEntry.Notes ""}}
+                                    <a class="btn normal" href="{{.InventoryEntry.Notes}}" target="_blank">Buy</a>
+                                {{end}}
+                                {{if ne .BuylistEntry.Notes ""}}
+                                    <a class="btn normal" href="{{.BuylistEntry.Notes}}" target="_blank">Sell</a>
+                                {{end}}
+                            </center>
+                        </td>
                     </tr>
                 {{end}}
             </table>
