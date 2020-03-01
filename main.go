@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -140,18 +141,23 @@ func main() {
 		DB = db
 	}()
 
-	// refresh every 6 hours
-	go func() {
-		for t := range time.NewTicker(6 * time.Hour).C {
-			periodicFunction(t, DB)
-		}
-	}()
-
 	// load necessary environmental variables
 	CKPartner = os.Getenv("CARDKINGDOM_PARTNER")
 	if CKPartner == "" {
 		log.Fatalln("CARDKINGDOM_PARTNER not set")
 	}
+	dataRefresh := os.Getenv("DATA_REFRESH")
+	refresh, _ := strconv.Atoi(dataRefresh)
+	if refresh == 0 {
+		log.Fatalln("DATA_REFRESH not set")
+	}
+
+	// refresh every few hours
+	go func() {
+		for t := range time.NewTicker(time.Duration(refresh) * time.Hour).C {
+			periodicFunction(t, DB)
+		}
+	}()
 
 	// serve everything in the css and img folders as a file
 	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(&FileSystem{http.Dir("css")})))
