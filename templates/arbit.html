@@ -19,8 +19,8 @@
 </nav>
 
 <div class="mainbody">
-    {{if ne .Message ""}}
-        <h1>{{.Message}}</h1>
+    {{if ne .ErrorMessage ""}}
+        <h1>{{.ErrorMessage}}</h1>
     {{else if eq .VendorShort .SellerShort}}
         <h1>Welcome to {{.SellerFull}} Arbitrage</h1>
         <div class="indent">
@@ -40,6 +40,7 @@
     {{else}}
         <h1>Arbitrage from {{.SellerFull}} to {{.VendorFull}}</h1>
         <div class="indent">
+            <h2><p>{{.InfoMessage}}</p></h2>
             {{if eq .SellerShort "CK"}}
                 <form target="_blank" id="build-cart" method="POST" action="https://www.cardkingdom.com/builder?utm_source={{.CKPartner}}&utm_medium=deck&utm_campaign={{.CKPartner}}">
                     <button name="cart" class="btn normal" value="value" type="text" onClick="document.forms[0].submit();">Build a Cart with this selection</button>

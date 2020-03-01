@@ -26,10 +26,11 @@ var cfb *channelfireball.Channelfireball
 var mm *miniaturemarket.Miniaturemarket
 
 type PageVars struct {
-	Title      string
-	CKPartner  string
-	Message    string
-	LastUpdate string
+	Title        string
+	CKPartner    string
+	ErrorMessage string
+	InfoMessage  string
+	LastUpdate   string
 
 	SellerShort  string
 	SellerFull   string

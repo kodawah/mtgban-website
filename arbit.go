@@ -10,8 +10,8 @@ import (
 func Arbit(w http.ResponseWriter, r *http.Request) {
 	if DB == nil {
 		pageVars := PageVars{
-			Title:   "Great things are coming",
-			Message: "Website is starting, please try again in a few minutes",
+			Title:        "Great things are coming",
+			ErrorMessage: "Website is starting, please try again in a few minutes",
 		}
 
 		render(w, "arbit.html", pageVars)
@@ -81,8 +81,8 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	}
 	if message != "" {
 		pageVars := PageVars{
-			Title:   "Errors have been made",
-			Message: message,
+			Title:        "Errors have been made",
+			ErrorMessage: message,
 		}
 
 		render(w, "arbit.html", pageVars)
@@ -109,7 +109,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		VendorShort:  vendorShort,
 		VendorFull:   vendorFull,
 		VendorUpdate: vendorUpdate.Format(time.RFC3339),
-		Message:      message,
+		ErrorMessage: message,
 		CKPartner:    CKPartner,
 		LastUpdate:   LastUpdate.Format(time.RFC3339),
 	}
@@ -126,7 +126,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	arbit, err := mtgban.Arbit(nil, vendor, seller)
 	if err != nil {
 		pageVars.Title = "Arbitrage Error"
-		pageVars.Message = err.Error()
+		pageVars.ErrorMessage = err.Error()
 
 		render(w, "arbit.html", pageVars)
 		return
