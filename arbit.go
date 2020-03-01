@@ -132,6 +132,10 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if len(arbit) == 0 {
+		pageVars.InfoMessage = "No arbitrage found"
+	}
+
 	if dumpCSV {
 		mtgban.WriteArbitrageToCSV(arbit, w)
 		return
