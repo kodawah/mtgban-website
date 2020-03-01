@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/kodabb/go-mtgban/mtgban"
@@ -135,6 +136,10 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	if len(arbit) == 0 {
 		pageVars.InfoMessage = "No arbitrage found"
 	}
+
+	sort.Slice(arbit, func(i, j int) bool {
+		return arbit[i].Spread > arbit[j].Spread
+	})
 
 	if dumpCSV {
 		mtgban.WriteArbitrageToCSV(arbit, w)
