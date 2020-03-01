@@ -31,10 +31,12 @@ type PageVars struct {
 	Message    string
 	LastUpdate string
 
-	SellerShort string
-	SellerFull  string
-	VendorShort string
-	VendorFull  string
+	SellerShort  string
+	SellerFull   string
+	SellerUpdate string
+	VendorShort  string
+	VendorFull   string
+	VendorUpdate string
 
 	Arb []mtgban.ArbitEntry
 }

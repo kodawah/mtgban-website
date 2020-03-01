@@ -35,7 +35,7 @@
                 <li>In case of mistakes of incongruities, please notify the devs in the BAN Discord.</li>
                 <li>Should you find this content useful, consider clicking on one of the provided links to make a purchase on the website, and directly support BAN.</li>
             </ul>
-            <a class="btn normal" href="arbit?seller={{.SellerShort}}&action=dlbl" download="{{.LastUpdate}}_{{.SellerShort}}_Buylist.csv">Download CSV</a>
+            <a class="btn normal" href="arbit?seller={{.SellerShort}}&action=dlbl" download="{{.VendorUpdate}}_{{.SellerShort}}_Buylist.csv">Download CSV</a>
         </div>
     {{else}}
         <h1>Arbitrage from {{.SellerFull}} to {{.VendorFull}}</h1>
@@ -123,7 +123,8 @@
         </div>
         <br>
         <p>
-            Last updated: {{.LastUpdate}}<br>
+            Last inventory update: {{.SellerUpdate}}<br>
+            Last buylist update: {{.VendorUpdate}}<br>
             {{if eq .SellerShort "CK"}}
             By visiting Card Kingdom through the links on this page you're supporting the continuos development of this site ♥
             {{end}}

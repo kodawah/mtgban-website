@@ -24,6 +24,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	var seller mtgban.Seller
 	var dumpCSV, dumpBL bool
 	var message string
+	var sellerUpdate, vendorUpdate time.Time
 
 	for k, v := range r.Form {
 		switch k {
@@ -31,14 +32,19 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			switch v[0] {
 			case "SZ":
 				vendor = sz
+				vendorUpdate = sz.BuylistDate
 			case "CFB":
 				vendor = cfb
+				vendorUpdate = cfb.BuylistDate
 			case "ABU":
 				vendor = abu
+				vendorUpdate = abu.BuylistDate
 			case "MM":
 				vendor = mm
+				vendorUpdate = mm.BuylistDate
 			case "CK":
 				vendor = ck
+				vendorUpdate = ck.BuylistDate
 			default:
 				message = "Unknown " + v[0] + " vendor"
 			}
@@ -47,14 +53,19 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			switch v[0] {
 			case "SZ":
 				seller = sz
+				sellerUpdate = sz.InventoryDate
 			case "CFB":
 				seller = cfb
+				sellerUpdate = cfb.InventoryDate
 			case "ABU":
 				seller = abu
+				sellerUpdate = abu.InventoryDate
 			case "MM":
 				seller = mm
+				sellerUpdate = mm.InventoryDate
 			case "CK":
 				seller = ck
+				sellerUpdate = ck.InventoryDate
 			default:
 				message = "Unknown " + v[0] + " seller"
 			}
@@ -92,13 +103,15 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pageVars := PageVars{
-		SellerShort: sellerShort,
-		SellerFull:  sellerFull,
-		VendorShort: vendorShort,
-		VendorFull:  vendorFull,
-		Message:     message,
-		CKPartner:   CKPartner,
-		LastUpdate:  LastUpdate.Format(time.RFC3339),
+		SellerShort:  sellerShort,
+		SellerFull:   sellerFull,
+		SellerUpdate: sellerUpdate.Format(time.RFC3339),
+		VendorShort:  vendorShort,
+		VendorFull:   vendorFull,
+		VendorUpdate: vendorUpdate.Format(time.RFC3339),
+		Message:      message,
+		CKPartner:    CKPartner,
+		LastUpdate:   LastUpdate.Format(time.RFC3339),
 	}
 
 	if vendor == nil {
