@@ -101,14 +101,6 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		LastUpdate:  LastUpdate.Format(time.RFC3339),
 	}
 
-	if sellerShort != "CK" {
-		pageVars.Title = "Arbitrage Error"
-		pageVars.Message = "404 - Page not found"
-
-		render(w, "arbit.html", pageVars)
-		return
-	}
-
 	if vendor == nil {
 		pageVars.Title = sellerFull + " Arbitrage"
 		pageVars.VendorShort = sellerShort
