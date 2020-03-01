@@ -124,7 +124,10 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	arbit, err := mtgban.Arbit(nil, vendor, seller)
+	opts := &mtgban.ArbitOpts{
+		MinSpread: 10,
+	}
+	arbit, err := mtgban.Arbit(opts, vendor, seller)
 	if err != nil {
 		pageVars.Title = "Arbitrage Error"
 		pageVars.ErrorMessage = err.Error()
