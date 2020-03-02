@@ -164,3 +164,48 @@ a.active:hover{
     color:#4b5786;
     margin-left: 20px;
 }
+
+/* from https://www.w3schools.com/w3css/4/w3.css */
+.w3-input{
+    padding:8px;
+    display:block;
+    border:none;
+    border-bottom:1px solid #ccc;
+    width:100%
+}
+
+.w3-border-0{
+    border:0!important
+}
+
+.w3-border{
+    border:1px solid #ccc!important
+}
+.w3-round-small{
+    border-radius:2px
+}
+.w3-round,
+.w3-round-medium{
+    border-radius:4px
+}
+.w3-round-large{
+    border-radius:8px
+}
+.w3-round-xlarge{
+    border-radius:16px
+}.w3-round-xxlarge{
+    border-radius:32px
+}
+
+.w3-animate-input{
+    transition:width 0.4s ease-in-out
+}
+.w3-animate-input:focus{
+    width:100%!important
+}
+
+.search {
+    padding: 8px 8px;
+    display: inline-block;
+    width: 350px;
+}
