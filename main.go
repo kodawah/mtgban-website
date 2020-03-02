@@ -40,7 +40,8 @@ type PageVars struct {
 	VendorFull   string
 	VendorUpdate string
 
-	Arb []mtgban.ArbitEntry
+	Arb       []mtgban.ArbitEntry
+	UseCredit bool
 }
 
 var CKPartner string

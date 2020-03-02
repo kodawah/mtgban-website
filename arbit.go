@@ -23,7 +23,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 
 	var vendor mtgban.Vendor
 	var seller mtgban.Seller
-	var dumpCSV, dumpBL bool
+	var dumpCSV, dumpBL, useCredit bool
 	var message string
 	var sellerUpdate, vendorUpdate time.Time
 
@@ -78,6 +78,12 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			case "dlbl":
 				dumpBL = true
 			}
+
+		case "credit":
+			switch v[0] {
+			case "true":
+				useCredit = true
+			}
 		}
 	}
 	if message != "" {
@@ -113,6 +119,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		ErrorMessage: message,
 		CKPartner:    CKPartner,
 		LastUpdate:   LastUpdate.Format(time.RFC3339),
+		UseCredit:    useCredit,
 	}
 
 	if vendor == nil {
@@ -126,6 +133,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 
 	opts := &mtgban.ArbitOpts{
 		MinSpread: 10,
+		UseTrades: useCredit,
 	}
 	arbit, err := mtgban.Arbit(opts, vendor, seller)
 	if err != nil {

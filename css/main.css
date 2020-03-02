@@ -73,6 +73,10 @@ p {
     margin-bottom: 20px;
 }
 
+.buildcart {
+    float: left;
+}
+
 .btn {
     border: none;
     background-color: inherit;
