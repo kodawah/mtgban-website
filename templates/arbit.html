@@ -9,12 +9,15 @@
 
 <nav>
     <ul>
-        <li><a href="/">Back</a></li>
-        <li><a {{if eq .VendorShort "CK"}}class="active"{{end}} href="arbit?seller={{.SellerShort}}{{if ne .SellerShort "CK"}}&vendor=CK{{end}}">Cardkingdom</a></li>
-        <li><a {{if eq .VendorShort "MM"}}class="active"{{end}} href="arbit?seller={{.SellerShort}}{{if ne .SellerShort "MM"}}&vendor=MM{{end}}">Miniature Market</a></li>
-        <li><a {{if eq .VendorShort "SZ"}}class="active"{{end}} href="arbit?seller={{.SellerShort}}{{if ne .SellerShort "SZ"}}&vendor=SZ{{end}}">Strikezone</a></li>
-        <li><a {{if eq .VendorShort "CFB"}}class="active"{{end}} href="arbit?seller={{.SellerShort}}{{if ne .SellerShort "CFB"}}&vendor=CFB{{end}}">Channel Fireball</a></li>
-        <li><a {{if eq .VendorShort "ABU"}}class="active"{{end}} href="arbit?seller={{.SellerShort}}{{if ne .SellerShort "ABU"}}&vendor=ABU{{end}}">ABUGames</a></li>
+        <li><a href="/">Home</a></li>
+        <li><a {{if eq .VendorShort ""}}class="active"{{end}} href="arbit">Arbitrage</a></li>
+        <li><a {{if eq .VendorShort "CK"}}class="active"{{end}} href="arbit?seller={{if eq .SellerShort ""}}CK{{else}}{{.SellerShort}}{{if ne .SellerShort "CK"}}&vendor=CK{{end}}{{end}}">Cardkingdom</a></li>
+        {{if ne .SellerShort ""}}
+            <li><a {{if eq .VendorShort "ABU"}}class="active"{{end}} href="arbit?seller={{if eq .SellerShort ""}}ABU{{else}}{{.SellerShort}}{{if ne .SellerShort "ABU"}}&vendor=ABU{{end}}{{end}}">ABUGames</a></li>
+            <li><a {{if eq .VendorShort "SZ"}}class="active"{{end}} href="arbit?seller={{if eq .SellerShort ""}}SZ{{else}}{{.SellerShort}}{{if ne .SellerShort "SZ"}}&vendor=SZ{{end}}{{end}}">Strikezone</a></li>
+            <li><a {{if eq .VendorShort "MM"}}class="active"{{end}} href="arbit?seller={{if eq .SellerShort ""}}MM{{else}}{{.SellerShort}}{{if ne .SellerShort "MM"}}&vendor=MM{{end}}{{end}}">Miniature Market</a></li>
+            <li><a {{if eq .VendorShort "CFB"}}class="active"{{end}} href="arbit?seller={{if eq .SellerShort ""}}CFB{{else}}{{.SellerShort}}{{if ne .SellerShort "CFB"}}&vendor=CFB{{end}}{{end}}">Channel Fireball</a></li>
+        {{end}}
         {{if eq .SellerShort "CK"}}
             <li>
                 <form class="search" target="_blank" action="https://www.cardkingdom.com/catalog/search?utm_source={{.CKPartner}}&utm_medium=affiliate&utm_campaign={{.CKPartner}}">
@@ -29,11 +32,10 @@
 <div class="mainbody">
     {{if ne .ErrorMessage ""}}
         <h1>{{.ErrorMessage}}</h1>
-    {{else if eq .VendorShort .SellerShort}}
-        <h1>Welcome to {{.SellerFull}} Arbitrage</h1>
+    {{else if eq .VendorShort ""}}
+        <h1>Welcome to Arbitrage</h1>
         <div class="indent">
-            <p>Please use the top bar to navigate across vendors.</p>
-
+            <p>Please use the top bar to choose the seller to buy from.</p>
             <h2>Instructions</h2>
             <ul class="indent">
                 <li>Data is refreshed periodically over the day.</li>
@@ -44,7 +46,11 @@
                 <li>In case of mistakes of incongruities, please notify the devs in the BAN Discord.</li>
                 <li>Should you find this content useful, consider clicking on one of the provided links to make a purchase on the website, and directly support BAN.</li>
             </ul>
-            <a class="btn normal" href="arbit?seller={{.SellerShort}}{{if .UseCredit}}&credit=true{{end}}&action=dlbl" download="{{.VendorUpdate}}_{{.SellerShort}}_Buylist.csv">Download CSV</a>
+    {{else if eq .VendorShort .SellerShort}}
+        <h1>Welcome to {{.SellerFull}} Arbitrage</h1>
+        <div class="indent">
+            <p>Please use the top bar to choose the vendor to sell to.</p>
+            <a class="btn normal" href="arbit?seller={{.SellerShort}}{{if .UseCredit}}&credit=true{{end}}&action=dlbl" download="{{.VendorUpdate}}_{{.SellerShort}}_Buylist.csv">Download Buylist in CSV format</a>
         </div>
     {{else}}
         <h1>Arbitrage from {{.SellerFull}} to {{.VendorFull}}</h1>

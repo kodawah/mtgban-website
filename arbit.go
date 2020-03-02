@@ -101,15 +101,18 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var vendorFull, vendorShort string
-	sellerShort := seller.(mtgban.Scraper).Info().Shorthand
-	sellerFull := seller.(mtgban.Scraper).Info().Name
+	var sellerShort, sellerFull, vendorFull, vendorShort string
+	if seller != nil {
+		sellerShort = seller.(mtgban.Scraper).Info().Shorthand
+		sellerFull = seller.(mtgban.Scraper).Info().Name
+	}
 	if vendor != nil {
 		vendorShort = vendor.(mtgban.Scraper).Info().Shorthand
 		vendorFull = vendor.(mtgban.Scraper).Info().Name
 	}
 
 	pageVars := PageVars{
+		Title:        "BAN Arbitrage",
 		SellerShort:  sellerShort,
 		SellerFull:   sellerFull,
 		SellerUpdate: sellerUpdate.Format(time.RFC3339),
