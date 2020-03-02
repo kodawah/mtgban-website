@@ -12,9 +12,9 @@
         <li><a href="/">Home</a></li>
         <li><a {{if eq .VendorShort ""}}class="active"{{end}} href="arbit">Arbitrage</a></li>
         <li><a {{if eq .VendorShort "CK"}}class="active"{{end}} href="arbit?seller={{if eq .SellerShort ""}}CK{{else}}{{.SellerShort}}{{if ne .SellerShort "CK"}}&vendor=CK{{end}}{{end}}">Cardkingdom</a></li>
+        <li><a {{if eq .VendorShort "ABU"}}class="active"{{end}} href="arbit?seller={{if eq .SellerShort ""}}ABU{{else}}{{.SellerShort}}{{if ne .SellerShort "ABU"}}&vendor=ABU{{end}}{{end}}">ABUGames</a></li>
+        <li><a {{if eq .VendorShort "SZ"}}class="active"{{end}} href="arbit?seller={{if eq .SellerShort ""}}SZ{{else}}{{.SellerShort}}{{if ne .SellerShort "SZ"}}&vendor=SZ{{end}}{{end}}">Strikezone</a></li>
         {{if ne .SellerShort ""}}
-            <li><a {{if eq .VendorShort "ABU"}}class="active"{{end}} href="arbit?seller={{if eq .SellerShort ""}}ABU{{else}}{{.SellerShort}}{{if ne .SellerShort "ABU"}}&vendor=ABU{{end}}{{end}}">ABUGames</a></li>
-            <li><a {{if eq .VendorShort "SZ"}}class="active"{{end}} href="arbit?seller={{if eq .SellerShort ""}}SZ{{else}}{{.SellerShort}}{{if ne .SellerShort "SZ"}}&vendor=SZ{{end}}{{end}}">Strikezone</a></li>
             <li><a {{if eq .VendorShort "MM"}}class="active"{{end}} href="arbit?seller={{if eq .SellerShort ""}}MM{{else}}{{.SellerShort}}{{if ne .SellerShort "MM"}}&vendor=MM{{end}}{{end}}">Miniature Market</a></li>
             <li><a {{if eq .VendorShort "CFB"}}class="active"{{end}} href="arbit?seller={{if eq .SellerShort ""}}CFB{{else}}{{.SellerShort}}{{if ne .SellerShort "CFB"}}&vendor=CFB{{end}}{{end}}">Channel Fireball</a></li>
         {{end}}
