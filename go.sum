@@ -47,8 +47,10 @@ github.com/hashicorp/go-retryablehttp v0.6.4/go.mod h1:vAew36LZh98gCBJNLH42IQ1ER
 github.com/jawher/mow.cli v1.1.0/go.mod h1:aNaQlc7ozF3vw6IJ2dHjp2ZFiA4ozMIYY6PyuRJwlUg=
 github.com/kennygrant/sanitize v1.2.4 h1:gN25/otpP5vAsO2djbMhF/LQX6R7+O1TB4yv8NzpJ3o=
 github.com/kennygrant/sanitize v1.2.4/go.mod h1:LGsjYYtgxbetdg5owWB2mpgUL6e2nfw2eObZ0u0qvak=
-github.com/kodabb/go-mtgban v0.0.0-20200302072713-312d4835fcab h1:bvNZ1zUJaOn+yxq9E71cxmMf46P60BQHXOdl/9SpPgE=
-github.com/kodabb/go-mtgban v0.0.0-20200302072713-312d4835fcab/go.mod h1:Be4URSSNPi4LGSXG+yZFPRNcICztn0iZjY7xAuZspUM=
+github.com/kodabb/go-mtgban v0.0.0-20200312172309-ccdf5b079bdb h1:4nSzqa9t7329ykibeHIj1WBCdwlesMCyg+eFWou3p2w=
+github.com/kodabb/go-mtgban v0.0.0-20200312172309-ccdf5b079bdb/go.mod h1:Be4URSSNPi4LGSXG+yZFPRNcICztn0iZjY7xAuZspUM=
+github.com/kodabb/go-mtgban v0.0.0-20200312203109-e63543d1f5da h1:akXJ7iMr9+gQTBRmvwSleTuEn1px5As6I5F0EvnksNQ=
+github.com/kodabb/go-mtgban v0.0.0-20200312203109-e63543d1f5da/go.mod h1:Be4URSSNPi4LGSXG+yZFPRNcICztn0iZjY7xAuZspUM=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca h1:NugYot0LIVPxTvN8n+Kvkn6TrbMyxQiuvKdEwFdR9vI=

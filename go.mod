@@ -9,6 +9,6 @@ require (
 	github.com/antchfx/xpath v1.1.4 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.3.3 // indirect
-	github.com/kodabb/go-mtgban v0.0.0-20200302072713-312d4835fcab
+	github.com/kodabb/go-mtgban v0.0.0-20200312203109-e63543d1f5da
 	golang.org/x/net v0.0.0-20200222033325-078779b8f2d8 // indirect
 )
