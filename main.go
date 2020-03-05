@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -20,7 +21,15 @@ import (
 	"github.com/kodabb/go-mtgban/mtgjson"
 )
 
+type NavElem struct {
+	Active bool
+	Link   string
+	Name   string
+}
+
 type PageVars struct {
+	Nav []NavElem
+
 	Title        string
 	CKPartner    string
 	ErrorMessage string
@@ -42,6 +51,8 @@ var BanClient *mtgban.BanClient
 var CKPartner string
 var DB mtgjson.MTGDB
 var LastUpdate time.Time
+var Sellers []mtgban.Seller
+var Vendors []mtgban.Vendor
 
 func Favicon(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "img/misc/favicon.ico")
@@ -103,6 +114,16 @@ func periodicFunction(db mtgjson.MTGDB) {
 		log.Println(err)
 		return
 	}
+
+	Sellers = newbc.Sellers()
+	sort.Slice(Sellers, func(i, j int) bool {
+		return strings.Compare(Sellers[i].Info().Name, Sellers[j].Info().Name) < 0
+	})
+
+	Vendors = newbc.Vendors()
+	sort.Slice(Vendors, func(i, j int) bool {
+		return strings.Compare(Vendors[i].Info().Name, Vendors[j].Info().Name) < 0
+	})
 
 	BanClient = newbc
 

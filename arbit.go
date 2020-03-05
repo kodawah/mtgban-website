@@ -12,6 +12,18 @@ import (
 func Arbit(w http.ResponseWriter, r *http.Request) {
 	pageVars := PageVars{
 		Title: "BAN Arbitrage",
+		Nav: []NavElem{
+			NavElem{
+				Name: "Home",
+				Link: "/?",
+			},
+			NavElem{
+				Active: true,
+				Class:  "active",
+				Name:   "Arbitrage",
+				Link:   "arbit?",
+			},
+		},
 	}
 	if DB == nil {
 		pageVars.Title = "Great things are coming"
@@ -72,6 +84,35 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+
+	if seller == nil {
+		for _, newSeller := range Sellers {
+			pageVars.Nav = append(pageVars.Nav, NavElem{
+				Name: newSeller.Info().Name,
+				Link: "arbit?seller=" + newSeller.Info().Shorthand,
+			})
+		}
+	} else {
+		pageVars.Nav[1].Active = false
+		baseLink := "arbit?seller=" + seller.Info().Shorthand
+		pageVars.Nav = append(pageVars.Nav, NavElem{
+			Active: vendor == nil,
+			Name:   seller.Info().Name,
+			Link:   baseLink,
+		})
+
+		for _, targetVendor := range Vendors {
+			if seller.(mtgban.Scraper) == targetVendor.(mtgban.Scraper) {
+				continue
+			}
+			pageVars.Nav = append(pageVars.Nav, NavElem{
+				Active: vendor == targetVendor,
+				Name:   targetVendor.Info().Name,
+				Link:   baseLink + "&vendor=" + targetVendor.Info().Shorthand,
+			})
+		}
+	}
+
 	if message != "" {
 		pageVars.Title = "Errors have been made"
 		pageVars.ErrorMessage = message

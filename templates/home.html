@@ -8,8 +8,9 @@
 <body>
     <nav>
     <ul>
-        <li><a class="active" href="/">Home</a></li>
-        <li><a href="arbit">Arbitrage</a></li>
+        {{range .Nav}}
+            <li><a {{if .Active}}class="{{.Class}}"{{end}} href="{{.Link}}">{{.Name}}</a></li>
+        {{end}}
     </ul>
     </nav>
 
