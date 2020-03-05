@@ -10,11 +10,12 @@ import (
 )
 
 func Arbit(w http.ResponseWriter, r *http.Request) {
+	pageVars := PageVars{
+		Title: "BAN Arbitrage",
+	}
 	if DB == nil {
-		pageVars := PageVars{
-			Title:        "Great things are coming",
-			ErrorMessage: "Website is starting, please try again in a few minutes",
-		}
+		pageVars.Title = "Great things are coming"
+		pageVars.ErrorMessage = "Website is starting, please try again in a few minutes"
 
 		render(w, "arbit.html", pageVars)
 		return
@@ -72,10 +73,8 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if message != "" {
-		pageVars := PageVars{
-			Title:        "Errors have been made",
-			ErrorMessage: message,
-		}
+		pageVars.Title = "Errors have been made"
+		pageVars.ErrorMessage = message
 
 		render(w, "arbit.html", pageVars)
 		return
@@ -88,10 +87,8 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		pageVars := PageVars{
-			Title:        "Errors have been made",
-			ErrorMessage: "Vendor is not a seller",
-		}
+		pageVars.Title = "Errors have been made"
+		pageVars.ErrorMessage = "Vendor is not a seller"
 
 		render(w, "arbit.html", pageVars)
 		return
@@ -109,19 +106,16 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		vendorUpdate = vendor.Info().BuylistTimestamp
 	}
 
-	pageVars := PageVars{
-		Title:        "BAN Arbitrage",
-		SellerShort:  sellerShort,
-		SellerFull:   sellerFull,
-		SellerUpdate: sellerUpdate.Format(time.RFC3339),
-		VendorShort:  vendorShort,
-		VendorFull:   vendorFull,
-		VendorUpdate: vendorUpdate.Format(time.RFC3339),
-		ErrorMessage: message,
-		CKPartner:    CKPartner,
-		LastUpdate:   LastUpdate.Format(time.RFC3339),
-		UseCredit:    useCredit,
-	}
+	pageVars.SellerShort = sellerShort
+	pageVars.SellerFull = sellerFull
+	pageVars.SellerUpdate = sellerUpdate.Format(time.RFC3339)
+	pageVars.VendorShort = vendorShort
+	pageVars.VendorFull = vendorFull
+	pageVars.VendorUpdate = vendorUpdate.Format(time.RFC3339)
+	pageVars.ErrorMessage = message
+	pageVars.CKPartner = CKPartner
+	pageVars.LastUpdate = LastUpdate.Format(time.RFC3339)
+	pageVars.UseCredit = useCredit
 
 	if vendor == nil {
 		pageVars.Title = sellerFull + " Arbitrage"
