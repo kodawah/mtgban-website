@@ -20,12 +20,6 @@ import (
 	"github.com/kodabb/go-mtgban/mtgjson"
 )
 
-var ck *cardkingdom.Cardkingdom
-var sz *strikezone.Strikezone
-var abu *abugames.ABUGames
-var cfb *channelfireball.Channelfireball
-var mm *miniaturemarket.Miniaturemarket
-
 type PageVars struct {
 	Title        string
 	CKPartner    string
@@ -44,6 +38,7 @@ type PageVars struct {
 	UseCredit bool
 }
 
+var BanClient *mtgban.BanClient
 var CKPartner string
 var DB mtgjson.MTGDB
 var LastUpdate time.Time
@@ -79,44 +74,38 @@ func (fs *FileSystem) Open(path string) (http.File, error) {
 func periodicFunction(t time.Time, db mtgjson.MTGDB) {
 	log.Println("Updating data")
 
+	newbc := mtgban.NewClient()
+
 	newck := cardkingdom.NewScraper(db)
 	newck.Partner = CKPartner
 	newck.LogCallback = log.Printf
-	_, err := newck.Buylist()
-	if err != nil {
-		log.Println(err)
-		return
-	}
+
 	newsz := strikezone.NewScraper(db)
 	newsz.LogCallback = log.Printf
-	_, err = newsz.Buylist()
-	if err != nil {
-		log.Println(err)
-		return
-	}
+
 	newabu := abugames.NewScraper(db)
 	newabu.LogCallback = log.Printf
-	_, err = newabu.Buylist()
-	if err != nil {
-		log.Println(err)
-		return
-	}
+
 	newcfb := channelfireball.NewScraper(db)
 	newcfb.LogCallback = log.Printf
-	_, err = newcfb.Buylist()
-	if err != nil {
-		log.Println(err)
-		return
-	}
+
 	newmm := miniaturemarket.NewScraper(db)
 	newmm.LogCallback = log.Printf
-	_, err = newmm.Buylist()
+
+	newbc.Register(newck)
+	newbc.Register(newsz)
+	newbc.Register(newabu)
+	newbc.Register(newcfb)
+	newbc.Register(newmm)
+
+	err := newbc.Load()
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	ck, sz, abu, cfb, mm = newck, newsz, newabu, newcfb, newmm
+	BanClient = newbc
+
 	LastUpdate = t
 
 	log.Println("DONE")

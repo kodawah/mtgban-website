@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"sort"
 	"time"
@@ -21,6 +22,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 
 	r.ParseForm()
 
+	var ok bool
 	var vendor mtgban.Vendor
 	var seller mtgban.Seller
 	var dumpCSV, dumpBL, useCredit bool
@@ -30,45 +32,28 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	for k, v := range r.Form {
 		switch k {
 		case "vendor":
-			switch v[0] {
-			case "SZ":
-				vendor = sz
-				vendorUpdate = sz.BuylistDate
-			case "CFB":
-				vendor = cfb
-				vendorUpdate = cfb.BuylistDate
-			case "ABU":
-				vendor = abu
-				vendorUpdate = abu.BuylistDate
-			case "MM":
-				vendor = mm
-				vendorUpdate = mm.BuylistDate
-			case "CK":
-				vendor = ck
-				vendorUpdate = ck.BuylistDate
-			default:
+			scraper, err := BanClient.ScraperByName(v[0])
+			if err != nil {
+				log.Println(err)
 				message = "Unknown " + v[0] + " vendor"
+				break
+			}
+			vendor, ok = scraper.(mtgban.Vendor)
+			if !ok {
+				message = "Unknown " + v[0] + " vendor (seller only?)"
+				break
 			}
 
 		case "seller":
-			switch v[0] {
-			case "SZ":
-				seller = sz
-				sellerUpdate = sz.InventoryDate
-			case "CFB":
-				seller = cfb
-				sellerUpdate = cfb.InventoryDate
-			case "ABU":
-				seller = abu
-				sellerUpdate = abu.InventoryDate
-			case "MM":
-				seller = mm
-				sellerUpdate = mm.InventoryDate
-			case "CK":
-				seller = ck
-				sellerUpdate = ck.InventoryDate
-			default:
+			scraper, err := BanClient.ScraperByName(v[0])
+			if err != nil {
+				log.Println(err)
 				message = "Unknown " + v[0] + " seller"
+				break
+			}
+			seller, ok = scraper.(mtgban.Seller)
+			if !ok {
+				message = "Unknown " + v[0] + " seller (vendor only?)"
 			}
 
 		case "action":
@@ -105,10 +90,12 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	if seller != nil {
 		sellerShort = seller.(mtgban.Scraper).Info().Shorthand
 		sellerFull = seller.(mtgban.Scraper).Info().Name
+		sellerUpdate = seller.(mtgban.Scraper).Info().InventoryTimestamp
 	}
 	if vendor != nil {
 		vendorShort = vendor.(mtgban.Scraper).Info().Shorthand
 		vendorFull = vendor.(mtgban.Scraper).Info().Name
+		vendorUpdate = vendor.(mtgban.Scraper).Info().BuylistTimestamp
 	}
 
 	pageVars := PageVars{
