@@ -71,7 +71,7 @@ func (fs *FileSystem) Open(path string) (http.File, error) {
 	return f, nil
 }
 
-func periodicFunction(t time.Time, db mtgjson.MTGDB) {
+func periodicFunction(db mtgjson.MTGDB) {
 	log.Println("Updating data")
 
 	newbc := mtgban.NewClient()
@@ -106,7 +106,7 @@ func periodicFunction(t time.Time, db mtgjson.MTGDB) {
 
 	BanClient = newbc
 
-	LastUpdate = t
+	LastUpdate = time.Now()
 
 	log.Println("DONE")
 }
@@ -127,7 +127,7 @@ func main() {
 			log.Fatalln(err)
 		}
 
-		periodicFunction(time.Now(), db)
+		periodicFunction(db)
 		DB = db
 	}()
 
@@ -144,8 +144,8 @@ func main() {
 
 	// refresh every few hours
 	go func() {
-		for t := range time.NewTicker(time.Duration(refresh) * time.Hour).C {
-			periodicFunction(t, DB)
+		for _ = range time.NewTicker(time.Duration(refresh) * time.Hour).C {
+			periodicFunction(DB)
 		}
 	}()
 
