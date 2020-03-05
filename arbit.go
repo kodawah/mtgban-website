@@ -82,20 +82,31 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if dumpBL {
-		mtgban.WriteBuylistToCSV(seller.(mtgban.Scraper).(mtgban.Vendor), w)
+		vendorFromSeller, ok := seller.(mtgban.Scraper).(mtgban.Vendor)
+		if ok {
+			mtgban.WriteBuylistToCSV(vendorFromSeller, w)
+			return
+		}
+
+		pageVars := PageVars{
+			Title:        "Errors have been made",
+			ErrorMessage: "Vendor is not a seller",
+		}
+
+		render(w, "arbit.html", pageVars)
 		return
 	}
 
 	var sellerShort, sellerFull, vendorFull, vendorShort string
 	if seller != nil {
-		sellerShort = seller.(mtgban.Scraper).Info().Shorthand
-		sellerFull = seller.(mtgban.Scraper).Info().Name
-		sellerUpdate = seller.(mtgban.Scraper).Info().InventoryTimestamp
+		sellerShort = seller.Info().Shorthand
+		sellerFull = seller.Info().Name
+		sellerUpdate = seller.Info().InventoryTimestamp
 	}
 	if vendor != nil {
-		vendorShort = vendor.(mtgban.Scraper).Info().Shorthand
-		vendorFull = vendor.(mtgban.Scraper).Info().Name
-		vendorUpdate = vendor.(mtgban.Scraper).Info().BuylistTimestamp
+		vendorShort = vendor.Info().Shorthand
+		vendorFull = vendor.Info().Name
+		vendorUpdate = vendor.Info().BuylistTimestamp
 	}
 
 	pageVars := PageVars{
