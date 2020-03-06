@@ -94,9 +94,14 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		pageVars.Nav[1].Active = false
+		class := "active"
+		if vendor != nil {
+			class = "selected"
+		}
 		baseLink := "arbit?seller=" + seller.Info().Shorthand
 		pageVars.Nav = append(pageVars.Nav, NavElem{
-			Active: vendor == nil,
+			Active: true,
+			Class:  class,
 			Name:   seller.Info().Name,
 			Link:   baseLink,
 		})
@@ -107,6 +112,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			}
 			pageVars.Nav = append(pageVars.Nav, NavElem{
 				Active: vendor == targetVendor,
+				Class:  "active",
 				Name:   targetVendor.Info().Name,
 				Link:   baseLink + "&vendor=" + targetVendor.Info().Shorthand,
 			})

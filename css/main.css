@@ -134,11 +134,19 @@ nav li a:hover {
 }
 
 .active {
-    background-color:  #f8f8f8;
+    background-color: #f8f8f8;
     color: #4b5786;
 }
 a.active:hover{
     color: #4b5786;
+}
+
+.selected {
+    background-color: #4b5786;
+    color: #f8f8f8;
+}
+a.selected:hover{
+    color: #879ced;
 }
 
 #container{width:900px;}

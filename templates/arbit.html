@@ -10,7 +10,7 @@
 <nav>
     <ul>
         {{range .Nav}}
-            <li><a {{if .Active}}class="active"{{end}} href="{{.Link}}">{{.Name}}</a></li>
+            <li><a {{if .Active}}class="{{.Class}}"{{end}} href="{{.Link}}">{{.Name}}</a></li>
         {{end}}
         {{if eq .SellerShort "CK"}}
             <li>

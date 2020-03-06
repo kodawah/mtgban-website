@@ -23,6 +23,7 @@ import (
 
 type NavElem struct {
 	Active bool
+	Class  string
 	Link   string
 	Name   string
 }
