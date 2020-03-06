@@ -1,30 +1,68 @@
 package main
 
 import (
+	"crypto/hmac"
+	"crypto/sha1"
+	"encoding/base64"
+	"fmt"
 	"log"
 	"net/http"
+	"net/url"
+	"os"
 	"sort"
+	"strconv"
 	"time"
 
 	"github.com/kodabb/go-mtgban/mtgban"
 )
 
+func signHMACSHA1Base64(key []byte, data []byte) string {
+	h := hmac.New(sha1.New, key)
+	h.Write(data)
+	return base64.StdEncoding.EncodeToString(h.Sum(nil))
+}
+
 func Arbit(w http.ResponseWriter, r *http.Request) {
+	sig := r.FormValue("Signature")
+	exp := r.FormValue("Expires")
+
+	signature := ""
+	if sig != "" && exp != "" {
+		signature = "?Signature=" + url.QueryEscape(sig) + "&Expires=" + url.QueryEscape(exp)
+	}
+
 	pageVars := PageVars{
-		Title: "BAN Arbitrage",
+		Title:     "BAN Arbitrage",
+		Signature: sig,
+		Expires:   exp,
 		Nav: []NavElem{
 			NavElem{
 				Name: "Home",
-				Link: "/?",
+				Link: "/" + signature,
 			},
 			NavElem{
 				Active: true,
 				Class:  "active",
 				Name:   "Arbitrage",
-				Link:   "arbit?",
+				Link:   "arbit" + signature,
 			},
 		},
 	}
+	if sig != "" && exp != "" {
+		signature = "&Signature=" + url.QueryEscape(sig) + "&Expires=" + url.QueryEscape(exp)
+	}
+
+	data := fmt.Sprintf("%s%s%s", r.Method, exp, r.URL.Host)
+	valid := signHMACSHA1Base64([]byte(os.Getenv("BAN_SECRET")), []byte(data))
+	expires, err := strconv.ParseInt(exp, 10, 64)
+	if err != nil || valid != sig || expires < time.Now().Unix() {
+		pageVars.Title = "Unauthorized"
+		pageVars.ErrorMessage = "Please double check your invitation link"
+
+		render(w, "arbit.html", pageVars)
+		return
+	}
+
 	if DB == nil {
 		pageVars.Title = "Great things are coming"
 		pageVars.ErrorMessage = "Website is starting, please try again in a few minutes"
@@ -89,7 +127,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		for _, newSeller := range Sellers {
 			pageVars.Nav = append(pageVars.Nav, NavElem{
 				Name: newSeller.Info().Name,
-				Link: "arbit?seller=" + newSeller.Info().Shorthand,
+				Link: "arbit?seller=" + newSeller.Info().Shorthand + signature,
 			})
 		}
 	} else {
@@ -103,7 +141,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			Active: true,
 			Class:  class,
 			Name:   seller.Info().Name,
-			Link:   baseLink,
+			Link:   baseLink + signature,
 		})
 
 		for _, targetVendor := range Vendors {
@@ -114,7 +152,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 				Active: vendor == targetVendor,
 				Class:  "active",
 				Name:   targetVendor.Info().Name,
-				Link:   baseLink + "&vendor=" + targetVendor.Info().Shorthand,
+				Link:   baseLink + "&vendor=" + targetVendor.Info().Shorthand + signature,
 			})
 		}
 	}

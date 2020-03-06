@@ -44,7 +44,7 @@
         <h1>Welcome to {{.SellerFull}} Arbitrage</h1>
         <div class="indent">
             <p>Please use the top bar to choose the vendor to sell to.</p>
-            <a class="btn normal" href="arbit?seller={{.SellerShort}}{{if .UseCredit}}&credit=true{{end}}&action=dlbl" download="{{.VendorUpdate}}_{{.SellerShort}}_Buylist.csv">Download Buylist in CSV format</a>
+            <a class="btn normal" href="arbit?seller={{.SellerShort}}{{if .UseCredit}}&credit=true{{end}}&action=dlbl&Signature={{.Signature}}&Expires={{$.Expires}}" download="{{.VendorUpdate}}_{{.SellerShort}}_Buylist.csv">Download Buylist in CSV format</a>
         </div>
     {{else}}
         <h1>Arbitrage from {{.SellerFull}} to {{.VendorFull}}</h1>
@@ -62,9 +62,9 @@
                             </form>
                         {{end}}
                         {{if .UseCredit}}
-                            <a class="btn success" style="float: right;" href="arbit?seller={{.SellerShort}}&vendor={{.VendorShort}}">Back to Cash Arbitrage</a>
+                            <a class="btn success" style="float: right;" href="arbit?seller={{.SellerShort}}&vendor={{.VendorShort}}&Signature={{.Signature}}&Expires={{.Expires}}">Back to Cash Arbitrage</a>
                         {{else}}
-                            <a class="btn warning" style="float: right;" href="arbit?seller={{.SellerShort}}&vendor={{.VendorShort}}&credit=true">Check Credit Arbitrage</a>
+                            <a class="btn warning" style="float: right;" href="arbit?seller={{.SellerShort}}&vendor={{.VendorShort}}&credit=true&Signature={{.Signature}}&Expires={{.Expires}}">Check Credit Arbitrage</a>
                         {{end}}
                     </td>
                 </tr>
@@ -141,7 +141,7 @@
                     </tr>
                 {{end}}
             </table>
-        <a class="btn normal" href="arbit?seller={{.SellerShort}}&vendor={{.VendorShort}}{{if .UseCredit}}&credit=true{{end}}&action=csv" download="{{.LastUpdate}}_{{.SellerShort}}-to-{{.VendorShort}}_{{if .UseCredit}}Credit{{end}}Arbitrage.csv">Download CSV</a>
+        <a class="btn normal" href="arbit?seller={{.SellerShort}}&vendor={{.VendorShort}}{{if .UseCredit}}&credit=true{{end}}&action=csv&Signature={{.Signature}}&Expires={{.Expires}}" download="{{.LastUpdate}}_{{.SellerShort}}-to-{{.VendorShort}}_{{if .UseCredit}}Credit{{end}}Arbitrage.csv">Download CSV</a>
         </div>
         <br>
         <p>

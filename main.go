@@ -29,7 +29,9 @@ type NavElem struct {
 }
 
 type PageVars struct {
-	Nav []NavElem
+	Nav       []NavElem
+	Signature string
+	Expires   string
 
 	Title        string
 	CKPartner    string
@@ -162,6 +164,9 @@ func main() {
 	refresh, _ := strconv.Atoi(dataRefresh)
 	if refresh == 0 {
 		log.Fatalln("DATA_REFRESH not set")
+	}
+	if os.Getenv("BAN_SECRET") == "" {
+		log.Fatalln("BAN_SECRET not set")
 	}
 
 	// refresh every few hours
