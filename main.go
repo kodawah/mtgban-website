@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"html/template"
 	"log"
@@ -51,6 +52,7 @@ type PageVars struct {
 }
 
 var BanClient *mtgban.BanClient
+var DevMode bool
 var CKPartner string
 var DB mtgjson.MTGDB
 var LastUpdate time.Time
@@ -108,9 +110,11 @@ func periodicFunction(db mtgjson.MTGDB) {
 
 	newbc.Register(newck)
 	newbc.Register(newsz)
-	newbc.Register(newabu)
-	newbc.Register(newcfb)
-	newbc.Register(newmm)
+	if !DevMode {
+		newbc.Register(newabu)
+		newbc.Register(newcfb)
+		newbc.Register(newmm)
+	}
 
 	err := newbc.Load()
 	if err != nil {
@@ -136,17 +140,27 @@ func periodicFunction(db mtgjson.MTGDB) {
 }
 
 func main() {
+	devMode := flag.Bool("dev", false, "Enable developer mode")
+	flag.Parse()
+	DevMode = *devMode
+
 	// load website up
 	go func() {
-		log.Println("Loading MTGJSON")
-		resp, err := http.Get("https://www.mtgjson.com/files/AllPrintings.json")
-		if err != nil {
-			log.Fatalln(err)
-		}
-		defer resp.Body.Close()
+		var db mtgjson.MTGDB
+		var err error
 
-		// Load static data once
-		db, err := mtgjson.LoadAllPrintingsFromReader(resp.Body)
+		log.Println("Loading MTGJSON")
+		if DevMode {
+			db, err = mtgjson.LoadAllPrintings("allprintings.json")
+		} else {
+			resp, err := http.Get("https://www.mtgjson.com/files/AllPrintings.json")
+			if err != nil {
+				log.Fatalln(err)
+			}
+			defer resp.Body.Close()
+
+			db, err = mtgjson.LoadAllPrintingsFromReader(resp.Body)
+		}
 		if err != nil {
 			log.Fatalln(err)
 		}

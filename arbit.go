@@ -55,7 +55,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	data := fmt.Sprintf("%s%s%s", r.Method, exp, r.URL.Host)
 	valid := signHMACSHA1Base64([]byte(os.Getenv("BAN_SECRET")), []byte(data))
 	expires, err := strconv.ParseInt(exp, 10, 64)
-	if err != nil || valid != sig || expires < time.Now().Unix() {
+	if !DevMode && (err != nil || valid != sig || expires < time.Now().Unix()) {
 		pageVars.Title = "Unauthorized"
 		pageVars.ErrorMessage = "Please double check your invitation link"
 
