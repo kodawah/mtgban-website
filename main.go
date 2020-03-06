@@ -51,6 +51,17 @@ type PageVars struct {
 	UseCredit bool
 }
 
+var DefaultNav = []NavElem{
+	NavElem{
+		Name: "Home",
+		Link: "/",
+	},
+	NavElem{
+		Name: "Arbitrage",
+		Link: "arbit",
+	},
+}
+
 var BanClient *mtgban.BanClient
 var DevMode bool
 var CKPartner string

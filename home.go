@@ -19,18 +19,15 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		Title:     "Welcome to BAN",
 		Signature: url.QueryEscape(sig),
 		Expires:   url.QueryEscape(exp),
-		Nav: []NavElem{
-			NavElem{
-				Active: true,
-				Class:  "active",
-				Name:   "Home",
-				Link:   "/" + signature,
-			},
-			NavElem{
-				Name: "Arbitrage",
-				Link: "arbit" + signature,
-			},
-		},
 	}
+	pageVars.Nav = make([]NavElem, len(DefaultNav))
+	copy(pageVars.Nav, DefaultNav)
+
+	pageVars.Nav[0].Active = true
+	pageVars.Nav[0].Class = "active"
+	for i := range pageVars.Nav {
+		pageVars.Nav[i].Link += signature
+	}
+
 	render(w, "home.html", pageVars)
 }

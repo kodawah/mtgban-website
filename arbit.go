@@ -35,19 +35,20 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		Title:     "BAN Arbitrage",
 		Signature: sig,
 		Expires:   exp,
-		Nav: []NavElem{
-			NavElem{
-				Name: "Home",
-				Link: "/" + signature,
-			},
-			NavElem{
-				Active: true,
-				Class:  "active",
-				Name:   "Arbitrage",
-				Link:   "arbit" + signature,
-			},
-		},
 	}
+	pageVars.Nav = make([]NavElem, len(DefaultNav))
+	copy(pageVars.Nav, DefaultNav)
+
+	mainNavIndex := 0
+	for i := range pageVars.Nav {
+		pageVars.Nav[i].Link += signature
+		if pageVars.Nav[i].Name == "Arbitrage" {
+			mainNavIndex = i
+		}
+	}
+	pageVars.Nav[mainNavIndex].Active = true
+	pageVars.Nav[mainNavIndex].Class = "active"
+
 	if sig != "" && exp != "" {
 		signature = "&Signature=" + url.QueryEscape(sig) + "&Expires=" + url.QueryEscape(exp)
 	}
@@ -131,7 +132,8 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 	} else {
-		pageVars.Nav[1].Active = false
+		pageVars.Nav[mainNavIndex].Active = false
+
 		class := "active"
 		if vendor != nil {
 			class = "selected"
