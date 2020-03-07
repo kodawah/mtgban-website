@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Rosario:400' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../css/main.css">
+    <title>{{.Title}}</title>
+</head>
+<body>
+
+<nav>
+    <ul>
+        {{range .Nav}}
+            <li><a {{if .Active}}class="{{.Class}}"{{end}} href="{{.Link}}">{{.Name}}</a></li>
+        {{end}}
+    </ul>
+</nav>
+
+<div class="mainbody">
+    {{if ne .ErrorMessage ""}}
+        <h1>{{.ErrorMessage}}</h1>
+    {{else}}
+        <h1>Welcome to Search</h1>
+            <div class="indent">
+                <form class="search" action="search">
+                    <label style="clear: both; float: left;" for="searchbox">Enter a card name</label>
+                    {{if ne .Signature ""}}
+                        <input type="hidden" name="Signature" value="{{.Signature}}">
+                    {{end}}
+                    {{if ne .Expires ""}}
+                        <input type="hidden" name="Expires" value="{{.Expires}}">
+                    {{end}}
+                    <input id="searchbox" class="w3-input w3-border w3-round-small" type="text" name="q" placeholder="Search BAN" value="{{.SearchQuery}}">
+                </form>
+            </div>
+        {{if ne .SearchQuery ""}}
+            <div class="indent">
+                <table style="float: left;">
+                    <tr>
+                        <th colspan="3"><h2 align=center>Sellers</h2></th>
+                    </tr>
+                    {{range $card, $entries := .FoundSellers}}
+                        <tr>
+                            <th colspan="3">{{$card.Name}} {{if $card.Foil}}(FOIL){{end}} - {{$card.Set}}</th>
+                        </tr>
+                        {{range $entries}}
+                            <tr>
+                                <td>
+                                    {{if ne .Notes ""}}
+                                        <a class="btn normal" href="{{.Notes}}" target="_blank">
+                                    {{end}}
+                                          {{.ScraperName}}
+                                    {{if ne .Notes ""}}
+                                        </a>
+                                    {{end}}
+                                </td>
+                                <td>
+                                    $ {{.Price}}
+                                </td>
+                                <td>
+                                    {{.Quantity}}
+                                </td>
+                            </tr>
+                        {{end}}
+                    {{end}}
+                </table>
+
+                <table style="float: left;">
+                    <tr>
+                        <th colspan="4"><h2 align=center>Buyers</h2></th>
+                    </tr>
+                    {{range $card, $entries := .FoundVendors}}
+                        <tr>
+                            <th colspan="4">{{$card.Name}} {{if $card.Foil}}(FOIL){{end}} - {{$card.Set}}</th>
+                        </tr>
+                        {{range $entries}}
+                            <tr>
+                                <td>
+                                    {{if ne .Notes ""}}
+                                        <a class="btn normal" href="{{.Notes}}" target="_blank">
+                                    {{end}}
+                                          {{.ScraperName}}
+                                    {{if ne .Notes ""}}
+                                        </a>
+                                    {{end}}
+                                </td>
+                                <td>
+                                    $ {{.Price}}
+                                </td>
+                                <td>
+                                    {{if ne .Ratio 0.0}}{{printf "%.2f" .Ratio}} %{{end}}
+                                </td>
+                                <td>
+                                    {{if ne .Quantity 0}}{{.Quantity}}{{end}}
+                                </td>
+                            </tr>
+                        {{end}}
+                    {{end}}
+                </table>
+            </div>
+        {{end}}
+        <div class="indent" style="clear:both;">
+        Last update: {{.LastUpdate}}
+        </div>
+    {{end}}
+    <br>
+</div>
+</body>
+</html>

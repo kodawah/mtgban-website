@@ -40,6 +40,10 @@ type PageVars struct {
 	InfoMessage  string
 	LastUpdate   string
 
+	SearchQuery  string
+	FoundSellers map[mtgban.Card][]mtgban.CombineEntry
+	FoundVendors map[mtgban.Card][]mtgban.CombineEntry
+
 	SellerShort  string
 	SellerFull   string
 	SellerUpdate string
@@ -57,6 +61,10 @@ var DefaultNav = []NavElem{
 		Link: "/",
 	},
 	NavElem{
+		Name: "Search",
+		Link: "/search",
+	},
+	NavElem{
 		Name: "Arbitrage",
 		Link: "arbit",
 	},
@@ -69,6 +77,9 @@ var DB mtgjson.MTGDB
 var LastUpdate time.Time
 var Sellers []mtgban.Seller
 var Vendors []mtgban.Vendor
+var GlobalBuylist *mtgban.CombineRoot
+var GlobalInventory *mtgban.CombineRoot
+var Norm *mtgban.Normalizer
 
 func Favicon(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "img/misc/favicon.ico")
@@ -143,6 +154,18 @@ func periodicFunction(db mtgjson.MTGDB) {
 		return strings.Compare(Vendors[i].Info().Name, Vendors[j].Info().Name) < 0
 	})
 
+	GlobalInventory, err = mtgban.CombineInventories(Sellers)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	GlobalBuylist, err = mtgban.CombineBuylists(Vendors, false)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
 	BanClient = newbc
 
 	LastUpdate = time.Now()
@@ -201,12 +224,15 @@ func main() {
 		}
 	}()
 
+	Norm = mtgban.NewNormalizer()
+
 	// serve everything in the css and img folders as a file
 	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(&FileSystem{http.Dir("css")})))
 	http.Handle("/img/", http.StripPrefix("/img/", http.FileServer(&FileSystem{http.Dir("img")})))
 
 	// when navigating to /home it should serve the home page
 	http.HandleFunc("/", Home)
+	http.HandleFunc("/search", Search)
 	http.HandleFunc("/arbit", Arbit)
 	http.HandleFunc("/favicon.ico", Favicon)
 	http.ListenAndServe(getPort(), nil)
