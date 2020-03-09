@@ -32,9 +32,10 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pageVars := PageVars{
-		Title:     "BAN Arbitrage",
-		Signature: sig,
-		Expires:   exp,
+		Title:      "BAN Arbitrage",
+		Signature:  sig,
+		Expires:    exp,
+		LastUpdate: LastUpdate.Format(time.RFC3339),
 	}
 	pageVars.Nav = make([]NavElem, len(DefaultNav))
 	copy(pageVars.Nav, DefaultNav)
@@ -201,7 +202,6 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	pageVars.VendorUpdate = vendorUpdate.Format(time.RFC3339)
 	pageVars.ErrorMessage = message
 	pageVars.CKPartner = CKPartner
-	pageVars.LastUpdate = LastUpdate.Format(time.RFC3339)
 	pageVars.UseCredit = useCredit
 
 	if vendor == nil {
