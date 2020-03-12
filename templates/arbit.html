@@ -107,25 +107,17 @@
                             $ {{.BuylistEntry.BuyPrice}}
                         </td>
                         <td>
-                            $ <script type='text/javascript'>
-                                document.write(Math.floor({{.BuylistEntry.TradePrice}} * 100)/100)
-                            </script>
+                            $ {{printf "%.2f" .BuylistEntry.TradePrice}}
                         </td>
                         <td>
-                            $ <script type='text/javascript'>
-                                document.write(Math.floor({{.Difference}} * 100)/100)
-                            </script>
+                            $ {{printf "%.2f" .Difference}}
                         </td>
                         <td>
-                            <script type='text/javascript'>
-                                document.write(Math.floor({{.Spread}} * 100)/100)
-                            </script>%
+                            {{printf "%.2f" .Spread}} %
                         </td>
                         <td>
                             <center>
-                            <script type='text/javascript'>
-                                document.write(Math.floor({{.BuylistEntry.PriceRatio}} * 100)/100)
-                            </script>%
+                            {{printf "%.2f" .BuylistEntry.PriceRatio}} %
                             </center>
                         </td>
                         <td>
