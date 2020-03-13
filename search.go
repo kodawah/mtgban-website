@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -102,4 +103,5 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render(w, "search.html", pageVars)
+	runtime.GC()
 }
