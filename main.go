@@ -16,6 +16,7 @@ import (
 	"github.com/kodabb/go-mtgban/cardkingdom"
 	"github.com/kodabb/go-mtgban/channelfireball"
 	"github.com/kodabb/go-mtgban/miniaturemarket"
+	"github.com/kodabb/go-mtgban/ninetyfive"
 	"github.com/kodabb/go-mtgban/strikezone"
 
 	"github.com/kodabb/go-mtgban/mtgban"
@@ -130,8 +131,12 @@ func periodicFunction(db mtgjson.MTGDB) {
 	newmm := miniaturemarket.NewScraper(db)
 	newmm.LogCallback = log.Printf
 
+	new95 := ninetyfive.NewScraper(db)
+	new95.LogCallback = log.Printf
+
 	newbc.Register(newck)
 	newbc.Register(newsz)
+	newbc.Register(new95)
 	if !DevMode {
 		newbc.Register(newabu)
 		newbc.Register(newcfb)
