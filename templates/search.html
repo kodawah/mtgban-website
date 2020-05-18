@@ -32,7 +32,20 @@
                     <input id="searchbox" class="w3-input w3-border w3-round-small" type="text" name="q" placeholder="Search BAN" value="{{.SearchQuery}}">
                 </form>
             </div>
-        {{if ne .SearchQuery ""}}
+        {{if eq .SearchQuery ""}}
+            <div class="indent">
+                <h2>Instructions</h2>
+                <ul class="indent">
+                    <li>Data is refreshed periodically over the day.</li>
+                    <li>You can filter by edition using the Scryfall syntax "s:CODE".</li>
+                    <li>The percentage found in buylist offers is the <b>price ratio</b>, the higher it is, the more a vendor is looking to purchase that card.</li>
+                    <li>Inventory prices refer to the stated conditions (and their accuracy depends on the data provider).</li>
+                    <li>Buylist prices are always referring to NM conditions.</li>
+                    <li>In case of mistakes or incongruities, please notify the devs in the BAN Discord.</li>
+                    <li>Should you find this content useful, consider clicking on one of the provided links to make a purchase on the website, and directly support BAN.</li>
+                </ul>
+             </div>
+        {{else}}
             <div class="indent">
                 <table style="float: left;">
                     <tr>
@@ -116,6 +129,7 @@
                 </table>
             </div>
         {{end}}
+        <br>
         <div class="indent" style="clear:both;">
         Last update: {{.LastUpdate}}
         </div>
