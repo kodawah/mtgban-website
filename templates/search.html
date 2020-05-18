@@ -40,16 +40,16 @@
                     </tr>
                     {{range $card, $entries := .FoundSellers}}
                         <tr>
-                            <th colspan="3">{{$card.Name}} {{if $card.Foil}}(FOIL){{end}} - {{$card.Set}}</th>
+                            <th colspan="3">{{$card.Name}} {{if $card.Foil}}(FOIL){{end}} - {{$card.Edition}}</th>
                         </tr>
                         {{range $entries}}
                             <tr>
                                 <td>
-                                    {{if ne .Notes ""}}
-                                        <a class="btn normal" href="{{.Notes}}" target="_blank">
+                                    {{if ne .URL ""}}
+                                        <a class="btn normal" href="{{.URL}}" target="_blank">
                                     {{end}}
                                           {{.ScraperName}}
-                                    {{if ne .Notes ""}}
+                                    {{if ne .URL ""}}
                                         </a>
                                     {{end}}
                                 </td>
@@ -70,16 +70,16 @@
                     </tr>
                     {{range $card, $entries := .FoundVendors}}
                         <tr>
-                            <th colspan="4">{{$card.Name}} {{if $card.Foil}}(FOIL){{end}} - {{$card.Set}}</th>
+                            <th colspan="4">{{$card.Name}} {{if $card.Foil}}(FOIL){{end}} - {{$card.Edition}}</th>
                         </tr>
                         {{range $entries}}
                             <tr>
                                 <td>
-                                    {{if ne .Notes ""}}
-                                        <a class="btn normal" href="{{.Notes}}" target="_blank">
+                                    {{if ne .URL ""}}
+                                        <a class="btn normal" href="{{.URL}}" target="_blank">
                                     {{end}}
                                           {{.ScraperName}}
-                                    {{if ne .Notes ""}}
+                                    {{if ne .URL ""}}
                                         </a>
                                     {{end}}
                                 </td>

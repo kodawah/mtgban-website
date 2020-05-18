@@ -20,7 +20,7 @@ import (
 	"github.com/kodabb/go-mtgban/strikezone"
 
 	"github.com/kodabb/go-mtgban/mtgban"
-	"github.com/kodabb/go-mtgban/mtgjson"
+	"github.com/kodabb/go-mtgban/mtgdb"
 )
 
 type NavElem struct {
@@ -42,8 +42,8 @@ type PageVars struct {
 	LastUpdate   string
 
 	SearchQuery  string
-	FoundSellers map[mtgban.Card][]mtgban.CombineEntry
-	FoundVendors map[mtgban.Card][]mtgban.CombineEntry
+	FoundSellers map[mtgdb.Card][]mtgban.CombineEntry
+	FoundVendors map[mtgdb.Card][]mtgban.CombineEntry
 
 	SellerShort  string
 	SellerFull   string
@@ -74,13 +74,12 @@ var DefaultNav = []NavElem{
 var BanClient *mtgban.BanClient
 var DevMode bool
 var CKPartner string
-var DB mtgjson.MTGDB
+var DatabaseLoaded bool
 var LastUpdate time.Time
 var Sellers []mtgban.Seller
 var Vendors []mtgban.Vendor
 var GlobalBuylist *mtgban.CombineRoot
 var GlobalInventory *mtgban.CombineRoot
-var Norm *mtgban.Normalizer
 
 func Favicon(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "img/misc/favicon.ico")
@@ -110,28 +109,28 @@ func (fs *FileSystem) Open(path string) (http.File, error) {
 	return f, nil
 }
 
-func periodicFunction(db mtgjson.MTGDB) {
+func periodicFunction() {
 	log.Println("Updating data")
 
 	newbc := mtgban.NewClient()
 
-	newck := cardkingdom.NewScraper(db)
+	newck := cardkingdom.NewScraper()
 	newck.Partner = CKPartner
 	newck.LogCallback = log.Printf
 
-	newsz := strikezone.NewScraper(db)
+	newsz := strikezone.NewScraper()
 	newsz.LogCallback = log.Printf
 
-	newabu := abugames.NewScraper(db)
+	newabu := abugames.NewScraper()
 	newabu.LogCallback = log.Printf
 
-	newcfb := channelfireball.NewScraper(db)
+	newcfb := channelfireball.NewScraper()
 	newcfb.LogCallback = log.Printf
 
-	newmm := miniaturemarket.NewScraper(db)
+	newmm := miniaturemarket.NewScraper()
 	newmm.LogCallback = log.Printf
 
-	new95 := ninetyfive.NewScraper(db)
+	new95 := ninetyfive.NewScraper()
 	new95.LogCallback = log.Printf
 
 	newbc.Register(newck)
@@ -175,7 +174,7 @@ func periodicFunction(db mtgjson.MTGDB) {
 
 	LastUpdate = time.Now()
 
-	log.Println("DONE")
+	log.Println("Scrapers loaded")
 }
 
 func main() {
@@ -185,27 +184,32 @@ func main() {
 
 	// load website up
 	go func() {
-		var db mtgjson.MTGDB
 		var err error
 
 		log.Println("Loading MTGJSON")
 		if DevMode {
-			db, err = mtgjson.LoadAllPrintings("allprintings.json")
+			err = mtgdb.RegisterWithPaths("allprintings.json", "allcards.json")
 		} else {
-			resp, err := http.Get("https://www.mtgjson.com/files/AllPrintings.json")
+			respPrintings, err := http.Get("https://www.mtgjson.com/files/AllPrintings.json")
 			if err != nil {
 				log.Fatalln(err)
 			}
-			defer resp.Body.Close()
+			defer respPrintings.Body.Close()
 
-			db, err = mtgjson.LoadAllPrintingsFromReader(resp.Body)
+			respCards, err := http.Get("https://www.mtgjson.com/files/AllCards.json")
+			if err != nil {
+				log.Fatalln(err)
+			}
+			defer respCards.Body.Close()
+
+			err = mtgdb.RegisterWithReaders(respPrintings.Body, respCards.Body)
 		}
 		if err != nil {
 			log.Fatalln(err)
 		}
 
-		periodicFunction(db)
-		DB = db
+		periodicFunction()
+		DatabaseLoaded = true
 	}()
 
 	// load necessary environmental variables
@@ -225,11 +229,9 @@ func main() {
 	// refresh every few hours
 	go func() {
 		for _ = range time.NewTicker(time.Duration(refresh) * time.Hour).C {
-			periodicFunction(DB)
+			periodicFunction()
 		}
 	}()
-
-	Norm = mtgban.NewNormalizer()
 
 	// serve everything in the css and img folders as a file
 	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(&FileSystem{http.Dir("css")})))

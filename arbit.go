@@ -65,7 +65,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if DB == nil {
+	if !DatabaseLoaded {
 		pageVars.Title = "Great things are coming"
 		pageVars.ErrorMessage = "Website is starting, please try again in a few minutes"
 

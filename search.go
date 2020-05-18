@@ -7,10 +7,11 @@ import (
 	"os"
 	"runtime"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/kodabb/go-mtgban/mtgban"
+	"github.com/kodabb/go-mtgban/mtgdb"
+	"github.com/kodabb/go-mtgban/mtgjson"
 )
 
 func Search(w http.ResponseWriter, r *http.Request) {
@@ -52,7 +53,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if DB == nil {
+	if !DatabaseLoaded {
 		pageVars.Title = "Great things are coming"
 		pageVars.ErrorMessage = "Website is starting, please try again in a few minutes"
 
@@ -64,13 +65,11 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	if query != "" {
 		pageVars.SearchQuery = query
-		pageVars.FoundSellers = map[mtgban.Card][]mtgban.CombineEntry{}
-		pageVars.FoundVendors = map[mtgban.Card][]mtgban.CombineEntry{}
-
-		query = Norm.Normalize(query)
+		pageVars.FoundSellers = map[mtgdb.Card][]mtgban.CombineEntry{}
+		pageVars.FoundVendors = map[mtgdb.Card][]mtgban.CombineEntry{}
 
 		for card, entries := range GlobalInventory.Entries {
-			if strings.HasPrefix(Norm.Normalize(card.Name), query) {
+			if mtgjson.NormPrefix(card.Name, query) {
 				for _, entry := range entries {
 					_, found := pageVars.FoundSellers[card]
 					if !found {
@@ -84,7 +83,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		}
 
 		for card, entries := range GlobalBuylist.Entries {
-			if strings.HasPrefix(Norm.Normalize(card.Name), query) {
+			if mtgjson.NormPrefix(card.Name, query) {
 				for _, entry := range entries {
 					_, found := pageVars.FoundVendors[card]
 					if !found {

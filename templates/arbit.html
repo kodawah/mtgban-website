@@ -84,18 +84,18 @@
                 {{range .Arb}}
                     <tr>
                         <td>
-                            {{.BuylistEntry.Card.Name}}
+                            {{.Card.Name}}
                             {{if eq $.SellerShort "CK"}}
                                 <script type='text/javascript'>
-                                    document.getElementById('cart-list').value += "{{.BuylistEntry.Card.Name}}||"
+                                    document.getElementById('cart-list').value += "{{.Card.Name}}||"
                                 </script>
                             {{end}}
                         </td>
                         <td>
-                            {{.BuylistEntry.Card.Set}}
+                            {{.Card.Edition}}
                         </td>
                         <td>
-                            {{if .BuylistEntry.Card.Foil}}FOIL{{end}}
+                            {{if .Card.Foil}}FOIL{{end}}
                         </td>
                         <td>
                             <center>{{.InventoryEntry.Conditions}}</center>
@@ -122,11 +122,11 @@
                         </td>
                         <td>
                             <center>
-                                {{if ne .InventoryEntry.Notes ""}}
-                                    <a class="btn normal" href="{{.InventoryEntry.Notes}}" target="_blank">Buy</a>
+                                {{if ne .InventoryEntry.URL ""}}
+                                    <a class="btn normal" href="{{.InventoryEntry.URL}}" target="_blank">Buy</a>
                                 {{end}}
-                                {{if ne .BuylistEntry.Notes ""}}
-                                    <a class="btn normal" href="{{.BuylistEntry.Notes}}" target="_blank">Sell</a>
+                                {{if ne .BuylistEntry.URL ""}}
+                                    <a class="btn normal" href="{{.BuylistEntry.URL}}" target="_blank">Sell</a>
                                 {{end}}
                             </center>
                         </td>
