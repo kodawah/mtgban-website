@@ -72,6 +72,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		pageVars.Images = map[mtgdb.Card]string{}
 
 		filterEdition := ""
+		filterCondition := ""
 		if strings.Contains(query, "s:") {
 			fields := strings.Fields(query)
 			for _, field := range fields {
@@ -86,6 +87,20 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 		}
+		if strings.Contains(query, "c:") {
+			fields := strings.Fields(query)
+			for _, field := range fields {
+				if strings.HasPrefix(field, "c:") {
+					query = strings.TrimPrefix(query, field)
+					query = strings.TrimSuffix(query, field)
+					query = strings.TrimSpace(query)
+
+					filterEdition = strings.TrimPrefix(field, "c:")
+					break
+				}
+			}
+		}
+
 		for _, seller := range BanClient.Sellers() {
 			inventory, err := seller.Inventory()
 			if err != nil {
@@ -105,6 +120,10 @@ func Search(w http.ResponseWriter, r *http.Request) {
 					}
 
 					for _, entry := range entries {
+						if filterCondition != "" && filterCondition != entry.Conditions {
+							continue
+						}
+
 						_, found := pageVars.FoundSellers[card]
 						if !found {
 							pageVars.FoundSellers[card] = map[string][]mtgban.CombineEntry{}
