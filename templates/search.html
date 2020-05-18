@@ -64,28 +64,33 @@
                             <td>No offers available</td>
                         </tr>
                     {{end}}
-                    {{range $card, $entries := .FoundSellers}}
+                    {{range $card, $condsEntry := .FoundSellers}}
                         <tr onmouseover="document.getElementById('cardImage').src={{index $.Images $card}};">
                             <th colspan="3">{{$card.Name}} {{if $card.Foil}}(FOIL){{end}} - {{$card.Edition}} ({{$card.Number}})</th>
                         </tr>
-                        {{range $entries}}
+                        {{range $conditions, $entries := $condsEntry}}
                             <tr onmouseover="document.getElementById('cardImage').src={{index $.Images $card}};">
-                                <td>
-                                    {{if ne .URL ""}}
-                                        <a class="btn normal" href="{{.URL}}" target="_blank">
-                                    {{end}}
-                                          {{.ScraperName}}
-                                    {{if ne .URL ""}}
-                                        </a>
-                                    {{end}}
-                                </td>
-                                <td>
-                                    $ {{.Price}}
-                                </td>
-                                <td>
-                                    {{.Quantity}}
-                                </td>
+                                <td colspan="3"><i>Conditions: {{$conditions}}</i></th>
                             </tr>
+                            {{range $entries}}
+                                <tr onmouseover="document.getElementById('cardImage').src={{index $.Images $card}};">
+                                    <td>
+                                        {{if ne .URL ""}}
+                                            <a class="btn normal" href="{{.URL}}" target="_blank">
+                                        {{end}}
+                                              {{.ScraperName}}
+                                        {{if ne .URL ""}}
+                                            </a>
+                                        {{end}}
+                                    </td>
+                                    <td>
+                                        $ {{.Price}}
+                                    </td>
+                                    <td>
+                                        {{.Quantity}}
+                                    </td>
+                                </tr>
+                            {{end}}
                         {{end}}
                     {{end}}
                 </table>

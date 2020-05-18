@@ -42,7 +42,7 @@ type PageVars struct {
 	LastUpdate   string
 
 	SearchQuery  string
-	FoundSellers map[mtgdb.Card][]mtgban.CombineEntry
+	FoundSellers map[mtgdb.Card]map[string][]mtgban.CombineEntry
 	FoundVendors map[mtgdb.Card][]mtgban.CombineEntry
 	Images       map[mtgdb.Card]string
 

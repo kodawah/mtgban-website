@@ -67,7 +67,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	if query != "" {
 		pageVars.SearchQuery = query
-		pageVars.FoundSellers = map[mtgdb.Card][]mtgban.CombineEntry{}
+		pageVars.FoundSellers = map[mtgdb.Card]map[string][]mtgban.CombineEntry{}
 		pageVars.FoundVendors = map[mtgdb.Card][]mtgban.CombineEntry{}
 		pageVars.Images = map[mtgdb.Card]string{}
 
@@ -105,20 +105,22 @@ func Search(w http.ResponseWriter, r *http.Request) {
 					}
 
 					for _, entry := range entries {
-						if entry.Conditions != "NM" {
-							continue
-						}
 						_, found := pageVars.FoundSellers[card]
 						if !found {
-							pageVars.FoundSellers[card] = []mtgban.CombineEntry{}
+							pageVars.FoundSellers[card] = map[string][]mtgban.CombineEntry{}
 						}
+						_, found = pageVars.FoundSellers[card][entry.Conditions]
+						if !found {
+							pageVars.FoundSellers[card][entry.Conditions] = []mtgban.CombineEntry{}
+						}
+
 						res := mtgban.CombineEntry{
 							ScraperName: seller.Info().Name,
 							Price:       entry.Price,
 							Quantity:    entry.Quantity,
 							URL:         entry.URL,
 						}
-						pageVars.FoundSellers[card] = append(pageVars.FoundSellers[card], res)
+						pageVars.FoundSellers[card][entry.Conditions] = append(pageVars.FoundSellers[card][entry.Conditions], res)
 					}
 				}
 			}
