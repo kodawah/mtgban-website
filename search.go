@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -68,30 +69,54 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		pageVars.FoundSellers = map[mtgdb.Card][]mtgban.CombineEntry{}
 		pageVars.FoundVendors = map[mtgdb.Card][]mtgban.CombineEntry{}
 
-		for card, entries := range GlobalInventory.Entries {
-			if mtgjson.NormPrefix(card.Name, query) {
-				for _, entry := range entries {
-					_, found := pageVars.FoundSellers[card]
-					if !found {
-						pageVars.FoundSellers[card] = []mtgban.CombineEntry{}
-					}
-					if entry.Price > 0 {
-						pageVars.FoundSellers[card] = append(pageVars.FoundSellers[card], entry)
+		for _, seller := range BanClient.Sellers() {
+			inventory, err := seller.Inventory()
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			for card, entries := range inventory {
+				if mtgjson.NormPrefix(card.Name, query) {
+					for _, entry := range entries {
+						if entry.Conditions != "NM" {
+							continue
+						}
+						_, found := pageVars.FoundSellers[card]
+						if !found {
+							pageVars.FoundSellers[card] = []mtgban.CombineEntry{}
+						}
+						res := mtgban.CombineEntry{
+							ScraperName: seller.Info().Name,
+							Price:       entry.Price,
+							Quantity:    entry.Quantity,
+							URL:         entry.URL,
+						}
+						pageVars.FoundSellers[card] = append(pageVars.FoundSellers[card], res)
 					}
 				}
 			}
 		}
 
-		for card, entries := range GlobalBuylist.Entries {
-			if mtgjson.NormPrefix(card.Name, query) {
-				for _, entry := range entries {
+		for _, vendor := range BanClient.Vendors() {
+			buylist, err := vendor.Buylist()
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			for card, entry := range buylist {
+				if mtgjson.NormPrefix(card.Name, query) {
 					_, found := pageVars.FoundVendors[card]
 					if !found {
 						pageVars.FoundVendors[card] = []mtgban.CombineEntry{}
 					}
-					if entry.Price > 0 {
-						pageVars.FoundVendors[card] = append(pageVars.FoundVendors[card], entry)
+					res := mtgban.CombineEntry{
+						ScraperName: vendor.Info().Name,
+						Price:       entry.BuyPrice,
+						Ratio:       entry.PriceRatio,
+						Quantity:    entry.Quantity,
+						URL:         entry.URL,
 					}
+					pageVars.FoundVendors[card] = append(pageVars.FoundVendors[card], res)
 				}
 			}
 		}

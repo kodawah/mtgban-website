@@ -78,8 +78,6 @@ var DatabaseLoaded bool
 var LastUpdate time.Time
 var Sellers []mtgban.Seller
 var Vendors []mtgban.Vendor
-var GlobalBuylist *mtgban.CombineRoot
-var GlobalInventory *mtgban.CombineRoot
 
 func Favicon(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "img/misc/favicon.ico")
@@ -157,18 +155,6 @@ func periodicFunction() {
 	sort.Slice(Vendors, func(i, j int) bool {
 		return strings.Compare(Vendors[i].Info().Name, Vendors[j].Info().Name) < 0
 	})
-
-	GlobalInventory, err = mtgban.CombineInventories(Sellers)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	GlobalBuylist, err = mtgban.CombineBuylists(Vendors, false)
-	if err != nil {
-		log.Println(err)
-		return
-	}
 
 	BanClient = newbc
 
