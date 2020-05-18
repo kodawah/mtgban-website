@@ -44,6 +44,7 @@ type PageVars struct {
 	SearchQuery  string
 	FoundSellers map[mtgdb.Card][]mtgban.CombineEntry
 	FoundVendors map[mtgdb.Card][]mtgban.CombineEntry
+	Images       map[mtgdb.Card]string
 
 	SellerShort  string
 	SellerFull   string

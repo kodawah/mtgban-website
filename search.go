@@ -69,6 +69,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		pageVars.SearchQuery = query
 		pageVars.FoundSellers = map[mtgdb.Card][]mtgban.CombineEntry{}
 		pageVars.FoundVendors = map[mtgdb.Card][]mtgban.CombineEntry{}
+		pageVars.Images = map[mtgdb.Card]string{}
 
 		filterEdition := ""
 		if strings.Contains(query, "s:") {
@@ -96,6 +97,13 @@ func Search(w http.ResponseWriter, r *http.Request) {
 					if filterEdition != "" && filterEdition != card.Edition {
 						continue
 					}
+
+					if pageVars.Images[card] == "" {
+						code, _ := mtgdb.EditionName2Code(card.Edition)
+						link := fmt.Sprintf("https://api.scryfall.com/cards/%s/%s?format=image&version=normal", strings.ToLower(code), card.Number)
+						pageVars.Images[card] = link
+					}
+
 					for _, entry := range entries {
 						if entry.Conditions != "NM" {
 							continue
@@ -126,6 +134,13 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				if filterEdition != "" && filterEdition != card.Edition {
 					continue
 				}
+
+				if pageVars.Images[card] == "" {
+					code, _ := mtgdb.EditionName2Code(card.Edition)
+					link := fmt.Sprintf("https://api.scryfall.com/cards/%s/%s?format=image&version=normal", strings.ToLower(code), card.Number)
+					pageVars.Images[card] = link
+				}
+
 				if mtgjson.NormPrefix(card.Name, query) {
 					_, found := pageVars.FoundVendors[card]
 					if !found {
