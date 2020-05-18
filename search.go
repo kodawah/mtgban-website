@@ -8,6 +8,7 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/kodabb/go-mtgban/mtgban"
@@ -69,6 +70,21 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		pageVars.FoundSellers = map[mtgdb.Card][]mtgban.CombineEntry{}
 		pageVars.FoundVendors = map[mtgdb.Card][]mtgban.CombineEntry{}
 
+		filterEdition := ""
+		if strings.Contains(query, "s:") {
+			fields := strings.Fields(query)
+			for _, field := range fields {
+				if strings.HasPrefix(field, "s:") {
+					query = strings.TrimPrefix(query, field)
+					query = strings.TrimSuffix(query, field)
+					query = strings.TrimSpace(query)
+
+					code := strings.TrimPrefix(field, "s:")
+					filterEdition, _ = mtgdb.EditionCode2Name(code)
+					break
+				}
+			}
+		}
 		for _, seller := range BanClient.Sellers() {
 			inventory, err := seller.Inventory()
 			if err != nil {
@@ -77,6 +93,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			}
 			for card, entries := range inventory {
 				if mtgjson.NormPrefix(card.Name, query) {
+					if filterEdition != "" && filterEdition != card.Edition {
+						continue
+					}
 					for _, entry := range entries {
 						if entry.Conditions != "NM" {
 							continue
@@ -104,6 +123,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 			for card, entry := range buylist {
+				if filterEdition != "" && filterEdition != card.Edition {
+					continue
+				}
 				if mtgjson.NormPrefix(card.Name, query) {
 					_, found := pageVars.FoundVendors[card]
 					if !found {
