@@ -67,6 +67,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	if query != "" {
 		pageVars.SearchQuery = query
+		pageVars.CondKeys = []string{"NM", "SP", "MP", "HP", "PO"}
 		pageVars.FoundSellers = map[mtgdb.Card]map[string][]mtgban.CombineEntry{}
 		pageVars.FoundVendors = map[mtgdb.Card][]mtgban.CombineEntry{}
 		pageVars.Images = map[mtgdb.Card]string{}

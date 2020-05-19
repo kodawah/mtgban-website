@@ -69,10 +69,13 @@
                         <tr onmouseover="document.getElementById('cardImage').src={{index $.Images $card}};">
                             <th colspan="3">{{$card.Name}} {{if $card.Foil}}(FOIL){{end}} - {{$card.Edition}} ({{$card.Number}})</th>
                         </tr>
-                        {{range $conditions, $entries := $condsEntry}}
-                            <tr onmouseover="document.getElementById('cardImage').src={{index $.Images $card}};">
-                                <td colspan="3"><i>Conditions: {{$conditions}}</i></th>
-                            </tr>
+                        {{range $conditions := $.CondKeys}}
+                            {{$entries := (index $condsEntry $conditions)}}
+                            {{if $entries}}
+                                <tr onmouseover="document.getElementById('cardImage').src={{index $.Images $card}};">
+                                    <td colspan="3"><i>Conditions: {{$conditions}}</i></th>
+                                </tr>
+                            {{end}}
                             {{range $entries}}
                                 <tr onmouseover="document.getElementById('cardImage').src={{index $.Images $card}};">
                                     <td>
