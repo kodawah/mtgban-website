@@ -81,10 +81,10 @@
                                     <td>
                                         {{if ne .URL ""}}
                                             <a class="btn normal" href="{{.URL}}" target="_blank">
-                                        {{end}}
-                                              {{.ScraperName}}
-                                        {{if ne .URL ""}}
+                                                {{.ScraperName}}
                                             </a>
+                                        {{else}}
+                                            &nbsp;&nbsp;{{.ScraperName}}
                                         {{end}}
                                     </td>
                                     <td>
@@ -117,10 +117,10 @@
                                 <td>
                                     {{if ne .URL ""}}
                                         <a class="btn normal" href="{{.URL}}" target="_blank">
-                                    {{end}}
-                                          {{.ScraperName}}
-                                    {{if ne .URL ""}}
+                                            {{.ScraperName}}
                                         </a>
+                                    {{else}}
+                                        &nbsp;&nbsp;{{.ScraperName}}
                                     {{end}}
                                 </td>
                                 <td>
