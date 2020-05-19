@@ -20,7 +20,7 @@
         <h1>{{.ErrorMessage}}</h1>
     {{else}}
         <h1>Welcome to Search</h1>
-            <div class="indent">
+            <div class="indent" style="position:sticky; top:48px; background-color:#f8f8f8;">
                 <form class="search" action="search">
                     <label style="clear: both; float: left;" for="searchbox">Enter a card name</label>
                     {{if ne .Signature ""}}
@@ -47,7 +47,7 @@
                 </ul>
              </div>
         {{else}}
-            <div class="indent">
+            <div class="indent sticky" style="top: 120px; z-index: -1;">
                 <table style="float: left;">
                     <tr>
                         <td>
@@ -55,7 +55,9 @@
                         </td>
                     </tr>
                 </table>
+            </div>
 
+            <div class="indent">
                 <table style="float: left;">
                     <tr>
                         <th colspan="3"><h2 align=center>Sellers</h2></th>

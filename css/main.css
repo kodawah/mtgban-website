@@ -61,6 +61,10 @@ tr:nth-child(even) {
     background-color: #f2f2ff;
 }
 
+tr:nth-child(odd) {
+    background-color: #f8f8f8;
+}
+
 th.wrap {
     white-space;
     text-overflow: ellipsis;
@@ -225,4 +229,9 @@ a.selected:hover{
     padding: 8px 8px;
     display: inline-block;
     width: 350px;
+}
+
+.sticky {
+    position: -webkit-sticky;
+    position: sticky;
 }
