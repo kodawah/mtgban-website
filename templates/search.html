@@ -67,7 +67,7 @@
                     {{end}}
                     {{range $card, $condsEntry := .FoundSellers}}
                         <tr onmouseover="document.getElementById('cardImage').src={{index $.Images $card}};">
-                            <th colspan="3">{{$card.Name}} {{if $card.Foil}}(FOIL){{end}} - {{$card.Edition}} ({{$card.Number}})</th>
+                            <th colspan="3" class="wrap">{{$card.Name}} {{if $card.Foil}}(FOIL){{end}} - {{$card.Edition}} ({{$card.Number}})</th>
                         </tr>
                         {{range $conditions := $.CondKeys}}
                             {{$entries := (index $condsEntry $conditions)}}
@@ -110,7 +110,7 @@
                     {{end}}
                     {{range $card, $entries := .FoundVendors}}
                         <tr onmouseover="document.getElementById('cardImage').src={{index $.Images $card}};">
-                            <th colspan="4">{{$card.Name}} {{if $card.Foil}}(FOIL){{end}} - {{$card.Edition}} ({{$card.Number}})</th>
+                            <th colspan="4" class="wrap">{{$card.Name}} {{if $card.Foil}}(FOIL){{end}} - {{$card.Edition}} ({{$card.Number}})</th>
                         </tr>
                         {{range $entries}}
                             <tr onmouseover="document.getElementById('cardImage').src={{index $.Images $card}};">

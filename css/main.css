@@ -61,6 +61,14 @@ tr:nth-child(even) {
     background-color: #f2f2ff;
 }
 
+th.wrap {
+    white-space;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 354px;
+    background-color: #eaeaea;
+}
+
 h1 {
     color: #17375e;
     margin-left: 20px;
