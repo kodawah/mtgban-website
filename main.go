@@ -165,6 +165,22 @@ func periodicFunction() {
 	log.Println("Scrapers loaded")
 }
 
+func loadDB() error {
+	respPrintings, err := http.Get("https://www.mtgjson.com/files/AllPrintings.json")
+	if err != nil {
+		return err
+	}
+	defer respPrintings.Body.Close()
+
+	respCards, err := http.Get("https://www.mtgjson.com/files/AllCards.json")
+	if err != nil {
+		return err
+	}
+	defer respCards.Body.Close()
+
+	return mtgdb.RegisterWithReaders(respPrintings.Body, respCards.Body)
+}
+
 func main() {
 	devMode := flag.Bool("dev", false, "Enable developer mode")
 	flag.Parse()
@@ -178,19 +194,7 @@ func main() {
 		if DevMode {
 			err = mtgdb.RegisterWithPaths("allprintings.json", "allcards.json")
 		} else {
-			respPrintings, err := http.Get("https://www.mtgjson.com/files/AllPrintings.json")
-			if err != nil {
-				log.Fatalln(err)
-			}
-			defer respPrintings.Body.Close()
-
-			respCards, err := http.Get("https://www.mtgjson.com/files/AllCards.json")
-			if err != nil {
-				log.Fatalln(err)
-			}
-			defer respCards.Body.Close()
-
-			err = mtgdb.RegisterWithReaders(respPrintings.Body, respCards.Body)
+			err = loadDB()
 		}
 		if err != nil {
 			log.Fatalln(err)
