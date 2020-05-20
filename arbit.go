@@ -76,45 +76,23 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
 	var ok bool
-	var vendor mtgban.Vendor
-	var seller mtgban.Seller
-	var dumpCSV, dumpBL, useCredit bool
+	var source mtgban.Seller
+	var useCredit bool
 	var message string
-	var sellerUpdate, vendorUpdate time.Time
 
 	for k, v := range r.Form {
 		switch k {
-		case "vendor":
-			scraper, err := BanClient.ScraperByName(v[0])
-			if err != nil {
-				log.Println(err)
-				message = "Unknown " + v[0] + " vendor"
-				break
-			}
-			vendor, ok = scraper.(mtgban.Vendor)
-			if !ok {
-				message = "Unknown " + v[0] + " vendor (seller only?)"
-				break
-			}
-
-		case "seller":
+		case "source":
 			scraper, err := BanClient.ScraperByName(v[0])
 			if err != nil {
 				log.Println(err)
 				message = "Unknown " + v[0] + " seller"
 				break
 			}
-			seller, ok = scraper.(mtgban.Seller)
+			source, ok = scraper.(mtgban.Seller)
 			if !ok {
 				message = "Unknown " + v[0] + " seller (vendor only?)"
-			}
-
-		case "action":
-			switch v[0] {
-			case "csv":
-				dumpCSV = true
-			case "dlbl":
-				dumpBL = true
+				break
 			}
 
 		case "credit":
@@ -122,41 +100,6 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			case "true":
 				useCredit = true
 			}
-		}
-	}
-
-	if seller == nil {
-		for _, newSeller := range Sellers {
-			pageVars.Nav = append(pageVars.Nav, NavElem{
-				Name: newSeller.Info().Name,
-				Link: "arbit?seller=" + newSeller.Info().Shorthand + signature,
-			})
-		}
-	} else {
-		pageVars.Nav[mainNavIndex].Active = false
-
-		class := "active"
-		if vendor != nil {
-			class = "selected"
-		}
-		baseLink := "arbit?seller=" + seller.Info().Shorthand
-		pageVars.Nav = append(pageVars.Nav, NavElem{
-			Active: true,
-			Class:  class,
-			Name:   seller.Info().Name,
-			Link:   baseLink + signature,
-		})
-
-		for _, targetVendor := range Vendors {
-			if seller.(mtgban.Scraper) == targetVendor.(mtgban.Scraper) {
-				continue
-			}
-			pageVars.Nav = append(pageVars.Nav, NavElem{
-				Active: vendor == targetVendor,
-				Class:  "active",
-				Name:   targetVendor.Info().Name,
-				Link:   baseLink + "&vendor=" + targetVendor.Info().Shorthand + signature,
-			})
 		}
 	}
 
@@ -168,79 +111,73 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if dumpBL {
-		vendorFromSeller, ok := seller.(mtgban.Scraper).(mtgban.Vendor)
-		if ok {
-			mtgban.WriteBuylistToCSV(vendorFromSeller, w)
-			return
+	for _, newSeller := range Sellers {
+		nav := NavElem{
+			Name: newSeller.Info().Name,
+			Link: "arbit?source=" + newSeller.Info().Shorthand + signature,
 		}
+		if source != nil && source.Info().Name == newSeller.Info().Name {
+			nav.Active = true
+			nav.Class = "selected"
+		}
+		pageVars.Nav = append(pageVars.Nav, nav)
+	}
 
-		pageVars.Title = "Errors have been made"
-		pageVars.ErrorMessage = "Vendor is not a seller"
+	if source == nil {
+		pageVars.Title = "Arbitrage Opportunities"
 
 		render(w, "arbit.html", pageVars)
 		return
 	}
 
-	var sellerShort, sellerFull, vendorFull, vendorShort string
-	if seller != nil {
-		sellerShort = seller.Info().Shorthand
-		sellerFull = seller.Info().Name
-		sellerUpdate = seller.Info().InventoryTimestamp
-	}
-	if vendor != nil {
-		vendorShort = vendor.Info().Shorthand
-		vendorFull = vendor.Info().Name
-		vendorUpdate = vendor.Info().BuylistTimestamp
-	}
-
-	pageVars.SellerShort = sellerShort
-	pageVars.SellerFull = sellerFull
-	pageVars.SellerUpdate = sellerUpdate.Format(time.RFC3339)
-	pageVars.VendorShort = vendorShort
-	pageVars.VendorFull = vendorFull
-	pageVars.VendorUpdate = vendorUpdate.Format(time.RFC3339)
-	pageVars.ErrorMessage = message
+	pageVars.SellerShort = source.Info().Shorthand
+	pageVars.SellerFull = source.Info().Name
+	pageVars.SellerUpdate = source.Info().InventoryTimestamp.Format(time.RFC3339)
 	pageVars.CKPartner = CKPartner
 	pageVars.UseCredit = useCredit
 
-	if vendor == nil {
-		pageVars.Title = sellerFull + " Arbitrage"
-		pageVars.VendorShort = sellerShort
-		pageVars.VendorFull = sellerFull
+	pageVars.Arb = []Arbitrage{}
 
-		render(w, "arbit.html", pageVars)
-		return
+	for _, vendor := range Vendors {
+		if vendor.(mtgban.Scraper) == source.(mtgban.Scraper) {
+			continue
+		}
+
+		opts := &mtgban.ArbitOpts{
+			MinSpread: 10,
+		}
+		if vendor.Info().Shorthand == "ABU" {
+			opts.UseTrades = useCredit
+		}
+
+		log.Println("Comparing", source.Info().Shorthand, "->", vendor.Info().Shorthand)
+		arbit, err := mtgban.Arbit(opts, vendor, source)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+
+		log.Println(len(arbit), "offers")
+		if len(arbit) == 0 {
+			continue
+		}
+
+		sort.Slice(arbit, func(i, j int) bool {
+			return arbit[i].Spread > arbit[j].Spread
+		})
+
+		pageVars.Arb = append(pageVars.Arb, Arbitrage{
+			Name:       vendor.Info().Name,
+			LastUpdate: vendor.Info().BuylistTimestamp.Format(time.RFC3339),
+			Arbit:      arbit,
+			Len:        len(arbit),
+		})
 	}
 
-	opts := &mtgban.ArbitOpts{
-		MinSpread: 10,
-		UseTrades: useCredit,
+	if len(pageVars.Arb) == 0 {
+		pageVars.InfoMessage = "No arbitrage available!"
 	}
-	arbit, err := mtgban.Arbit(opts, vendor, seller)
-	if err != nil {
-		pageVars.Title = "Arbitrage Error"
-		pageVars.ErrorMessage = err.Error()
-
-		render(w, "arbit.html", pageVars)
-		return
-	}
-
-	if len(arbit) == 0 {
-		pageVars.InfoMessage = "No arbitrage found"
-	}
-
-	sort.Slice(arbit, func(i, j int) bool {
-		return arbit[i].Spread > arbit[j].Spread
-	})
-
-	if dumpCSV {
-		mtgban.WriteArbitrageToCSV(arbit, w)
-		return
-	}
-
-	pageVars.Title = sellerFull + " arbitrage towards " + vendorFull
-	pageVars.Arb = arbit
+	pageVars.Title = "Arbitrage from " + source.Info().Name
 
 	render(w, "arbit.html", pageVars)
 }

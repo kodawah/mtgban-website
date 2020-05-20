@@ -31,6 +31,13 @@ type NavElem struct {
 	Name   string
 }
 
+type Arbitrage struct {
+	Name       string
+	LastUpdate string
+	Arbit      []mtgban.ArbitEntry
+	Len        int
+}
+
 type PageVars struct {
 	Nav       []NavElem
 	Signature string
@@ -51,11 +58,8 @@ type PageVars struct {
 	SellerShort  string
 	SellerFull   string
 	SellerUpdate string
-	VendorShort  string
-	VendorFull   string
-	VendorUpdate string
 
-	Arb       []mtgban.ArbitEntry
+	Arb       []Arbitrage
 	UseCredit bool
 }
 

@@ -26,7 +26,7 @@
 <div class="mainbody">
     {{if ne .ErrorMessage ""}}
         <h1>{{.ErrorMessage}}</h1>
-    {{else if eq .VendorShort ""}}
+    {{else if eq .SellerShort ""}}
         <h1>Welcome to Arbitrage</h1>
         <div class="indent">
             <p>Please use the top bar to choose the seller to buy from.</p>
@@ -34,111 +34,115 @@
             <ul class="indent">
                 <li>Data is refreshed periodically over the day.</li>
                 <li>There is a minimum 10% spread and $0.2 difference for a card to be considered arbitrage.</li>
-                <li>Always check validity of prices before committing anything.</li>
-                <li>By default, arbitrage is computed on cash value, but it is possible to use the credit value by clickling on the option to do so.</li>
-                <li>You may download a standardized version of the buylist in CSV format, mapped to a <a href="www.mtgjson.com">MTGJSON database</a>.</li>
-                <li>In case of mistakes of incongruities, please notify the devs in the BAN Discord.</li>
+                <li>Always check validity of prices before committing anything, it is possible that prices or quantities changed.</li>
+                <li>By default, arbitrage is computed on cash value, taking into account for condition whenever possible.</li>
+                <li>Each seller page will contain a list of vendors, with a brief summary at the top containing the number of arbitrage opportunities.</li>
+                <li>In case of mistakes or incongruities, please notify the devs in the BAN Discord.</li>
                 <li>Should you find this content useful, consider clicking on one of the provided links to make a purchase on the website, and directly support BAN.</li>
             </ul>
-    {{else if eq .VendorShort .SellerShort}}
-        <h1>Welcome to {{.SellerFull}} Arbitrage</h1>
-        <div class="indent">
-            <p>Please use the top bar to choose the vendor to sell to.</p>
-            <a class="btn normal" href="arbit?seller={{.SellerShort}}{{if .UseCredit}}&credit=true{{end}}&action=dlbl&Signature={{.Signature}}&Expires={{$.Expires}}" download="{{.SellerShort}}_Buylist.csv">Download Buylist in CSV format</a>
         </div>
     {{else}}
-        <h1>Arbitrage from {{.SellerFull}} to {{.VendorFull}}</h1>
+        <h1>Arbitrage from {{.SellerFull}}</h1>
         <div class="indent">
             <h2><p>{{.InfoMessage}}</p></h2>
-
-            <table>
-                <tr>
-                    <td colspan=11>
-                        {{if eq .SellerShort "CK"}}
-                            <form class="buildcart" target="_blank" id="build-cart" method="POST" action="https://www.cardkingdom.com/builder?utm_source={{.CKPartner}}&utm_medium=deck&utm_campaign={{.CKPartner}}">
-                                <button name="cart" class="btn normal" value="value" type="text" onClick="document.forms[0].submit();">Build a Cart with this selection</button>
-                                <input type="hidden" name="c" id="cart-list" value="">
-                                <input type="hidden" name="partner" value="{{.CKPartner}}">
-                            </form>
-                        {{end}}
-                        {{if .UseCredit}}
-                            <a class="btn success" style="float: right;" href="arbit?seller={{.SellerShort}}&vendor={{.VendorShort}}&Signature={{.Signature}}&Expires={{.Expires}}">Back to Cash Arbitrage</a>
-                        {{else}}
-                            <a class="btn warning" style="float: right;" href="arbit?seller={{.SellerShort}}&vendor={{.VendorShort}}&credit=true&Signature={{.Signature}}&Expires={{.Expires}}">Check Credit Arbitrage</a>
-                        {{end}}
-                    </td>
-                </tr>
-                <tr>
-                    <th>Card Name</th>
-                    <th>Edition</th>
-                    <th>F/NF</th>
-                    <th>Conditions</th>
-                    <th>Sell Price</th>
-                    <th>Buy Price</th>
-                    <th>Trade Price</th>
-                    <th>Difference</th>
-                    <th>Spread</th>
-                    <th>Price Ratio</th>
-                    <th><center>Quicklinks</center></th>
-                </tr>
+            <div class="indent">
+                <p>
+                Jump to
                 {{range .Arb}}
+                    <a class="btn normal" href="#{{.Name}}">{{.Name}} ({{.Len}})</a>
+                {{end}}
+                </p>
+            </div>
+            {{range .Arb}}
+                <div class="sticky" style="top: 48px; background-color: #f8f8f8; z-index: 1;">
+                    <h3><a name="{{.Name}}">{{.Name}}</a></h3>
+                    <hr width=20%>
+                </div>
+                <table>
                     <tr>
-                        <td>
-                            {{.Card.Name}}
-                            {{if eq $.SellerShort "CK"}}
-                                <script type='text/javascript'>
-                                    document.getElementById('cart-list').value += "{{.Card.Name}}||"
-                                </script>
+                        <td colspan=11>
+                            {{if eq .Name "ABU"}}
+                                {{if $.UseCredit}}
+                                    <a class="btn success" style="float: right;" href="arbit?source={{$.SellerShort}}&Signature={{$.Signature}}&Expires={{$.Expires}}">Back to Cash Arbitrage</a>
+                                {{else}}
+                                    <a class="btn warning" style="float: right;" href="arbit?source={{$.SellerShort}}&credit=true&Signature={{$.Signature}}&Expires={{$.Expires}}">Check Credit Arbitrage</a>
+                                {{end}}
                             {{end}}
                         </td>
-                        <td>
-                            {{.Card.Edition}}
-                        </td>
-                        <td>
-                            {{if .Card.Foil}}FOIL{{end}}
-                        </td>
-                        <td>
-                            <center>{{.InventoryEntry.Conditions}}</center>
-                        </td>
-                        <td>
-                            $ {{.InventoryEntry.Price}}
-                        </td>
-                        <td>
-                            $ {{.BuylistEntry.BuyPrice}}
-                        </td>
-                        <td>
-                            $ {{printf "%.2f" .BuylistEntry.TradePrice}}
-                        </td>
-                        <td>
-                            $ {{printf "%.2f" .Difference}}
-                        </td>
-                        <td>
-                            {{printf "%.2f" .Spread}} %
-                        </td>
-                        <td>
-                            <center>
-                            {{printf "%.2f" .BuylistEntry.PriceRatio}} %
-                            </center>
-                        </td>
-                        <td>
-                            <center>
-                                {{if ne .InventoryEntry.URL ""}}
-                                    <a class="btn normal" href="{{.InventoryEntry.URL}}" target="_blank">Buy</a>
-                                {{end}}
-                                {{if ne .BuylistEntry.URL ""}}
-                                    <a class="btn normal" href="{{.BuylistEntry.URL}}" target="_blank">Sell</a>
-                                {{end}}
-                            </center>
-                        </td>
                     </tr>
-                {{end}}
-            </table>
-        <a class="btn normal" href="arbit?seller={{.SellerShort}}&vendor={{.VendorShort}}{{if .UseCredit}}&credit=true{{end}}&action=csv&Signature={{.Signature}}&Expires={{.Expires}}" download="{{.SellerShort}}-to-{{.VendorShort}}_{{if .UseCredit}}Credit{{end}}Arbitrage.csv">Download CSV</a>
+                    <tr class="sticky" style="top: 73px; background-color: #eaeaea; z-index: 0;">
+                        <th>Card Name</th>
+                        <th>Edition</th>
+                        <th><center>#</center></th>
+                        <th>F/NF</th>
+                        <th>Conditions</th>
+                        <th>Sell Price</th>
+                        <th>Buy Price</th>
+                        <th>Trade Price</th>
+                        <th>Difference</th>
+                        <th>Spread</th>
+                        <th>Price Ratio</th>
+                        <th><center>Quicklinks</center></th>
+                    </tr>
+                    {{range .Arbit}}
+                        <tr>
+                            <td>
+                                {{.Card.Name}}
+                            </td>
+                            <td>
+                                {{.Card.Edition}}
+                            </td>
+                            <td>
+                                {{.Card.Number}}
+                            </td>
+                            <td>
+                                {{if .Card.Foil}}FOIL{{end}}
+                            </td>
+                            <td>
+                                <center>{{.InventoryEntry.Conditions}}</center>
+                            </td>
+                            <td>
+                                $ {{.InventoryEntry.Price}}
+                            </td>
+                            <td>
+                                $ {{.BuylistEntry.BuyPrice}}
+                            </td>
+                            <td>
+                                $ {{printf "%.2f" .BuylistEntry.TradePrice}}
+                            </td>
+                            <td>
+                                $ {{printf "%.2f" .Difference}}
+                            </td>
+                            <td>
+                                {{printf "%.2f" .Spread}} %
+                            </td>
+                            <td>
+                                <center>
+                                {{printf "%.2f" .BuylistEntry.PriceRatio}} %
+                                </center>
+                            </td>
+                            <td>
+                                <center>
+                                    {{if ne .InventoryEntry.URL ""}}
+                                        <a class="btn normal" href="{{.InventoryEntry.URL}}" target="_blank">Buy</a>
+                                    {{end}}
+                                    {{if ne .BuylistEntry.URL ""}}
+                                        <a class="btn normal" href="{{.BuylistEntry.URL}}" target="_blank">Sell</a>
+                                    {{end}}
+                                </center>
+                            </td>
+                        </tr>
+                    {{end}}
+                </table>
+                 <p>
+                    <i>Last update: {{.LastUpdate}}</i><br>
+                </p>
+                <br>
+            {{end}}
         </div>
         <br>
         <p>
-            Last inventory update: {{.SellerUpdate}}<br>
-            Last buylist update: {{.VendorUpdate}}<br>
+            <i>Last update: {{.SellerUpdate}}</i><br>
             {{if eq .SellerShort "CK"}}
             By visiting Card Kingdom through the links on this page you're supporting the continuos development of this site ♥
             {{end}}
