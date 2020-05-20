@@ -102,7 +102,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		for _, seller := range BanClient.Sellers() {
+		for _, seller := range Sellers {
 			inventory, err := seller.Inventory()
 			if err != nil {
 				log.Println(err)
@@ -146,7 +146,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		for _, vendor := range BanClient.Vendors() {
+		for _, vendor := range Vendors {
 			buylist, err := vendor.Buylist()
 			if err != nil {
 				log.Println(err)
