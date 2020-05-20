@@ -186,6 +186,9 @@ func periodicFunction() {
 
 	LastUpdate = time.Now()
 
+	// Clean as much as possible to that we stay under quota
+	debug.FreeOSMemory()
+
 	log.Println("Scrapers loaded")
 }
 
@@ -283,4 +286,7 @@ func render(w http.ResponseWriter, tmpl string, pageVars PageVars) {
 	if err != nil {              // if there is an error
 		log.Print("template executing error: ", err) //log it
 	}
+
+	// Clean as much as possible to that we stay under quota
+	debug.FreeOSMemory()
 }
