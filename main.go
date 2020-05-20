@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime/debug"
 	"sort"
 	"strconv"
 	"strings"
@@ -142,23 +143,42 @@ func periodicFunction() {
 		newbc.Register(newmm)
 	}
 
-	err := newbc.Load()
-	if err != nil {
-		log.Println(err)
-		return
+	// Load inventory first and then buylists
+	// Return as much memory as possible between runs to prevent running out
+	// of memory quota on heroku
+	newSellers := newbc.Sellers()
+	sort.Slice(newSellers, func(i, j int) bool {
+		return strings.Compare(newSellers[i].Info().Name, newSellers[j].Info().Name) < 0
+	})
+	for _, seller := range newSellers {
+		_, err := seller.Inventory()
+		debug.FreeOSMemory()
+		log.Println(seller.Info().Name)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		log.Println("-- OK")
 	}
 
-	Sellers = newbc.Sellers()
-	sort.Slice(Sellers, func(i, j int) bool {
-		return strings.Compare(Sellers[i].Info().Name, Sellers[j].Info().Name) < 0
+	newVendors := newbc.Vendors()
+	sort.Slice(newVendors, func(i, j int) bool {
+		return strings.Compare(newVendors[i].Info().Name, newVendors[j].Info().Name) < 0
 	})
-
-	Vendors = newbc.Vendors()
-	sort.Slice(Vendors, func(i, j int) bool {
-		return strings.Compare(Vendors[i].Info().Name, Vendors[j].Info().Name) < 0
-	})
+	for _, vendor := range newVendors {
+		_, err := vendor.Buylist()
+		debug.FreeOSMemory()
+		log.Println(vendor.Info().Name)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		log.Println("-- OK")
+	}
 
 	BanClient = newbc
+	Sellers = newSellers
+	Vendors = newVendors
 
 	LastUpdate = time.Now()
 
