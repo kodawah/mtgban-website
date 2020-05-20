@@ -70,7 +70,6 @@ th.wrap {
     text-overflow: ellipsis;
     overflow: hidden;
     max-width: 354px;
-    background-color: #eaeaea;
 }
 
 h1 {
@@ -235,4 +234,19 @@ a.selected:hover{
 .sticky {
     position: -webkit-sticky;
     position: sticky;
+}
+
+th.stickyCategory {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 114px;
+    background-color: #f8f8f8;
+}
+
+th.stickyHeader {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 150px;
+    background-color: #eaeaea;
+    height: 40px;
 }
