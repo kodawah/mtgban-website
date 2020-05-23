@@ -288,5 +288,5 @@ func render(w http.ResponseWriter, tmpl string, pageVars PageVars) {
 	}
 
 	// Clean as much as possible to that we stay under quota
-	debug.FreeOSMemory()
+	go debug.FreeOSMemory()
 }
