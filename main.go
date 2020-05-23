@@ -19,6 +19,7 @@ import (
 	"github.com/kodabb/go-mtgban/miniaturemarket"
 	"github.com/kodabb/go-mtgban/ninetyfive"
 	"github.com/kodabb/go-mtgban/strikezone"
+	"github.com/kodabb/go-mtgban/tcgplayer"
 
 	"github.com/kodabb/go-mtgban/mtgban"
 	"github.com/kodabb/go-mtgban/mtgdb"
@@ -78,9 +79,16 @@ var DefaultNav = []NavElem{
 	},
 }
 
+type TCGArgs struct {
+	Affiliate string
+	PublicId  string
+	PrivateId string
+}
+
 var BanClient *mtgban.BanClient
 var DevMode bool
 var CKPartner string
+var TCGConfig TCGArgs
 var DatabaseLoaded bool
 var LastUpdate time.Time
 var Sellers []mtgban.Seller
@@ -138,6 +146,10 @@ func periodicFunction() {
 	new95 := ninetyfive.NewScraper()
 	new95.LogCallback = log.Printf
 
+	tcg := tcgplayer.NewScraperMarket(TCGConfig.PublicId, TCGConfig.PrivateId)
+	tcg.Affiliate = TCGConfig.Affiliate
+	tcg.LogCallback = log.Printf
+
 	newbc.Register(newck)
 	newbc.Register(newsz)
 	newbc.Register(new95)
@@ -145,6 +157,17 @@ func periodicFunction() {
 		newbc.Register(newabu)
 		newbc.Register(newcfb)
 		newbc.Register(newmm)
+
+		sellers, err := mtgban.Seller2Sellers(tcg)
+		if err != nil {
+			log.Println(err)
+		}
+		for _, seller := range sellers {
+			if seller.Info().Name == "TCG Low" {
+				newbc.RegisterSeller(seller)
+			}
+		}
+		debug.FreeOSMemory()
 	}
 
 	// Load inventory first and then buylists
@@ -243,6 +266,14 @@ func main() {
 	}
 	if os.Getenv("BAN_SECRET") == "" {
 		log.Fatalln("BAN_SECRET not set")
+	}
+	TCGConfig = TCGArgs{
+		Affiliate: os.Getenv("TCG_AFFILIATE"),
+		PublicId:  os.Getenv("TCG_PUBLIC_ID"),
+		PrivateId: os.Getenv("TCG_PRIVATE_ID"),
+	}
+	if TCGConfig.Affiliate == "" || TCGConfig.PublicId == "" || TCGConfig.PrivateId == "" {
+		log.Fatalln("TCG configuration not set")
 	}
 
 	// refresh every few hours
