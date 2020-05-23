@@ -59,17 +59,6 @@
                     <hr width=20%>
                 </div>
                 <table>
-                    <tr>
-                        <td colspan=11>
-                            {{if eq .Name "ABU"}}
-                                {{if $.UseCredit}}
-                                    <a class="btn success" style="float: right;" href="arbit?source={{$.SellerShort}}&Signature={{$.Signature}}&Expires={{$.Expires}}">Back to Cash Arbitrage</a>
-                                {{else}}
-                                    <a class="btn warning" style="float: right;" href="arbit?source={{$.SellerShort}}&credit=true&Signature={{$.Signature}}&Expires={{$.Expires}}">Check Credit Arbitrage</a>
-                                {{end}}
-                            {{end}}
-                        </td>
-                    </tr>
                     <tr class="sticky" style="top: 73px; background-color: #eaeaea; z-index: 0;">
                         <th>Card Name</th>
                         <th>Edition</th>
@@ -133,10 +122,22 @@
                             </td>
                         </tr>
                     {{end}}
+                    <tr style="background-color: #f8f8f8;">
+                        <td colspan=12>
+                            <p style="float: left;">
+                                <i>Last update: {{.LastUpdate}}</i>
+                            </p>
+
+                            {{if eq .Name "ABU Games"}}
+                                {{if $.UseCredit}}
+                                    <a class="btn success" style="float: right;" href="arbit?source={{$.SellerShort}}&Signature={{$.Signature}}&Expires={{$.Expires}}">Return to Cash Arbitrage</a>
+                                {{else}}
+                                    <a class="btn warning" style="float: right;" href="arbit?source={{$.SellerShort}}&credit=true&Signature={{$.Signature}}&Expires={{$.Expires}}">Check Credit Arbitrage</a>
+                                {{end}}
+                            {{end}}
+                        </td>
+                    </tr>
                 </table>
-                 <p>
-                    <i>Last update: {{.LastUpdate}}</i><br>
-                </p>
                 <br>
             {{end}}
         </div>
