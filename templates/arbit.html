@@ -23,6 +23,7 @@
     </ul>
 </nav>
 
+<a name="top">&nbsp;</a>
 <div class="mainbody">
     {{if ne .ErrorMessage ""}}
         <h1>{{.ErrorMessage}}</h1>
@@ -128,6 +129,7 @@
                                 <i>Last update: {{.LastUpdate}}</i>
                             </p>
 
+                            <a class="btn default" style="float: right;" href="#top">back to top</a>
                             {{if eq .Name "ABU Games"}}
                                 {{if $.UseCredit}}
                                     <a class="btn success" style="float: right;" href="arbit?source={{$.SellerShort}}&Signature={{$.Signature}}&Expires={{$.Expires}}">Return to Cash Arbitrage</a>
