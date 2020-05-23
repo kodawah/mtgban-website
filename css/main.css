@@ -250,3 +250,10 @@ th.stickyHeader {
     background-color: #eaeaea;
     height: 40px;
 }
+
+th.stickyHeaderTiny {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 72px;
+    background-color: #eaeaea;
+}
