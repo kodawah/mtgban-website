@@ -166,6 +166,14 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			return arbit[i].Spread > arbit[j].Spread
 		})
 
+		for i := len(arbit) - 1; i >= 0; i-- {
+			if arbit[i].Spread > 650 {
+				log.Printf("Skipping impossible spread of %f", arbit[i].Spread)
+				arbit = arbit[i:]
+				break
+			}
+		}
+
 		pageVars.Arb = append(pageVars.Arb, Arbitrage{
 			Name:       vendor.Info().Name,
 			LastUpdate: vendor.Info().BuylistTimestamp.Format(time.RFC3339),
