@@ -11,9 +11,11 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/kodabb/go-mtgban/mtgban"
+	"github.com/kodabb/go-mtgban/mtgdb"
 )
 
 func signHMACSHA1Base64(key []byte, data []byte) string {
@@ -137,6 +139,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	pageVars.UseCredit = useCredit
 
 	pageVars.Arb = []Arbitrage{}
+	pageVars.Images = map[mtgdb.Card]string{}
 
 	for _, vendor := range Vendors {
 		if vendor.(mtgban.Scraper) == source.(mtgban.Scraper) {
@@ -160,6 +163,13 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		log.Println(len(arbit), "offers")
 		if len(arbit) == 0 {
 			continue
+		}
+
+		for _, arb := range arbit {
+			card := arb.Card
+			code, _ := mtgdb.EditionName2Code(card.Edition)
+			link := fmt.Sprintf("https://api.scryfall.com/cards/%s/%s?format=image&version=small", strings.ToLower(code), card.Number)
+			pageVars.Images[card] = link
 		}
 
 		sort.Slice(arbit, func(i, j int) bool {

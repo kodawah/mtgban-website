@@ -43,6 +43,28 @@
             </ul>
         </div>
     {{else}}
+        <img id="hoverImage" src="" style="position:absolute; z-index: 5;"/>
+
+        <script type="text/javascript">
+            var hoverImage = document.getElementById("hoverImage");
+
+            document.addEventListener("mousemove", getMouse);
+
+            setInterval(followMouse, 10);
+
+            var mouse = {x:0, y:0}; //mouse.x, mouse.y
+
+            function getMouse(e){
+                mouse.x = e.pageX;
+                mouse.y = e.pageY;
+            }
+
+            function followMouse(){
+                hoverImage.style.left = mouse.x + "px";
+                hoverImage.style.top = mouse.y + "px";
+            }
+        </script>
+
         <h1>Arbitrage from {{.SellerFull}}</h1>
         <div class="indent">
             <h2><p>{{.InfoMessage}}</p></h2>
@@ -59,7 +81,7 @@
                     <h3><a name="{{.Name}}">{{.Name}}</a></h3>
                     <hr width=20%>
                 </div>
-                <table>
+                <table onmouseout="document.getElementById('hoverImage').src='';">
                     <tr>
                         <th class="stickyHeaderTiny">Card Name</th>
                         <th class="stickyHeaderTiny">Edition</th>
@@ -75,7 +97,7 @@
                         <th class="stickyHeaderTiny"><center>Quicklinks</center></th>
                     </tr>
                     {{range .Arbit}}
-                        <tr>
+                        <tr onmouseover="document.getElementById('hoverImage').src={{index $.Images .Card}};">
                             <td>
                                 {{.Card.Name}}
                             </td>
