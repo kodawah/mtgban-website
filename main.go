@@ -37,7 +37,6 @@ type Arbitrage struct {
 type PageVars struct {
 	Nav       []NavElem
 	Signature string
-	Expires   string
 
 	Title        string
 	CKPartner    string
@@ -134,19 +133,18 @@ func loadDB() error {
 	return mtgdb.RegisterWithReaders(respPrintings.Body, respCards.Body)
 }
 
-func genPageNav(activeTab, sig, exp string) PageVars {
+func genPageNav(activeTab, sig string) PageVars {
 	pageVars := PageVars{
 		Title:      "BAN " + activeTab,
 		Signature:  sig,
-		Expires:    exp,
 		LastUpdate: LastUpdate.Format(time.RFC3339),
 	}
 	pageVars.Nav = make([]NavElem, len(DefaultNav))
 	copy(pageVars.Nav, DefaultNav)
 
 	signature := ""
-	if sig != "" && exp != "" {
-		signature = "?Signature=" + url.QueryEscape(sig) + "&Expires=" + url.QueryEscape(exp)
+	if sig != "" {
+		signature = "?sig=" + sig
 	}
 
 	mainNavIndex := 0
@@ -240,6 +238,8 @@ func getPort() string {
 	return ":8080"
 }
 
+const ErrMsg = "Please double check your invitation link"
+
 func signHMACSHA1Base64(key []byte, data []byte) string {
 	h := hmac.New(sha1.New, key)
 	h.Write(data)
@@ -248,17 +248,43 @@ func signHMACSHA1Base64(key []byte, data []byte) string {
 
 func enforceSigning(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		sig := r.FormValue("Signature")
-		exp := r.FormValue("Expires")
+		sign := r.FormValue("sig")
 
-		pageVars := genPageNav("Error", sig, exp)
+		pageVars := genPageNav("Error", sign)
+
+		raw, err := base64.StdEncoding.DecodeString(sign)
+		if SigCheck && err != nil {
+			pageVars.Title = "Unauthorized"
+			pageVars.ErrorMessage = ErrMsg
+			if DevMode {
+				pageVars.ErrorMessage += " - " + err.Error()
+			}
+
+			render(w, "home.html", pageVars)
+			return
+		}
+
+		v, err := url.ParseQuery(string(raw))
+		if SigCheck && err != nil {
+			pageVars.Title = "Unauthorized"
+			pageVars.ErrorMessage = ErrMsg
+			if DevMode {
+				pageVars.ErrorMessage += " - " + err.Error()
+			}
+
+			render(w, "home.html", pageVars)
+			return
+		}
+
+		sig := v.Get("Signature")
+		exp := v.Get("Expires")
 
 		data := fmt.Sprintf("%s%s%s", r.Method, exp, r.URL.Host)
 		valid := signHMACSHA1Base64([]byte(os.Getenv("BAN_SECRET")), []byte(data))
 		expires, err := strconv.ParseInt(exp, 10, 64)
 		if SigCheck && (err != nil || valid != sig || expires < time.Now().Unix()) {
 			pageVars.Title = "Unauthorized"
-			pageVars.ErrorMessage = "Please double check your invitation link"
+			pageVars.ErrorMessage = ErrMsg
 
 			render(w, "home.html", pageVars)
 			return

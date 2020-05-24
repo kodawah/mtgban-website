@@ -12,10 +12,9 @@ import (
 )
 
 func Search(w http.ResponseWriter, r *http.Request) {
-	sig := r.FormValue("Signature")
-	exp := r.FormValue("Expires")
+	sig := r.FormValue("sig")
 
-	pageVars := genPageNav("Search", sig, exp)
+	pageVars := genPageNav("Search", sig)
 
 	if !DatabaseLoaded {
 		pageVars.Title = "Great things are coming"

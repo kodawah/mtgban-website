@@ -6,10 +6,9 @@ import (
 
 //handler for / renders the home.html
 func Home(w http.ResponseWriter, r *http.Request) {
-	sig := r.FormValue("Signature")
-	exp := r.FormValue("Expires")
+	sig := r.FormValue("sig")
 
-	pageVars := genPageNav("Home", sig, exp)
+	pageVars := genPageNav("Home", sig)
 
 	render(w, "home.html", pageVars)
 }

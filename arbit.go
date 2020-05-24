@@ -13,10 +13,9 @@ import (
 )
 
 func Arbit(w http.ResponseWriter, r *http.Request) {
-	sig := r.FormValue("Signature")
-	exp := r.FormValue("Expires")
+	sig := r.FormValue("sig")
 
-	pageVars := genPageNav("Arbitrage", sig, exp)
+	pageVars := genPageNav("Arbitrage", sig)
 
 	if !DatabaseLoaded {
 		pageVars.Title = "Great things are coming"
@@ -69,8 +68,8 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			Name: newSeller.Info().Name,
 			Link: "arbit?source=" + newSeller.Info().Shorthand,
 		}
-		if sig != "" && exp != "" {
-			nav.Link += "&Signature=" + sig + "&Expires=" + exp
+		if sig != "" {
+			nav.Link += "&sig=" + sig
 		}
 
 		if source != nil && source.Info().Name == newSeller.Info().Name {

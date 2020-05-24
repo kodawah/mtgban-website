@@ -154,9 +154,9 @@
                             <a class="btn default" style="float: right;" href="#top">back to top</a>
                             {{if eq .Name "ABU Games"}}
                                 {{if $.UseCredit}}
-                                    <a class="btn success" style="float: right;" href="arbit?source={{$.SellerShort}}&Signature={{$.Signature}}&Expires={{$.Expires}}">Return to Cash Arbitrage</a>
+                                    <a class="btn success" style="float: right;" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}">Return to Cash Arbitrage</a>
                                 {{else}}
-                                    <a class="btn warning" style="float: right;" href="arbit?source={{$.SellerShort}}&credit=true&Signature={{$.Signature}}&Expires={{$.Expires}}">Check Credit Arbitrage</a>
+                                    <a class="btn warning" style="float: right;" href="arbit?source={{$.SellerShort}}&credit=true&sig={{$.Signature}}">Check Credit Arbitrage</a>
                                 {{end}}
                             {{end}}
                         </td>
