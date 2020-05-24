@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"sort"
 	"strconv"
@@ -28,33 +27,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	sig := r.FormValue("Signature")
 	exp := r.FormValue("Expires")
 
-	signature := ""
-	if sig != "" && exp != "" {
-		signature = "?Signature=" + url.QueryEscape(sig) + "&Expires=" + url.QueryEscape(exp)
-	}
-
-	pageVars := PageVars{
-		Title:      "BAN Arbitrage",
-		Signature:  sig,
-		Expires:    exp,
-		LastUpdate: LastUpdate.Format(time.RFC3339),
-	}
-	pageVars.Nav = make([]NavElem, len(DefaultNav))
-	copy(pageVars.Nav, DefaultNav)
-
-	mainNavIndex := 0
-	for i := range pageVars.Nav {
-		pageVars.Nav[i].Link += signature
-		if pageVars.Nav[i].Name == "Arbitrage" {
-			mainNavIndex = i
-		}
-	}
-	pageVars.Nav[mainNavIndex].Active = true
-	pageVars.Nav[mainNavIndex].Class = "active"
-
-	if sig != "" && exp != "" {
-		signature = "&Signature=" + url.QueryEscape(sig) + "&Expires=" + url.QueryEscape(exp)
-	}
+	pageVars := genPageNav("Arbitrage", sig, exp)
 
 	data := fmt.Sprintf("%s%s%s", r.Method, exp, r.URL.Host)
 	valid := signHMACSHA1Base64([]byte(os.Getenv("BAN_SECRET")), []byte(data))
@@ -116,7 +89,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	for _, newSeller := range Sellers {
 		nav := NavElem{
 			Name: newSeller.Info().Name,
-			Link: "arbit?source=" + newSeller.Info().Shorthand + signature,
+			Link: "arbit?source=" + newSeller.Info().Shorthand + "&Signature=" + sig + "&Expires=" + exp,
 		}
 		if source != nil && source.Info().Name == newSeller.Info().Name {
 			nav.Active = true

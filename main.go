@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"runtime/debug"
 	"strconv"
@@ -127,6 +128,33 @@ func loadDB() error {
 	defer respCards.Body.Close()
 
 	return mtgdb.RegisterWithReaders(respPrintings.Body, respCards.Body)
+}
+
+func genPageNav(activeTab, sig, exp string) PageVars {
+	pageVars := PageVars{
+		Title:      "BAN " + activeTab,
+		Signature:  sig,
+		Expires:    exp,
+		LastUpdate: LastUpdate.Format(time.RFC3339),
+	}
+	pageVars.Nav = make([]NavElem, len(DefaultNav))
+	copy(pageVars.Nav, DefaultNav)
+
+	signature := ""
+	if sig != "" && exp != "" {
+		signature = "?Signature=" + url.QueryEscape(sig) + "&Expires=" + url.QueryEscape(exp)
+	}
+
+	mainNavIndex := 0
+	for i := range pageVars.Nav {
+		pageVars.Nav[i].Link += signature
+		if pageVars.Nav[i].Name == activeTab {
+			mainNavIndex = i
+		}
+	}
+	pageVars.Nav[mainNavIndex].Active = true
+	pageVars.Nav[mainNavIndex].Class = "active"
+	return pageVars
 }
 
 func main() {

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -19,29 +18,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	sig := r.FormValue("Signature")
 	exp := r.FormValue("Expires")
 
-	signature := ""
-	if sig != "" && exp != "" {
-		signature = "?Signature=" + url.QueryEscape(sig) + "&Expires=" + url.QueryEscape(exp)
-	}
-
-	pageVars := PageVars{
-		Title:      "BAN Search",
-		Signature:  sig,
-		Expires:    exp,
-		LastUpdate: LastUpdate.Format(time.RFC3339),
-	}
-	pageVars.Nav = make([]NavElem, len(DefaultNav))
-	copy(pageVars.Nav, DefaultNav)
-
-	mainNavIndex := 0
-	for i := range pageVars.Nav {
-		pageVars.Nav[i].Link += signature
-		if pageVars.Nav[i].Name == "Search" {
-			mainNavIndex = i
-		}
-	}
-	pageVars.Nav[mainNavIndex].Active = true
-	pageVars.Nav[mainNavIndex].Class = "active"
+	pageVars := genPageNav("Search", sig, exp)
 
 	data := fmt.Sprintf("%s%s%s", r.Method, exp, r.URL.Host)
 	valid := signHMACSHA1Base64([]byte(os.Getenv("BAN_SECRET")), []byte(data))
