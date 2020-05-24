@@ -1,15 +1,10 @@
 package main
 
 import (
-	"crypto/hmac"
-	"crypto/sha1"
-	"encoding/base64"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 
@@ -17,28 +12,11 @@ import (
 	"github.com/kodabb/go-mtgban/mtgdb"
 )
 
-func signHMACSHA1Base64(key []byte, data []byte) string {
-	h := hmac.New(sha1.New, key)
-	h.Write(data)
-	return base64.StdEncoding.EncodeToString(h.Sum(nil))
-}
-
 func Arbit(w http.ResponseWriter, r *http.Request) {
 	sig := r.FormValue("Signature")
 	exp := r.FormValue("Expires")
 
 	pageVars := genPageNav("Arbitrage", sig, exp)
-
-	data := fmt.Sprintf("%s%s%s", r.Method, exp, r.URL.Host)
-	valid := signHMACSHA1Base64([]byte(os.Getenv("BAN_SECRET")), []byte(data))
-	expires, err := strconv.ParseInt(exp, 10, 64)
-	if !DevMode && (err != nil || valid != sig || expires < time.Now().Unix()) {
-		pageVars.Title = "Unauthorized"
-		pageVars.ErrorMessage = "Please double check your invitation link"
-
-		render(w, "arbit.html", pageVars)
-		return
-	}
 
 	if !DatabaseLoaded {
 		pageVars.Title = "Great things are coming"
@@ -89,8 +67,12 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	for _, newSeller := range Sellers {
 		nav := NavElem{
 			Name: newSeller.Info().Name,
-			Link: "arbit?source=" + newSeller.Info().Shorthand + "&Signature=" + sig + "&Expires=" + exp,
+			Link: "arbit?source=" + newSeller.Info().Shorthand,
 		}
+		if sig != "" && exp != "" {
+			nav.Link += "&Signature=" + sig + "&Expires=" + exp
+		}
+
 		if source != nil && source.Info().Name == newSeller.Info().Name {
 			nav.Active = true
 			nav.Class = "selected"

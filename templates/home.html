@@ -24,5 +24,9 @@
         This website is not affiliated with Wizards of the Coast or any other data provider.<br>
         Data is provided for informational purpose only, and does not provide financial advice.
     </div>
+
+    {{if ne .ErrorMessage ""}}
+        <h1>{{.ErrorMessage}}</h1>
+    {{end}}
 </body>
 </html>

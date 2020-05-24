@@ -1,6 +1,9 @@
 package main
 
 import (
+	"crypto/hmac"
+	"crypto/sha1"
+	"encoding/base64"
 	"flag"
 	"fmt"
 	"html/template"
@@ -79,6 +82,7 @@ type TCGArgs struct {
 
 var BanClient *mtgban.BanClient
 var DevMode bool
+var SigCheck bool
 var CKPartner string
 var TCGConfig TCGArgs
 var DatabaseLoaded bool
@@ -159,8 +163,13 @@ func genPageNav(activeTab, sig, exp string) PageVars {
 
 func main() {
 	devMode := flag.Bool("dev", false, "Enable developer mode")
+	sigCheck := flag.Bool("sig", false, "Enable signature verification")
 	flag.Parse()
 	DevMode = *devMode
+	SigCheck = true
+	if DevMode {
+		SigCheck = *sigCheck
+	}
 
 	// load website up
 	go func() {
@@ -215,8 +224,8 @@ func main() {
 
 	// when navigating to /home it should serve the home page
 	http.HandleFunc("/", Home)
-	http.HandleFunc("/search", Search)
-	http.HandleFunc("/arbit", Arbit)
+	http.Handle("/search", enforceSigning(http.HandlerFunc(Search)))
+	http.Handle("/arbit", enforceSigning(http.HandlerFunc(Arbit)))
 	http.HandleFunc("/favicon.ico", Favicon)
 	http.ListenAndServe(getPort(), nil)
 }
@@ -229,6 +238,34 @@ func getPort() string {
 		return ":" + p
 	}
 	return ":8080"
+}
+
+func signHMACSHA1Base64(key []byte, data []byte) string {
+	h := hmac.New(sha1.New, key)
+	h.Write(data)
+	return base64.StdEncoding.EncodeToString(h.Sum(nil))
+}
+
+func enforceSigning(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		sig := r.FormValue("Signature")
+		exp := r.FormValue("Expires")
+
+		pageVars := genPageNav("Error", sig, exp)
+
+		data := fmt.Sprintf("%s%s%s", r.Method, exp, r.URL.Host)
+		valid := signHMACSHA1Base64([]byte(os.Getenv("BAN_SECRET")), []byte(data))
+		expires, err := strconv.ParseInt(exp, 10, 64)
+		if SigCheck && (err != nil || valid != sig || expires < time.Now().Unix()) {
+			pageVars.Title = "Unauthorized"
+			pageVars.ErrorMessage = "Please double check your invitation link"
+
+			render(w, "home.html", pageVars)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
 
 func render(w http.ResponseWriter, tmpl string, pageVars PageVars) {
