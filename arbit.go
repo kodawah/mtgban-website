@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -25,6 +26,24 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	param := r.URL.Query().Get("Arbit")
+	canSearch, _ := strconv.ParseBool(param)
+	if SigCheck && !canSearch {
+		pageVars.Title = "Unauthorized"
+		pageVars.ErrorMessage = ErrMsg
+
+		render(w, "home.html", pageVars)
+		return
+	}
+	enabled := r.URL.Query().Get("Enabled")
+	if enabled == "ALL" {
+		shorthands := []string{}
+		for _, scraper := range BanClient.Scrapers() {
+			shorthands = append(shorthands, scraper.Info().Shorthand)
+		}
+		enabled = strings.Join(shorthands, ",")
+	}
+
 	r.ParseForm()
 
 	var ok bool
@@ -35,6 +54,11 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	for k, v := range r.Form {
 		switch k {
 		case "source":
+			if !strings.Contains(enabled, v[0]) {
+				log.Println("Unauthorized attempt with", v[0])
+				message = "Unknown " + v[0] + " seller"
+				break
+			}
 			scraper, err := BanClient.ScraperByName(v[0])
 			if err != nil {
 				log.Println(err)
@@ -64,6 +88,10 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, newSeller := range Sellers {
+		if !strings.Contains(enabled, newSeller.Info().Shorthand) {
+			continue
+		}
+
 		nav := NavElem{
 			Name: newSeller.Info().Name,
 			Link: "arbit?source=" + newSeller.Info().Shorthand,

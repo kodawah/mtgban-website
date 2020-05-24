@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/kodabb/go-mtgban/mtgban"
@@ -21,6 +22,16 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		pageVars.ErrorMessage = "Website is starting, please try again in a few minutes"
 
 		render(w, "search.html", pageVars)
+		return
+	}
+
+	param := r.URL.Query().Get("Search")
+	canSearch, _ := strconv.ParseBool(param)
+	if SigCheck && !canSearch {
+		pageVars.Title = "Unauthorized"
+		pageVars.ErrorMessage = ErrMsg
+
+		render(w, "home.html", pageVars)
 		return
 	}
 
