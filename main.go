@@ -37,6 +37,7 @@ type Arbitrage struct {
 type PageVars struct {
 	Nav       []NavElem
 	Signature string
+	PatreonId string
 
 	Title        string
 	CKPartner    string
@@ -137,6 +138,7 @@ func genPageNav(activeTab, sig string) PageVars {
 	pageVars := PageVars{
 		Title:      "BAN " + activeTab,
 		Signature:  sig,
+		PatreonId:  PatreonClientId,
 		LastUpdate: LastUpdate.Format(time.RFC3339),
 	}
 	pageVars.Nav = make([]NavElem, len(DefaultNav))
@@ -208,6 +210,9 @@ func main() {
 	if TCGConfig.Affiliate == "" || TCGConfig.PublicId == "" || TCGConfig.PrivateId == "" {
 		log.Fatalln("TCG configuration not set")
 	}
+	if os.Getenv("PATREON_SECRET") == "" {
+		log.Fatalln("PATREON_SECRET not set")
+	}
 
 	// refresh every few hours
 	go func() {
@@ -225,6 +230,7 @@ func main() {
 	http.Handle("/search", enforceSigning(http.HandlerFunc(Search)))
 	http.Handle("/arbit", enforceSigning(http.HandlerFunc(Arbit)))
 	http.HandleFunc("/favicon.ico", Favicon)
+	http.HandleFunc("/auth", Auth)
 	http.ListenAndServe(getPort(), nil)
 }
 
