@@ -278,15 +278,20 @@ func enforceSigning(next http.Handler) http.Handler {
 
 		u := r.URL.Query()
 		q := url.Values{}
-		for _, param := range []string{"Search", "Arbit", "Enabled"} {
+		for _, param := range []string{"Search", "Arbit"} {
 			q.Set(param, v.Get(param))
 			u.Set(param, v.Get(param))
+		}
+		optionalEnabled := v.Get("Enabled")
+		if optionalEnabled != "" {
+			q.Set("Enabled", optionalEnabled)
+			u.Set("Enabled", optionalEnabled)
 		}
 
 		sig := v.Get("Signature")
 		exp := v.Get("Expires")
 
-		data := fmt.Sprintf("%s%s%s%s", r.Method, exp, r.URL.Host, q.Encode())
+		data := fmt.Sprintf("%s%s%s%s", r.Method, exp, r.Host, q.Encode())
 		valid := signHMACSHA1Base64([]byte(os.Getenv("BAN_SECRET")), []byte(data))
 		expires, err := strconv.ParseInt(exp, 10, 64)
 		if SigCheck && (err != nil || valid != sig || expires < time.Now().Unix()) {
