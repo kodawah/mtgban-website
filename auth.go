@@ -31,7 +31,10 @@ const (
 	PatreonMemberOpts  = "?include=currently_entitled_tiers&fields%5Btier%5D=title"
 )
 
-const ErrMsg = "Please double check your invitation link"
+const (
+	ErrMsg     = "Join the BAN Community and gain access to exclusive tools!"
+	ErrMsgPlus = "Increase your pledge to gain access to this feature!"
+)
 
 func getUserToken(code, baseURL string) (string, error) {
 	resp, err := cleanhttp.DefaultClient().PostForm(PatreonTokenURL, url.Values{

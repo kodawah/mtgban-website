@@ -15,7 +15,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 	case "TokenNotFound":
 		pageVars.ErrorMessage = "There was a problem authenticating you with Patreon."
 	case "UserNotFound", "TierNotFound":
-		pageVars.ErrorMessage = "Join BAN's community to acces this page."
+		pageVars.ErrorMessage = ErrMsg
 	}
 
 	render(w, "home.html", pageVars)

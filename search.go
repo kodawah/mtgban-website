@@ -28,8 +28,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	searchParam, _ := GetParamFromSig(sig, "Search")
 	canSearch, _ := strconv.ParseBool(searchParam)
 	if SigCheck && !canSearch {
-		pageVars.Title = "Unauthorized"
-		pageVars.ErrorMessage = ErrMsg
+		pageVars.Title = "This feature is BANned"
+		pageVars.ErrorMessage = ErrMsgPlus
 
 		render(w, "home.html", pageVars)
 		return
