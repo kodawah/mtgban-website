@@ -25,8 +25,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	param := r.URL.Query().Get("Search")
-	canSearch, _ := strconv.ParseBool(param)
+	searchParam, _ := GetParamFromSig(sig, "Search")
+	canSearch, _ := strconv.ParseBool(searchParam)
 	if SigCheck && !canSearch {
 		pageVars.Title = "Unauthorized"
 		pageVars.ErrorMessage = ErrMsg

@@ -275,16 +275,13 @@ func enforceSigning(next http.Handler) http.Handler {
 			return
 		}
 
-		u := r.URL.Query()
 		q := url.Values{}
 		for _, param := range []string{"Search", "Arbit"} {
 			q.Set(param, v.Get(param))
-			u.Set(param, v.Get(param))
 		}
 		optionalEnabled := v.Get("Enabled")
 		if optionalEnabled != "" {
 			q.Set("Enabled", optionalEnabled)
-			u.Set("Enabled", optionalEnabled)
 		}
 
 		sig := v.Get("Signature")
@@ -300,8 +297,6 @@ func enforceSigning(next http.Handler) http.Handler {
 			render(w, "home.html", pageVars)
 			return
 		}
-
-		r.URL.RawQuery = u.Encode()
 
 		next.ServeHTTP(w, r)
 	})
@@ -342,4 +337,16 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) string {
 	sourceURL.Path = ""
 
 	return sourceURL.String()
+}
+
+func GetParamFromSig(sig, param string) (string, error) {
+	raw, err := base64.StdEncoding.DecodeString(sig)
+	if err != nil {
+		return "", err
+	}
+	v, err := url.ParseQuery(string(raw))
+	if err != nil {
+		return "", err
+	}
+	return v.Get(param), nil
 }

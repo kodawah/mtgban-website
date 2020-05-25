@@ -28,8 +28,8 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	param := r.URL.Query().Get("Arbit")
-	canSearch, _ := strconv.ParseBool(param)
+	arbitParam, _ := GetParamFromSig(sig, "Arbit")
+	canSearch, _ := strconv.ParseBool(arbitParam)
 	if SigCheck && !canSearch {
 		pageVars.Title = "Unauthorized"
 		pageVars.ErrorMessage = ErrMsg
@@ -37,7 +37,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		render(w, "home.html", pageVars)
 		return
 	}
-	enabled := r.URL.Query().Get("Enabled")
+	enabled, _ := GetParamFromSig(sig, "Enabled")
 	if enabled == "ALL" {
 		shorthands := []string{}
 		for _, scraper := range BanClient.Scrapers() {
