@@ -124,6 +124,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	pageVars.SellerFull = source.Info().Name
 	pageVars.SellerUpdate = source.Info().InventoryTimestamp.Format(time.RFC3339)
 	pageVars.CKPartner = CKPartner
+	pageVars.TCGAffiliate = TCGConfig.Affiliate
 	pageVars.UseCredit = useCredit
 
 	pageVars.Arb = []Arbitrage{}

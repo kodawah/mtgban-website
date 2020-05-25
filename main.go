@@ -41,6 +41,7 @@ type PageVars struct {
 
 	Title        string
 	CKPartner    string
+	TCGAffiliate string
 	ErrorMessage string
 	InfoMessage  string
 	LastUpdate   string
