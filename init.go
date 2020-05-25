@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http"
 	"runtime/debug"
 	"sort"
 	"strings"
@@ -17,7 +18,24 @@ import (
 	"log"
 
 	"github.com/kodabb/go-mtgban/mtgban"
+	"github.com/kodabb/go-mtgban/mtgdb"
 )
+
+func loadDB() error {
+	respPrintings, err := http.Get("https://www.mtgjson.com/files/AllPrintings.json")
+	if err != nil {
+		return err
+	}
+	defer respPrintings.Body.Close()
+
+	respCards, err := http.Get("https://www.mtgjson.com/files/AllCards.json")
+	if err != nil {
+		return err
+	}
+	defer respCards.Body.Close()
+
+	return mtgdb.RegisterWithReaders(respPrintings.Body, respCards.Body)
+}
 
 func periodicFunction() {
 	log.Println("Updating data")

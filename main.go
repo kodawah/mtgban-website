@@ -1,15 +1,11 @@
 package main
 
 import (
-	"crypto/hmac"
-	"crypto/sha1"
-	"encoding/base64"
 	"flag"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"runtime/debug"
 	"strconv"
@@ -117,22 +113,6 @@ func (fs *FileSystem) Open(path string) (http.File, error) {
 	}
 
 	return f, nil
-}
-
-func loadDB() error {
-	respPrintings, err := http.Get("https://www.mtgjson.com/files/AllPrintings.json")
-	if err != nil {
-		return err
-	}
-	defer respPrintings.Body.Close()
-
-	respCards, err := http.Get("https://www.mtgjson.com/files/AllCards.json")
-	if err != nil {
-		return err
-	}
-	defer respCards.Body.Close()
-
-	return mtgdb.RegisterWithReaders(respPrintings.Body, respCards.Body)
 }
 
 func genPageNav(activeTab, sig string) PageVars {
@@ -244,89 +224,6 @@ func getPort() string {
 		return ":" + p
 	}
 	return ":8080"
-}
-
-const ErrMsg = "Please double check your invitation link"
-
-func signHMACSHA1Base64(key []byte, data []byte) string {
-	h := hmac.New(sha1.New, key)
-	h.Write(data)
-	return base64.StdEncoding.EncodeToString(h.Sum(nil))
-}
-
-// This function is mostly here only for initializing the host
-func noSigning(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if PatreonHost == "" {
-			PatreonHost = getBaseURL(r) + "/auth"
-		}
-		next.ServeHTTP(w, r)
-	})
-}
-
-func enforceSigning(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if PatreonHost == "" {
-			PatreonHost = getBaseURL(r) + "/auth"
-		}
-		sign := r.FormValue("sig")
-
-		pageVars := genPageNav("Error", sign)
-
-		raw, err := base64.StdEncoding.DecodeString(sign)
-		if SigCheck && err != nil {
-			pageVars.Title = "Unauthorized"
-			pageVars.ErrorMessage = ErrMsg
-			if DevMode {
-				pageVars.ErrorMessage += " - " + err.Error()
-			}
-
-			render(w, "home.html", pageVars)
-			return
-		}
-
-		v, err := url.ParseQuery(string(raw))
-		if SigCheck && err != nil {
-			pageVars.Title = "Unauthorized"
-			pageVars.ErrorMessage = ErrMsg
-			if DevMode {
-				pageVars.ErrorMessage += " - " + err.Error()
-			}
-
-			render(w, "home.html", pageVars)
-			return
-		}
-
-		u := r.URL.Query()
-		q := url.Values{}
-		for _, param := range []string{"Search", "Arbit"} {
-			q.Set(param, v.Get(param))
-			u.Set(param, v.Get(param))
-		}
-		optionalEnabled := v.Get("Enabled")
-		if optionalEnabled != "" {
-			q.Set("Enabled", optionalEnabled)
-			u.Set("Enabled", optionalEnabled)
-		}
-
-		sig := v.Get("Signature")
-		exp := v.Get("Expires")
-
-		data := fmt.Sprintf("%s%s%s%s", r.Method, exp, r.Host, q.Encode())
-		valid := signHMACSHA1Base64([]byte(os.Getenv("BAN_SECRET")), []byte(data))
-		expires, err := strconv.ParseInt(exp, 10, 64)
-		if SigCheck && (err != nil || valid != sig || expires < time.Now().Unix()) {
-			pageVars.Title = "Unauthorized"
-			pageVars.ErrorMessage = ErrMsg
-
-			render(w, "home.html", pageVars)
-			return
-		}
-
-		r.URL.RawQuery = u.Encode()
-
-		next.ServeHTTP(w, r)
-	})
 }
 
 func render(w http.ResponseWriter, tmpl string, pageVars PageVars) {
