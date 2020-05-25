@@ -87,6 +87,7 @@ var DatabaseLoaded bool
 var LastUpdate time.Time
 var Sellers []mtgban.Seller
 var Vendors []mtgban.Vendor
+var DefaultSellers string
 
 func Favicon(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "img/misc/favicon.ico")
@@ -195,6 +196,10 @@ func main() {
 	}
 	if os.Getenv("PATREON_SECRET") == "" {
 		log.Fatalln("PATREON_SECRET not set")
+	}
+	DefaultSellers = os.Getenv("DATA_ENABLED")
+	if DefaultSellers == "" {
+		log.Fatalln("DATA_ENABLED not set")
 	}
 
 	// refresh every few hours

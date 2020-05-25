@@ -13,8 +13,6 @@ import (
 	"github.com/kodabb/go-mtgban/mtgdb"
 )
 
-const DefaultSellers = "TCG Low,CK,ABU"
-
 func Arbit(w http.ResponseWriter, r *http.Request) {
 	sig := r.FormValue("sig")
 
