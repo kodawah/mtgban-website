@@ -68,14 +68,16 @@
         <h1>Arbitrage from {{.SellerFull}}</h1>
         <div class="indent">
             <h2><p>{{.InfoMessage}}</p></h2>
-            <div class="indent">
-                <p>
-                Jump to
-                {{range .Arb}}
-                    <a class="btn normal" href="#{{.Name}}">{{.Name}} ({{.Len}})</a>
-                {{end}}
-                </p>
-            </div>
+            {{if .Arb}}
+                <div class="indent">
+                    <p>
+                    Jump to
+                    {{range .Arb}}
+                        <a class="btn normal" href="#{{.Name}}">{{.Name}} ({{.Len}})</a>
+                    {{end}}
+                    </p>
+                </div>
+            {{end}}
             {{range .Arb}}
                 <div class="sticky" style="top: 48px; background-color: #f8f8f8; z-index: 1;">
                     <h3><a name="{{.Name}}">{{.Name}}</a></h3>
