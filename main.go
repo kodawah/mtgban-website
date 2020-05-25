@@ -35,6 +35,7 @@ type PageVars struct {
 	Signature  string
 	PatreonId  string
 	PatreonURL string
+	ShowPromo  bool
 
 	Title        string
 	CKPartner    string

@@ -18,6 +18,9 @@
 <div class="mainbody">
     {{if ne .ErrorMessage ""}}
         <h1>{{.ErrorMessage}}</h1>
+        {{if .ShowPromo}}
+            <img class="center" src="img/promo/search.jpg">
+        {{end}}
     {{else}}
         <h1>Welcome to Search</h1>
             <div class="indent sticky" style="top:48px; background-color:#f8f8f8; z-index: 1;">

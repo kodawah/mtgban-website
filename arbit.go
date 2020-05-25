@@ -33,8 +33,9 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	if SigCheck && !canSearch {
 		pageVars.Title = "This feature is BANned"
 		pageVars.ErrorMessage = ErrMsgPlus
+		pageVars.ShowPromo = true
 
-		render(w, "home.html", pageVars)
+		render(w, "arbit.html", pageVars)
 		return
 	}
 	enabled, _ := GetParamFromSig(sig, "Enabled")
