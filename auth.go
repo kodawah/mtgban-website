@@ -32,8 +32,9 @@ const (
 )
 
 const (
-	ErrMsg     = "Join the BAN Community and gain access to exclusive tools!"
-	ErrMsgPlus = "Increase your pledge to gain access to this feature!"
+	ErrMsg        = "Join the BAN Community and gain access to exclusive tools!"
+	ErrMsgPlus    = "Increase your pledge to gain access to this feature!"
+	ErrMsgExpired = "You've been logged out"
 )
 
 func getUserToken(code, baseURL string) (string, error) {
@@ -309,6 +310,10 @@ func enforceSigning(next http.Handler) http.Handler {
 		if SigCheck && (err != nil || valid != sig || expires < time.Now().Unix()) {
 			pageVars.Title = "Unauthorized"
 			pageVars.ErrorMessage = ErrMsg
+			if valid == sig && expires < time.Now().Unix() {
+				pageVars.ErrorMessage = ErrMsgExpired
+				pageVars.PatreonLogin = true
+			}
 
 			render(w, "home.html", pageVars)
 			return

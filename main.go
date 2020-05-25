@@ -31,11 +31,13 @@ type Arbitrage struct {
 }
 
 type PageVars struct {
-	Nav        []NavElem
-	Signature  string
-	PatreonId  string
-	PatreonURL string
-	ShowPromo  bool
+	Nav       []NavElem
+	Signature string
+
+	PatreonId    string
+	PatreonURL   string
+	PatreonLogin bool
+	ShowPromo    bool
 
 	Title        string
 	CKPartner    string
@@ -118,12 +120,25 @@ func (fs *FileSystem) Open(path string) (http.File, error) {
 }
 
 func genPageNav(activeTab, sig string) PageVars {
+	exp, _ := GetParamFromSig(sig, "Expires")
+	expires, _ := strconv.ParseInt(exp, 10, 64)
+	msg := ""
+	patreonLogin := false
+	if expires < time.Now().Unix() {
+		if sig != "" {
+			msg = ErrMsgExpired
+			patreonLogin = true
+		}
+	}
+
 	pageVars := PageVars{
-		Title:      "BAN " + activeTab,
-		Signature:  sig,
-		PatreonId:  PatreonClientId,
-		PatreonURL: PatreonHost,
-		LastUpdate: LastUpdate.Format(time.RFC3339),
+		Title:        "BAN " + activeTab,
+		Signature:    sig,
+		PatreonId:    PatreonClientId,
+		PatreonURL:   PatreonHost,
+		PatreonLogin: patreonLogin,
+		ErrorMessage: msg,
+		LastUpdate:   LastUpdate.Format(time.RFC3339),
 	}
 	pageVars.Nav = make([]NavElem, len(DefaultNav))
 	copy(pageVars.Nav, DefaultNav)
