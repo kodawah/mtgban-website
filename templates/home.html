@@ -30,7 +30,7 @@
     {{end}}
 
     {{if eq .Signature ""}}
-        <a class="btn normal" href="http://www.patreon.com/oauth2/authorize?response_type=code&client_id={{.PatreonId}}&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fauth&scope=identity%20identity%5Bemail%5D%20campaigns%20campaigns.members">Auth with Patreon</a>
+        <a class="btn normal" href="http://www.patreon.com/oauth2/authorize?response_type=code&client_id={{.PatreonId}}&redirect_uri={{.PatreonURL}}&scope=identity%20identity%5Bemail%5D%20campaigns%20campaigns.members">Auth with Patreon</a>
     {{else}}
         <a class="btn normal" href="/">Disconnect</a>
     {{end}}

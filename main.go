@@ -35,9 +35,10 @@ type Arbitrage struct {
 }
 
 type PageVars struct {
-	Nav       []NavElem
-	Signature string
-	PatreonId string
+	Nav        []NavElem
+	Signature  string
+	PatreonId  string
+	PatreonURL string
 
 	Title        string
 	CKPartner    string
@@ -139,6 +140,7 @@ func genPageNav(activeTab, sig string) PageVars {
 		Title:      "BAN " + activeTab,
 		Signature:  sig,
 		PatreonId:  PatreonClientId,
+		PatreonURL: PatreonHost,
 		LastUpdate: LastUpdate.Format(time.RFC3339),
 	}
 	pageVars.Nav = make([]NavElem, len(DefaultNav))
@@ -226,7 +228,7 @@ func main() {
 	http.Handle("/img/", http.StripPrefix("/img/", http.FileServer(&FileSystem{http.Dir("img")})))
 
 	// when navigating to /home it should serve the home page
-	http.HandleFunc("/", Home)
+	http.Handle("/", noSigning(http.HandlerFunc(Home)))
 	http.Handle("/search", enforceSigning(http.HandlerFunc(Search)))
 	http.Handle("/arbit", enforceSigning(http.HandlerFunc(Arbit)))
 	http.HandleFunc("/favicon.ico", Favicon)
@@ -252,8 +254,21 @@ func signHMACSHA1Base64(key []byte, data []byte) string {
 	return base64.StdEncoding.EncodeToString(h.Sum(nil))
 }
 
+// This function is mostly here only for initializing the host
+func noSigning(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if PatreonHost == "" {
+			PatreonHost = getBaseURL(r) + "/auth"
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 func enforceSigning(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if PatreonHost == "" {
+			PatreonHost = getBaseURL(r) + "/auth"
+		}
 		sign := r.FormValue("sig")
 
 		pageVars := genPageNav("Error", sign)

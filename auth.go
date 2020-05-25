@@ -17,6 +17,8 @@ import (
 	"golang.org/x/oauth2"
 )
 
+var PatreonHost string
+
 const (
 	PatreonClientId = "VrjStFvhtp7HhF1xItHm83FMY7PK3nptpls1xVkYL5IDufXNVW4Xb-pHPXBIuWZ4"
 
