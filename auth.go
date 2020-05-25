@@ -319,7 +319,7 @@ func enforceSigning(next http.Handler) http.Handler {
 }
 
 func sign(tierTitle string, sourceURL *url.URL, baseURL string) string {
-	duration := 7 * 24 * time.Hour
+	duration := 3 * time.Hour
 	expires := time.Now().Add(duration)
 
 	v := url.Values{}
