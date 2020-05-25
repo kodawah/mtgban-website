@@ -16,7 +16,7 @@
             <li>
                 <form class="search" target="_blank" action="https://www.cardkingdom.com/catalog/search?utm_source={{.CKPartner}}&utm_medium=affiliate&utm_campaign={{.CKPartner}}">
                     <input type="hidden" id="partner" name="partner" value="{{.CKPartner}}">
-                    <input class="w3-input w3-border-0 w3-round-small w3-animate-input" style="width:30%" type="text" name="filter[name]" placeholder="Search CK..." value="">
+                    <input class="w3-input w3-border-0 w3-round-small w3-animate-input" style="width:30%" onClick="this.setSelectionRange(0, this.value.length)" type="text" name="filter[name]" placeholder="Search CK..." value="">
                 </form>
             </li>
         {{end}}
