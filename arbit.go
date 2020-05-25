@@ -37,6 +37,9 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	enabled, _ := GetParamFromSig(sig, "Enabled")
+	if enabled == "" && !SigCheck {
+		enabled = "ALL"
+	}
 	if enabled == "ALL" {
 		shorthands := []string{}
 		for _, scraper := range BanClient.Scrapers() {
