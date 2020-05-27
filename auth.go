@@ -206,9 +206,7 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 	baseURL := getBaseURL(r)
 	code := r.FormValue("code")
 	if code == "" {
-		log.Println("Empty auth code query param")
-		u, _ := url.Parse(PatreonHost)
-		http.Redirect(w, r, u.Scheme+u.Host, http.StatusFound)
+		http.Redirect(w, r, baseURL, http.StatusFound)
 		return
 	}
 
