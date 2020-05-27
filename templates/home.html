@@ -29,11 +29,13 @@
         <h1>{{.ErrorMessage}}</h1>
     {{end}}
 
-    {{if or (eq .Signature "") (.PatreonLogin)}}
-        <a class="btn normal" href="http://www.patreon.com/oauth2/authorize?response_type=code&client_id={{.PatreonId}}&redirect_uri={{.PatreonURL}}&scope=identity%20identity%5Bemail%5D%20campaigns%20campaigns.members">Auth with Patreon</a>
-    {{else}}
-        <a class="btn normal" href="/">Disconnect</a>
-    {{end}}
-
+    <br>
+    <div class="indent">
+        {{if or (eq .Signature "") (.PatreonLogin)}}
+            <a class="btn normal" href="http://www.patreon.com/oauth2/authorize?response_type=code&client_id={{.PatreonId}}&redirect_uri={{.PatreonURL}}&scope=identity%20identity%5Bemail%5D%20campaigns%20campaigns.members">Login with Patreon</a>
+        {{else}}
+            <a class="btn normal" href="/">Disconnect</a>
+        {{end}}
+    </div>
 </body>
 </html>
