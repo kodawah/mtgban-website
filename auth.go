@@ -188,8 +188,14 @@ func getUserTier(tc *http.Client, userId string) (string, error) {
 	return tierTitle, nil
 }
 
+// Retrieve the main url, mostly for Patron auth -- we can't use the one provided
+// by the url since it can be relative and thus empty
 func getBaseURL(r *http.Request) string {
-	baseURL := "http://" + r.Host
+	host := r.Host
+	if host == "mtgban.herokuapp.com" {
+		host = "www.mtgban.com"
+	}
+	baseURL := "http://" + host
 	if r.TLS != nil {
 		baseURL = strings.Replace(baseURL, "http", "https", 1)
 	}
