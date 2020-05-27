@@ -228,7 +228,7 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 	switch userIds[0] {
 	case "26313002":
 		tierTitle = "Root"
-	case "28316283":
+	case "28316283", "17587259", "7196986":
 		tierTitle = "Admin"
 	default:
 		for _, userId := range userIds[1:] {
