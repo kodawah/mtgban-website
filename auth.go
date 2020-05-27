@@ -339,6 +339,8 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) string {
 	v := url.Values{}
 	switch tierTitle {
 	case "Squire":
+		v.Set("Search", "false")
+		v.Set("Arbit", "false")
 	case "Merchant":
 		v.Set("Search", "true")
 		v.Set("Arbit", "false")
