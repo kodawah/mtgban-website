@@ -70,16 +70,17 @@ func getUserToken(code, baseURL string) (string, error) {
 	return userTokens.AccessToken, nil
 }
 
-func getUserId(tc *http.Client) (string, error) {
+// Retrieve a user id for each membership of the current user
+func getUserIds(tc *http.Client) ([]string, error) {
 	resp, err := tc.Get(PatreonIdentityURL)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	var userData struct {
@@ -103,27 +104,21 @@ func getUserId(tc *http.Client) (string, error) {
 	log.Println(string(data))
 	err = json.Unmarshal(data, &userData)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if len(userData.Errors) > 0 {
-		return "", errors.New(userData.Errors[0].CodeName)
+		return nil, errors.New(userData.Errors[0].CodeName)
 	}
 
-	userId := ""
+	userIds := []string{userData.Data.IdV1}
 	for _, memberData := range userData.Data.Relationships.Memberships.Data {
 		if memberData.Type == "member" {
-			userId = memberData.Id
+			userIds = append(userIds, memberData.Id)
 			break
 		}
 	}
-	if userId == "" {
-		userId = userData.Data.IdV1
-	}
-	if userId == "" {
-		return "", errors.New("empty user id")
-	}
 
-	return userId, nil
+	return userIds, nil
 }
 
 func getUserTier(tc *http.Client, userId string) (string, error) {
@@ -222,7 +217,7 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
 	tc := oauth2.NewClient(r.Context(), ts)
 
-	userId, err := getUserId(tc)
+	userIds, err := getUserIds(tc)
 	if err != nil {
 		log.Println("getUserId", err.Error())
 		http.Redirect(w, r, baseURL+"?errmsg=UserNotFound", http.StatusFound)
@@ -230,21 +225,28 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tierTitle := ""
-	switch userId {
+	switch userIds[0] {
 	case "26313002":
 		tierTitle = "Root"
 	case "28316283":
 		tierTitle = "Admin"
 	default:
-		tierTitle, err = getUserTier(tc, userId)
-		if err != nil {
-			log.Println("getUserTier", err.Error())
-			http.Redirect(w, r, baseURL+"?errmsg=TierNotFound", http.StatusFound)
-			return
+		for _, userId := range userIds[1:] {
+			foundTitle, _ := getUserTier(tc, userId)
+			if foundTitle != "Squire" && foundTitle != "Merchant" && foundTitle != "Knight" {
+				continue
+			}
+			tierTitle = foundTitle
 		}
 	}
 
-	log.Println(userId, tierTitle)
+	if tierTitle == "" {
+		log.Println("getUserTier returned an empty tier")
+		http.Redirect(w, r, baseURL+"?errmsg=TierNotFound", http.StatusFound)
+		return
+	}
+
+	log.Println(userIds, tierTitle)
 	targetURL := sign(tierTitle, r.URL, baseURL)
 
 	http.Redirect(w, r, targetURL, http.StatusFound)
