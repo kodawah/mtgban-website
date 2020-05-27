@@ -100,6 +100,7 @@ func getUserId(tc *http.Client) (string, error) {
 		} `json:"data"`
 	}
 
+	log.Println(string(data))
 	err = json.Unmarshal(data, &userData)
 	if err != nil {
 		return "", err
@@ -162,6 +163,7 @@ func getUserTier(tc *http.Client, userId string) (string, error) {
 	}
 	tierId := ""
 	tierTitle := ""
+	log.Println(string(data))
 	err = json.Unmarshal(data, &membershipData)
 	if err != nil {
 		return "", err
@@ -242,6 +244,7 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	log.Println(userId, tierTitle)
 	targetURL := sign(tierTitle, r.URL, baseURL)
 
 	http.Redirect(w, r, targetURL, http.StatusFound)
