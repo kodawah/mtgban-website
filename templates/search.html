@@ -25,15 +25,15 @@
         {{end}}
     {{else}}
         <h1>Welcome to Search</h1>
-            <div class="indent sticky" style="top:48px; background-color:#f8f8f8; z-index: 1;">
-                <form class="search autocomplete" action="search" autocomplete="off" id="searchform">
-                    <label style="clear: both; float: left;" for="searchbox">Enter a card name</label>
-                    {{if ne .Signature ""}}
-                        <input type="hidden" name="sig" value="{{.Signature}}">
-                    {{end}}
-                    <input id="searchbox" class="w3-input w3-border w3-round-small" onClick="this.setSelectionRange(0, this.value.length)" type="text" name="q" placeholder="Search BAN" value="{{.SearchQuery}}">
-                </form>
-            </div>
+        <div class="indent sticky" style="top:48px; background-color:#f8f8f8; z-index: 1;">
+            <form class="search autocomplete" action="search" autocomplete="off" id="searchform">
+                <label style="clear: both; float: left;" for="searchbox">Enter a card name</label>
+                {{if ne .Signature ""}}
+                    <input type="hidden" name="sig" value="{{.Signature}}">
+                {{end}}
+                <input id="searchbox" class="w3-input w3-border w3-round-small" onClick="this.setSelectionRange(0, this.value.length)" type="text" name="q" placeholder="Search BAN" value="{{.SearchQuery}}">
+            </form>
+        </div>
 
         <script type="text/javascript">
             autocomplete(document.getElementById("searchform"));
