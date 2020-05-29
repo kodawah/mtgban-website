@@ -192,7 +192,8 @@ a.selected:hover{
     display:block;
     border:none;
     border-bottom:1px solid #ccc;
-    width:100%
+    width:100%;
+    font-size: 16px;
 }
 
 .w3-border-0{
