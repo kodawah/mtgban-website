@@ -11,6 +11,7 @@
         {{range .Nav}}
             <li><a {{if .Active}}class="{{.Class}}"{{end}} href="{{.Link}}">{{.Name}}</a></li>
         {{end}}
+        <li>Last data refresh: {{.LastUpdate}}</li>
     </ul>
     </nav>
 

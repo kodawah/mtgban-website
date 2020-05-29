@@ -13,26 +13,27 @@
             <li><a {{if .Active}}class="{{.Class}}"{{end}} href="{{.Link}}">{{.Name}}</a></li>
         {{end}}
         {{if eq .SellerShort "CK"}}
-            <li>
+            <li class=optional>
                 <form class="search" target="_blank" action="https://www.cardkingdom.com/catalog/search?utm_source={{.CKPartner}}&utm_medium=affiliate&utm_campaign={{.CKPartner}}">
                     <input type="hidden" id="partner" name="partner" value="{{.CKPartner}}">
                     <input class="w3-input w3-border-0 w3-round-small w3-animate-input" style="width:30%" onClick="this.setSelectionRange(0, this.value.length)" type="text" name="filter[name]" placeholder="Search CK..." value="">
                 </form>
             </li>
         {{else if eq .SellerShort "TCG Low"}}
-            <li>
+            <li class=optional>
                 <form class="search" target="_blank" action="https://shop.tcgplayer.com/productcatalog/product/show?utm_campaign=affiliate&utm_medium={{.TCGAffiliate}}&utm_source={{.TCGAffiliate}}&partner=MTGBAN&IsProductNameExact=false">
                     <input type="hidden" id="partner" name="partner" value="{{.TCGAffiliate}}">
                     <input class="w3-input w3-border-0 w3-round-small w3-animate-input" style="width:30%" onClick="this.setSelectionRange(0, this.value.length)" type="text" name="ProductName" placeholder="Search TCG..." value="">
                 </form>
             </li>
         {{else if eq .SellerShort "ABU"}}
-            <li>
+            <li class=optional>
                 <form class="search" target="_blank" action="https://abugames.com/magic-the-gathering/singles">
                     <input class="w3-input w3-border-0 w3-round-small w3-animate-input" style="width:30%" onClick="this.setSelectionRange(0, this.value.length)" type="text" name="search" placeholder="Search ABU..." value="">
                 </form>
             </li>
         {{end}}
+        <li>Last data refresh: {{.LastUpdate}}</li>
     </ul>
 </nav>
 
@@ -184,7 +185,6 @@
         </div>
         <br>
         <p>
-            <i>Last update: {{.SellerUpdate}}</i><br>
             By visiting {{.SellerFull}} through the links on this page you're supporting the continuos development of this site ♥
         </p>
         <br>

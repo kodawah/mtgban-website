@@ -131,8 +131,16 @@ nav li {
     border-right: 1px solid  #4b5786;
 }
 
-nav li:last-child {
+nav li.optional {
     border-right: none;
+}
+
+nav li:last-child {
+    float: right;
+    color:  #ffffff;
+    text-align: center;
+    padding: 14px;
+    font-style: italic;
 }
 
 nav li a {

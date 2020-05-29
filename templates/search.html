@@ -14,6 +14,7 @@
         {{range .Nav}}
             <li><a {{if .Active}}class="{{.Class}}"{{end}} href="{{.Link}}">{{.Name}}</a></li>
         {{end}}
+        <li>Last data refresh: {{.LastUpdate}}</li>
     </ul>
 </nav>
 
@@ -146,10 +147,7 @@
                 </table>
             </div>
         {{end}}
-        <br>
-        <div class="indent" style="clear:both;">
-        Last update: {{.LastUpdate}}
-        </div>
+        <div style="clear:both;"></div>
     {{end}}
     <br>
 </div>
