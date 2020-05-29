@@ -225,9 +225,10 @@ func main() {
 		}
 	}()
 
-	// serve everything in the css and img folders as a file
+	// serve everything in known folders as a file
 	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(&FileSystem{http.Dir("css")})))
 	http.Handle("/img/", http.StripPrefix("/img/", http.FileServer(&FileSystem{http.Dir("img")})))
+	http.Handle("/js/", http.StripPrefix("/js/", http.FileServer(&FileSystem{http.Dir("js")})))
 
 	// when navigating to /home it should serve the home page
 	http.Handle("/", noSigning(http.HandlerFunc(Home)))

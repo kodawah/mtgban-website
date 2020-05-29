@@ -268,3 +268,41 @@ th.stickyHeaderTiny {
     -ms-transform: translateY(10%);
     transform: translateY(10%);
 }
+
+.autocomplete {
+    /* The container must be positioned relative */
+    position: relative;
+    display: inline-block;
+}
+.autocomplete-items {
+    position: absolute;
+    border: 1px solid #d4d4d4;
+    border-bottom: none;
+    border-top: none;
+    z-index: 99;
+
+    /* Position the autocomplete items to be the same width as the container */
+    top: 100%;
+    left: 0;
+    right: 0;
+
+    /* Adjust the offsets brought by the container element */
+    margin-left: 8px;
+    margin-top: -8px;
+    margin-right: -10px;
+}
+.autocomplete-items div {
+    padding: 10px;
+    cursor: pointer;
+    background-color: #fff;
+    border-bottom: 1px solid #d4d4d4;
+}
+/* when hovering an item */
+.autocomplete-items div:hover {
+    background-color: #e9e9e9;
+}
+/* when navigating through the items using the arrow keys */
+.autocomplete-active {
+    background-color: #96b1cf !important;
+    color: #ffffff;
+}
