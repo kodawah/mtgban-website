@@ -34,9 +34,9 @@
     <br>
     <div class="indent">
         {{if or (eq .Signature "") (.PatreonLogin)}}
-            <a class="btn normal" href="http://www.patreon.com/oauth2/authorize?response_type=code&client_id={{.PatreonId}}&redirect_uri={{.PatreonURL}}&scope=identity%20identity%5Bemail%5D%20campaigns%20campaigns.members">Login with Patreon</a>
+            <a href="http://www.patreon.com/oauth2/authorize?response_type=code&client_id={{.PatreonId}}&redirect_uri={{.PatreonURL}}&scope=identity%20identity%5Bemail%5D%20campaigns%20campaigns.members"><img src="../img/misc/login.png"></a>
         {{else}}
-            <a class="btn normal" href="/">Disconnect</a>
+            <a href="/"><img src="../img/misc/logout.png"></a>
         {{end}}
     </div>
 </body>
