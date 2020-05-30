@@ -131,7 +131,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	pageVars.Images = map[mtgdb.Card]string{}
 
 	for _, vendor := range Vendors {
-		if vendor.(mtgban.Scraper) == source.(mtgban.Scraper) {
+		if vendor.Info().Name == source.Info().Name {
 			continue
 		}
 
