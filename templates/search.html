@@ -81,10 +81,12 @@
                         </tr>
                         {{range $conditions := $.CondKeys}}
                             {{$entries := (index $condsEntry $conditions)}}
-                            {{if $entries}}
-                                <tr onmouseover="document.getElementById('cardImage').src={{index $.Images $card}};">
-                                    <td colspan="3"><i>Conditions: {{$conditions}}</i></th>
-                                </tr>
+                            {{if ne $conditions "TCG"}}
+                                {{if $entries}}
+                                    <tr onmouseover="document.getElementById('cardImage').src={{index $.Images $card}};">
+                                        <td colspan="3"><i>Conditions: {{$conditions}}</i></th>
+                                    </tr>
+                                {{end}}
                             {{end}}
                             {{range $entries}}
                                 <tr onmouseover="document.getElementById('cardImage').src={{index $.Images $card}};">
@@ -101,7 +103,9 @@
                                         $ {{.Price}}
                                     </td>
                                     <td>
-                                        {{.Quantity}}
+                                        {{if ne $conditions "TCG"}}
+                                            {{.Quantity}}
+                                        {{end}}
                                     </td>
                                 </tr>
                             {{end}}
