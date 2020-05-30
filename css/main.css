@@ -151,6 +151,11 @@ nav li a {
     text-decoration: none;
 }
 
+nav li:first-child a {
+    display: inline-block;
+    padding: 0;
+}
+
 nav li a:hover {
     color: #f8f8f8;
 }
