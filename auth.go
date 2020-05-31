@@ -233,10 +233,12 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 	default:
 		for _, userId := range userIds[1:] {
 			foundTitle, _ := getUserTier(tc, userId)
-			if foundTitle != "Squire" && foundTitle != "Merchant" && foundTitle != "Knight" {
-				continue
+			switch foundTitle {
+			case "Squire",
+				"Merchant",
+				"Master of Coin":
+				tierTitle = foundTitle
 			}
-			tierTitle = foundTitle
 		}
 	}
 
