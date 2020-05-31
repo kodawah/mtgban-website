@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"runtime/debug"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/kodabb/go-mtgban/abugames"
@@ -90,7 +89,7 @@ func periodicFunction() {
 	// of memory quota on heroku
 	newSellers := newbc.Sellers()
 	sort.Slice(newSellers, func(i, j int) bool {
-		return strings.Compare(newSellers[i].Info().Name, newSellers[j].Info().Name) < 0
+		return newSellers[i].Info().Name < newSellers[j].Info().Name
 	})
 	for _, seller := range newSellers {
 		_, err := seller.Inventory()
@@ -105,7 +104,7 @@ func periodicFunction() {
 
 	newVendors := newbc.Vendors()
 	sort.Slice(newVendors, func(i, j int) bool {
-		return strings.Compare(newVendors[i].Info().Name, newVendors[j].Info().Name) < 0
+		return newVendors[i].Info().Name < newVendors[j].Info().Name
 	})
 	for _, vendor := range newVendors {
 		_, err := vendor.Buylist()
