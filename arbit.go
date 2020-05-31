@@ -50,6 +50,8 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		enabled = DefaultSellers
 	}
 
+	log.Println("Enabling", enabled)
+
 	r.ParseForm()
 
 	var ok bool
@@ -95,6 +97,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 
 	for _, newSeller := range Sellers {
 		if !strings.Contains(enabled, newSeller.Info().Shorthand) {
+			log.Println("Skipping", newSeller.Info().Shorthand)
 			continue
 		}
 
