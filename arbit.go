@@ -50,8 +50,6 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		enabled = DefaultSellers
 	}
 
-	log.Println("Enabling", enabled)
-
 	r.ParseForm()
 
 	var ok bool
@@ -69,7 +67,6 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			}
 			scraper, err := BanClient.ScraperByName(v[0])
 			if err != nil {
-				log.Println(err)
 				message = "Unknown " + v[0] + " seller"
 				break
 			}
@@ -97,7 +94,6 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 
 	for _, newSeller := range Sellers {
 		if !strings.Contains(enabled, newSeller.Info().Shorthand) {
-			log.Println("Skipping", newSeller.Info().Shorthand)
 			continue
 		}
 
@@ -145,14 +141,12 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			opts.UseTrades = useCredit
 		}
 
-		log.Println("Comparing", source.Info().Shorthand, "->", vendor.Info().Shorthand)
 		arbit, err := mtgban.Arbit(opts, vendor, source)
 		if err != nil {
 			log.Println(err)
 			continue
 		}
 
-		log.Println(len(arbit), "offers")
 		if len(arbit) == 0 {
 			continue
 		}
