@@ -7,7 +7,7 @@
  */
 async function autocomplete(form, inp) {
     var currentFocus;
-    const minlen = 3;
+    var minlen = 3;
     const arr = await fetchNames();
 
     /* Execute a function when someone writes in the text field: */
@@ -72,13 +72,24 @@ async function autocomplete(form, inp) {
         }
         if (e.keyCode == 40) { // DOWN key
             /* If the arrow DOWN key is pressed,
-             * increase the currentFocus variable */
-            currentFocus++;
-            /* and and make the current item more visible */
-            addActive(x);
+             * do not move input cursor */
+            e.preventDefault();
+            if (!x || x.length == 0) {
+                /* ignore the minimum input length */
+                minlen = 1;
+                /* force the drop-down menu to appear */
+                this.dispatchEvent(new InputEvent("input", e));
+            } else {
+                /* increase the currentFocus variable */
+                currentFocus++;
+                /* and and make the current item more visible */
+                addActive(x);
+            }
         } else if (e.keyCode == 38) { // UP key
             /* If the arrow UP key is pressed,
-             * decrease the currentFocus variable */
+             * do not move input cursor */
+            e.preventDefault();
+            /* decrease the currentFocus variable */
             currentFocus--;
             /* and and make the current item more visible */
             addActive(x);
