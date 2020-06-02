@@ -42,6 +42,10 @@ async function autocomplete(form, inp) {
                 b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
                 b.innerHTML += arr[i].substr(val.length);
 
+                /* Escape single quotes from autocompleted names */
+                if (arr[i].includes("'")){
+                    arr[i] = arr[i].replace("'", "&apos;")
+                }
                 /* Insert a input field that will hold the current array item's value */
                 b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
                 /* Execute a function when someone clicks on the item value (DIV element) */
