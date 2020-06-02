@@ -91,6 +91,7 @@ var LastUpdate time.Time
 var Sellers []mtgban.Seller
 var Vendors []mtgban.Vendor
 var DefaultSellers string
+var AdminIds []string
 
 func Favicon(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "img/misc/favicon.ico")
@@ -217,6 +218,11 @@ func main() {
 	if DefaultSellers == "" {
 		log.Fatalln("DATA_ENABLED not set")
 	}
+	ids := os.Getenv("BAN_ADMIN_IDS")
+	if ids == "" {
+		log.Fatalln("BAN_ADMIN_IDS not set")
+	}
+	AdminIds = strings.Split(ids, ",")
 
 	// refresh every few hours
 	go func() {

@@ -225,12 +225,18 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tierTitle := ""
-	switch userIds[0] {
-	case "26313002":
+	if userIds[0] == "26313002" {
 		tierTitle = "Root"
-	case "28316283", "17587259", "7196986", "3918569", "35720880":
-		tierTitle = "Admin"
-	default:
+	} else {
+		for _, adminId := range AdminIds {
+			if userIds[0] == adminId {
+				tierTitle = "Admin"
+				break
+			}
+		}
+	}
+
+	if tierTitle == "" {
 		for _, userId := range userIds[1:] {
 			foundTitle, _ := getUserTier(tc, userId)
 			switch foundTitle {
