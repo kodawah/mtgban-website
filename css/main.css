@@ -324,3 +324,9 @@ th.stickyHeaderTiny {
     background-color: #96b1cf !important;
     color: #ffffff;
 }
+
+pre {
+  display: inline-block;
+  font-family: monospace;
+  white-space: pre;
+}
