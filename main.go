@@ -92,6 +92,7 @@ var Sellers []mtgban.Seller
 var Vendors []mtgban.Vendor
 var DefaultSellers string
 var AdminIds []string
+var RootId string
 
 func Favicon(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "img/misc/favicon.ico")
@@ -223,6 +224,10 @@ func main() {
 		log.Fatalln("BAN_ADMIN_IDS not set")
 	}
 	AdminIds = strings.Split(ids, ",")
+	RootId = os.Getenv("BAN_ROOT_ID")
+	if RootId == "" {
+		log.Fatalln("BAN_ROOT_ID not set")
+	}
 
 	// refresh every few hours
 	go func() {

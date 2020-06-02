@@ -225,7 +225,7 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tierTitle := ""
-	if userIds[0] == "26313002" {
+	if userIds[0] == RootId {
 		tierTitle = "Root"
 	} else {
 		for _, adminId := range AdminIds {
