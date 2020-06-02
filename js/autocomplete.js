@@ -82,6 +82,10 @@ async function autocomplete(form, inp) {
             } else {
                 /* increase the currentFocus variable */
                 currentFocus++;
+                /* prevent overflowing */
+                if (x && currentFocus > x.length - 1) {
+                    currentFocus = 0;
+                }
                 /* and and make the current item more visible */
                 addActive(x);
             }
@@ -91,6 +95,10 @@ async function autocomplete(form, inp) {
             e.preventDefault();
             /* decrease the currentFocus variable */
             currentFocus--;
+            /* prevent overflowing */
+            if (currentFocus < 0 ) {
+                currentFocus = x ? x.length - 1 : 0;
+            }
             /* and and make the current item more visible */
             addActive(x);
         } else if (e.keyCode == 13 && currentFocus > -1) {
