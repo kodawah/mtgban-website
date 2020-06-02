@@ -9,6 +9,7 @@ import (
 	"github.com/kodabb/go-mtgban/abugames"
 	"github.com/kodabb/go-mtgban/cardkingdom"
 	"github.com/kodabb/go-mtgban/channelfireball"
+	"github.com/kodabb/go-mtgban/coolstuffinc"
 	"github.com/kodabb/go-mtgban/miniaturemarket"
 	"github.com/kodabb/go-mtgban/ninetyfive"
 	"github.com/kodabb/go-mtgban/strikezone"
@@ -64,6 +65,9 @@ func periodicFunction() {
 	tcg.Affiliate = TCGConfig.Affiliate
 	tcg.LogCallback = log.Printf
 
+	newcsi := coolstuffinc.NewScraper()
+	newcsi.LogCallback = log.Printf
+
 	newbc.Register(newck)
 	newbc.Register(newsz)
 	newbc.Register(new95)
@@ -71,6 +75,7 @@ func periodicFunction() {
 		newbc.Register(newabu)
 		newbc.Register(newcfb)
 		newbc.Register(newmm)
+		newbc.Register(newcsi)
 
 		sellers, err := mtgban.Seller2Sellers(tcg)
 		if err != nil {
