@@ -75,6 +75,19 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
+		cmpFunc := mtgjson.NormPrefix
+		if strings.HasPrefix(query, "\"") && strings.HasSuffix(query, "\"") {
+			cmpFunc = mtgjson.NormEquals
+			query = strings.TrimPrefix(query, "\"")
+			query = strings.TrimSuffix(query, "\"")
+			query = strings.TrimSpace(query)
+		} else if strings.HasPrefix(query, "*") && strings.HasSuffix(query, "*") {
+			cmpFunc = mtgjson.NormContains
+			query = strings.TrimPrefix(query, "*")
+			query = strings.TrimSuffix(query, "*")
+			query = strings.TrimSpace(query)
+		}
+
 		for _, seller := range Sellers {
 			inventory, err := seller.Inventory()
 			if err != nil {
@@ -82,7 +95,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 			for card, entries := range inventory {
-				if mtgjson.NormPrefix(card.Name, query) {
+				if cmpFunc(card.Name, query) {
 					if filterEdition != "" && filterEdition != card.Edition {
 						continue
 					}
@@ -141,7 +154,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 					pageVars.Images[card] = link
 				}
 
-				if mtgjson.NormPrefix(card.Name, query) {
+				if cmpFunc(card.Name, query) {
 					_, found := pageVars.FoundVendors[card]
 					if !found {
 						pageVars.FoundVendors[card] = []mtgban.CombineEntry{}
