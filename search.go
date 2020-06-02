@@ -47,30 +47,34 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 		filterEdition := ""
 		filterCondition := ""
-		if strings.Contains(query, "s:") {
-			fields := strings.Fields(query)
-			for _, field := range fields {
-				if strings.HasPrefix(field, "s:") {
-					query = strings.TrimPrefix(query, field)
-					query = strings.TrimSuffix(query, field)
-					query = strings.TrimSpace(query)
+		filterFoil := ""
+		for _, tag := range []string{"s:", "c:", "f:"} {
+			if strings.Contains(query, tag) {
+				fields := strings.Fields(query)
+				for _, field := range fields {
+					if strings.HasPrefix(field, tag) {
+						query = strings.TrimPrefix(query, field)
+						query = strings.TrimSuffix(query, field)
+						query = strings.TrimSpace(query)
 
-					code := strings.TrimPrefix(field, "s:")
-					filterEdition, _ = mtgdb.EditionCode2Name(code)
-					break
-				}
-			}
-		}
-		if strings.Contains(query, "c:") {
-			fields := strings.Fields(query)
-			for _, field := range fields {
-				if strings.HasPrefix(field, "c:") {
-					query = strings.TrimPrefix(query, field)
-					query = strings.TrimSuffix(query, field)
-					query = strings.TrimSpace(query)
-
-					filterEdition = strings.TrimPrefix(field, "c:")
-					break
+						code := strings.TrimPrefix(field, tag)
+						switch tag {
+						case "s:":
+							filterEdition, _ = mtgdb.EditionCode2Name(code)
+							break
+						case "c:":
+							filterCondition = code
+							break
+						case "f:":
+							filterFoil = code
+							if filterFoil == "yes" || filterFoil == "y" {
+								filterFoil = "true"
+							} else if filterFoil == "no" || filterFoil == "n" {
+								filterFoil = "false"
+							}
+							break
+						}
+					}
 				}
 			}
 		}
@@ -98,6 +102,16 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				if cmpFunc(card.Name, query) {
 					if filterEdition != "" && filterEdition != card.Edition {
 						continue
+					}
+					if filterFoil != "" {
+						foilStatus, err := strconv.ParseBool(filterFoil)
+						if err == nil {
+							if foilStatus && !card.Foil {
+								continue
+							} else if !foilStatus && card.Foil {
+								continue
+							}
+						}
 					}
 
 					if pageVars.Images[card] == "" {
@@ -146,6 +160,16 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			for card, entry := range buylist {
 				if filterEdition != "" && filterEdition != card.Edition {
 					continue
+				}
+				if filterFoil != "" {
+					foilStatus, err := strconv.ParseBool(filterFoil)
+					if err == nil {
+						if foilStatus && !card.Foil {
+							continue
+						} else if !foilStatus && card.Foil {
+							continue
+						}
+					}
 				}
 
 				if pageVars.Images[card] == "" {
