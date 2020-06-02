@@ -107,6 +107,9 @@ async function autocomplete(form, inp) {
                 /* simulate a click on the "active" item */
                 x[currentFocus].click();
             }
+        } else if (e.keyCode == 27) {
+            /* If the ESC key is pressed just close everything */
+            closeAllLists();
         }
     });
 
