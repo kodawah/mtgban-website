@@ -97,7 +97,8 @@
             {{end}}
             {{range .Arb}}
                 <div class="sticky" style="top: 48px; background-color: #f8f8f8; z-index: 1;">
-                    <h3><a name="{{.Name}}">{{.Name}}</a></h3>
+                    <span class="anchor" id="{{.Name}}"></span>
+                    <h3 class="storename">{{.Name}}</a></h3>
                     <hr width=20%>
                 </div>
                 <table onmouseout="document.getElementById('hoverImage').src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';">
