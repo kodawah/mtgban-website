@@ -107,11 +107,21 @@
                         <th class="stickyHeaderTiny"><center>#</center></th>
                         <th class="stickyHeaderTiny">F/NF</th>
                         <th class="stickyHeaderTiny">Conditions</th>
-                        <th class="stickyHeaderTiny">Sell Price</th>
-                        <th class="stickyHeaderTiny">Buy Price</th>
-                        <th class="stickyHeaderTiny">Trade Price</th>
-                        <th class="stickyHeaderTiny">Difference</th>
-                        <th class="stickyHeaderTiny">Spread</th>
+                        <th class="stickyHeaderTiny">
+                            <a href="arbit?source={{$.SellerShort}}&sort=sell_price&sig={{$.Signature}}{{if $.UseCredit}}&credit=true{{end}}#{{.Name}}">Sell Price</a>
+                        </th>
+                        <th class="stickyHeaderTiny">
+                            <a href="arbit?source={{$.SellerShort}}&sort=buy_price&sig={{$.Signature}}{{if $.UseCredit}}&credit=true{{end}}#{{.Name}}">Buy Price</a>
+                        </th>
+                        <th class="stickyHeaderTiny">
+                            <a href="arbit?source={{$.SellerShort}}&sort=trade_price&sig={{$.Signature}}{{if $.UseCredit}}&credit=true{{end}}#{{.Name}}">Trade Price</a>
+                        </th>
+                        <th class="stickyHeaderTiny">
+                            <a href="arbit?source={{$.SellerShort}}&sort=diff&sig={{$.Signature}}{{if $.UseCredit}}&credit=true{{end}}#{{.Name}}">Difference</a>
+                        </th>
+                        <th class="stickyHeaderTiny">
+                            <a href="arbit?source={{$.SellerShort}}&sort=spread&sig={{$.Signature}}{{if $.UseCredit}}&credit=true{{end}}#{{.Name}}">Spread</a>
+                        </th>
                         <th class="stickyHeaderTiny">Price Ratio</th>
                         <th class="stickyHeaderTiny"><center>Quicklinks</center></th>
                     </tr>

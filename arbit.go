@@ -56,6 +56,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	var source mtgban.Seller
 	var useCredit bool
 	var message string
+	var sorting string
 
 	for k, v := range r.Form {
 		switch k {
@@ -81,6 +82,9 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			case "true":
 				useCredit = true
 			}
+
+		case "sort":
+			sorting = v[0]
 		}
 	}
 
@@ -158,9 +162,28 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			pageVars.Images[card] = link
 		}
 
-		sort.Slice(arbit, func(i, j int) bool {
-			return arbit[i].Spread > arbit[j].Spread
-		})
+		switch sorting {
+		case "sell_price":
+			sort.Slice(arbit, func(i, j int) bool {
+				return arbit[i].InventoryEntry.Price > arbit[j].InventoryEntry.Price
+			})
+		case "buy_price":
+			sort.Slice(arbit, func(i, j int) bool {
+				return arbit[i].BuylistEntry.BuyPrice > arbit[j].BuylistEntry.BuyPrice
+			})
+		case "trade_price":
+			sort.Slice(arbit, func(i, j int) bool {
+				return arbit[i].BuylistEntry.TradePrice > arbit[j].BuylistEntry.TradePrice
+			})
+		case "diff":
+			sort.Slice(arbit, func(i, j int) bool {
+				return arbit[i].Difference > arbit[j].Difference
+			})
+		default:
+			sort.Slice(arbit, func(i, j int) bool {
+				return arbit[i].Spread > arbit[j].Spread
+			})
+		}
 
 		for i := len(arbit) - 1; i >= 0; i-- {
 			if arbit[i].Spread > 650 {

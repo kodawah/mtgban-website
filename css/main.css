@@ -276,6 +276,11 @@ th.stickyHeaderTiny {
     background-color: #eaeaea;
 }
 
+th a {
+    color: black;
+    text-decoration: none;
+}
+
 .center {
     display: block;
     margin-left: auto;
