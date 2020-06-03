@@ -257,14 +257,14 @@ a.selected:hover{
 th.stickyCategory {
     position: -webkit-sticky;
     position: sticky;
-    top: 114px;
+    top: 48px;
     background-color: #f8f8f8;
 }
 
 th.stickyHeader {
     position: -webkit-sticky;
     position: sticky;
-    top: 150px;
+    top: 84px;
     background-color: #eaeaea;
     height: 40px;
 }
