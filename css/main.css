@@ -72,6 +72,11 @@ th.wrap {
     max-width: 354px;
 }
 
+table.searchResults {
+    float: left;
+    min-width:360px;
+}
+
 h1 {
     color: #17375e;
     margin-left: 20px;
