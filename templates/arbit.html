@@ -113,6 +113,11 @@
                         <th class="stickyHeaderTiny"><center>#</center></th>
                         <th class="stickyHeaderTiny">F/NF</th>
                         <th class="stickyHeaderTiny">Conditions</th>
+                        {{if ne .Name "TCG Low"}}
+                            <th class="stickyHeaderTiny">
+                                <a href="arbit?source={{$.SellerShort}}&sort=available&sig={{$.Signature}}{{if $.UseCredit}}&credit=true{{end}}#{{.Name}}">Available</a>
+                            </th>
+                        {{end}}
                         <th class="stickyHeaderTiny">
                             <a href="arbit?source={{$.SellerShort}}&sort=sell_price&sig={{$.Signature}}{{if $.UseCredit}}&credit=true{{end}}#{{.Name}}">Sell Price</a>
                         </th>
@@ -131,6 +136,7 @@
                         <th class="stickyHeaderTiny">Price Ratio</th>
                         <th class="stickyHeaderTiny"><center>Quicklinks</center></th>
                     </tr>
+                    {{$save := .}}
                     {{range .Arbit}}
                         <tr onmouseover="document.getElementById('hoverImage').src={{index $.Images .Card}};">
                             <td>
@@ -148,6 +154,11 @@
                             <td>
                                 <center>{{.InventoryEntry.Conditions}}</center>
                             </td>
+                            {{if ne $save.Name "TCG Low"}}
+                                <td>
+                                    <center>{{.InventoryEntry.Quantity}}</center>
+                                </td>
+                            {{end}}
                             <td>
                                 $ {{.InventoryEntry.Price}}
                             </td>
@@ -181,7 +192,7 @@
                         </tr>
                     {{end}}
                     <tr style="background-color: #f8f8f8;">
-                        <td colspan=12>
+                        <td colspan={{if eq .Name "TCG Low"}}12{{else}}13{{end}}>
                             <p style="float: left;">
                                 <i>Last update: {{.LastUpdate}}</i>
                             </p>

@@ -172,6 +172,10 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		}
 
 		switch sorting {
+		case "available":
+			sort.Slice(arbit, func(i, j int) bool {
+				return arbit[i].InventoryEntry.Quantity > arbit[j].InventoryEntry.Quantity
+			})
 		case "sell_price":
 			sort.Slice(arbit, func(i, j int) bool {
 				return arbit[i].InventoryEntry.Price > arbit[j].InventoryEntry.Price
