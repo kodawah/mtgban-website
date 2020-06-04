@@ -10,7 +10,11 @@
     <ul>
         <li><a href="https://www.patreon.com/ban_community"><img src="https://c5.patreon.com/external/favicon/apple-touch-icon.png" width=48></a></li>
         {{range .Nav}}
-            <li><a {{if .Active}}class="{{.Class}}"{{end}} href="{{.Link}}">{{.Name}}</a></li>
+            <li>
+                <a {{if .Active}}class="{{.Class}}"{{end}} href="{{.Link}}">
+                    <span>{{.Name}}</span>
+                </a>
+            </li>
         {{end}}
         <li><!--If you're reading this, and would like to help, join our Discord, it's the right place for any talented developer with a passion for mtg!--></li>
     </ul>

@@ -351,6 +351,10 @@ h3.storename {
     visibility: hidden;
 }
 
+span {
+    line-height: 1;
+}
+
 /* Hide short text by default (resolution > 1200px) */
 .short-text {
     display: none;
