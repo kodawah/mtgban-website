@@ -21,6 +21,7 @@ type NavElem struct {
 	Class  string
 	Link   string
 	Name   string
+	Short  string
 }
 
 type Arbitrage struct {
@@ -62,16 +63,19 @@ type PageVars struct {
 
 var DefaultNav = []NavElem{
 	NavElem{
-		Name: "Home",
-		Link: "/",
+		Name:  "🏡 Home",
+		Short: "🏡",
+		Link:  "/",
 	},
 	NavElem{
-		Name: "Search",
-		Link: "/search",
+		Name:  "🔍 Search",
+		Short: "🔍",
+		Link:  "/search",
 	},
 	NavElem{
-		Name: "Arbitrage",
-		Link: "arbit",
+		Name:  "📈 Arbitrage",
+		Short: "📈",
+		Link:  "arbit",
 	},
 }
 
@@ -154,7 +158,8 @@ func genPageNav(activeTab, sig string) PageVars {
 	mainNavIndex := 0
 	for i := range pageVars.Nav {
 		pageVars.Nav[i].Link += signature
-		if pageVars.Nav[i].Name == activeTab {
+		// Ingore the starting emoji
+		if strings.HasSuffix(pageVars.Nav[i].Name, activeTab) {
 			mainNavIndex = i
 		}
 	}
