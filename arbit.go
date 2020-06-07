@@ -163,6 +163,9 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			pageVars.Images[card] = link
 		}
 
+		sort.Slice(arbit, func(i, j int) bool {
+			return arbit[i].Spread > arbit[j].Spread
+		})
 		for i := len(arbit) - 1; i >= 0; i-- {
 			if arbit[i].Spread > 650 {
 				log.Printf("Skipping impossible spread of %f", arbit[i].Spread)
