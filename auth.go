@@ -16,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/NYTimes/gziphandler"
 	cleanhttp "github.com/hashicorp/go-cleanhttp"
 	"golang.org/x/oauth2"
 )
@@ -352,7 +353,7 @@ func enforceSigning(next http.Handler) http.Handler {
 			return
 		}
 
-		next.ServeHTTP(w, r)
+		gziphandler.GzipHandler(next).ServeHTTP(w, r)
 	})
 }
 
