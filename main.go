@@ -97,6 +97,7 @@ var Vendors []mtgban.Vendor
 var DefaultSellers string
 var AdminIds []string
 var RootId string
+var Refresh int
 
 func Favicon(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "img/misc/favicon.ico")
@@ -168,6 +169,46 @@ func genPageNav(activeTab, sig string) PageVars {
 	return pageVars
 }
 
+func loadVars() (err error) {
+	envVars := map[string]string{}
+
+	keyVars := []string{
+		"CARDKINGDOM_PARTNER",
+		"DATA_REFRESH",
+		"BAN_SECRET",
+		"TCG_AFFILIATE",
+		"TCG_PUBLIC_ID",
+		"TCG_PRIVATE_ID",
+		"PATREON_SECRET",
+		"DATA_ENABLED",
+		"BAN_ADMIN_IDS",
+		"BAN_ROOT_ID",
+	}
+	for _, key := range keyVars {
+		v := os.Getenv(key)
+		if v == "" {
+			return fmt.Errorf("%s variable not set", key)
+		}
+		envVars[key] = v
+	}
+
+	CKPartner = envVars["CARDKINGDOM_PARTNER"]
+	Refresh, err = strconv.Atoi(envVars["DATA_REFRESH"])
+	if err != nil {
+		return err
+	}
+	TCGConfig = TCGArgs{
+		Affiliate: envVars["TCG_AFFILIATE"],
+		PublicId:  envVars["TCG_PUBLIC_ID"],
+		PrivateId: envVars["TCG_PRIVATE_ID"],
+	}
+	DefaultSellers = envVars["DATA_ENABLED"]
+	AdminIds = strings.Split(envVars["BAN_ADMIN_IDS"], ",")
+	RootId = envVars["BAN_ROOT_ID"]
+
+	return nil
+}
+
 func main() {
 	devMode := flag.Bool("dev", false, "Enable developer mode")
 	sigCheck := flag.Bool("sig", false, "Enable signature verification")
@@ -197,46 +238,14 @@ func main() {
 	}()
 
 	// load necessary environmental variables
-	CKPartner = os.Getenv("CARDKINGDOM_PARTNER")
-	if CKPartner == "" {
-		log.Fatalln("CARDKINGDOM_PARTNER not set")
-	}
-	dataRefresh := os.Getenv("DATA_REFRESH")
-	refresh, _ := strconv.Atoi(dataRefresh)
-	if refresh == 0 {
-		log.Fatalln("DATA_REFRESH not set")
-	}
-	if os.Getenv("BAN_SECRET") == "" {
-		log.Fatalln("BAN_SECRET not set")
-	}
-	TCGConfig = TCGArgs{
-		Affiliate: os.Getenv("TCG_AFFILIATE"),
-		PublicId:  os.Getenv("TCG_PUBLIC_ID"),
-		PrivateId: os.Getenv("TCG_PRIVATE_ID"),
-	}
-	if TCGConfig.Affiliate == "" || TCGConfig.PublicId == "" || TCGConfig.PrivateId == "" {
-		log.Fatalln("TCG configuration not set")
-	}
-	if os.Getenv("PATREON_SECRET") == "" {
-		log.Fatalln("PATREON_SECRET not set")
-	}
-	DefaultSellers = os.Getenv("DATA_ENABLED")
-	if DefaultSellers == "" {
-		log.Fatalln("DATA_ENABLED not set")
-	}
-	ids := os.Getenv("BAN_ADMIN_IDS")
-	if ids == "" {
-		log.Fatalln("BAN_ADMIN_IDS not set")
-	}
-	AdminIds = strings.Split(ids, ",")
-	RootId = os.Getenv("BAN_ROOT_ID")
-	if RootId == "" {
-		log.Fatalln("BAN_ROOT_ID not set")
+	err := loadVars()
+	if err != nil {
+		log.Fatalln(err)
 	}
 
 	// refresh every few hours
 	go func() {
-		for _ = range time.NewTicker(time.Duration(refresh) * time.Hour).C {
+		for _ = range time.NewTicker(time.Duration(Refresh) * time.Hour).C {
 			periodicFunction()
 		}
 	}()
