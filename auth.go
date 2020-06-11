@@ -23,7 +23,8 @@ import (
 var PatreonHost string
 
 const (
-	PatreonClientId = "VrjStFvhtp7HhF1xItHm83FMY7PK3nptpls1xVkYL5IDufXNVW4Xb-pHPXBIuWZ4"
+	PatreonClientId  = "VrjStFvhtp7HhF1xItHm83FMY7PK3nptpls1xVkYL5IDufXNVW4Xb-pHPXBIuWZ4"
+	PatreonPartnerId = "ZZHIY-2izbIqHEz-ZMB8rJYZI-rcMizlHVpG_rJP0iViW34IeCQZZWYMvc_-HCF7"
 
 	PatreonTokenURL    = "https://www.patreon.com/api/oauth2/token"
 	PatreonIdentityURL = "https://www.patreon.com/api/oauth2/v2/identity?include=memberships&fields%5Buser%5D=email,first_name,full_name,image_url,last_name,social_connections,thumb_url,url,vanity"
@@ -37,12 +38,18 @@ const (
 	ErrMsgExpired = "You've been logged out"
 )
 
-func getUserToken(code, baseURL string) (string, error) {
+func getUserToken(code, baseURL, ref string) (string, error) {
+	clientId := PatreonClientId
+	secret := os.Getenv("PATREON_SECRET")
+	if ref == "CG" {
+		clientId = PatreonPartnerId
+		secret = os.Getenv("PATREON_PARTNER_SECRET")
+	}
 	resp, err := cleanhttp.DefaultClient().PostForm(PatreonTokenURL, url.Values{
 		"code":          {code},
 		"grant_type":    {"authorization_code"},
-		"client_id":     {PatreonClientId},
-		"client_secret": {os.Getenv("PATREON_SECRET")},
+		"client_id":     {clientId},
+		"client_secret": {secret},
 		"redirect_uri":  {baseURL + "/auth"},
 	})
 	if err != nil {
@@ -207,7 +214,7 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := getUserToken(code, baseURL)
+	token, err := getUserToken(code, baseURL, r.FormValue("state"))
 	if err != nil {
 		log.Println("getUserToken", err.Error())
 		http.Redirect(w, r, baseURL+"?errmsg=TokenNotFound", http.StatusFound)
@@ -234,6 +241,12 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 		}
+		for _, partnerId := range PartnerIds {
+			if userIds[0] == partnerId {
+				tierTitle = "Partner"
+				break
+			}
+		}
 	}
 
 	if tierTitle == "" {
@@ -244,6 +257,9 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 				"Merchant",
 				"Master of Coin":
 				tierTitle = foundTitle
+			case "Upkeep (Early Adopters)",
+				"The Main Phase":
+				tierTitle = "Partner"
 			}
 		}
 	}
@@ -349,7 +365,7 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) string {
 	case "Squire":
 		v.Set("Search", "false")
 		v.Set("Arbit", "false")
-	case "Merchant":
+	case "Merchant", "Partner":
 		v.Set("Search", "true")
 		v.Set("Arbit", "false")
 	case "Master of Coin", "Admin", "Root":

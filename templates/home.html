@@ -39,6 +39,8 @@
     <div class="indent">
         {{if or (eq .Signature "") (.PatreonLogin)}}
             <a href="http://www.patreon.com/oauth2/authorize?response_type=code&client_id={{.PatreonId}}&redirect_uri={{.PatreonURL}}&scope=identity%20identity%5Bemail%5D%20campaigns%20campaigns.members"><img src="../img/misc/login.png"></a>
+            <br>
+            <a class="btn normal" href="http://www.patreon.com/oauth2/authorize?response_type=code&client_id={{.PatreonPartnerId}}&redirect_uri={{.PatreonURL}}&scope=identity%20identity%5Bemail%5D%20campaigns%20campaigns.members&state=CG">Conviction Gaming partner login</a>
         {{else}}
             <a href="/"><img src="../img/misc/logout.png"></a>
         {{end}}

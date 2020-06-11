@@ -40,6 +40,8 @@ type PageVars struct {
 	PatreonLogin bool
 	ShowPromo    bool
 
+	PatreonPartnerId string
+
 	Title        string
 	CKPartner    string
 	TCGAffiliate string
@@ -96,6 +98,7 @@ var Sellers []mtgban.Seller
 var Vendors []mtgban.Vendor
 var DefaultSellers string
 var AdminIds []string
+var PartnerIds []string
 var RootId string
 var Refresh int
 
@@ -147,6 +150,8 @@ func genPageNav(activeTab, sig string) PageVars {
 		PatreonLogin: patreonLogin,
 		ErrorMessage: msg,
 		LastUpdate:   LastUpdate.Format(time.RFC3339),
+
+		PatreonPartnerId: PatreonPartnerId,
 	}
 	pageVars.Nav = make([]NavElem, len(DefaultNav))
 	copy(pageVars.Nav, DefaultNav)
@@ -180,8 +185,10 @@ func loadVars() (err error) {
 		"TCG_PUBLIC_ID",
 		"TCG_PRIVATE_ID",
 		"PATREON_SECRET",
+		"PATREON_PARTNER_SECRET",
 		"DATA_ENABLED",
 		"BAN_ADMIN_IDS",
+		"BAN_PARTNER_IDS",
 		"BAN_ROOT_ID",
 	}
 	for _, key := range keyVars {
@@ -204,6 +211,7 @@ func loadVars() (err error) {
 	}
 	DefaultSellers = envVars["DATA_ENABLED"]
 	AdminIds = strings.Split(envVars["BAN_ADMIN_IDS"], ",")
+	PartnerIds = strings.Split(envVars["BAN_PARTNER_IDS"], ",")
 	RootId = envVars["BAN_ROOT_ID"]
 
 	return nil
