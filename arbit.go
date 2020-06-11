@@ -156,6 +156,10 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
+		if len(arbit) > 1000 {
+			arbit = arbit[:1000]
+		}
+
 		for _, arb := range arbit {
 			card := arb.Card
 			code, _ := mtgdb.EditionName2Code(card.Edition)
