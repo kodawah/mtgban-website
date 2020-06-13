@@ -59,8 +59,10 @@ type PageVars struct {
 	SellerFull   string
 	SellerUpdate string
 
-	Arb       []Arbitrage
-	UseCredit bool
+	Arb        []Arbitrage
+	UseCredit  bool
+	FilterCond bool
+	FilterFoil bool
 }
 
 var DefaultNav = []NavElem{

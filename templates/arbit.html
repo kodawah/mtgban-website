@@ -99,6 +99,19 @@
                         <a class="btn normal" href="#{{.Name}}">{{.Name}} ({{.Len}})</a>
                     {{end}}
                     </p>
+                    <p>
+                        Show
+                        {{if $.FilterCond}}
+                            <a class="btn success" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}{{if $.FilterFoil}}&nofoil=true{{end}}"><b>only NM/SP</b></a>
+                        {{else}}
+                            <a class="btn normal" href="arbit?source={{$.SellerShort}}&nocond=true&sig={{$.Signature}}{{if $.FilterFoil}}&nofoil=true{{end}}">only NM/SP</a>
+                        {{end}}
+                        {{if $.FilterFoil}}
+                            <a class="btn success" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}{{if $.FilterCond}}&nocond=true{{end}}"><b>only non-Foil</b></a>
+                        {{else}}
+                            <a class="btn normal" href="arbit?source={{$.SellerShort}}&nofoil=true&sig={{$.Signature}}{{if $.FilterCond}}&nocond=true{{end}}">only non-Foil</a>
+                        {{end}}
+                    </p>
                 </div>
             {{end}}
             {{range .Arb}}
@@ -109,7 +122,7 @@
                 </div>
                 <script type='text/javascript'>
                     function sortBy(sort) {
-                        window.location.href = "arbit?&source={{$.SellerShort}}&sort=" + sort + "&sig={{$.Signature}}#{{.Name}}";
+                        window.location.href = "arbit?&source={{$.SellerShort}}&sort=" + sort + "&sig={{$.Signature}}{{if $.FilterCond}}&nocond=true{{end}}{{if $.FilterFoil}}&nofoil=true{{end}}#{{.Name}}";
                     }
                 </script>
                 <table onmouseout="document.getElementById('hoverImage').src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';">

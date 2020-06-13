@@ -55,6 +55,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	var ok bool
 	var source mtgban.Seller
 	var useCredit bool
+	var nocond, nofoil bool
 	var message string
 	var sorting string
 
@@ -85,6 +86,12 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 
 		case "sort":
 			sorting = v[0]
+
+		case "nofoil":
+			nofoil, _ = strconv.ParseBool(v[0])
+
+		case "nocond":
+			nocond, _ = strconv.ParseBool(v[0])
 		}
 	}
 
@@ -130,6 +137,8 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	pageVars.CKPartner = CKPartner
 	pageVars.TCGAffiliate = TCGConfig.Affiliate
 	pageVars.UseCredit = useCredit
+	pageVars.FilterCond = nocond
+	pageVars.FilterFoil = nofoil
 
 	pageVars.Arb = []Arbitrage{}
 	pageVars.Images = map[mtgdb.Card]string{}
@@ -154,6 +163,25 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 
 		if len(arbit) == 0 {
 			continue
+		}
+
+		if nocond {
+			tmp := arbit[:0]
+			for i := range arbit {
+				if arbit[i].InventoryEntry.Conditions == "NM" || arbit[i].InventoryEntry.Conditions == "SP" {
+					tmp = append(tmp, arbit[i])
+				}
+			}
+			arbit = tmp
+		}
+		if nofoil {
+			tmp := arbit[:0]
+			for i := range arbit {
+				if !arbit[i].Card.Foil {
+					tmp = append(tmp, arbit[i])
+				}
+			}
+			arbit = tmp
 		}
 
 		if len(arbit) > 1000 {
