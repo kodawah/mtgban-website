@@ -132,7 +132,7 @@
                         <th class="stickyHeaderTiny"><center>#</center></th>
                         <th class="stickyHeaderTiny">F/NF</th>
                         <th class="stickyHeaderTiny">Conditions</th>
-                        {{if ne .Name "TCG Low"}}
+                        {{if ne $.SellerShort "TCG Low"}}
                             <th class="stickyHeaderTiny">
                                 <a href="javascript:sortBy('available')">Available</a>
                             </th>
@@ -155,7 +155,6 @@
                         <th class="stickyHeaderTiny">Price Ratio</th>
                         <th class="stickyHeaderTiny"><center>Quicklinks</center></th>
                     </tr>
-                    {{$save := .}}
                     {{range .Arbit}}
                         <tr onmouseover="document.getElementById('hoverImage').src={{index $.Images .Card}};">
                             <td>
@@ -173,7 +172,7 @@
                             <td>
                                 <center>{{.InventoryEntry.Conditions}}</center>
                             </td>
-                            {{if ne $save.Name "TCG Low"}}
+                            {{if ne $.SellerShort "TCG Low"}}
                                 <td>
                                     <center>{{.InventoryEntry.Quantity}}</center>
                                 </td>
@@ -211,7 +210,7 @@
                         </tr>
                     {{end}}
                     <tr style="background-color: #f8f8f8;">
-                        <td colspan={{if eq .Name "TCG Low"}}12{{else}}13{{end}}>
+                        <td colspan={{if eq $.SellerShort "TCG Low"}}12{{else}}13{{end}}>
                             <p style="float: left;">
                                 <i>Last update: {{.LastUpdate}}</i>
                             </p>
