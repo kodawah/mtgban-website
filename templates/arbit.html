@@ -232,7 +232,9 @@
         </div>
         <br>
         <p>
-            By visiting {{.SellerFull}} through the links on this page you're supporting the continuos development of this site ♥
+            {{if or (eq .SellerFull "Card Kingdom") (eq .SellerFull "TCG Low")}}
+                By visiting {{.SellerFull}} through the links on this page you're supporting the continuos development of this site ♥
+            {{end}}
         </p>
         <br>
     {{end}}
