@@ -107,6 +107,11 @@
                     <h3 class="storename">{{.Name}}</a></h3>
                     <hr width=20%>
                 </div>
+                <script type='text/javascript'>
+                    function sortBy(sort) {
+                        window.location.href = "arbit?&source={{$.SellerShort}}&sort=" + sort + "&sig={{$.Signature}}#{{.Name}}";
+                    }
+                </script>
                 <table onmouseout="document.getElementById('hoverImage').src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';">
                     <tr>
                         <th class="stickyHeaderTiny">Card Name</th>
@@ -116,23 +121,23 @@
                         <th class="stickyHeaderTiny">Conditions</th>
                         {{if ne .Name "TCG Low"}}
                             <th class="stickyHeaderTiny">
-                                <a href="arbit?source={{$.SellerShort}}&sort=available&sig={{$.Signature}}{{if $.UseCredit}}&credit=true{{end}}#{{.Name}}">Available</a>
+                                <a href="javascript:sortBy('available')">Available</a>
                             </th>
                         {{end}}
                         <th class="stickyHeaderTiny">
-                            <a href="arbit?source={{$.SellerShort}}&sort=sell_price&sig={{$.Signature}}{{if $.UseCredit}}&credit=true{{end}}#{{.Name}}">Sell Price</a>
+                            <a href="javascript:sortBy('sell_price')">Sell Price</a>
                         </th>
                         <th class="stickyHeaderTiny">
-                            <a href="arbit?source={{$.SellerShort}}&sort=buy_price&sig={{$.Signature}}{{if $.UseCredit}}&credit=true{{end}}#{{.Name}}">Buy Price</a>
+                            <a href="javascript:sortBy('buy_price')">Buy Price</a>
                         </th>
                         <th class="stickyHeaderTiny">
-                            <a href="arbit?source={{$.SellerShort}}&sort=trade_price&sig={{$.Signature}}{{if $.UseCredit}}&credit=true{{end}}#{{.Name}}">Trade Price</a>
+                            <a href="javascript:sortBy('trade_price')">Trade Price</a>
                         </th>
                         <th class="stickyHeaderTiny">
-                            <a href="arbit?source={{$.SellerShort}}&sort=diff&sig={{$.Signature}}{{if $.UseCredit}}&credit=true{{end}}#{{.Name}}">Difference</a>
+                            <a href="javascript:sortBy('diff')">Difference</a>
                         </th>
                         <th class="stickyHeaderTiny">
-                            <a href="arbit?source={{$.SellerShort}}&sort=spread&sig={{$.Signature}}{{if $.UseCredit}}&credit=true{{end}}#{{.Name}}">Spread</a>
+                            <a href="javascript:sortBy('')">Spread</a>
                         </th>
                         <th class="stickyHeaderTiny">Price Ratio</th>
                         <th class="stickyHeaderTiny"><center>Quicklinks</center></th>
