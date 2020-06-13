@@ -79,10 +79,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			}
 
 		case "credit":
-			switch v[0] {
-			case "true":
-				useCredit = true
-			}
+			useCredit, _ = strconv.ParseBool(v[0])
 
 		case "sort":
 			sorting = v[0]
