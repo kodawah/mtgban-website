@@ -124,6 +124,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 						if filterCondition != "" && filterCondition != entry.Conditions {
 							continue
 						}
+						if entry.Price == 0 {
+							continue
+						}
 
 						_, found := pageVars.FoundSellers[card]
 						if !found {
