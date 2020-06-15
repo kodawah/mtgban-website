@@ -235,6 +235,10 @@ func main() {
 		var err error
 
 		log.Println("Loading MTGJSON")
+		err = loadDatastore()
+		if err != nil {
+			log.Fatalln(err)
+		}
 		if DevMode {
 			err = mtgdb.RegisterWithPaths("allprintings.json", "allcards.json")
 		} else {
@@ -270,6 +274,7 @@ func main() {
 	http.Handle("/", noSigning(http.HandlerFunc(Home)))
 	http.Handle("/search", enforceSigning(http.HandlerFunc(Search)))
 	http.Handle("/arbit", enforceSigning(http.HandlerFunc(Arbit)))
+	http.Handle("/api/mtgjson/ck.json", enforceSigning(http.HandlerFunc(API)))
 	http.HandleFunc("/favicon.ico", Favicon)
 	http.HandleFunc("/auth", Auth)
 	http.ListenAndServe(getPort(), nil)

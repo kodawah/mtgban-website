@@ -330,9 +330,11 @@ func enforceSigning(next http.Handler) http.Handler {
 		for _, param := range []string{"Search", "Arbit"} {
 			q.Set(param, v.Get(param))
 		}
-		optionalEnabled := v.Get("Enabled")
-		if optionalEnabled != "" {
-			q.Set("Enabled", optionalEnabled)
+		for _, optional := range []string{"Enabled", "API"} {
+			val := v.Get(optional)
+			if val != "" {
+				q.Set(optional, val)
+			}
 		}
 
 		sig := v.Get("Signature")
