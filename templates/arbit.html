@@ -102,14 +102,19 @@
                     <p>
                         Show
                         {{if $.FilterCond}}
-                            <a class="btn success" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}{{if $.FilterFoil}}&nofoil=true{{end}}"><b>only NM/SP</b></a>
+                            <a class="btn success" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}{{if $.FilterFoil}}&nofoil=true{{end}}{{if $.FilterComm}}&nocomm=true{{end}}"><b>only NM/SP</b></a>
                         {{else}}
-                            <a class="btn normal" href="arbit?source={{$.SellerShort}}&nocond=true&sig={{$.Signature}}{{if $.FilterFoil}}&nofoil=true{{end}}">only NM/SP</a>
+                            <a class="btn normal" href="arbit?source={{$.SellerShort}}&nocond=true&sig={{$.Signature}}{{if $.FilterFoil}}&nofoil=true{{end}}{{if $.FilterComm}}&nocomm=true{{end}}">only NM/SP</a>
                         {{end}}
                         {{if $.FilterFoil}}
-                            <a class="btn success" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}{{if $.FilterCond}}&nocond=true{{end}}"><b>only non-Foil</b></a>
+                            <a class="btn success" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}{{if $.FilterCond}}&nocond=true{{end}}{{if $.FilterComm}}&nocomm=true{{end}}"><b>only non-Foil</b></a>
                         {{else}}
-                            <a class="btn normal" href="arbit?source={{$.SellerShort}}&nofoil=true&sig={{$.Signature}}{{if $.FilterCond}}&nocond=true{{end}}">only non-Foil</a>
+                            <a class="btn normal" href="arbit?source={{$.SellerShort}}&nofoil=true&sig={{$.Signature}}{{if $.FilterCond}}&nocond=true{{end}}{{if $.FilterComm}}&nocomm=true{{end}}">only non-Foil</a>
+                        {{end}}
+                        {{if $.FilterComm}}
+                            <a class="btn success" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}{{if $.FilterFoil}}&nofoil=true{{end}}{{if $.FilterCond}}&nocond=true{{end}}"><b>only Rare/Mythic</b></a>
+                        {{else}}
+                            <a class="btn normal" href="arbit?source={{$.SellerShort}}&nocomm=true&sig={{$.Signature}}{{if $.FilterComm}}&nocond=true{{end}}{{if $.FilterCond}}&nocond=true{{end}}">only Rare/Mythic</a>
                         {{end}}
                     </p>
                 </div>
@@ -122,7 +127,7 @@
                 </div>
                 <script type='text/javascript'>
                     function sortBy(sort) {
-                        window.location.href = "arbit?&source={{$.SellerShort}}&sort=" + sort + "&sig={{$.Signature}}{{if $.FilterCond}}&nocond=true{{end}}{{if $.FilterFoil}}&nofoil=true{{end}}#{{.Name}}";
+                        window.location.href = "arbit?&source={{$.SellerShort}}&sort=" + sort + "&sig={{$.Signature}}{{if $.FilterCond}}&nocond=true{{end}}{{if $.FilterFoil}}&nofoil=true{{end}}{{if $.FilterComm}}&nocomm=true{{end}}#{{.Name}}";
                     }
                 </script>
                 <table onmouseout="document.getElementById('hoverImage').src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';">

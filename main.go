@@ -63,6 +63,7 @@ type PageVars struct {
 	UseCredit  bool
 	FilterCond bool
 	FilterFoil bool
+	FilterComm bool
 }
 
 var DefaultNav = []NavElem{

@@ -55,7 +55,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	var ok bool
 	var source mtgban.Seller
 	var useCredit bool
-	var nocond, nofoil bool
+	var nocond, nofoil, nocomm bool
 	var message string
 	var sorting string
 
@@ -89,6 +89,9 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 
 		case "nocond":
 			nocond, _ = strconv.ParseBool(v[0])
+
+		case "nocomm":
+			nocomm, _ = strconv.ParseBool(v[0])
 		}
 	}
 
@@ -136,6 +139,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	pageVars.UseCredit = useCredit
 	pageVars.FilterCond = nocond
 	pageVars.FilterFoil = nofoil
+	pageVars.FilterComm = nocomm
 
 	pageVars.Arb = []Arbitrage{}
 	pageVars.Images = map[mtgdb.Card]string{}
@@ -175,6 +179,15 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			tmp := arbit[:0]
 			for i := range arbit {
 				if !arbit[i].Card.Foil {
+					tmp = append(tmp, arbit[i])
+				}
+			}
+			arbit = tmp
+		}
+		if nocomm {
+			tmp := arbit[:0]
+			for i := range arbit {
+				if arbit[i].Card.Rarity == "R" || arbit[i].Card.Rarity == "M" {
 					tmp = append(tmp, arbit[i])
 				}
 			}
