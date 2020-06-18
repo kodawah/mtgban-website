@@ -131,6 +131,9 @@
                                         {{if ne $conditions "TCG"}}
                                             {{.Quantity}}
                                         {{end}}
+                                        {{if eq .ScraperName "TCG Direct Low"}}
+                                        <img style="padding-top:4px;" src="img/misc/direct.png">
+                                        {{end}}
                                     </td>
                                 </tr>
                             {{end}}

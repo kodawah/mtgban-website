@@ -134,7 +134,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 						}
 
 						conditions := entry.Conditions
-						if seller.Info().Name == "TCG Low" {
+						if seller.Info().Name == "TCG Low" || seller.Info().Name == "TCG Direct Low" {
 							conditions = "TCG"
 						}
 						_, found = pageVars.FoundSellers[card][conditions]

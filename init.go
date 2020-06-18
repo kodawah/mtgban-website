@@ -82,7 +82,7 @@ func periodicFunction() {
 			log.Println(err)
 		}
 		for _, seller := range sellers {
-			if seller.Info().Name == "TCG Low" {
+			if seller.Info().Name == "TCG Low" || seller.Info().Name == "TCG Direct Low" {
 				newbc.RegisterSeller(seller)
 			}
 		}
