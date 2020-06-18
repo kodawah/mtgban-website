@@ -51,8 +51,8 @@ github.com/hashicorp/go-retryablehttp v0.6.6/go.mod h1:vAew36LZh98gCBJNLH42IQ1ER
 github.com/jawher/mow.cli v1.1.0/go.mod h1:aNaQlc7ozF3vw6IJ2dHjp2ZFiA4ozMIYY6PyuRJwlUg=
 github.com/kennygrant/sanitize v1.2.4 h1:gN25/otpP5vAsO2djbMhF/LQX6R7+O1TB4yv8NzpJ3o=
 github.com/kennygrant/sanitize v1.2.4/go.mod h1:LGsjYYtgxbetdg5owWB2mpgUL6e2nfw2eObZ0u0qvak=
-github.com/kodabb/go-mtgban v0.0.0-20200617054939-eb58d36699ee h1:lfBfAkeoNA4HUMIDKlNYcyvWfibXFZgGtyWYV/zF5vk=
-github.com/kodabb/go-mtgban v0.0.0-20200617054939-eb58d36699ee/go.mod h1:821Cg6RcFUVsQ+7o+FMUORPnI+JG9I0o+AfAjMGQwQk=
+github.com/kodabb/go-mtgban v0.0.0-20200618173449-d319708f8a23 h1:0AKbR4p4z6kPQPsuerpzTPN8w7SDa9hb3d/q0mo1Uvw=
+github.com/kodabb/go-mtgban v0.0.0-20200618173449-d319708f8a23/go.mod h1:821Cg6RcFUVsQ+7o+FMUORPnI+JG9I0o+AfAjMGQwQk=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca h1:NugYot0LIVPxTvN8n+Kvkn6TrbMyxQiuvKdEwFdR9vI=
