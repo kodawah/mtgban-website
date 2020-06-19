@@ -92,6 +92,11 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			query = strings.TrimSpace(query)
 		}
 
+		if strings.Contains(query, " // ") {
+			s := strings.Split(query, " // ")
+			query = s[0]
+		}
+
 		for _, seller := range Sellers {
 			inventory, err := seller.Inventory()
 			if err != nil {
