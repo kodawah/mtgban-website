@@ -54,6 +54,7 @@ func periodicFunction() {
 
 	newcfb := channelfireball.NewScraper()
 	newcfb.LogCallback = log.Printf
+	newcfb.MaxConcurrency = 6
 
 	newmm := miniaturemarket.NewScraper()
 	newmm.LogCallback = log.Printf
@@ -65,8 +66,15 @@ func periodicFunction() {
 	tcg.Affiliate = TCGConfig.Affiliate
 	tcg.LogCallback = log.Printf
 
+	// keep the two tcg scrapers separate as we need the garbage collector
+	// to remove the unneeded sub sellers
+	tcgbuy := tcgplayer.NewScraperMarket(TCGConfig.PublicId, TCGConfig.PrivateId)
+	tcgbuy.Affiliate = TCGConfig.Affiliate
+	tcgbuy.LogCallback = log.Printf
+
 	newcsi := coolstuffinc.NewScraper()
 	newcsi.LogCallback = log.Printf
+	newcfb.MaxConcurrency = 6
 
 	newbc.Register(newck)
 	newbc.Register(newsz)
@@ -76,7 +84,7 @@ func periodicFunction() {
 		newbc.Register(newcfb)
 		newbc.Register(newmm)
 		newbc.Register(newcsi)
-		newbc.RegisterVendor(tcg)
+		newbc.RegisterVendor(tcgbuy)
 
 		sellers, err := mtgban.Seller2Sellers(tcg)
 		if err != nil {
