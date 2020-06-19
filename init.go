@@ -54,6 +54,7 @@ func periodicFunction() {
 
 	newcfb := channelfireball.NewScraper()
 	newcfb.LogCallback = log.Printf
+	newcfb.MaxConcurrency = 6
 
 	newmm := miniaturemarket.NewScraper()
 	newmm.LogCallback = log.Printf
