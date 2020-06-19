@@ -76,6 +76,7 @@ func periodicFunction() {
 		newbc.Register(newcfb)
 		newbc.Register(newmm)
 		newbc.Register(newcsi)
+		newbc.RegisterVendor(tcg)
 
 		sellers, err := mtgban.Seller2Sellers(tcg)
 		if err != nil {
