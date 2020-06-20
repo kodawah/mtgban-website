@@ -131,7 +131,6 @@ func periodicFunction() {
 		log.Println("-- OK")
 	}
 
-	BanClient = newbc
 	Sellers = newSellers
 	Vendors = newVendors
 

@@ -90,7 +90,6 @@ type TCGArgs struct {
 	PrivateId string
 }
 
-var BanClient *mtgban.BanClient
 var DevMode bool
 var SigCheck bool
 var CKPartner string

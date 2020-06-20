@@ -42,8 +42,8 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	}
 	if enabled == "ALL" {
 		shorthands := []string{}
-		for _, scraper := range BanClient.Scrapers() {
-			shorthands = append(shorthands, scraper.Info().Shorthand)
+		for _, seller := range Sellers {
+			shorthands = append(shorthands, seller.Info().Shorthand)
 		}
 		enabled = strings.Join(shorthands, ",")
 	} else if enabled == "DEFAULT" {
@@ -52,7 +52,6 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 
 	r.ParseForm()
 
-	var ok bool
 	var source mtgban.Seller
 	var useCredit bool
 	var nocond, nofoil, nocomm bool
@@ -67,13 +66,14 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 				message = "Unknown " + v[0] + " seller"
 				break
 			}
-			scraper, err := BanClient.ScraperByName(v[0])
-			if err != nil {
-				message = "Unknown " + v[0] + " seller"
-				break
+
+			for _, seller := range Sellers {
+				if seller.Info().Shorthand == v[0] {
+					source = seller
+					break
+				}
 			}
-			source, ok = scraper.(mtgban.Seller)
-			if !ok {
+			if source == nil {
 				message = "Unknown " + v[0] + " seller (vendor only?)"
 				break
 			}
