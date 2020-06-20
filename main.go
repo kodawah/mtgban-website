@@ -247,8 +247,15 @@ func main() {
 			log.Fatalln(err)
 		}
 
-		periodicFunction()
+		periodicFunction(true)
 		DatabaseLoaded = true
+
+		// If today's cache is missing, schedule a refresh right away
+		fi, err := os.Stat(fmt.Sprintf("cache_inv/%03d", time.Now().YearDay()))
+		if os.IsNotExist(err) || !fi.IsDir() {
+			log.Println("Loaded too old data, refreshing in the background")
+			periodicFunction(false)
+		}
 	}()
 
 	// load necessary environmental variables
@@ -260,7 +267,7 @@ func main() {
 	// refresh every few hours
 	go func() {
 		for _ = range time.NewTicker(time.Duration(Refresh) * time.Hour).C {
-			periodicFunction()
+			periodicFunction(false)
 		}
 	}()
 
