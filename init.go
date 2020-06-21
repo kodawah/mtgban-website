@@ -268,12 +268,6 @@ func periodicFunction(init bool) {
 	tcg.Affiliate = TCGConfig.Affiliate
 	tcg.LogCallback = log.Printf
 
-	// keep the two tcg scrapers separate as we need the garbage collector
-	// to remove the unneeded sub sellers
-	tcgbuy := tcgplayer.NewScraperMarket(TCGConfig.PublicId, TCGConfig.PrivateId)
-	tcgbuy.Affiliate = TCGConfig.Affiliate
-	tcgbuy.LogCallback = log.Printf
-
 	newcsi := coolstuffinc.NewScraper()
 	newcsi.LogCallback = log.Printf
 	newcfb.MaxConcurrency = 6
@@ -290,7 +284,7 @@ func periodicFunction(init bool) {
 		newbc.Register(newcfb)
 		newbc.Register(newmm)
 		newbc.Register(newcsi)
-		newbc.RegisterVendor(tcgbuy)
+		newbc.RegisterVendor(tcg)
 
 		err := specialTCGhandle(init, currentDir, newbc, tcg)
 		if err != nil {
