@@ -291,7 +291,7 @@ func main() {
 	http.Handle("/api/mtgjson/ck.json", enforceSigning(http.HandlerFunc(API)))
 	http.HandleFunc("/favicon.ico", Favicon)
 	http.HandleFunc("/auth", Auth)
-	http.ListenAndServe(getPort(), nil)
+	log.Fatal(http.ListenAndServe(getPort(), nil))
 }
 
 // Detect $PORT and if present uses it for listen and serve else defaults to :8080
@@ -310,6 +310,7 @@ func render(w http.ResponseWriter, tmpl string, pageVars PageVars) {
 	t, err := template.ParseFiles(tmpl) // parse the template file held in the templates folder
 	if err != nil {                     // if there is an error
 		log.Print("template parsing error: ", err) // log it
+		return
 	}
 
 	err = t.Execute(w, pageVars) // execute the template and pass in the variables to fill the gaps
