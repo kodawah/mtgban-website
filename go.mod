@@ -15,4 +15,5 @@ require (
 	github.com/kodabb/go-mtgmatcher v0.0.0-20200620032043-71963c8e4215
 	golang.org/x/net v0.0.0-20200222033325-078779b8f2d8 // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
+	gopkg.in/robfig/cron.v2 v2.0.0-20150107220207-be2e0b0deed5
 )

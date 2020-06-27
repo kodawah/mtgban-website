@@ -239,8 +239,13 @@ func specialTCGhandle(init bool, currentDir string, newbc *mtgban.BanClient, tcg
 	return nil
 }
 
-func periodicFunction(init bool) {
-	log.Println("Updating data")
+func loadScrapers() {
+	init := !DatabaseLoaded
+	if init {
+		log.Println("Loading data")
+	} else {
+		log.Println("Updating data")
+	}
 
 	newbc := mtgban.NewClient()
 

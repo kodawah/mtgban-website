@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	cron "gopkg.in/robfig/cron.v2"
+
 	"github.com/kodabb/go-mtgban/mtgban"
 	"github.com/kodabb/go-mtgban/mtgdb"
 )
@@ -247,14 +249,14 @@ func main() {
 			log.Fatalln(err)
 		}
 
-		periodicFunction(true)
+		loadScrapers()
 		DatabaseLoaded = true
 
 		// If today's cache is missing, schedule a refresh right away
 		fi, err := os.Stat(fmt.Sprintf("cache_inv/%03d", time.Now().YearDay()))
 		if os.IsNotExist(err) || !fi.IsDir() {
 			log.Println("Loaded too old data, refreshing in the background")
-			periodicFunction(false)
+			loadScrapers()
 		}
 	}()
 
@@ -264,12 +266,10 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	c := cron.New()
 	// refresh every few hours
-	go func() {
-		for _ = range time.NewTicker(time.Duration(Refresh) * time.Hour).C {
-			periodicFunction(false)
-		}
-	}()
+	c.AddFunc(fmt.Sprintf("@every %dh", Refresh), loadScrapers)
+	c.Start()
 
 	// serve everything in known folders as a file
 	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(&FileSystem{http.Dir("css")})))
