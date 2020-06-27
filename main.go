@@ -241,11 +241,13 @@ func main() {
 	go func() {
 		var err error
 
-		log.Println("Loading MTGJSON")
+		log.Println("Loading MTGJSONv5")
 		err = loadDatastore()
 		if err != nil {
 			log.Fatalln(err)
 		}
+
+		log.Println("Loading MTGJSON")
 		err = loadDB()
 		if err != nil {
 			log.Fatalln(err)
