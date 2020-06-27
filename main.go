@@ -31,6 +31,7 @@ type Arbitrage struct {
 	LastUpdate string
 	Arbit      []mtgban.ArbitEntry
 	Len        int
+	HasCredit  bool
 }
 
 type PageVars struct {
@@ -241,10 +242,12 @@ func main() {
 	go func() {
 		var err error
 
-		log.Println("Loading MTGJSONv5")
-		err = loadDatastore()
-		if err != nil {
-			log.Fatalln(err)
+		if !DevMode {
+			log.Println("Loading MTGJSONv5")
+			err = loadDatastore()
+			if err != nil {
+				log.Fatalln(err)
+			}
 		}
 
 		log.Println("Loading MTGJSON")

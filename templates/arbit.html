@@ -149,9 +149,12 @@
                         <th class="stickyHeaderTiny">
                             <a href="javascript:sortBy('buy_price', '{{.Name}}')">Buy Price</a>
                         </th>
-                        <th class="stickyHeaderTiny">
-                            <a href="javascript:sortBy('trade_price', '{{.Name}}')">Trade Price</a>
-                        </th>
+                        {{$save := .}}
+                        {{if .HasCredit}}
+                            <th class="stickyHeaderTiny">
+                                <a href="javascript:sortBy('trade_price', '{{.Name}}')">Trade Price</a>
+                            </th>
+                        {{end}}
                         <th class="stickyHeaderTiny">
                             <a href="javascript:sortBy('diff', '{{.Name}}')">Difference</a>
                         </th>
@@ -189,9 +192,11 @@
                             <td>
                                 $ {{.BuylistEntry.BuyPrice}}
                             </td>
-                            <td>
-                                $ {{printf "%.2f" .BuylistEntry.TradePrice}}
-                            </td>
+                            {{if $save.HasCredit}}
+                                <td>
+                                    $ {{printf "%.2f" .BuylistEntry.TradePrice}}
+                                </td>
+                            {{end}}
                             <td>
                                 $ {{printf "%.2f" .Difference}}
                             </td>

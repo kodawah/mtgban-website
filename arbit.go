@@ -248,6 +248,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			LastUpdate: vendor.Info().BuylistTimestamp.Format(time.RFC3339),
 			Arbit:      arbit,
 			Len:        len(arbit),
+			HasCredit:  !vendor.Info().NoCredit,
 		})
 	}
 
