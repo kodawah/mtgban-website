@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"runtime/debug"
 	"strconv"
 	"strings"
 	"time"
@@ -317,7 +316,4 @@ func render(w http.ResponseWriter, tmpl string, pageVars PageVars) {
 	if err != nil {              // if there is an error
 		log.Print("template executing error: ", err) //log it
 	}
-
-	// Clean as much as possible to that we stay under quota
-	go debug.FreeOSMemory()
 }

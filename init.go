@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"path"
-	"runtime/debug"
 	"sort"
 	"time"
 
@@ -353,9 +352,6 @@ func loadScrapers() {
 	}
 
 	LastUpdate = time.Now()
-
-	// Clean as much as possible to that we stay under quota
-	debug.FreeOSMemory()
 
 	log.Println("Scrapers loaded")
 }
