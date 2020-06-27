@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path"
 	"runtime/debug"
@@ -16,8 +17,6 @@ import (
 	"github.com/kodabb/go-mtgban/ninetyfive"
 	"github.com/kodabb/go-mtgban/strikezone"
 	"github.com/kodabb/go-mtgban/tcgplayer"
-
-	"log"
 
 	"github.com/kodabb/go-mtgban/mtgban"
 	"github.com/kodabb/go-mtgban/mtgdb"
