@@ -265,6 +265,14 @@ func main() {
 	c := cron.New()
 	// refresh every few hours
 	c.AddFunc(fmt.Sprintf("@every %dh", Refresh), loadScrapers)
+	// refresh at 12:00 every Tuesday
+	c.AddFunc("0 12 * * 2", func() {
+		log.Println("Reloading MTGJSON")
+		err := loadDB()
+		if err != nil {
+			log.Println(err)
+		}
+	})
 	c.Start()
 
 	// serve everything in known folders as a file
