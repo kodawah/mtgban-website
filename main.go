@@ -246,11 +246,7 @@ func main() {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		if DevMode {
-			err = mtgdb.RegisterWithPaths("allprintings.json", "allcards.json")
-		} else {
-			err = loadDB()
-		}
+		err = loadDB()
 		if err != nil {
 			log.Fatalln(err)
 		}

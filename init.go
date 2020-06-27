@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"path"
 	"runtime/debug"
@@ -25,19 +24,7 @@ import (
 )
 
 func loadDB() error {
-	respPrintings, err := http.Get("https://www.mtgjson.com/files/AllPrintings.json")
-	if err != nil {
-		return err
-	}
-	defer respPrintings.Body.Close()
-
-	respCards, err := http.Get("https://www.mtgjson.com/files/AllCards.json")
-	if err != nil {
-		return err
-	}
-	defer respCards.Body.Close()
-
-	return mtgdb.RegisterWithReaders(respPrintings.Body, respCards.Body)
+	return mtgdb.RegisterWithPaths("allprintings.json", "allcards.json")
 }
 
 func fileExists(filename string) bool {
