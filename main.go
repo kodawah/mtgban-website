@@ -231,6 +231,12 @@ func main() {
 		SigCheck = *sigCheck
 	}
 
+	// load necessary environmental variables
+	err := loadVars()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	// load website up
 	go func() {
 		var err error
@@ -259,12 +265,6 @@ func main() {
 			loadScrapers()
 		}
 	}()
-
-	// load necessary environmental variables
-	err := loadVars()
-	if err != nil {
-		log.Fatalln(err)
-	}
 
 	c := cron.New()
 	// refresh every few hours
