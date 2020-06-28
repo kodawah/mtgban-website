@@ -197,7 +197,7 @@ func getUserTier(tc *http.Client, userId string) (string, error) {
 // by the url since it can be relative and thus empty
 func getBaseURL(r *http.Request) string {
 	host := r.Host
-	if host == "mtgban.herokuapp.com" {
+	if host == "localhost"+getPort() && !DevMode {
 		host = "www.mtgban.com"
 	}
 	baseURL := "http://" + host
@@ -340,7 +340,7 @@ func enforceSigning(next http.Handler) http.Handler {
 		sig := v.Get("Signature")
 		exp := v.Get("Expires")
 
-		data := fmt.Sprintf("%s%s%s%s", r.Method, exp, r.Host, q.Encode())
+		data := fmt.Sprintf("%s%s%s%s", r.Method, exp, getBaseURL(r), q.Encode())
 		valid := signHMACSHA1Base64([]byte(os.Getenv("BAN_SECRET")), []byte(data))
 		expires, err := strconv.ParseInt(exp, 10, 64)
 		if SigCheck && (err != nil || valid != sig || expires < time.Now().Unix()) {
@@ -385,7 +385,7 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) string {
 	sourceURL.Scheme = bu.Scheme
 	sourceURL.Host = bu.Host
 
-	data := fmt.Sprintf("GET%d%s%s", expires.Unix(), sourceURL.Host, v.Encode())
+	data := fmt.Sprintf("GET%d%s%s", expires.Unix(), sourceURL.Scheme+"://"+sourceURL.Host, v.Encode())
 	key := os.Getenv("BAN_SECRET")
 	sig := signHMACSHA1Base64([]byte(key), []byte(data))
 
