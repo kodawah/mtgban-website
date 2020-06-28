@@ -295,7 +295,6 @@ func main() {
 }
 
 // Detect $PORT and if present uses it for listen and serve else defaults to :8080
-// This is so that app can run on Heroku
 func getPort() string {
 	p := os.Getenv("PORT")
 	if p != "" {
