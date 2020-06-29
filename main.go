@@ -104,7 +104,6 @@ var DefaultSellers string
 var AdminIds []string
 var PartnerIds []string
 var RootId string
-var Refresh int
 
 func Favicon(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "img/misc/favicon.ico")
@@ -183,7 +182,6 @@ func loadVars() (err error) {
 
 	keyVars := []string{
 		"CARDKINGDOM_PARTNER",
-		"DATA_REFRESH",
 		"BAN_SECRET",
 		"TCG_AFFILIATE",
 		"TCG_PUBLIC_ID",
@@ -204,10 +202,6 @@ func loadVars() (err error) {
 	}
 
 	CKPartner = envVars["CARDKINGDOM_PARTNER"]
-	Refresh, err = strconv.Atoi(envVars["DATA_REFRESH"])
-	if err != nil {
-		return err
-	}
 	TCGConfig = TCGArgs{
 		Affiliate: envVars["TCG_AFFILIATE"],
 		PublicId:  envVars["TCG_PUBLIC_ID"],
@@ -267,8 +261,8 @@ func main() {
 	}()
 
 	c := cron.New()
-	// refresh every few hours
-	c.AddFunc(fmt.Sprintf("@every %dh", Refresh), loadScrapers)
+	// refresh every day at 13:00
+	c.AddFunc("0 13 * * *", loadScrapers)
 	// refresh at 12:00 every Tuesday
 	c.AddFunc("0 12 * * 2", func() {
 		log.Println("Reloading MTGJSON")
