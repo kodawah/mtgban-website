@@ -263,6 +263,8 @@ func main() {
 	c := cron.New()
 	// refresh every day at 13:00
 	c.AddFunc("0 13 * * *", loadScrapers)
+	// refresh CK at every 8th hour
+	c.AddFunc("0 */8 * * *", loadCK)
 	// refresh at 12:00 every Tuesday
 	c.AddFunc("0 12 * * 2", func() {
 		log.Println("Reloading MTGJSON")
