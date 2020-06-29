@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -253,8 +254,8 @@ func main() {
 		DatabaseLoaded = true
 
 		// If today's cache is missing, schedule a refresh right away
-		fi, err := os.Stat(fmt.Sprintf("cache_inv/%03d", time.Now().YearDay()))
-		if os.IsNotExist(err) || !fi.IsDir() {
+		files, err := ioutil.ReadDir(fmt.Sprintf("cache_inv/%03d", time.Now().YearDay()))
+		if err != nil || len(files) < len(Sellers)/2 {
 			log.Println("Loaded too old data, refreshing in the background")
 			loadScrapers()
 		}
