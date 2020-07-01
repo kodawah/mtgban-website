@@ -54,7 +54,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 
 	var source mtgban.Seller
 	var useCredit bool
-	var nocond, nofoil, nocomm bool
+	var nocond, nofoil, nocomm, noposi bool
 	var message string
 	var sorting string
 
@@ -92,6 +92,9 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 
 		case "nocomm":
 			nocomm, _ = strconv.ParseBool(v[0])
+
+		case "noposi":
+			noposi, _ = strconv.ParseBool(v[0])
 		}
 	}
 
@@ -140,6 +143,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	pageVars.FilterCond = nocond
 	pageVars.FilterFoil = nofoil
 	pageVars.FilterComm = nocomm
+	pageVars.FilterNega = noposi
 
 	pageVars.Arb = []Arbitrage{}
 	pageVars.Images = map[mtgdb.Card]string{}
@@ -151,6 +155,10 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 
 		opts := &mtgban.ArbitOpts{
 			MinSpread: 10,
+		}
+		if noposi {
+			opts.MinSpread = -30
+			opts.MinDiff = -100
 		}
 		if vendor.Info().Shorthand == "ABU" {
 			opts.UseTrades = useCredit
@@ -209,8 +217,8 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			return arbit[i].Spread > arbit[j].Spread
 		})
 		for i := len(arbit) - 1; i >= 0; i-- {
-			if arbit[i].Spread > 650 {
-				log.Printf("Skipping impossible spread of %f", arbit[i].Spread)
+			if arbit[i].Spread > 650 || (noposi && arbit[i].Spread > 10) {
+				log.Printf("Skipping spread of %f", arbit[i].Spread)
 				arbit = arbit[i:]
 				break
 			}

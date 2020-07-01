@@ -67,6 +67,7 @@ type PageVars struct {
 	FilterCond bool
 	FilterFoil bool
 	FilterComm bool
+	FilterNega bool
 }
 
 var DefaultNav = []NavElem{
