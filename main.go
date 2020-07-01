@@ -105,6 +105,7 @@ var DefaultSellers string
 var AdminIds []string
 var PartnerIds []string
 var RootId string
+var SCGCategories string
 
 func Favicon(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "img/misc/favicon.ico")
@@ -193,6 +194,7 @@ func loadVars() (err error) {
 		"BAN_ADMIN_IDS",
 		"BAN_PARTNER_IDS",
 		"BAN_ROOT_ID",
+		"SCG_CATEGORIES_URL",
 	}
 	for _, key := range keyVars {
 		v := os.Getenv(key)
@@ -212,6 +214,7 @@ func loadVars() (err error) {
 	AdminIds = strings.Split(envVars["BAN_ADMIN_IDS"], ",")
 	PartnerIds = strings.Split(envVars["BAN_PARTNER_IDS"], ",")
 	RootId = envVars["BAN_ROOT_ID"]
+	SCGCategories = envVars["SCG_CATEGORIES_URL"]
 
 	return nil
 }

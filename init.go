@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"path"
 	"sort"
@@ -12,10 +13,13 @@ import (
 	"github.com/kodabb/go-mtgban/cardkingdom"
 	"github.com/kodabb/go-mtgban/channelfireball"
 	"github.com/kodabb/go-mtgban/coolstuffinc"
+	"github.com/kodabb/go-mtgban/facetoface"
 	"github.com/kodabb/go-mtgban/miniaturemarket"
 	"github.com/kodabb/go-mtgban/ninetyfive"
+	"github.com/kodabb/go-mtgban/starcitygames"
 	"github.com/kodabb/go-mtgban/strikezone"
 	"github.com/kodabb/go-mtgban/tcgplayer"
+	"github.com/kodabb/go-mtgban/trollandtoad"
 
 	"github.com/kodabb/go-mtgban/mtgban"
 	"github.com/kodabb/go-mtgban/mtgdb"
@@ -221,6 +225,23 @@ func loadCK() {
 	}
 }
 
+func trySCGScraper() mtgban.Vendor {
+	resp, err := http.Get(SCGCategories)
+	if err != nil {
+		log.Println("SCG", err)
+		return nil
+	}
+	defer resp.Body.Close()
+
+	scg, err := starcitygames.NewScraper(resp.Body)
+	if err != nil {
+		log.Println("SCG", err)
+		return nil
+	}
+
+	return scg
+}
+
 func loadScrapers() {
 	init := !DatabaseLoaded
 	if init {
@@ -259,6 +280,16 @@ func loadScrapers() {
 	newcsi.LogCallback = log.Printf
 	newcfb.MaxConcurrency = 6
 
+	newftf, _ := facetoface.NewScraper()
+	if newftf != nil {
+		newftf.LogCallback = log.Printf
+	}
+
+	newscg := trySCGScraper()
+
+	newtat := trollandtoad.NewScraper()
+	newtat.LogCallback = log.Printf
+
 	dirName := "cache_inv/"
 	currentDir := fmt.Sprintf("%s%03d", dirName, time.Now().YearDay())
 	mkDirIfNotExisting(currentDir)
@@ -272,6 +303,14 @@ func loadScrapers() {
 		newbc.Register(newmm)
 		newbc.Register(newcsi)
 		newbc.RegisterVendor(tcg)
+		newbc.Register(newtat)
+
+		if newftf != nil {
+			newbc.Register(newftf)
+		}
+		if newscg != nil {
+			newbc.RegisterVendor(newscg)
+		}
 
 		err := specialTCGhandle(init, currentDir, newbc, tcg)
 		if err != nil {
