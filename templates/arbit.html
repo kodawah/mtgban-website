@@ -96,7 +96,7 @@
                             <a class="btn normal" href="arbit?source={{$.SellerShort}}&nocomm=true&sig={{$.Signature}}{{if $.FilterFoil}}&nofoil=true{{end}}{{if $.FilterCond}}&nocond=true{{end}}{{if $.FilterNega}}&noposi=true{{end}}">only Rare/Mythic</a>
                         {{end}}
                         {{if $.FilterNega}}
-                            <a class="btn success" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}{{if $.FilterComm}}&nocomm=true{{end}}{{if $.FilterFoil}}&nofoil=true{{end}}{{if $.FilterCond}}&nocond=true{{end}}"><b>only Rare/Mythic</b></a>
+                            <a class="btn success" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}{{if $.FilterComm}}&nocomm=true{{end}}{{if $.FilterFoil}}&nofoil=true{{end}}{{if $.FilterCond}}&nocond=true{{end}}"><b>only Negative</b></a>
                         {{else}}
                             <a class="btn normal" href="arbit?source={{$.SellerShort}}&noposi=true&sig={{$.Signature}}{{if $.FilterComm}}&nocomm=true{{end}}{{if $.FilterFoil}}&nofoil=true{{end}}{{if $.FilterCond}}&nocond=true{{end}}">only Negative</a>
                         {{end}}
