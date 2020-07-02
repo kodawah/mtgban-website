@@ -153,6 +153,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 							Quantity:    entry.Quantity,
 							URL:         entry.URL,
 						}
+						if seller.Info().CountryFlag != "" {
+							res.ScraperName += " " + seller.Info().CountryFlag
+						}
 						pageVars.FoundSellers[card][conditions] = append(pageVars.FoundSellers[card][conditions], res)
 					}
 				}
@@ -197,6 +200,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 						Ratio:       entry.PriceRatio,
 						Quantity:    entry.Quantity,
 						URL:         entry.URL,
+					}
+					if vendor.Info().CountryFlag != "" {
+						res.ScraperName += " " + vendor.Info().CountryFlag
 					}
 					pageVars.FoundVendors[card] = append(pageVars.FoundVendors[card], res)
 				}
