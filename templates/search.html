@@ -125,7 +125,7 @@
                                         {{end}}
                                     </td>
                                     <td>
-                                        $ {{.Price}}
+                                        $ {{printf "%.2f" .Price}}
                                     </td>
                                     <td>
                                         {{if ne $conditions "TCG"}}
@@ -166,7 +166,7 @@
                                     {{end}}
                                 </td>
                                 <td>
-                                    $ {{.Price}}
+                                    $ {{printf "%.2f" .Price}}
                                 </td>
                                 <td>
                                     {{if ne .Ratio 0.0}}{{printf "%.2f" .Ratio}} %{{end}}

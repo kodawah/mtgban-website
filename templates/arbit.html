@@ -171,10 +171,10 @@
                                 </td>
                             {{end}}
                             <td>
-                                $ {{.InventoryEntry.Price}}
+                                $ {{printf "%.2f" .InventoryEntry.Price}}
                             </td>
                             <td>
-                                $ {{.BuylistEntry.BuyPrice}}
+                                $ {{printf "%.2f" .BuylistEntry.BuyPrice}}
                             </td>
                             {{if $save.HasCredit}}
                                 <td>
