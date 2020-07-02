@@ -110,11 +110,18 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		if !strings.Contains(enabled, newSeller.Info().Shorthand) {
 			continue
 		}
+		if newSeller.Info().Name == "TCG Direct Low" {
+			continue
+		}
 
 		nav := NavElem{
 			Name:  newSeller.Info().Name,
 			Short: newSeller.Info().Shorthand,
 			Link:  "arbit?source=" + newSeller.Info().Shorthand,
+		}
+
+		if newSeller.Info().Name == "TCG Low" {
+			nav.Short = "TCG"
 		}
 		if sig != "" {
 			nav.Link += "&sig=" + sig
