@@ -51,8 +51,8 @@ github.com/hashicorp/go-retryablehttp v0.6.6/go.mod h1:vAew36LZh98gCBJNLH42IQ1ER
 github.com/jawher/mow.cli v1.1.0/go.mod h1:aNaQlc7ozF3vw6IJ2dHjp2ZFiA4ozMIYY6PyuRJwlUg=
 github.com/kennygrant/sanitize v1.2.4 h1:gN25/otpP5vAsO2djbMhF/LQX6R7+O1TB4yv8NzpJ3o=
 github.com/kennygrant/sanitize v1.2.4/go.mod h1:LGsjYYtgxbetdg5owWB2mpgUL6e2nfw2eObZ0u0qvak=
-github.com/kodabb/go-mtgban v0.0.0-20200702145958-968432d931e0 h1:VX5Q0Ys9yVmm27u07ynzHOU1MsRmQXHTwko1HRCUdAQ=
-github.com/kodabb/go-mtgban v0.0.0-20200702145958-968432d931e0/go.mod h1:821Cg6RcFUVsQ+7o+FMUORPnI+JG9I0o+AfAjMGQwQk=
+github.com/kodabb/go-mtgban v0.0.0-20200702161449-f29b3722fbca h1:XdUBIJpeSQYUNOUqdPYK+CBXGS6NZbDwM/300okjfM4=
+github.com/kodabb/go-mtgban v0.0.0-20200702161449-f29b3722fbca/go.mod h1:821Cg6RcFUVsQ+7o+FMUORPnI+JG9I0o+AfAjMGQwQk=
 github.com/kodabb/go-mtgmatcher v0.0.0-20200620032043-71963c8e4215 h1:GO5uY8tZnGi9ZhADubscl2HPQHb5FangPPIEMBe5UCc=
 github.com/kodabb/go-mtgmatcher v0.0.0-20200620032043-71963c8e4215/go.mod h1:IH9x2OBF61ObfRnE847I8oQ6NYhYvPwfCJJHsigqXGw=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
