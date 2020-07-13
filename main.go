@@ -249,22 +249,23 @@ func main() {
 			log.Println("Loaded too old data, refreshing in the background")
 			loadScrapers()
 		}
-	}()
 
-	c := cron.New()
-	// refresh every day at 13:00
-	c.AddFunc("0 13 * * *", loadScrapers)
-	// refresh CK at every 8th hour
-	c.AddFunc("0 */8 * * *", loadCK)
-	// refresh at 12:00 every Tuesday
-	c.AddFunc("0 12 * * 2", func() {
-		log.Println("Reloading MTGJSON")
-		err := loadDB()
-		if err != nil {
-			log.Println(err)
-		}
-	})
-	c.Start()
+		// Set up new refreshes as needed
+		c := cron.New()
+		// refresh every day at 13:00
+		c.AddFunc("0 13 * * *", loadScrapers)
+		// refresh CK at every 8th hour
+		c.AddFunc("0 */8 * * *", loadCK)
+		// refresh at 12:00 every Tuesday
+		c.AddFunc("0 12 * * 2", func() {
+			log.Println("Reloading MTGJSON")
+			err := loadDB()
+			if err != nil {
+				log.Println(err)
+			}
+		})
+		c.Start()
+	}()
 
 	// serve everything in known folders as a file
 	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(&FileSystem{http.Dir("css")})))
