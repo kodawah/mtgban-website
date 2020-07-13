@@ -41,10 +41,10 @@ const (
 
 func getUserToken(code, baseURL, ref string) (string, error) {
 	clientId := PatreonClientId
-	secret := os.Getenv("PATREON_SECRET")
+	secret := Config.Patreon.Secret["ban"]
 	if ref == "CG" {
 		clientId = PatreonPartnerId
-		secret = os.Getenv("PATREON_PARTNER_SECRET")
+		secret = Config.Patreon.Secret["cg"]
 	}
 	resp, err := cleanhttp.DefaultClient().PostForm(PatreonTokenURL, url.Values{
 		"code":          {code},
@@ -197,7 +197,7 @@ func getUserTier(tc *http.Client, userId string) (string, error) {
 // by the url since it can be relative and thus empty
 func getBaseURL(r *http.Request) string {
 	host := r.Host
-	if host == "localhost"+getPort() && !DevMode {
+	if host == "localhost:"+fmt.Sprint(Config.Port) && !DevMode {
 		host = "www.mtgban.com"
 	}
 	baseURL := "http://" + host
@@ -233,20 +233,9 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tierTitle := ""
-	if userIds[0] == RootId {
-		tierTitle = "Root"
-	} else {
-		for _, adminId := range AdminIds {
-			if userIds[0] == adminId {
-				tierTitle = "Admin"
-				break
-			}
-		}
-		for _, partnerId := range PartnerIds {
-			if userIds[0] == partnerId {
-				tierTitle = "Partner"
-				break
-			}
+	for _, tier := range []string{"root", "admin", "partner"} {
+		if stringSliceContains(Config.Patreon.Ids[tier], userIds[0]) {
+			tierTitle = strings.Title(tier)
 		}
 	}
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"html/template"
@@ -46,8 +47,6 @@ type PageVars struct {
 	PatreonPartnerId string
 
 	Title        string
-	CKPartner    string
-	TCGAffiliate string
 	ErrorMessage string
 	InfoMessage  string
 	LastUpdate   string
@@ -88,25 +87,23 @@ var DefaultNav = []NavElem{
 	},
 }
 
-type TCGArgs struct {
-	Affiliate string
-	PublicId  string
-	PrivateId string
+var Config struct {
+	Port           int               `json:"port"`
+	Affiliate      map[string]string `json:"affiliate"`
+	Api            map[string]string `json:"api"`
+	DefaultSellers []string          `json:"default_sellers"`
+	Patreon        struct {
+		Secret map[string]string   `json:"secret"`
+		Ids    map[string][]string `json:"ids"`
+	} `json:"patreon"`
 }
 
 var DevMode bool
 var SigCheck bool
-var CKPartner string
-var TCGConfig TCGArgs
-var DatabaseLoaded bool
 var LastUpdate time.Time
+var DatabaseLoaded bool
 var Sellers []mtgban.Seller
 var Vendors []mtgban.Vendor
-var DefaultSellers string
-var AdminIds []string
-var PartnerIds []string
-var RootId string
-var SCGCategories string
 
 func Favicon(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "img/misc/favicon.ico")
@@ -180,47 +177,36 @@ func genPageNav(activeTab, sig string) PageVars {
 	return pageVars
 }
 
-func loadVars() (err error) {
-	envVars := map[string]string{}
+func loadVars(cfg string) error {
+	// Load from command line
+	file, err := os.Open(cfg)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
 
+	d := json.NewDecoder(file)
+	err = d.Decode(&Config)
+	if err != nil {
+		return err
+	}
+
+	// Load from env
 	keyVars := []string{
-		"CARDKINGDOM_PARTNER",
 		"BAN_SECRET",
-		"TCG_AFFILIATE",
-		"TCG_PUBLIC_ID",
-		"TCG_PRIVATE_ID",
-		"PATREON_SECRET",
-		"PATREON_PARTNER_SECRET",
-		"DATA_ENABLED",
-		"BAN_ADMIN_IDS",
-		"BAN_PARTNER_IDS",
-		"BAN_ROOT_ID",
-		"SCG_CATEGORIES_URL",
 	}
 	for _, key := range keyVars {
 		v := os.Getenv(key)
 		if v == "" {
 			return fmt.Errorf("%s variable not set", key)
 		}
-		envVars[key] = v
 	}
-
-	CKPartner = envVars["CARDKINGDOM_PARTNER"]
-	TCGConfig = TCGArgs{
-		Affiliate: envVars["TCG_AFFILIATE"],
-		PublicId:  envVars["TCG_PUBLIC_ID"],
-		PrivateId: envVars["TCG_PRIVATE_ID"],
-	}
-	DefaultSellers = envVars["DATA_ENABLED"]
-	AdminIds = strings.Split(envVars["BAN_ADMIN_IDS"], ",")
-	PartnerIds = strings.Split(envVars["BAN_PARTNER_IDS"], ",")
-	RootId = envVars["BAN_ROOT_ID"]
-	SCGCategories = envVars["SCG_CATEGORIES_URL"]
 
 	return nil
 }
 
 func main() {
+	config := flag.String("cfg", "config.json", "Load configuration file")
 	devMode := flag.Bool("dev", false, "Enable developer mode")
 	sigCheck := flag.Bool("sig", false, "Enable signature verification")
 	flag.Parse()
@@ -231,7 +217,7 @@ func main() {
 	}
 
 	// load necessary environmental variables
-	err := loadVars()
+	err := loadVars(*config)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -292,16 +278,7 @@ func main() {
 	http.Handle("/api/mtgjson/ck.json", enforceSigning(http.HandlerFunc(API)))
 	http.HandleFunc("/favicon.ico", Favicon)
 	http.HandleFunc("/auth", Auth)
-	log.Fatal(http.ListenAndServe(getPort(), nil))
-}
-
-// Detect $PORT and if present uses it for listen and serve else defaults to :8080
-func getPort() string {
-	p := os.Getenv("PORT")
-	if p != "" {
-		return ":" + p
-	}
-	return ":8080"
+	log.Fatal(http.ListenAndServe(":"+fmt.Sprint(Config.Port), nil))
 }
 
 func render(w http.ResponseWriter, tmpl string, pageVars PageVars) {

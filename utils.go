@@ -39,3 +39,12 @@ func mkDirIfNotExisting(dirName string) error {
 	}
 	return err
 }
+
+func stringSliceContains(slice []string, pb string) bool {
+	for _, e := range slice {
+		if e == pb {
+			return true
+		}
+	}
+	return false
+}

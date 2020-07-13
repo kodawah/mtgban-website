@@ -51,7 +51,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		}
 		enabled = strings.Join(shorthands, ",")
 	} else if enabled == "DEFAULT" {
-		enabled = DefaultSellers
+		enabled = strings.Join(Config.DefaultSellers, ",")
 	}
 
 	r.ParseForm()
@@ -156,8 +156,6 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	pageVars.SellerShort = source.Info().Shorthand
 	pageVars.SellerFull = source.Info().Name
 	pageVars.SellerUpdate = source.Info().InventoryTimestamp.Format(time.RFC3339)
-	pageVars.CKPartner = CKPartner
-	pageVars.TCGAffiliate = TCGConfig.Affiliate
 	pageVars.UseCredit = useCredit
 	pageVars.FilterCond = nocond
 	pageVars.FilterFoil = nofoil

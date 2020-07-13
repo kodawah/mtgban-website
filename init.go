@@ -197,7 +197,7 @@ func loadCK() {
 	log.Println("Reloading CK")
 
 	newck := cardkingdom.NewScraper()
-	newck.Partner = CKPartner
+	newck.Partner = Config.Affiliate["CK"]
 	newck.LogCallback = log.Printf
 
 	for i := range Sellers {
@@ -226,7 +226,7 @@ func loadCK() {
 }
 
 func trySCGScraper() mtgban.Vendor {
-	resp, err := http.Get(SCGCategories)
+	resp, err := http.Get(Config.Api["scg_categories"])
 	if err != nil {
 		log.Println("SCG", err)
 		return nil
@@ -253,7 +253,7 @@ func loadScrapers() {
 	newbc := mtgban.NewClient()
 
 	newck := cardkingdom.NewScraper()
-	newck.Partner = CKPartner
+	newck.Partner = Config.Affiliate["CK"]
 	newck.LogCallback = log.Printf
 
 	newsz := strikezone.NewScraper()
@@ -272,8 +272,8 @@ func loadScrapers() {
 	new95 := ninetyfive.NewScraper()
 	new95.LogCallback = log.Printf
 
-	tcg := tcgplayer.NewScraperMarket(TCGConfig.PublicId, TCGConfig.PrivateId)
-	tcg.Affiliate = TCGConfig.Affiliate
+	tcg := tcgplayer.NewScraperMarket(Config.Api["tcg_public"], Config.Api["tcg_private"])
+	tcg.Affiliate = Config.Affiliate["TCG"]
 	tcg.LogCallback = log.Printf
 
 	newcsi := coolstuffinc.NewScraper()
@@ -284,8 +284,6 @@ func loadScrapers() {
 	if newftf != nil {
 		newftf.LogCallback = log.Printf
 	}
-
-	newscg := trySCGScraper()
 
 	newtat := trollandtoad.NewScraper()
 	newtat.LogCallback = log.Printf
@@ -308,6 +306,7 @@ func loadScrapers() {
 		if newftf != nil {
 			newbc.Register(newftf)
 		}
+		newscg := trySCGScraper()
 		if newscg != nil {
 			newbc.RegisterVendor(newscg)
 		}
