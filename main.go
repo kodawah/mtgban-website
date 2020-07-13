@@ -240,20 +240,27 @@ func main() {
 			log.Fatalln(err)
 		}
 
-		loadScrapers()
+		loadScrapers(true, true)
 		DatabaseLoaded = true
 
 		// If today's cache is missing, schedule a refresh right away
 		files, err := ioutil.ReadDir(fmt.Sprintf("cache_inv/%03d", time.Now().YearDay()))
-		if err != nil || len(files) < len(Sellers)/2 {
-			log.Println("Loaded too old data, refreshing in the background")
-			loadScrapers()
+		if err != nil || len(files) < len(Sellers) {
+			log.Println("Loaded inventory data too old, refreshing in the background")
+			loadScrapers(true, false)
+		}
+		files, err = ioutil.ReadDir(fmt.Sprintf("cache_bl/%03d", time.Now().YearDay()))
+		if err != nil || len(files) < len(Vendors) {
+			log.Println("Loaded buylist data too old, refreshing in the background")
+			loadScrapers(false, true)
 		}
 
 		// Set up new refreshes as needed
 		c := cron.New()
 		// refresh every day at 13:00
-		c.AddFunc("0 13 * * *", loadScrapers)
+		c.AddFunc("0 13 * * *", func() {
+			loadScrapers(true, true)
+		})
 		// refresh CK at every 8th hour
 		c.AddFunc("0 */8 * * *", loadCK)
 		// refresh at 12:00 every Tuesday

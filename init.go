@@ -123,7 +123,7 @@ func dumpBuylistToFile(vendor mtgban.Vendor, currentDir, fname string) error {
 	return os.Symlink(outName, fname)
 }
 
-func specialTCGhandle(init bool, currentDir string, newbc *mtgban.BanClient, tcg *tcgplayer.TCGPlayerMarket) error {
+func specialTCGhandle(init bool, currentDir string, newbc *mtgban.BanClient, tcg mtgban.Market) error {
 	dirName := path.Clean(currentDir+"/..") + "/"
 
 	// Check if both sub seller files are present
@@ -225,24 +225,111 @@ func loadCK() {
 	}
 }
 
-func trySCGScraper() mtgban.Vendor {
-	resp, err := http.Get(Config.Api["scg_categories"])
-	if err != nil {
-		log.Println("SCG", err)
-		return nil
-	}
-	defer resp.Body.Close()
-
-	scg, err := starcitygames.NewScraper(resp.Body)
-	if err != nil {
-		log.Println("SCG", err)
-		return nil
-	}
-
-	return scg
+type scraperOption struct {
+	OnlySeller bool
+	OnlyVendor bool
+	Init       func() (mtgban.Scraper, error)
 }
 
-func loadScrapers() {
+var options = map[string]*scraperOption{
+	"strikezone": &scraperOption{
+		Init: func() (mtgban.Scraper, error) {
+			scraper := strikezone.NewScraper()
+			scraper.LogCallback = log.Printf
+			return scraper, nil
+		},
+	},
+	"cardkingdom": &scraperOption{
+		Init: func() (mtgban.Scraper, error) {
+			scraper := cardkingdom.NewScraper()
+			scraper.LogCallback = log.Printf
+			scraper.Partner = Config.Affiliate["CK"]
+			return scraper, nil
+		},
+	},
+	"abugames": &scraperOption{
+		Init: func() (mtgban.Scraper, error) {
+			scraper := abugames.NewScraper()
+			scraper.LogCallback = log.Printf
+			return scraper, nil
+		},
+	},
+	"channelfireball": &scraperOption{
+		Init: func() (mtgban.Scraper, error) {
+			scraper := channelfireball.NewScraper()
+			scraper.LogCallback = log.Printf
+			scraper.MaxConcurrency = 6
+			return scraper, nil
+		},
+	},
+	"miniaturemarket": &scraperOption{
+		Init: func() (mtgban.Scraper, error) {
+			scraper := miniaturemarket.NewScraper()
+			scraper.LogCallback = log.Printf
+			scraper.Affiliate = "MTGBAN"
+			return scraper, nil
+		},
+	},
+	"ninetyfive": &scraperOption{
+		Init: func() (mtgban.Scraper, error) {
+			scraper := ninetyfive.NewScraper()
+			scraper.LogCallback = log.Printf
+			return scraper, nil
+		},
+	},
+	"facetoface": &scraperOption{
+		Init: func() (mtgban.Scraper, error) {
+			scraper, err := facetoface.NewScraper()
+			if err != nil {
+				return nil, err
+			}
+			scraper.LogCallback = log.Printf
+			return scraper, nil
+		},
+	},
+	"tcg_market": &scraperOption{
+		Init: func() (mtgban.Scraper, error) {
+			scraper := tcgplayer.NewScraperMarket(Config.Api["tcg_public"], Config.Api["tcg_private"])
+			scraper.Affiliate = Config.Affiliate["TCG"]
+			scraper.LogCallback = log.Printf
+			return scraper, nil
+		},
+	},
+	"coolstuffinc": &scraperOption{
+		Init: func() (mtgban.Scraper, error) {
+			scraper := coolstuffinc.NewScraper()
+			scraper.LogCallback = log.Printf
+			scraper.MaxConcurrency = 6
+			return scraper, nil
+		},
+	},
+	"starcitygames": &scraperOption{
+		OnlyVendor: true,
+		Init: func() (mtgban.Scraper, error) {
+			resp, err := http.Get(Config.Api["scg_categories"])
+			if err != nil {
+				return nil, err
+			}
+			defer resp.Body.Close()
+
+			scraper, err := starcitygames.NewScraper(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			scraper.LogCallback = log.Printf
+			return scraper, nil
+		},
+	},
+	"trollandtoad": &scraperOption{
+		Init: func() (mtgban.Scraper, error) {
+			scraper := trollandtoad.NewScraper()
+			scraper.LogCallback = log.Printf
+			return scraper, nil
+		},
+	},
+}
+
+func loadScrapers(doSellers, doVendors bool) {
 	init := !DatabaseLoaded
 	if init {
 		log.Println("Loading data")
@@ -250,70 +337,34 @@ func loadScrapers() {
 		log.Println("Updating data")
 	}
 
-	newbc := mtgban.NewClient()
-
-	newck := cardkingdom.NewScraper()
-	newck.Partner = Config.Affiliate["CK"]
-	newck.LogCallback = log.Printf
-
-	newsz := strikezone.NewScraper()
-	newsz.LogCallback = log.Printf
-
-	newabu := abugames.NewScraper()
-	newabu.LogCallback = log.Printf
-
-	newcfb := channelfireball.NewScraper()
-	newcfb.LogCallback = log.Printf
-	newcfb.MaxConcurrency = 6
-
-	newmm := miniaturemarket.NewScraper()
-	newmm.LogCallback = log.Printf
-
-	new95 := ninetyfive.NewScraper()
-	new95.LogCallback = log.Printf
-
-	tcg := tcgplayer.NewScraperMarket(Config.Api["tcg_public"], Config.Api["tcg_private"])
-	tcg.Affiliate = Config.Affiliate["TCG"]
-	tcg.LogCallback = log.Printf
-
-	newcsi := coolstuffinc.NewScraper()
-	newcsi.LogCallback = log.Printf
-	newcfb.MaxConcurrency = 6
-
-	newftf, _ := facetoface.NewScraper()
-	if newftf != nil {
-		newftf.LogCallback = log.Printf
-	}
-
-	newtat := trollandtoad.NewScraper()
-	newtat.LogCallback = log.Printf
-
 	dirName := "cache_inv/"
 	currentDir := fmt.Sprintf("%s%03d", dirName, time.Now().YearDay())
 	mkDirIfNotExisting(currentDir)
 
-	newbc.Register(newck)
-	newbc.Register(newsz)
-	newbc.Register(new95)
-	if !DevMode {
-		newbc.Register(newabu)
-		newbc.Register(newcfb)
-		newbc.Register(newmm)
-		newbc.Register(newcsi)
-		newbc.RegisterVendor(tcg)
-		newbc.Register(newtat)
+	newbc := mtgban.NewClient()
 
-		if newftf != nil {
-			newbc.Register(newftf)
+	for key, opt := range options {
+		if DevMode && key != "ninetyfive" && key != "cardkingdom" && key != "strikezone" {
+			continue
 		}
-		newscg := trySCGScraper()
-		if newscg != nil {
-			newbc.RegisterVendor(newscg)
-		}
-
-		err := specialTCGhandle(init, currentDir, newbc, tcg)
+		scraper, err := opt.Init()
 		if err != nil {
-			log.Println(err)
+			log.Println("error initializing", key, err)
+			continue
+		}
+
+		if key == "tcg_market" {
+			err := specialTCGhandle(init, currentDir, newbc, scraper.(mtgban.Market))
+			if err != nil {
+				log.Println(err)
+			}
+			newbc.RegisterVendor(scraper)
+		} else if opt.OnlySeller {
+			newbc.RegisterSeller(scraper)
+		} else if opt.OnlyVendor {
+			newbc.RegisterVendor(scraper)
+		} else {
+			newbc.Register(scraper)
 		}
 	}
 
@@ -339,6 +390,24 @@ func loadScrapers() {
 	if Vendors == nil {
 		Vendors = make([]mtgban.Vendor, len(newVendors))
 	}
+
+	if doSellers {
+		loadSellers(newSellers)
+	}
+	if doVendors {
+		loadVendors(newVendors)
+	}
+
+	LastUpdate = time.Now()
+
+	log.Println("Scrapers loaded")
+}
+
+func loadSellers(newSellers []mtgban.Seller) {
+	init := !DatabaseLoaded
+	dirName := "cache_inv/"
+	currentDir := fmt.Sprintf("%s%03d", dirName, time.Now().YearDay())
+	mkDirIfNotExisting(currentDir)
 
 	// Load Sellers
 	for i := range newSellers {
@@ -377,10 +446,12 @@ func loadScrapers() {
 		}
 		log.Println("-- OK")
 	}
+}
 
-	// Chand destination directory
-	dirName = "cache_bl/"
-	currentDir = fmt.Sprintf("%s%03d", dirName, time.Now().YearDay())
+func loadVendors(newVendors []mtgban.Vendor) {
+	init := !DatabaseLoaded
+	dirName := "cache_bl/"
+	currentDir := fmt.Sprintf("%s%03d", dirName, time.Now().YearDay())
 	mkDirIfNotExisting(currentDir)
 
 	// Load Vendors
@@ -420,8 +491,4 @@ func loadScrapers() {
 		}
 		log.Println("-- OK")
 	}
-
-	LastUpdate = time.Now()
-
-	log.Println("Scrapers loaded")
 }
