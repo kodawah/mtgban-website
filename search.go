@@ -97,7 +97,12 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			query = s[0]
 		}
 
-		for _, seller := range Sellers {
+		for i, seller := range Sellers {
+			if seller == nil {
+				log.Println("nil seller at position", i)
+				continue
+			}
+
 			inventory, err := seller.Inventory()
 			if err != nil {
 				log.Println(err)
@@ -162,7 +167,12 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		for _, vendor := range Vendors {
+		for i, vendor := range Vendors {
+			if vendor == nil {
+				log.Println("nil vendor at position", i)
+				continue
+			}
+
 			buylist, err := vendor.Buylist()
 			if err != nil {
 				log.Println(err)

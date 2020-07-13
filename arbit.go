@@ -42,7 +42,11 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	}
 	if enabled == "ALL" {
 		shorthands := []string{}
-		for _, seller := range Sellers {
+		for i, seller := range Sellers {
+			if seller == nil {
+				log.Println("nil seller at position", i)
+				continue
+			}
 			shorthands = append(shorthands, seller.Info().Shorthand)
 		}
 		enabled = strings.Join(shorthands, ",")
@@ -67,7 +71,11 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 
-			for _, seller := range Sellers {
+			for i, seller := range Sellers {
+				if seller == nil {
+					log.Println("nil seller at position", i)
+					continue
+				}
 				if seller.Info().Shorthand == v[0] {
 					source = seller
 					break
@@ -106,7 +114,11 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, newSeller := range Sellers {
+	for i, newSeller := range Sellers {
+		if newSeller == nil {
+			log.Println("nil seller at position", i)
+			continue
+		}
 		if !strings.Contains(enabled, newSeller.Info().Shorthand) {
 			continue
 		}
