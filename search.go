@@ -39,6 +39,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	query := r.FormValue("q")
 
 	if query != "" {
+		log.Println(query)
+
 		pageVars.SearchQuery = query
 		pageVars.CondKeys = []string{"TCG", "NM", "SP", "MP", "HP", "PO"}
 		pageVars.FoundSellers = map[mtgdb.Card]map[string][]mtgban.CombineEntry{}
