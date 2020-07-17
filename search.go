@@ -12,6 +12,12 @@ import (
 	"github.com/kodabb/go-mtgban/mtgjson"
 )
 
+const (
+	MaxSearchResults = 64
+	TooManyMessage   = "More results available, try adjusting your filters"
+	NoResultsMessage = "No results found"
+)
+
 func Search(w http.ResponseWriter, r *http.Request) {
 	sig := r.FormValue("sig")
 
@@ -161,6 +167,11 @@ func Search(w http.ResponseWriter, r *http.Request) {
 						// Check if card already has any entry
 						_, found := pageVars.FoundSellers[card]
 						if !found {
+							// Skip when you have too many results
+							if len(pageVars.FoundSellers) > MaxSearchResults {
+								pageVars.InfoMessage = TooManyMessage
+								continue
+							}
 							pageVars.FoundSellers[card] = map[string][]mtgban.CombineEntry{}
 						}
 
@@ -230,6 +241,10 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				if cmpFunc(card.Name, query) {
 					_, found := pageVars.FoundVendors[card]
 					if !found {
+						if len(pageVars.FoundVendors) > MaxSearchResults {
+							pageVars.InfoMessage = TooManyMessage
+							continue
+						}
 						pageVars.FoundVendors[card] = []mtgban.CombineEntry{}
 					}
 					res := mtgban.CombineEntry{
@@ -248,7 +263,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if len(pageVars.FoundSellers) == 0 && len(pageVars.FoundVendors) == 0 {
-			pageVars.InfoMessage = "No results found"
+			pageVars.InfoMessage = NoResultsMessage
 		}
 	}
 
