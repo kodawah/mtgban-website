@@ -13,6 +13,9 @@ import (
 	"strings"
 	"time"
 
+	"database/sql"
+
+	_ "github.com/go-sql-driver/mysql"
 	cron "gopkg.in/robfig/cron.v2"
 
 	"github.com/kodabb/go-mtgban/mtgban"
@@ -89,6 +92,7 @@ var DefaultNav = []NavElem{
 
 var Config struct {
 	Port           int               `json:"port"`
+	DBAddress      string            `json:"db_address"`
 	Affiliate      map[string]string `json:"affiliate"`
 	Api            map[string]string `json:"api"`
 	DefaultSellers []string          `json:"default_sellers"`
@@ -104,6 +108,7 @@ var LastUpdate time.Time
 var DatabaseLoaded bool
 var Sellers []mtgban.Seller
 var Vendors []mtgban.Vendor
+var CardDB *sql.DB
 
 func Favicon(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "img/misc/favicon.ico")
@@ -218,6 +223,11 @@ func main() {
 
 	// load necessary environmental variables
 	err := loadVars(*config)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	CardDB, err = sql.Open("mysql", Config.DBAddress+"/mtgjson")
 	if err != nil {
 		log.Fatalln(err)
 	}

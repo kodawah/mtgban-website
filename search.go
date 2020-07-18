@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -145,15 +144,17 @@ func Search(w http.ResponseWriter, r *http.Request) {
 						}
 					}
 
-					// Load up image links
-					if pageVars.Images[card] == "" {
-						code, _ := mtgdb.EditionName2Code(card.Edition)
-						link := fmt.Sprintf("https://api.scryfall.com/cards/%s/%s?format=image&version=normal", strings.ToLower(code), card.Number)
-						pageVars.Images[card] = link
-					}
-
 					// Loop thorugh available conditions
 					for _, entry := range entries {
+						// Load up image links
+						if pageVars.Images[card] == "" {
+							link, err := ScryfallImageURL(card, false)
+							if err != nil {
+								log.Println(err)
+							}
+							pageVars.Images[card] = link
+						}
+
 						// Skip cards that have not the desired condition
 						if filterCondition != "" && filterCondition != entry.Conditions {
 							continue
@@ -232,13 +233,15 @@ func Search(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 
-				if pageVars.Images[card] == "" {
-					code, _ := mtgdb.EditionName2Code(card.Edition)
-					link := fmt.Sprintf("https://api.scryfall.com/cards/%s/%s?format=image&version=normal", strings.ToLower(code), card.Number)
-					pageVars.Images[card] = link
-				}
-
 				if cmpFunc(card.Name, query) {
+					if pageVars.Images[card] == "" {
+						link, err := ScryfallImageURL(card, false)
+						if err != nil {
+							log.Println(err)
+						}
+						pageVars.Images[card] = link
+					}
+
 					_, found := pageVars.FoundVendors[card]
 					if !found {
 						if len(pageVars.FoundVendors) > MaxSearchResults {

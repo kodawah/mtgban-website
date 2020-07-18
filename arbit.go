@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"sort"
@@ -224,10 +223,11 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		}
 
 		for _, arb := range arbit {
-			card := arb.Card
-			code, _ := mtgdb.EditionName2Code(card.Edition)
-			link := fmt.Sprintf("https://api.scryfall.com/cards/%s/%s?format=image&version=small", strings.ToLower(code), card.Number)
-			pageVars.Images[card] = link
+			link, err := ScryfallImageURL(arb.Card, true)
+			if err != nil {
+				log.Println(err)
+			}
+			pageVars.Images[arb.Card] = link
 		}
 
 		sort.Slice(arbit, func(i, j int) bool {
