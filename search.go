@@ -53,7 +53,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		pageVars.CondKeys = []string{"TCG", "NM", "SP", "MP", "HP", "PO"}
 		pageVars.FoundSellers = map[mtgdb.Card]map[string][]mtgban.CombineEntry{}
 		pageVars.FoundVendors = map[mtgdb.Card][]mtgban.CombineEntry{}
-		pageVars.Images = map[mtgdb.Card]string{}
+		pageVars.Metadata = map[mtgdb.Card]CardMeta{}
 
 		// Filter out any element from the search syntax
 		filterEdition := ""
@@ -147,12 +147,21 @@ func Search(w http.ResponseWriter, r *http.Request) {
 					// Loop thorugh available conditions
 					for _, entry := range entries {
 						// Load up image links
-						if pageVars.Images[card] == "" {
+						_, found := pageVars.Metadata[card]
+						if !found {
 							link, err := ScryfallImageURL(card, false)
 							if err != nil {
 								log.Println(err)
 							}
-							pageVars.Images[card] = link
+							html, title, err := KeyruneCodes(card)
+							if err != nil {
+								log.Println(err)
+							}
+							pageVars.Metadata[card] = CardMeta{
+								ImageURL:     link,
+								KeyruneHTML:  html,
+								KeyruneTitle: title,
+							}
 						}
 
 						// Skip cards that have not the desired condition
@@ -166,7 +175,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 						}
 
 						// Check if card already has any entry
-						_, found := pageVars.FoundSellers[card]
+						_, found = pageVars.FoundSellers[card]
 						if !found {
 							// Skip when you have too many results
 							if len(pageVars.FoundSellers) > MaxSearchResults {
@@ -234,15 +243,24 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				}
 
 				if cmpFunc(card.Name, query) {
-					if pageVars.Images[card] == "" {
+					_, found := pageVars.Metadata[card]
+					if !found {
 						link, err := ScryfallImageURL(card, false)
 						if err != nil {
 							log.Println(err)
 						}
-						pageVars.Images[card] = link
+						html, title, err := KeyruneCodes(card)
+						if err != nil {
+							log.Println(err)
+						}
+						pageVars.Metadata[card] = CardMeta{
+							ImageURL:     link,
+							KeyruneHTML:  html,
+							KeyruneTitle: title,
+						}
 					}
 
-					_, found := pageVars.FoundVendors[card]
+					_, found = pageVars.FoundVendors[card]
 					if !found {
 						if len(pageVars.FoundVendors) > MaxSearchResults {
 							pageVars.InfoMessage = TooManyMessage

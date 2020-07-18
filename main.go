@@ -38,6 +38,12 @@ type Arbitrage struct {
 	HasCredit  bool
 }
 
+type CardMeta struct {
+	ImageURL     string
+	KeyruneHTML  string
+	KeyruneTitle string
+}
+
 type PageVars struct {
 	Nav       []NavElem
 	Signature string
@@ -59,6 +65,7 @@ type PageVars struct {
 	FoundSellers map[mtgdb.Card]map[string][]mtgban.CombineEntry
 	FoundVendors map[mtgdb.Card][]mtgban.CombineEntry
 	Images       map[mtgdb.Card]string
+	Metadata     map[mtgdb.Card]CardMeta
 
 	SellerShort  string
 	SellerFull   string
