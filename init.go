@@ -233,10 +233,9 @@ type scraperOption struct {
 }
 
 var options = map[string]*scraperOption{
-	"strikezone": &scraperOption{
-		DevEnabled: true,
+	"abugames": &scraperOption{
 		Init: func() (mtgban.Scraper, error) {
-			scraper := strikezone.NewScraper()
+			scraper := abugames.NewScraper()
 			scraper.LogCallback = log.Printf
 			return scraper, nil
 		},
@@ -250,18 +249,29 @@ var options = map[string]*scraperOption{
 			return scraper, nil
 		},
 	},
-	"abugames": &scraperOption{
-		Init: func() (mtgban.Scraper, error) {
-			scraper := abugames.NewScraper()
-			scraper.LogCallback = log.Printf
-			return scraper, nil
-		},
-	},
 	"channelfireball": &scraperOption{
 		Init: func() (mtgban.Scraper, error) {
 			scraper := channelfireball.NewScraper()
 			scraper.LogCallback = log.Printf
 			scraper.MaxConcurrency = 6
+			return scraper, nil
+		},
+	},
+	"coolstuffinc": &scraperOption{
+		Init: func() (mtgban.Scraper, error) {
+			scraper := coolstuffinc.NewScraper()
+			scraper.LogCallback = log.Printf
+			scraper.MaxConcurrency = 6
+			return scraper, nil
+		},
+	},
+	"facetoface": &scraperOption{
+		Init: func() (mtgban.Scraper, error) {
+			scraper, err := facetoface.NewScraper()
+			if err != nil {
+				return nil, err
+			}
+			scraper.LogCallback = log.Printf
 			return scraper, nil
 		},
 	},
@@ -278,32 +288,6 @@ var options = map[string]*scraperOption{
 		Init: func() (mtgban.Scraper, error) {
 			scraper := ninetyfive.NewScraper()
 			scraper.LogCallback = log.Printf
-			return scraper, nil
-		},
-	},
-	"facetoface": &scraperOption{
-		Init: func() (mtgban.Scraper, error) {
-			scraper, err := facetoface.NewScraper()
-			if err != nil {
-				return nil, err
-			}
-			scraper.LogCallback = log.Printf
-			return scraper, nil
-		},
-	},
-	"tcg_market": &scraperOption{
-		Init: func() (mtgban.Scraper, error) {
-			scraper := tcgplayer.NewScraperMarket(Config.Api["tcg_public"], Config.Api["tcg_private"])
-			scraper.Affiliate = Config.Affiliate["TCG"]
-			scraper.LogCallback = log.Printf
-			return scraper, nil
-		},
-	},
-	"coolstuffinc": &scraperOption{
-		Init: func() (mtgban.Scraper, error) {
-			scraper := coolstuffinc.NewScraper()
-			scraper.LogCallback = log.Printf
-			scraper.MaxConcurrency = 6
 			return scraper, nil
 		},
 	},
@@ -324,9 +308,25 @@ var options = map[string]*scraperOption{
 			return scraper, nil
 		},
 	},
+	"strikezone": &scraperOption{
+		DevEnabled: true,
+		Init: func() (mtgban.Scraper, error) {
+			scraper := strikezone.NewScraper()
+			scraper.LogCallback = log.Printf
+			return scraper, nil
+		},
+	},
 	"trollandtoad": &scraperOption{
 		Init: func() (mtgban.Scraper, error) {
 			scraper := trollandtoad.NewScraper()
+			scraper.LogCallback = log.Printf
+			return scraper, nil
+		},
+	},
+	"tcg_market": &scraperOption{
+		Init: func() (mtgban.Scraper, error) {
+			scraper := tcgplayer.NewScraperMarket(Config.Api["tcg_public"], Config.Api["tcg_private"])
+			scraper.Affiliate = Config.Affiliate["TCG"]
 			scraper.LogCallback = log.Printf
 			return scraper, nil
 		},
