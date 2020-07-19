@@ -226,6 +226,7 @@ func loadCK() {
 }
 
 type scraperOption struct {
+	DevEnabled bool
 	OnlySeller bool
 	OnlyVendor bool
 	Init       func() (mtgban.Scraper, error)
@@ -233,6 +234,7 @@ type scraperOption struct {
 
 var options = map[string]*scraperOption{
 	"strikezone": &scraperOption{
+		DevEnabled: true,
 		Init: func() (mtgban.Scraper, error) {
 			scraper := strikezone.NewScraper()
 			scraper.LogCallback = log.Printf
@@ -240,6 +242,7 @@ var options = map[string]*scraperOption{
 		},
 	},
 	"cardkingdom": &scraperOption{
+		DevEnabled: true,
 		Init: func() (mtgban.Scraper, error) {
 			scraper := cardkingdom.NewScraper()
 			scraper.LogCallback = log.Printf
@@ -271,6 +274,7 @@ var options = map[string]*scraperOption{
 		},
 	},
 	"ninetyfive": &scraperOption{
+		DevEnabled: true,
 		Init: func() (mtgban.Scraper, error) {
 			scraper := ninetyfive.NewScraper()
 			scraper.LogCallback = log.Printf
@@ -344,7 +348,7 @@ func loadScrapers(doSellers, doVendors bool) {
 	newbc := mtgban.NewClient()
 
 	for key, opt := range options {
-		if DevMode && key != "ninetyfive" && key != "cardkingdom" && key != "strikezone" {
+		if DevMode && !opt.DevEnabled {
 			continue
 		}
 		scraper, err := opt.Init()
