@@ -280,6 +280,8 @@ func main() {
 		})
 		// refresh CK at every 8th hour
 		c.AddFunc("0 */8 * * *", loadCK)
+		// refresh TCG every day at 1:00
+		c.AddFunc("0 1 * * *", loadTCG)
 		// refresh at 12:00 every Tuesday
 		c.AddFunc("0 12 * * 2", func() {
 			log.Println("Reloading MTGJSON")

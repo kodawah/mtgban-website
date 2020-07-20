@@ -199,6 +199,57 @@ func specialTCGhandle(init bool, currentDir string, newbc *mtgban.BanClient, tcg
 	return nil
 }
 
+func loadTCG() {
+	log.Println("Reloading TCG")
+
+	scraper, err := options["tcg_market"].Init()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	tcgSellers, err := mtgban.Seller2Sellers(scraper.(mtgban.Market))
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	var tcgLow, tcgDirectLow mtgban.Seller
+	for i := range tcgSellers {
+		if tcgSellers[i].Info().Shorthand == TCG_LOW {
+			tcgLow = tcgSellers[i]
+		} else if tcgSellers[i].Info().Shorthand == TCG_DIRECT_LOW {
+			tcgDirectLow = tcgSellers[i]
+		}
+	}
+
+	for i := range Sellers {
+		if Sellers[i] == nil {
+			continue
+		}
+		if Sellers[i].Info().Shorthand == TCG_LOW {
+			Sellers[i] = tcgLow
+			log.Println("TCG Low updated")
+		} else if Sellers[i].Info().Shorthand == TCG_DIRECT_LOW {
+			Sellers[i] = tcgDirectLow
+			log.Println("TCG Direct Low updated")
+		}
+	}
+
+	for i := range Vendors {
+		if Vendors[i] != nil && Vendors[i].Info().Shorthand == TCG_BUYLIST {
+			_, err := scraper.(mtgban.Vendor).Buylist()
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			Vendors[i] = scraper.(mtgban.Vendor)
+			log.Println("TCG Buylist updated")
+		}
+	}
+
+}
+
 func loadCK() {
 	log.Println("Reloading CK")
 
