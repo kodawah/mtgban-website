@@ -13,6 +13,10 @@ import (
 	"github.com/kodabb/go-mtgban/mtgdb"
 )
 
+const (
+	MaxArbitResults = 600
+)
+
 func Arbit(w http.ResponseWriter, r *http.Request) {
 	sig := r.FormValue("sig")
 
@@ -219,8 +223,8 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			arbit = tmp
 		}
 
-		if len(arbit) > 1000 {
-			arbit = arbit[:1000]
+		if len(arbit) > MaxArbitResults {
+			arbit = arbit[:MaxArbitResults]
 		}
 
 		for _, arb := range arbit {
