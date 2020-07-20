@@ -25,6 +25,12 @@ import (
 	"github.com/kodabb/go-mtgban/mtgdb"
 )
 
+const (
+	TCG_LOW        = "TCG Low"
+	TCG_DIRECT_LOW = "TCG Direct Low"
+	TCG_BUYLIST    = "TCG Player"
+)
+
 func loadDB() error {
 	return mtgdb.RegisterWithPaths("allprintings.json", "allcards.json")
 }
@@ -132,7 +138,7 @@ func specialTCGhandle(init bool, currentDir string, newbc *mtgban.BanClient, tcg
 	if init && fileExists(lowname) && fileExists(lowdirectname) {
 		log.Println("Found TCG subseller files")
 
-		for _, name := range []string{"TCG Low", "TCG Direct Low"} {
+		for _, name := range []string{TCG_LOW, TCG_DIRECT_LOW} {
 			info := tcg.Info()
 			info.Name = name
 			info.Shorthand = name
@@ -179,7 +185,7 @@ func specialTCGhandle(init bool, currentDir string, newbc *mtgban.BanClient, tcg
 
 	// Save and register sellers that matter
 	for _, seller := range sellers {
-		if seller.Info().Name == "TCG Low" || seller.Info().Name == "TCG Direct Low" {
+		if seller.Info().Name == TCG_LOW || seller.Info().Name == TCG_DIRECT_LOW {
 			fname := dirName + seller.Info().Name + "-latest.csv"
 			err = dumpInventoryToFile(seller, currentDir, fname)
 			if err != nil {
