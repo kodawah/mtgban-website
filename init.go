@@ -202,31 +202,33 @@ func specialTCGhandle(init bool, currentDir string, newbc *mtgban.BanClient, tcg
 func loadCK() {
 	log.Println("Reloading CK")
 
-	newck := cardkingdom.NewScraper()
-	newck.Partner = Config.Affiliate["CK"]
-	newck.LogCallback = log.Printf
+	scraper, err := options["cardkingdom"].Init()
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
 	for i := range Sellers {
 		if Sellers[i] != nil && Sellers[i].Info().Shorthand == "CK" {
-			_, err := newck.Inventory()
+			_, err := scraper.(mtgban.Seller).Inventory()
 			if err != nil {
 				log.Println(err)
 				continue
 			}
 			log.Println("CK Inventory updated")
-			Sellers[i] = newck
+			Sellers[i] = scraper.(mtgban.Seller)
 		}
 	}
 
 	for i := range Vendors {
 		if Vendors[i] != nil && Vendors[i].Info().Shorthand == "CK" {
-			_, err := newck.Buylist()
+			_, err := scraper.(mtgban.Vendor).Buylist()
 			if err != nil {
 				log.Println(err)
 				continue
 			}
 			log.Println("CK Buylist updated")
-			Vendors[i] = newck
+			Vendors[i] = scraper.(mtgban.Vendor)
 		}
 	}
 }
