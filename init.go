@@ -13,7 +13,6 @@ import (
 	"github.com/kodabb/go-mtgban/cardkingdom"
 	"github.com/kodabb/go-mtgban/channelfireball"
 	"github.com/kodabb/go-mtgban/coolstuffinc"
-	"github.com/kodabb/go-mtgban/facetoface"
 	"github.com/kodabb/go-mtgban/miniaturemarket"
 	"github.com/kodabb/go-mtgban/ninetyfive"
 	"github.com/kodabb/go-mtgban/starcitygames"
@@ -321,16 +320,6 @@ var options = map[string]*scraperOption{
 			scraper := coolstuffinc.NewScraper()
 			scraper.LogCallback = log.Printf
 			scraper.MaxConcurrency = 6
-			return scraper, nil
-		},
-	},
-	"facetoface": &scraperOption{
-		Init: func() (mtgban.Scraper, error) {
-			scraper, err := facetoface.NewScraper()
-			if err != nil {
-				return nil, err
-			}
-			scraper.LogCallback = log.Printf
 			return scraper, nil
 		},
 	},
