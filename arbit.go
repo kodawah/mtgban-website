@@ -169,7 +169,11 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	pageVars.Arb = []Arbitrage{}
 	pageVars.Images = map[mtgdb.Card]string{}
 
-	for _, vendor := range Vendors {
+	for i, vendor := range Vendors {
+		if vendor == nil {
+			log.Println("nil vendor at position", i)
+			continue
+		}
 		if vendor.Info().Name == source.Info().Name {
 			continue
 		}
