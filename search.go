@@ -55,11 +55,25 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		pageVars.FoundVendors = map[mtgdb.Card][]mtgban.CombineEntry{}
 		pageVars.Metadata = map[mtgdb.Card]CardMeta{}
 
+		// Set which comparison function to use depending on the search syntax
+		cmpFunc := mtgjson.NormPrefix
+		if strings.HasPrefix(query, "\"") && strings.HasSuffix(query, "\"") {
+			cmpFunc = mtgjson.NormEquals
+			query = strings.TrimPrefix(query, "\"")
+			query = strings.TrimSuffix(query, "\"")
+			query = strings.TrimSpace(query)
+		} else if strings.HasPrefix(query, "*") && strings.HasSuffix(query, "*") {
+			cmpFunc = mtgjson.NormContains
+			query = strings.TrimPrefix(query, "*")
+			query = strings.TrimSuffix(query, "*")
+			query = strings.TrimSpace(query)
+		}
+
 		// Filter out any element from the search syntax
 		filterEdition := ""
 		filterCondition := ""
 		filterFoil := ""
-		for _, tag := range []string{"s:", "c:", "f:"} {
+		for _, tag := range []string{"s:", "c:", "f:", "sm:"} {
 			if strings.Contains(query, tag) {
 				fields := strings.Fields(query)
 				for _, field := range fields {
@@ -84,24 +98,20 @@ func Search(w http.ResponseWriter, r *http.Request) {
 								filterFoil = "false"
 							}
 							break
+						case "sm:":
+							switch code {
+							case "exact":
+								cmpFunc = mtgjson.NormEquals
+							case "prefix":
+								cmpFunc = mtgjson.NormPrefix
+							case "any":
+								cmpFunc = mtgjson.NormContains
+							}
+							break
 						}
 					}
 				}
 			}
-		}
-
-		// Set which comparison function to use depending on the search syntax
-		cmpFunc := mtgjson.NormPrefix
-		if strings.HasPrefix(query, "\"") && strings.HasSuffix(query, "\"") {
-			cmpFunc = mtgjson.NormEquals
-			query = strings.TrimPrefix(query, "\"")
-			query = strings.TrimSuffix(query, "\"")
-			query = strings.TrimSpace(query)
-		} else if strings.HasPrefix(query, "*") && strings.HasSuffix(query, "*") {
-			cmpFunc = mtgjson.NormContains
-			query = strings.TrimPrefix(query, "*")
-			query = strings.TrimSuffix(query, "*")
-			query = strings.TrimSpace(query)
 		}
 
 		// Handle split cards
