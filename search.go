@@ -56,18 +56,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		pageVars.Metadata = map[mtgdb.Card]CardMeta{}
 
 		// Set which comparison function to use depending on the search syntax
-		cmpFunc := mtgjson.NormPrefix
-		if strings.HasPrefix(query, "\"") && strings.HasSuffix(query, "\"") {
-			cmpFunc = mtgjson.NormEquals
-			query = strings.TrimPrefix(query, "\"")
-			query = strings.TrimSuffix(query, "\"")
-			query = strings.TrimSpace(query)
-		} else if strings.HasPrefix(query, "*") && strings.HasSuffix(query, "*") {
-			cmpFunc = mtgjson.NormContains
-			query = strings.TrimPrefix(query, "*")
-			query = strings.TrimSuffix(query, "*")
-			query = strings.TrimSpace(query)
-		}
+		cmpFunc := mtgjson.NormEquals
 
 		// Filter out any element from the search syntax
 		filterEdition := ""
