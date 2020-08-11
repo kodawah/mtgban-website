@@ -168,7 +168,12 @@
                             </td>
                             {{if ne $.SellerShort "TCG Low"}}
                                 <td>
-                                    <center>{{.InventoryEntry.Quantity}}</center>
+                                    <center>
+                                        {{.InventoryEntry.Quantity}}
+                                        {{if ne .BuylistEntry.Quantity 0}}
+                                            / {{.BuylistEntry.Quantity}}
+                                        {{end}}
+                                    </center>
                                 </td>
                             {{end}}
                             <td>
