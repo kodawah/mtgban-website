@@ -62,7 +62,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		filterEdition := ""
 		filterCondition := ""
 		filterFoil := ""
-		for _, tag := range []string{"s:", "c:", "f:", "sm:"} {
+		filterNumber := ""
+		for _, tag := range []string{"s:", "c:", "f:", "sm:", "cn:"} {
 			if strings.Contains(query, tag) {
 				fields := strings.Fields(query)
 				for _, field := range fields {
@@ -78,6 +79,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 							break
 						case "c:":
 							filterCondition = code
+							break
+						case "cn:":
+							filterNumber = code
 							break
 						case "f:":
 							filterFoil = code
@@ -129,6 +133,10 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				if cmpFunc(card.Name, query) {
 					// Skip cards that are not of the desired set
 					if filterEdition != "" && filterEdition != card.Edition {
+						continue
+					}
+					// Skip cards that are not of the desired collector number
+					if filterNumber != "" && filterNumber != card.Number {
 						continue
 					}
 					// Skip cards that are not as desired foil
