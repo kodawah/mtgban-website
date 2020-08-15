@@ -62,7 +62,10 @@ func API(w http.ResponseWriter, r *http.Request) {
 			log.Println(card)
 			alias, ok := err.(*mtgmatcher.AliasingError)
 			if ok {
-				log.Println(alias.Probe())
+				probes := alias.Probe()
+				for _, probe := range probes {
+					log.Println("-", probe)
+				}
 			}
 			continue
 		}
