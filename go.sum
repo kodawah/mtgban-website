@@ -55,8 +55,8 @@ github.com/kennygrant/sanitize v1.2.4 h1:gN25/otpP5vAsO2djbMhF/LQX6R7+O1TB4yv8Nz
 github.com/kennygrant/sanitize v1.2.4/go.mod h1:LGsjYYtgxbetdg5owWB2mpgUL6e2nfw2eObZ0u0qvak=
 github.com/kodabb/go-mtgban v0.0.0-20200720125012-0ba0cc7e8b7b h1:JPdO7fb6bEY3pM9xFSHgrPNsruFZ0YsMNRDFWyZJy6c=
 github.com/kodabb/go-mtgban v0.0.0-20200720125012-0ba0cc7e8b7b/go.mod h1:821Cg6RcFUVsQ+7o+FMUORPnI+JG9I0o+AfAjMGQwQk=
-github.com/kodabb/go-mtgmatcher v0.0.0-20200620032043-71963c8e4215 h1:GO5uY8tZnGi9ZhADubscl2HPQHb5FangPPIEMBe5UCc=
-github.com/kodabb/go-mtgmatcher v0.0.0-20200620032043-71963c8e4215/go.mod h1:IH9x2OBF61ObfRnE847I8oQ6NYhYvPwfCJJHsigqXGw=
+github.com/kodabb/go-mtgmatcher v0.0.0-20200815202852-df76b07182b8 h1:imkREwYJkOCRmMjVuhizq5ufCJY2Ra6vJL/FskzQxu4=
+github.com/kodabb/go-mtgmatcher v0.0.0-20200815202852-df76b07182b8/go.mod h1:IH9x2OBF61ObfRnE847I8oQ6NYhYvPwfCJJHsigqXGw=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca h1:NugYot0LIVPxTvN8n+Kvkn6TrbMyxQiuvKdEwFdR9vI=

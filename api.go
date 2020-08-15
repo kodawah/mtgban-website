@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/kodabb/go-mtgmatcher/cklite"
-	"github.com/kodabb/go-mtgmatcher/mtgjson"
 	"github.com/kodabb/go-mtgmatcher/mtgmatcher"
 )
 
@@ -29,15 +28,7 @@ func loadDatastore() error {
 	}
 	defer allPrintings.Body.Close()
 
-	allprints, err := mtgjson.LoadAllPrintings(allPrintings.Body)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-
-	mtgmatcher.NewDatastore(allprints)
-
-	return nil
+	return mtgmatcher.LoadDatastore(allPrintings.Body)
 }
 
 func API(w http.ResponseWriter, r *http.Request) {
