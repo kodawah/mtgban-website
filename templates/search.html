@@ -39,7 +39,7 @@
                 {{if ne .Signature ""}}
                     <input type="hidden" name="sig" value="{{.Signature}}">
                 {{end}}
-                <input id="searchbox" class="w3-input w3-border w3-round-small search-input" onClick="this.setSelectionRange(0, this.value.length)" type="text" name="q" placeholder="Search BAN" value="{{.SearchQuery}}">
+                <input id="searchbox" class="w3-input w3-border w3-round-small search-input" onFocus="this.setSelectionRange(0, this.value.length)" type="text" name="q" placeholder="Search BAN" value="{{.SearchQuery}}">
             </form>
         </div>
 
