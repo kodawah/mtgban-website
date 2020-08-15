@@ -360,13 +360,13 @@ span {
     line-height: 1;
 }
 
-/* Hide short text by default (resolution > 1200px) */
+/* Hide short text by default */
 .short-text {
     display: none;
 }
 
-/* When resolution <= 1500px, hide full text and show short text */
-@media (max-width: 1500px) {
+/* For samll resolutions, hide full text and show short text */
+@media (max-width: 1400px) {
     .short-text {
         display: inline-block;
     }
