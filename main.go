@@ -85,12 +85,17 @@ var DefaultNav = []NavElem{
 		Short: "🏡",
 		Link:  "/",
 	},
-	NavElem{
+}
+
+var OrderNav = []string{"Search", "Arbit"}
+
+var ExtraNavs = map[string]NavElem{
+	"Search": NavElem{
 		Name:  "🔍 Search",
 		Short: "🔍",
 		Link:  "/search",
 	},
-	NavElem{
+	"Arbit": NavElem{
 		Name:  "📈 Arbitrage",
 		Short: "📈",
 		Link:  "arbit",
@@ -168,8 +173,19 @@ func genPageNav(activeTab, sig string) PageVars {
 
 		PatreonPartnerId: PatreonPartnerId,
 	}
+
+	// Allocate a new navigation bar
 	pageVars.Nav = make([]NavElem, len(DefaultNav))
 	copy(pageVars.Nav, DefaultNav)
+
+	// Enable buttons according to the enabled features
+	for _, feat := range OrderNav {
+		param, _ := GetParamFromSig(sig, feat)
+		allowed, _ := strconv.ParseBool(param)
+		if allowed {
+			pageVars.Nav = append(pageVars.Nav, ExtraNavs[feat])
+		}
+	}
 
 	signature := ""
 	if sig != "" {

@@ -316,7 +316,7 @@ func enforceSigning(next http.Handler) http.Handler {
 		}
 
 		q := url.Values{}
-		for _, param := range []string{"Search", "Arbit"} {
+		for _, param := range OrderNav {
 			q.Set(param, v.Get(param))
 		}
 		for _, optional := range []string{"Enabled", "API"} {
