@@ -68,8 +68,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				fields := strings.Fields(query)
 				for _, field := range fields {
 					if strings.HasPrefix(field, tag) {
-						query = strings.TrimPrefix(query, field)
-						query = strings.TrimSuffix(query, field)
+						query = strings.Replace(query, field, "", 1)
 						query = strings.TrimSpace(query)
 
 						code := strings.TrimPrefix(field, tag)
