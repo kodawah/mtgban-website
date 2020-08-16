@@ -38,6 +38,22 @@ type Arbitrage struct {
 	HasCredit  bool
 }
 
+type GenericCard struct {
+	Name     string
+	Edition  string
+	SetCode  string
+	Number   string
+	Keyrune  string
+	ImageURL string
+}
+
+type Top25List struct {
+	Ranking int
+	Retail  float64
+	Buylist float64
+	Vendors int
+}
+
 type CardMeta struct {
 	ImageURL     string
 	KeyruneHTML  string
@@ -77,6 +93,9 @@ type PageVars struct {
 	FilterFoil bool
 	FilterComm bool
 	FilterNega bool
+
+	Cards []GenericCard
+	Top25 []Top25List
 }
 
 var DefaultNav = []NavElem{
@@ -87,13 +106,18 @@ var DefaultNav = []NavElem{
 	},
 }
 
-var OrderNav = []string{"Search", "Arbit"}
+var OrderNav = []string{"Search", "Newspaper", "Arbit"}
 
 var ExtraNavs = map[string]NavElem{
 	"Search": NavElem{
 		Name:  "🔍 Search",
 		Short: "🔍",
 		Link:  "/search",
+	},
+	"Newspaper": NavElem{
+		Name:  "🗞️ Newspaper",
+		Short: "🗞️",
+		Link:  "/newspaper",
 	},
 	"Arbit": NavElem{
 		Name:  "📈 Arbitrage",
@@ -121,6 +145,7 @@ var DatabaseLoaded bool
 var Sellers []mtgban.Seller
 var Vendors []mtgban.Vendor
 var CardDB *sql.DB
+var NewspaperDB *sql.DB
 
 func Favicon(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "img/misc/favicon.ico")
@@ -254,6 +279,10 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	NewspaperDB, err = sql.Open("mysql", Config.DBAddress+"/newspaper")
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	// load website up
 	go func() {
@@ -315,6 +344,7 @@ func main() {
 	// when navigating to /home it should serve the home page
 	http.Handle("/", noSigning(http.HandlerFunc(Home)))
 	http.Handle("/search", enforceSigning(http.HandlerFunc(Search)))
+	http.Handle("/newspaper", enforceSigning(http.HandlerFunc(Newspaper)))
 	http.Handle("/arbit", enforceSigning(http.HandlerFunc(Arbit)))
 	http.Handle("/api/mtgjson/ck.json", enforceSigning(http.HandlerFunc(API)))
 	http.HandleFunc("/favicon.ico", Favicon)

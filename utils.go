@@ -1,8 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"os"
+	"strings"
 	"time"
+
+	"github.com/kodabb/go-mtgmatcher/mtgmatcher"
 )
 
 func fileExists(filename string) bool {
@@ -47,4 +51,30 @@ func stringSliceContains(slice []string, pb string) bool {
 		}
 	}
 	return false
+}
+
+func keyruneForCardSet(uuid string) string {
+	uuids := mtgmatcher.GetUUIDs()
+	co, found := uuids[uuid]
+	if !found {
+		return ""
+	}
+
+	sets := mtgmatcher.GetSets()
+	set, found := sets[co.SetCode]
+	if !found {
+		return ""
+	}
+
+	keyrune := set.KeyruneCode
+	if keyrune == "STAR" {
+		keyrune = "PMEI"
+	}
+
+	rarity := co.Card.Rarity
+	if co.SetCode == "TSB" {
+		rarity = "timeshifted"
+	}
+
+	return fmt.Sprintf("ss-%s ss-%s", strings.ToLower(keyrune), rarity)
 }

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Rosario:400' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../css/main.css">
+    <link href="//cdn.jsdelivr.net/npm/keyrune@latest/css/keyrune.css" rel="stylesheet" type="text/css" />
+    <title>{{.Title}}</title>
+</head>
+<body>
+
+<nav>
+    <ul>
+        <li><a href="https://www.patreon.com/ban_community"><img src="img/misc/patreon.png" width=48></a></li>
+        <li><a href="https://discord.gg/hcXpMZB"><img src="img/misc/discord.png" width=48></a></li>
+        {{range .Nav}}
+            <li>
+                <a {{if .Active}}class="{{.Class}}"{{end}} href="{{.Link}}">
+                    <span class="full-text">{{.Name}}</span>
+                    <span class="short-text">{{.Short}}</span>
+                </a>
+            </li>
+        {{end}}
+        <li>Last data refresh: {{.LastUpdate}}</li>
+    </ul>
+</nav>
+
+<div class="mainbody">
+    {{if ne .ErrorMessage ""}}
+        <h1>{{.ErrorMessage}}</h1>
+        {{if .ShowPromo}}
+            <img class="center" src="img/promo/arbit.jpg">
+        {{end}}
+    {{else if ne .SellerShort ""}}
+        <h1>Welcome to BAN Arbitrage<a name="top">&nbsp;</a></h1>
+        <div class="indent">
+            <p>Please use the top bar to choose the seller to buy from.</p>
+            <h2>Instructions</h2>
+            <ul class="indent">
+                <li>Data is refreshed periodically over the day.</li>
+                <li>There is a minimum 10% spread and $0.2 difference for a card to be considered arbitrage.</li>
+                <li>Always check validity of prices before committing anything, it is possible that prices or quantities changed.</li>
+                <li>By default, arbitrage is computed on cash value, taking into account for condition whenever possible.</li>
+                <li>Note that buylist prices are always displayed NM to make them easier to find, but the actual spread and difference is computer according to the card conditions.</li>
+                <li>Each seller page will contain a list of vendors, with a brief summary at the top containing the number of arbitrage opportunities.</li>
+                <li>In case of mistakes or incongruities, please notify the devs in the BAN Discord.</li>
+                <li>Should you find this content useful, consider clicking on one of the provided links to make a purchase on the website, and directly support BAN.</li>
+            </ul>
+        </div>
+    {{else}}
+        <img id="hoverImage" src="" style="position:absolute; z-index: 2;"/>
+
+        <script type="text/javascript">
+            var hoverImage = document.getElementById("hoverImage");
+
+            document.addEventListener("mousemove", getMouse);
+
+            setInterval(followMouse, 10);
+
+            var mouse = {x:0, y:0};
+
+            function getMouse(e){
+                mouse.x = e.pageX+10;
+                mouse.y = e.pageY+10;
+            }
+
+            function followMouse(){
+                hoverImage.style.left = mouse.x + "px";
+                hoverImage.style.top = mouse.y + "px";
+            }
+        </script>
+
+        <h1>Top 25 Singles (3 Week Market Review)</h1>
+        <div class="indent">
+
+            <table onmouseout="document.getElementById('hoverImage').src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';" width=70%>
+                <tr>
+                    <th class="stickyHeaderShort">Ranking</th>
+                    <th class="stickyHeaderShort">Card Name</th>
+                    <th class="stickyHeaderShort">Edition</th>
+                    <th class="stickyHeaderShort"><center>#</center></th>
+                    <th class="stickyHeaderShort">Retail</th>
+                    <th class="stickyHeaderShort">Buylist</th>
+                    <th class="stickyHeaderShort">Vendors</th>
+                 </tr>
+                {{range $i, $card := .Cards}}
+                    {{$top25 := (index $.Top25 $i)}}
+                    <tr onmouseover="document.getElementById('hoverImage').src={{$card.ImageURL}};">
+                        <td>
+                            <center>{{$top25.Ranking}}</center>
+                        </td>
+                        <td>
+                            <a href="search?q={{$card.Name}} s:{{$card.SetCode}} cn:{{$card.Number}}&sig={{$.Signature}}">{{$card.Name}}</a>
+                        </td>
+                        <td>
+                            <i class="ss {{$card.Keyrune}} ss-1x ss-fw"></i> {{$card.Edition}}
+                        </td>
+                        <td>
+                            {{$card.Number}}
+                        </td>
+                        <td>
+                            $ {{printf "%.2f" $top25.Retail}}
+                        </td>
+                        <td>
+                            $ {{printf "%.2f" $top25.Buylist}}
+                        </td>
+                        <td>
+                            {{$top25.Vendors}}
+                        </td>
+                    </tr>
+                {{end}}
+            </table>
+            <br>
+            <h4><p>{{.InfoMessage}}</p></h4>
+            <br><br><br>
+        </div>
+        <br>
+    {{end}}
+</div>
+</body>
+</html>

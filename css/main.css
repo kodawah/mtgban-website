@@ -286,6 +286,13 @@ th.stickyHeaderTiny {
     background-color: #eaeaea;
 }
 
+th.stickyHeaderShort {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 48px;
+    background-color: #eaeaea;
+}
+
 th a {
     color: black;
     text-decoration: none;
