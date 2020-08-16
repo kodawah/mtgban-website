@@ -36,6 +36,11 @@ func KeyruneCodes(card mtgdb.Card) (string, string, error) {
 		rarity = "timeshifted"
 	}
 
+	// Handle an idiosyncrasy between scryfall, keyrune, and mtgjson
+	if keyrune == "STAR" {
+		keyrune = "PMEI"
+	}
+
 	res := fmt.Sprintf("ss-%s ss-%s", strings.ToLower(keyrune), rarity)
 	foil := ""
 	if card.Foil {
