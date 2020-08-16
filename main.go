@@ -98,7 +98,7 @@ var ExtraNavs = map[string]NavElem{
 	"Arbit": NavElem{
 		Name:  "📈 Arbitrage",
 		Short: "📈",
-		Link:  "arbit",
+		Link:  "/arbit",
 	},
 }
 

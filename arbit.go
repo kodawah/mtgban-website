@@ -133,7 +133,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		nav := NavElem{
 			Name:  newSeller.Info().Name,
 			Short: newSeller.Info().Shorthand,
-			Link:  "arbit?source=" + newSeller.Info().Shorthand,
+			Link:  "/arbit?source=" + newSeller.Info().Shorthand,
 		}
 
 		if newSeller.Info().Name == "TCG Low" {
