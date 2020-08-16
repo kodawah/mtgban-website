@@ -21,16 +21,6 @@ type ck2id struct {
 	Foil   *meta `json:"foil,omitempty"`
 }
 
-func loadDatastore() error {
-	allPrintings, err := http.Get("https://mtgjson.com/api/v5/AllPrintings.json")
-	if err != nil {
-		return err
-	}
-	defer allPrintings.Body.Close()
-
-	return mtgmatcher.LoadDatastore(allPrintings.Body)
-}
-
 func API(w http.ResponseWriter, r *http.Request) {
 	sig := r.FormValue("sig")
 

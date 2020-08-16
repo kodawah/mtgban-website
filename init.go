@@ -22,6 +22,7 @@ import (
 
 	"github.com/kodabb/go-mtgban/mtgban"
 	"github.com/kodabb/go-mtgban/mtgdb"
+	"github.com/kodabb/go-mtgmatcher/mtgmatcher"
 )
 
 const (
@@ -32,6 +33,16 @@ const (
 
 func loadDB() error {
 	return mtgdb.RegisterWithPaths("allprintings.json", "allcards.json")
+}
+
+func loadDatastore() error {
+	allPrintingsReader, err := os.Open("allprintings5.json")
+	if err != nil {
+		return err
+	}
+	defer allPrintingsReader.Close()
+
+	return mtgmatcher.LoadDatastore(allPrintingsReader)
 }
 
 func loadInventoryFromFile(info mtgban.ScraperInfo, fname string) (mtgban.Seller, error) {
