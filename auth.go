@@ -316,10 +316,7 @@ func enforceSigning(next http.Handler) http.Handler {
 		}
 
 		q := url.Values{}
-		for _, param := range OrderNav {
-			q.Set(param, v.Get(param))
-		}
-		for _, optional := range []string{"Enabled", "API"} {
+		for _, optional := range append([]string{"Enabled", "API"}, OrderNav...) {
 			val := v.Get(optional)
 			if val != "" {
 				q.Set(optional, val)
@@ -353,16 +350,17 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) string {
 	expires := time.Now().Add(duration)
 
 	v := url.Values{}
+	// Enable option according to tier
 	switch tierTitle {
 	case "Squire", "Partner":
 		v.Set("Search", "true")
-		v.Set("Arbit", "false")
 	case "Merchant":
 		v.Set("Search", "true")
-		v.Set("Arbit", "false")
 	case "Master of Coin", "Admin", "Root":
 		v.Set("Search", "true")
 		v.Set("Arbit", "true")
+	}
+	if v.Get("Arbit") == "true" {
 		if tierTitle == "Root" {
 			v.Set("Enabled", "ALL")
 		} else {
