@@ -17,6 +17,14 @@ const (
 	MaxArbitResults = 600
 )
 
+type Arbitrage struct {
+	Name       string
+	LastUpdate string
+	Arbit      []mtgban.ArbitEntry
+	Len        int
+	HasCredit  bool
+}
+
 func Arbit(w http.ResponseWriter, r *http.Request) {
 	sig := r.FormValue("sig")
 

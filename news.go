@@ -20,6 +20,23 @@ type Top25 struct {
 	Vendors  sql.NullInt64
 }
 
+type GenericCard struct {
+	Name     string
+	Edition  string
+	SetCode  string
+	Number   string
+	Keyrune  string
+	ImageURL string
+	Reserved bool
+}
+
+type Top25List struct {
+	Ranking int
+	Retail  float64
+	Buylist float64
+	Vendors int
+}
+
 func Newspaper(w http.ResponseWriter, r *http.Request) {
 	sig := r.FormValue("sig")
 

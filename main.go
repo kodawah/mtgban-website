@@ -30,31 +30,6 @@ type NavElem struct {
 	Short  string
 }
 
-type Arbitrage struct {
-	Name       string
-	LastUpdate string
-	Arbit      []mtgban.ArbitEntry
-	Len        int
-	HasCredit  bool
-}
-
-type GenericCard struct {
-	Name     string
-	Edition  string
-	SetCode  string
-	Number   string
-	Keyrune  string
-	ImageURL string
-	Reserved bool
-}
-
-type Top25List struct {
-	Ranking int
-	Retail  float64
-	Buylist float64
-	Vendors int
-}
-
 type CardMeta struct {
 	ImageURL     string
 	KeyruneHTML  string
