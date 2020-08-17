@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -42,6 +43,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	query := r.FormValue("q")
+	bestSorting, _ := strconv.ParseBool(r.FormValue("b"))
 
 	// Query is not null, let's get processing
 	if query != "" {
@@ -221,6 +223,16 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
+		if bestSorting {
+			for card := range pageVars.FoundSellers {
+				for cond := range pageVars.FoundSellers[card] {
+					sort.Slice(pageVars.FoundSellers[card][cond], func(i, j int) bool {
+						return pageVars.FoundSellers[card][cond][i].Price < pageVars.FoundSellers[card][cond][j].Price
+					})
+				}
+			}
+		}
+
 		// Really same as above
 		for i, vendor := range Vendors {
 			if vendor == nil {
@@ -289,6 +301,14 @@ func Search(w http.ResponseWriter, r *http.Request) {
 					}
 					pageVars.FoundVendors[card] = append(pageVars.FoundVendors[card], res)
 				}
+			}
+		}
+
+		if bestSorting {
+			for card := range pageVars.FoundVendors {
+				sort.Slice(pageVars.FoundVendors[card], func(i, j int) bool {
+					return pageVars.FoundVendors[card][i].Price > pageVars.FoundVendors[card][j].Price
+				})
 			}
 		}
 

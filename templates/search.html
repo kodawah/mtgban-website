@@ -35,7 +35,13 @@
         <h1>Welcome to BAN Search</h1>
         <div class="indent sticky" style="top:48px; background-color:#f8f8f8; z-index: 1; width: min-content;">
             <form class="search autocomplete" action="search" autocomplete="off" id="searchform">
-                <label style="clear: both; float: left;" for="searchbox">Enter a card name</label>
+                <label style="clear: both; float: left;" for="searchbox">
+                    {{if eq .SearchQuery "" }}
+                        Enter a card name
+                    {{else}}
+                        Enter another card, or <a href="search?q={{.SearchQuery}}&b=true&sig={{.Signature}}">sort results by best price</a>
+                    {{end}}
+                </label>
                 {{if ne .Signature ""}}
                     <input type="hidden" name="sig" value="{{.Signature}}">
                 {{end}}
