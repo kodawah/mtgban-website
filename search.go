@@ -237,6 +237,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				if filterEdition != "" && filterEdition != card.Edition {
 					continue
 				}
+				if filterNumber != "" && filterNumber != card.Number {
+					continue
+				}
 				if filterFoil != "" {
 					foilStatus, err := strconv.ParseBool(filterFoil)
 					if err == nil {
