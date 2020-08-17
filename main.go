@@ -45,6 +45,7 @@ type GenericCard struct {
 	Number   string
 	Keyrune  string
 	ImageURL string
+	Reserved bool
 }
 
 type Top25List struct {

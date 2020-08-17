@@ -104,6 +104,7 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 			Number:   co.Card.Number,
 			Keyrune:  keyruneForCardSet(row.UUID),
 			ImageURL: fmt.Sprintf("https://api.scryfall.com/cards/%s/%s?format=image&version=small", strings.ToLower(co.SetCode), co.Card.Number),
+			Reserved: co.Card.IsReserved,
 		})
 		pageVars.Top25 = append(pageVars.Top25, Top25List{
 			Ranking: row.Ranking,

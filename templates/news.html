@@ -89,7 +89,7 @@
                             <center>{{$top25.Ranking}}</center>
                         </td>
                         <td>
-                            <a href="search?q={{$card.Name}} s:{{$card.SetCode}} cn:{{$card.Number}}&sig={{$.Signature}}">{{$card.Name}}</a>
+                            <a href="search?q={{$card.Name}} s:{{$card.SetCode}} cn:{{$card.Number}}&sig={{$.Signature}}">{{$card.Name}}</a> {{if $card.Reserved}}*{{end}}
                         </td>
                         <td>
                             <i class="ss {{$card.Keyrune}} ss-1x ss-fw"></i> {{$card.Edition}}
