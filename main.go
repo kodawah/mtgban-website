@@ -275,6 +275,11 @@ func main() {
 		loadScrapers(true, true)
 		DatabaseLoaded = true
 
+		// Nothing else to do if hacking around
+		if DevMode {
+			return
+		}
+
 		// If today's cache is missing, schedule a refresh right away
 		files, err := ioutil.ReadDir(fmt.Sprintf("cache_inv/%03d", time.Now().YearDay()))
 		if err != nil || len(files) < len(Sellers) {
