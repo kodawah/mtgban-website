@@ -110,7 +110,12 @@
                 {{end}}
             </table>
             <br>
-            <h4><p>{{.InfoMessage}}</p></h4>
+            <h4>
+                <p>{{.InfoMessage}}</p>
+                {{if .HasReserved}}
+                    <p>* = Part of the <a href="https://mtg.gamepedia.com/Reserved_List">Reserved List</a></p>
+                {{end}}
+            </h4>
             <br><br><br>
         </div>
         <br>

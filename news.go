@@ -131,6 +131,13 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
+	for _, c := range pageVars.Cards {
+		if c.Reserved {
+			pageVars.HasReserved = true
+			break
+		}
+	}
+
 	if len(pageVars.Cards) == 0 {
 		pageVars.InfoMessage = "Newspaper is on strike"
 	}

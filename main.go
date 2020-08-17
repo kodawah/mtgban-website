@@ -70,8 +70,9 @@ type PageVars struct {
 	FilterComm bool
 	FilterNega bool
 
-	Cards []GenericCard
-	Top25 []Top25List
+	Cards       []GenericCard
+	Top25       []Top25List
+	HasReserved bool
 }
 
 var DefaultNav = []NavElem{
