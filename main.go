@@ -164,6 +164,9 @@ func genPageNav(activeTab, sig string) PageVars {
 		}
 	}
 
+	// These values need to be set for every rendered page
+	// In particular the Patreon variables are needed because the signature
+	// could expire in any page, and the button url needs these parameters
 	pageVars := PageVars{
 		Title:        "BAN " + activeTab,
 		Signature:    sig,
