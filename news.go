@@ -37,6 +37,10 @@ type Top25List struct {
 	Vendors int
 }
 
+const (
+	newsPageSize = 25
+)
+
 func Newspaper(w http.ResponseWriter, r *http.Request) {
 	sig := r.FormValue("sig")
 
@@ -89,10 +93,10 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	pageVars.Title = "Top 25 Singles (3 Week Market Review)"
 	pageVars.InfoMessage = "Rankings are weighted via prior 21,15, and 7 days via Retail, Buy list, and several other criteria to arrive at an overall ranking"
 
-	pageVars.Cards = []GenericCard{}
-	pageVars.Top25 = []Top25List{}
+	pageVars.Cards = make([]GenericCard, 0, newsPageSize)
+	pageVars.Top25 = make([]Top25List, 0, newsPageSize)
 
-	results, err := NewspaperDB.Query("SELECT * FROM top_25 LIMIT 25")
+	results, err := NewspaperDB.Query("SELECT * FROM top_25 LIMIT ?", newsPageSize)
 	// ORDER BY retail/etc DESC/ASC
 	if err != nil {
 		log.Println(err)
