@@ -78,3 +78,15 @@ func keyruneForCardSet(uuid string) string {
 
 	return fmt.Sprintf("ss-%s ss-%s", strings.ToLower(keyrune), rarity)
 }
+
+func insertNavBar(page string, nav []NavElem, extra []NavElem) []NavElem {
+	i := 0
+	for i = range nav {
+		if nav[i].Name == page {
+			break
+		}
+	}
+	tail := nav[i:]
+	nav = append(nav[:i], extra...)
+	return append(nav, tail...)
+}
