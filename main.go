@@ -167,9 +167,13 @@ func genPageNav(activeTab, sig string) PageVars {
 	pageVars := PageVars{
 		Title:        "BAN " + activeTab,
 		Signature:    sig,
+		PatreonId:    PatreonClientId,
+		PatreonURL:   PatreonHost,
 		PatreonLogin: patreonLogin,
 		ErrorMessage: msg,
 		LastUpdate:   LastUpdate.Format(time.RFC3339),
+
+		PatreonPartnerId: PatreonPartnerId,
 	}
 
 	// Allocate a new navigation bar

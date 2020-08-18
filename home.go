@@ -10,9 +10,6 @@ func Home(w http.ResponseWriter, r *http.Request) {
 	errmsg := r.FormValue("errmsg")
 
 	pageVars := genPageNav("Home", sig)
-	pageVars.PatreonId = PatreonClientId
-	pageVars.PatreonURL = PatreonHost
-	pageVars.PatreonPartnerId = PatreonPartnerId
 
 	switch errmsg {
 	case "TokenNotFound":
