@@ -170,6 +170,17 @@ nav li a:hover {
     color: #f8f8f8;
 }
 
+.index ol {
+    padding: 14px 16px;
+}
+
+.index li {
+    float: left;
+    padding: 4px 8px;
+    margin: 4px 20px;
+}
+
+
 .active {
     background-color: #f8f8f8;
     color: #4b5786;
@@ -291,6 +302,7 @@ th.stickyHeaderShort {
     position: sticky;
     top: 48px;
     background-color: #eaeaea;
+    z-index: 1;
 }
 
 th a {

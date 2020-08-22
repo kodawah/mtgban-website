@@ -39,87 +39,59 @@ type Top25List struct {
 
 const (
 	newsPageSize = 25
-	newsBaseURL  = "/newspaper?page="
 )
 
 type NewspaperPage struct {
-	Title string
-	Desc  string
-	Nav   NavElem
+	Title  string
+	Desc   string
+	Option string
 }
 
 var NewspaperPages = []NewspaperPage{
 	NewspaperPage{
-		Title: "Top 25 Singles (3 Week Market Review)",
-		Desc:  "Rankings are weighted via prior 21, 15, and 7 days via Retail, Buy list, and several other criteria to arrive at an overall ranking",
-		Nav: NavElem{
-			Name:  "Market Review",
-			Short: "review",
-		},
+		Title:  "Top 25 Singles (3 Week Market Review)",
+		Desc:   "Rankings are weighted via prior 21, 15, and 7 days via Retail, Buy list, and several other criteria to arrive at an overall ranking",
+		Option: "review",
 	},
 	NewspaperPage{
-		Title: "Greatest Decrease in Vendor Listings",
-		Desc:  "Information Sourced from TCG: Stock decreases indicate that there is not enough supply to meet current demand across the reviewed time period (tl:dr - Seek these out)",
-		Nav: NavElem{
-			Name:  "Stock Decreases",
-			Short: "stock_dec",
-		},
+		Title:  "Greatest Decrease in Vendor Listings",
+		Desc:   "Information Sourced from TCG: Stock decreases indicate that there is not enough supply to meet current demand across the reviewed time period (tl:dr - Seek these out)",
+		Option: "stock_dec",
 	},
 	NewspaperPage{
-		Title: "Greatest Increase in Vendor Listings",
-		Desc:  "Information Sourced from TCG: Stock Increases indicate that there is more than enough supply to meet current demand across the reviewed time period (tl:dr - Avoid These)",
-		Nav: NavElem{
-			Name:  "Stock Increases",
-			Short: "stock_inc",
-		},
+		Title:  "Greatest Increase in Vendor Listings",
+		Desc:   "Information Sourced from TCG: Stock Increases indicate that there is more than enough supply to meet current demand across the reviewed time period (tl:dr - Avoid These)",
+		Option: "stock_inc",
 	},
 	NewspaperPage{
-		Title: "Greatest Increase in Buy List Offer",
-		Desc:  "Information Sourced from CK: Buy List increases indicate a higher sales rate (eg. higher demand). These may be fleeting, do not base a purchase solely off this metric unless dropshipping",
-		Nav: NavElem{
-			Name:  "Buylist Increases",
-			Short: "buylist_inc",
-		},
+		Title:  "Greatest Increase in Buy List Offer",
+		Desc:   "Information Sourced from CK: Buy List increases indicate a higher sales rate (eg. higher demand). These may be fleeting, do not base a purchase solely off this metric unless dropshipping",
+		Option: "buylist_inc",
 	},
 	NewspaperPage{
-		Title: "Greatest Decrease in Buy List Offer",
-		Desc:  "Information Sourced from CK: Buy List Decreases indicate a declining sales rate (eg, Less demand). These may be fleeting, do not base a purchase solely off this metric unless dropshipping",
-		Nav: NavElem{
-			Name:  "Buylist Decreases",
-			Short: "buylist_dec",
-		},
+		Title:  "Greatest Decrease in Buy List Offer",
+		Desc:   "Information Sourced from CK: Buy List Decreases indicate a declining sales rate (eg, Less demand). These may be fleeting, do not base a purchase solely off this metric unless dropshipping",
+		Option: "buylist_dec",
 	},
 	NewspaperPage{
-		Title: "Buy List Growth - 7 Day Forecast",
-		Desc:  "Forecasting Card Kingdom's Buy List Offers on Cards",
-		Nav: NavElem{
-			Name:  "Buylist Growth Forecast",
-			Short: "buylist_growth",
-		},
+		Title:  "Buy List Growth - 7 Day Forecast",
+		Desc:   "Forecasting Card Kingdom's Buy List Offers on Cards",
+		Option: "buylist_growth",
 	},
 	NewspaperPage{
-		Title: "Buy List Forecast - Performance Review",
-		Desc:  "Comparing the Buy List forecasts from a week ago with current, to provide additional context of how well one might expect them to perform moving forward",
-		Nav: NavElem{
-			Name:  "Buylist Performance Forecast",
-			Short: "buylist_perf",
-		},
+		Title:  "Buy List Forecast - Performance Review",
+		Desc:   "Comparing the Buy List forecasts from a week ago with current, to provide additional context of how well one might expect them to perform moving forward",
+		Option: "buylist_perf",
 	},
 	NewspaperPage{
-		Title: "Vendor Growth - 7 Day Forecast",
-		Desc:  "Forecasting TCG Vendor Levels for Individual Cards",
-		Nav: NavElem{
-			Name:  "Vendor Forecast",
-			Short: "vendor_forecast",
-		},
+		Title:  "Vendor Growth - 7 Day Forecast",
+		Desc:   "Forecasting TCG Vendor Levels for Individual Cards",
+		Option: "vendor_forecast",
 	},
 	NewspaperPage{
-		Title: "Vendor Forecast - Performance Review",
-		Desc:  "Comparing the TCG Vendor forecasts from a week ago with current, to provide additional context of how well one might expect them to perform moving forward",
-		Nav: NavElem{
-			Name:  "Vendor Growth Forecast",
-			Short: "vendor_growth",
-		},
+		Title:  "Vendor Forecast - Performance Review",
+		Desc:   "Comparing the TCG Vendor forecasts from a week ago with current, to provide additional context of how well one might expect them to perform moving forward",
+		Option: "vendor_growth",
 	},
 }
 
@@ -152,35 +124,21 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	} else if enabled == "DEFAULT" {
 	}
 
+	pageVars.ToC = NewspaperPages
+
 	r.ParseForm()
 	page := r.FormValue("page")
 
-	extraNav := make([]NavElem, 0, len(NewspaperPages))
-	for _, newspage := range NewspaperPages {
-		nav := newspage.Nav
-		nav.Link = newsBaseURL + nav.Short
-		if sig != "" {
-			nav.Link += "&sig=" + sig
-		}
-
-		if nav.Short == page {
-			nav.Active = true
-			nav.Class = "selected"
-			pageVars.Title = newspage.Title
-			pageVars.InfoMessage = newspage.Desc
-		}
-
-		extraNav = append(extraNav, nav)
-	}
-
-	pageVars.Nav = insertNavBar("Newspaper", pageVars.Nav, extraNav)
-
 	if page == "" {
-		pageVars.Title = "Instructions"
-	} else if page != "review" {
-		pageVars.Title = "Under construction"
-		render(w, "news.html", pageVars)
-		return
+		pageVars.Title = "Index"
+	} else {
+		for _, newspage := range NewspaperPages {
+			if newspage.Option == page {
+				pageVars.Title = newspage.Title
+				pageVars.InfoMessage = newspage.Desc
+				break
+			}
+		}
 	}
 
 	pageVars.Cards = make([]GenericCard, 0, newsPageSize)

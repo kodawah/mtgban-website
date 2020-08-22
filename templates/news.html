@@ -14,10 +14,7 @@
         <li><a href="https://discord.gg/hcXpMZB"><img src="img/misc/discord.png" width=48></a></li>
         {{range .Nav}}
             <li>
-                <a {{if .Active}}class="{{.Class}}"{{end}} href="{{.Link}}">
-                    <span class="full-text">{{.Name}}</span>
-                    <span class="short-text">{{.Short}}</span>
-                </a>
+                <a {{if .Active}}class="{{.Class}}"{{end}} href="{{.Link}}">{{.Name}}</a>
             </li>
         {{end}}
         <li>Last data refresh: {{.LastUpdate}}</li>
@@ -30,120 +27,132 @@
         {{if .ShowPromo}}
             <img class="center" src="img/promo/arbit.jpg">
         {{end}}
-    {{else if eq .Title "Instructions"}}
-        <h1>Welcome to the BAN Newspaper<a name="top">&nbsp;</a></h1>
-        <div class="indent" style="max-width: 900px;">
-            <p>Please use the top bar to explore the newspaper pages.</p>
-            <h2>Instructions</h2>
-            <ul class="indent">
-                <li>The Market Review provides an overall market health overview.
-                <li>Someone needs to review this text thoroughly</li>
-                <li>Slides (3-7) show you how the market is trending.<br>
-                    These are the cards that mtgstocks, echomtg, etc bots will pick up in about 5 days... usually... even if they don't, these are the cards that are actively churning on the market given a 3 week review across multiple vendor sites</li>
-
-                <li>Slide 8-13 ive you an overview of TCG vendor levels, how many vendors have listings of card x and how that is trending.</li>
-
-                <li>Slide 14-19, same deal as 8-13, just reviewing CK buylist and the strength and trends of their offers on cards</li>
-
-                <li>Slides 20-22, is my personal forecast of future buylist offers on cards from CK.</li>
-
-                <li>Slides 23-32 are just the most recent mtgo deck results per meta, often time explaining the "why" for the slides above</li>
-            </ul>
-            <br>
-            <ul class="indent">
-                <li>Check out a <a href=https://youtu.be/1BILs981-Y4>video introuction</a> from WolfOfTinStreet.
-            </ul>
-                        <br>
-            <h3>A note on forecasts</h3>
-            <ul class="indent">
-                <li>This newspaper is not a crystal ball</li>
-                <li>More often then not, the trend of the card is what we're aiming to predict and the sharpness of that trend velocity.</li>
-                <li>These forecasts hereafter attempt to show, based off time series analysis, the potential future values (7 days out) for key metrics.</li>
-                <li>The values shown demonstrate the value and forecast value from one week prior. We then can compare the forecast value (what the model thought the value would be in present day (or on a 3 or 7 day lag, depending on the edition you're reading))</li>
-                <li>Then it will demonstrate today's value, and the current projection moving forward.</li>
-                <li>In your own review of how my model performed last week to this week, <b>it is left up to the reader</b> to decide whether or not to believe it will continue to hold true into the future week, or if trends will change. What is being represented is historical patterns and their predicted end result.</li>
-                <ul class="indent">
-                    <li>Things in the present, oftentimes, do not follow historical trends, and herein lies the risk.</li>
-                    <li>If they should follow historical patterns though...</li>
-                </ul>
-                <li>Please also remember, this edition IS LAGGED 3 DAYS BEHIND PRESENT DATE</li>
-            </ul>
-            <br>
-
-        </div>
     {{else}}
-        <img id="hoverImage" src="" style="position:absolute; z-index: 2;"/>
-
-        <script type="text/javascript">
-            var hoverImage = document.getElementById("hoverImage");
-
-            document.addEventListener("mousemove", getMouse);
-
-            setInterval(followMouse, 10);
-
-            var mouse = {x:0, y:0};
-
-            function getMouse(e){
-                mouse.x = e.pageX+10;
-                mouse.y = e.pageY+10;
-            }
-
-            function followMouse(){
-                hoverImage.style.left = mouse.x + "px";
-                hoverImage.style.top = mouse.y + "px";
-            }
-        </script>
-
-        <h1>{{.Title}}</h1>
-        <div class="indent" style="max-width: 800px;">
-
-            <table onmouseout="document.getElementById('hoverImage').src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';" width=100%>
-                <tr>
-                    <th class="stickyHeaderShort">Ranking</th>
-                    <th class="stickyHeaderShort">Card Name</th>
-                    <th class="stickyHeaderShort">Edition</th>
-                    <th class="stickyHeaderShort"><center>#</center></th>
-                    <th class="stickyHeaderShort">Retail</th>
-                    <th class="stickyHeaderShort">Buylist</th>
-                    <th class="stickyHeaderShort">Vendors</th>
-                 </tr>
-                {{range $i, $card := .Cards}}
-                    {{$top25 := (index $.Top25 $i)}}
-                    <tr onmouseover="document.getElementById('hoverImage').src={{$card.ImageURL}};">
-                        <td>
-                            <center>{{$top25.Ranking}}</center>
-                        </td>
-                        <td>
-                            <a href="search?q={{$card.Name}} s:{{$card.SetCode}} cn:{{$card.Number}}&sig={{$.Signature}}">{{$card.Name}}</a> {{if $card.Reserved}}*{{end}}
-                        </td>
-                        <td>
-                            <i class="ss {{$card.Keyrune}} ss-1x ss-fw"></i> {{$card.Edition}}
-                        </td>
-                        <td>
-                            {{$card.Number}}
-                        </td>
-                        <td>
-                            $ {{printf "%.2f" $top25.Retail}}
-                        </td>
-                        <td>
-                            $ {{printf "%.2f" $top25.Buylist}}
-                        </td>
-                        <td>
-                            {{$top25.Vendors}}
-                        </td>
-                    </tr>
+        <h1>Welcome to BAN Newspaper</h1>
+        <div class="indent" style="max-width: 1000px;">
+            <h2>Table of contents</h2>
+            <ol class="indent index">
+                {{range .ToC}}
+                <li><a href="newspaper?page={{.Option}}&sig={{$.Signature}}">{{.Title}}</a></li>
                 {{end}}
-            </table>
-            <br>
-            <h4>
-                <p>{{.InfoMessage}}</p>
-                {{if .HasReserved}}
-                    <p>* = Part of the <a href="https://mtg.gamepedia.com/Reserved_List">Reserved List</a></p>
-                {{end}}
-            </h4>
-            <br><br><br>
+            </ol>
         </div>
-        <br>
+
+        <div style="clear:both;"></div>
+
+        {{if eq .Title "Index"}}
+            <div class="indent" style="max-width: 900px;">
+                <h2>Instructions</h2>
+                <ul class="indent">
+                    <li>The Market Review provides an overall market health overview.
+                    <li>Someone needs to review this text thoroughly</li>
+                    <li>Slides (3-7) show you how the market is trending.<br>
+                        These are the cards that mtgstocks, echomtg, etc bots will pick up in about 5 days... usually... even if they don't, these are the cards that are actively churning on the market given a 3 week review across multiple vendor sites</li>
+
+                    <li>Slide 8-13 ive you an overview of TCG vendor levels, how many vendors have listings of card x and how that is trending.</li>
+
+                    <li>Slide 14-19, same deal as 8-13, just reviewing CK buylist and the strength and trends of their offers on cards</li>
+
+                    <li>Slides 20-22, is my personal forecast of future buylist offers on cards from CK.</li>
+
+                    <li>Slides 23-32 are just the most recent mtgo deck results per meta, often time explaining the "why" for the slides above</li>
+                </ul>
+                <br>
+                <ul class="indent">
+                    <li>Check out a <a href=https://youtu.be/1BILs981-Y4>video introuction</a> from WolfOfTinStreet.
+                </ul>
+                <br>
+                <h3>A note on forecasts</h3>
+                <ul class="indent">
+                    <li>This newspaper is not a crystal ball</li>
+                    <li>More often then not, the trend of the card is what we're aiming to predict and the sharpness of that trend velocity.</li>
+                    <li>These forecasts hereafter attempt to show, based off time series analysis, the potential future values (7 days out) for key metrics.</li>
+                    <li>The values shown demonstrate the value and forecast value from one week prior. We then can compare the forecast value (what the model thought the value would be in present day (or on a 3 or 7 day lag, depending on the edition you're reading))</li>
+                    <li>Then it will demonstrate today's value, and the current projection moving forward.</li>
+                    <li>In your own review of how my model performed last week to this week, <b>it is left up to the reader</b> to decide whether or not to believe it will continue to hold true into the future week, or if trends will change. What is being represented is historical patterns and their predicted end result.</li>
+                    <ul class="indent">
+                        <li>Things in the present, oftentimes, do not follow historical trends, and herein lies the risk.</li>
+                        <li>If they should follow historical patterns though...</li>
+                    </ul>
+                    <li>Please also remember, this edition IS LAGGED 3 DAYS BEHIND PRESENT DATE</li>
+                </ul>
+                <br>
+
+            </div>
+        {{else}}
+            <img id="hoverImage" src="" style="position:absolute; z-index: 2;"/>
+
+            <script type="text/javascript">
+                var hoverImage = document.getElementById("hoverImage");
+
+                document.addEventListener("mousemove", getMouse);
+
+                setInterval(followMouse, 10);
+
+                var mouse = {x:0, y:0};
+
+                function getMouse(e){
+                    mouse.x = e.pageX+10;
+                    mouse.y = e.pageY+10;
+                }
+
+                function followMouse(){
+                    hoverImage.style.left = mouse.x + "px";
+                    hoverImage.style.top = mouse.y + "px";
+                }
+            </script>
+
+            <h1>{{.Title}}</h1>
+            <div class="indent" style="max-width: 800px;">
+
+                <table onmouseout="document.getElementById('hoverImage').src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';" width=100%>
+                    <tr>
+                        <th class="stickyHeaderShort">Ranking</th>
+                        <th class="stickyHeaderShort">Card Name</th>
+                        <th class="stickyHeaderShort">Edition</th>
+                        <th class="stickyHeaderShort"><center>#</center></th>
+                        <th class="stickyHeaderShort">Retail</th>
+                        <th class="stickyHeaderShort">Buylist</th>
+                        <th class="stickyHeaderShort">Vendors</th>
+                     </tr>
+                    {{range $i, $card := .Cards}}
+                        {{$top25 := (index $.Top25 $i)}}
+                        <tr onmouseover="document.getElementById('hoverImage').src={{$card.ImageURL}};">
+                            <td>
+                                <center>{{$top25.Ranking}}</center>
+                            </td>
+                            <td>
+                                <a href="search?q={{$card.Name}} s:{{$card.SetCode}} cn:{{$card.Number}}&sig={{$.Signature}}">{{$card.Name}}</a> {{if $card.Reserved}}*{{end}}
+                            </td>
+                            <td>
+                                <i class="ss {{$card.Keyrune}} ss-1x ss-fw"></i> {{$card.Edition}}
+                            </td>
+                            <td>
+                                {{$card.Number}}
+                            </td>
+                            <td>
+                                $ {{printf "%.2f" $top25.Retail}}
+                            </td>
+                            <td>
+                                $ {{printf "%.2f" $top25.Buylist}}
+                            </td>
+                            <td>
+                                {{$top25.Vendors}}
+                            </td>
+                        </tr>
+                    {{end}}
+                </table>
+                <br>
+                <h4>
+                    <p>{{.InfoMessage}}</p>
+                    {{if .HasReserved}}
+                        <p>* = Part of the <a href="https://mtg.gamepedia.com/Reserved_List">Reserved List</a></p>
+                    {{end}}
+                </h4>
+                <br><br><br>
+            </div>
+            <br>
+        {{end}}
     {{end}}
 </div>
 </body>
