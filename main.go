@@ -184,11 +184,13 @@ func genPageNav(activeTab, sig string) PageVars {
 	copy(pageVars.Nav, DefaultNav)
 
 	// Enable buttons according to the enabled features
-	for _, feat := range OrderNav {
-		param, _ := GetParamFromSig(sig, feat)
-		allowed, _ := strconv.ParseBool(param)
-		if allowed {
-			pageVars.Nav = append(pageVars.Nav, ExtraNavs[feat])
+	if expires > time.Now().Unix() || DevMode {
+		for _, feat := range OrderNav {
+			param, _ := GetParamFromSig(sig, feat)
+			allowed, _ := strconv.ParseBool(param)
+			if allowed || DevMode {
+				pageVars.Nav = append(pageVars.Nav, ExtraNavs[feat])
+			}
 		}
 	}
 
