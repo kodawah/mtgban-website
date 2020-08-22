@@ -15,8 +15,8 @@ type Top25 struct {
 	RowNames string
 	UUID     string
 	Ranking  int
-	Retail   float64
-	Buylist  float64
+	Retail   sql.NullFloat64
+	Buylist  sql.NullFloat64
 	Vendors  sql.NullInt64
 }
 
@@ -30,11 +30,9 @@ type GenericCard struct {
 	Reserved bool
 }
 
-type Top25List struct {
-	Ranking int
-	Retail  float64
-	Buylist float64
-	Vendors int
+type Heading struct {
+	Title   string
+	CanSort bool
 }
 
 const (
@@ -128,12 +126,15 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 
 	r.ParseForm()
 	page := r.FormValue("page")
+	sort := r.FormValue("sort")
+	dir := r.FormValue("dir")
 
 	if page == "" {
 		pageVars.Title = "Index"
 	} else {
 		for _, newspage := range NewspaperPages {
 			if newspage.Option == page {
+				pageVars.Page = newspage.Option
 				pageVars.Title = newspage.Title
 				pageVars.InfoMessage = newspage.Desc
 				break
@@ -141,16 +142,53 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	pageVars.Cards = make([]GenericCard, 0, newsPageSize)
-	pageVars.Top25 = make([]Top25List, 0, newsPageSize)
+	pageVars.Headings = []Heading{
+		Heading{
+			Title:   "Ranking",
+			CanSort: true,
+		},
+		Heading{
+			Title: "Card Name",
+		},
+		Heading{
+			Title: "Edition",
+		},
+		Heading{
+			Title: "#",
+		},
+		Heading{
+			Title:   "Retail",
+			CanSort: true,
+		},
+		Heading{
+			Title:   "Buylist",
+			CanSort: true,
+		},
+		Heading{
+			Title:   "Vendors",
+			CanSort: true,
+		},
+	}
+	pageVars.Table = make([][]string, newsPageSize)
 
-	results, err := NewspaperDB.Query("SELECT * FROM top_25 LIMIT ?", newsPageSize)
-	// ORDER BY retail/etc DESC/ASC
+	query := "SELECT * FROM top_25"
+	if sort != "" {
+		query += " ORDER BY " + sort
+		if dir == "asc" {
+			query += " ASC"
+		} else if dir == "desc" {
+			query += " DESC"
+		}
+	}
+	query = fmt.Sprintf("%s LIMIT %d", query, newsPageSize)
+
+	results, err := NewspaperDB.Query(query)
 	if err != nil {
-		log.Println(err)
+		log.Println(query, err)
 		return
 	}
 
+	i := 0
 	uuids := mtgmatcher.GetUUIDs()
 	for results.Next() {
 		var row Top25
@@ -175,12 +213,24 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 			ImageURL: fmt.Sprintf("https://api.scryfall.com/cards/%s/%s?format=image&version=small", strings.ToLower(co.SetCode), co.Card.Number),
 			Reserved: co.Card.IsReserved,
 		})
-		pageVars.Top25 = append(pageVars.Top25, Top25List{
-			Ranking: row.Ranking,
-			Retail:  row.Retail,
-			Buylist: row.Buylist,
-			Vendors: int(row.Vendors.Int64),
-		})
+
+		pageVars.Table[i] = []string{fmt.Sprintf("%d", row.Ranking)}
+		if row.Retail.Valid {
+			pageVars.Table[i] = append(pageVars.Table[i], fmt.Sprintf("%0.2f", row.Retail.Float64))
+		} else {
+			pageVars.Table[i] = append(pageVars.Table[i], "n/a")
+		}
+		if row.Buylist.Valid {
+			pageVars.Table[i] = append(pageVars.Table[i], fmt.Sprintf("%0.2f", row.Buylist.Float64))
+		} else {
+			pageVars.Table[i] = append(pageVars.Table[i], "n/a")
+		}
+		if row.Vendors.Valid {
+			pageVars.Table[i] = append(pageVars.Table[i], fmt.Sprintf("%d", row.Vendors.Int64))
+		} else {
+			pageVars.Table[i] = append(pageVars.Table[i], "n/a")
+		}
+		i++
 	}
 
 	for _, c := range pageVars.Cards {

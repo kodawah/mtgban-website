@@ -103,23 +103,25 @@
             </script>
 
             <h1>{{.Title}}</h1>
-            <div class="indent" style="max-width: 800px;">
+            <div class="indent" style="max-width: 900px;">
 
                 <table onmouseout="document.getElementById('hoverImage').src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';" width=100%>
                     <tr>
-                        <th class="stickyHeaderShort">Ranking</th>
-                        <th class="stickyHeaderShort">Card Name</th>
-                        <th class="stickyHeaderShort">Edition</th>
-                        <th class="stickyHeaderShort"><center>#</center></th>
-                        <th class="stickyHeaderShort">Retail</th>
-                        <th class="stickyHeaderShort">Buylist</th>
-                        <th class="stickyHeaderShort">Vendors</th>
+                        {{range .Headings}}
+                            <th class="stickyHeaderShort">
+                                {{.Title}}
+                                {{if .CanSort}}
+                                <a href="newspaper?page={{$.Page}}&sort={{.Title}}&dir=desc&sig={{$.Signature}}">▼</a>
+                                <a href="newspaper?page={{$.Page}}&sort={{.Title}}&dir=asc&sig={{$.Signature}}">▲</a>
+                                {{end}}
+                            </th>
+                        {{end}}
                      </tr>
                     {{range $i, $card := .Cards}}
-                        {{$top25 := (index $.Top25 $i)}}
+                        {{$table := (index $.Table $i)}}
                         <tr onmouseover="document.getElementById('hoverImage').src={{$card.ImageURL}};">
                             <td>
-                                <center>{{$top25.Ranking}}</center>
+                                <center>{{index $table 0}}</center>
                             </td>
                             <td>
                                 <a href="search?q={{$card.Name}} s:{{$card.SetCode}} cn:{{$card.Number}}&sig={{$.Signature}}">{{$card.Name}}</a> {{if $card.Reserved}}*{{end}}
@@ -130,15 +132,13 @@
                             <td>
                                 {{$card.Number}}
                             </td>
-                            <td>
-                                $ {{printf "%.2f" $top25.Retail}}
-                            </td>
-                            <td>
-                                $ {{printf "%.2f" $top25.Buylist}}
-                            </td>
-                            <td>
-                                {{$top25.Vendors}}
-                            </td>
+                            {{range $i, $row := $table}}
+                                {{if ne $i 0}}
+                                    <td>
+                                        {{$row}}
+                                    </td>
+                                {{end}}
+                            {{end}}
                         </tr>
                     {{end}}
                 </table>

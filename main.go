@@ -70,9 +70,11 @@ type PageVars struct {
 	FilterComm bool
 	FilterNega bool
 
+	Page        string
 	ToC         []NewspaperPage
+	Headings    []Heading
 	Cards       []GenericCard
-	Top25       []Top25List
+	Table       [][]string
 	HasReserved bool
 }
 
