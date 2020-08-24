@@ -52,8 +52,8 @@ async function autocomplete(form, inp) {
                      * (or any other open lists of autocompleted values */
                     closeAllLists();
 
-                    /* Submit the form */
-                    form.submit();
+                    /* Submit the form (so that onSubmit may trigger) */
+                    form.dispatchEvent(new Event('submit'));
                 });
                 a.appendChild(b);
             }
