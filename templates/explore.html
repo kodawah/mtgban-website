@@ -50,54 +50,31 @@
             }
         </script>
 
-        <div class="indent sticky" style="top:48px; background-color:#f8f8f8; z-index: 1; width: min-content;">
+        <div class="indent">
+        <h3>Search across a multitude of MTG stores</h3>
             <form class="search autocomplete" autocomplete="off" id="searchform" onSubmit="javascript:sites.reverse().forEach(openWindow)">
-                <label style="clear: both; float: left;" for="searchbox">Enter a card name</label>
                 {{if ne .Signature ""}}
                     <input type="hidden" name="sig" value="{{.Signature}}">
                 {{end}}
-                <input id="searchbox" class="w3-input w3-border w3-round-small search-input" onFocus="this.setSelectionRange(0, this.value.length)" type="text" name="q" placeholder="Explore BAN" value="{{.SearchQuery}}">
+                <input id="searchbox" class="w3-input w3-border w3-round-small search-input" onFocus="this.setSelectionRange(0, this.value.length)" type="text" name="q" placeholder="Enter a card name or anything really" value="{{.SearchQuery}}">
             </form>
         </div>
 
         <script type="text/javascript">
             autocomplete(document.getElementById("searchform"), document.getElementById("searchbox"));
         </script>
-        {{if eq .SearchQuery ""}}
-            <div class="indent">
-                <h2>Instructions</h2>
-                <br>
-                <ul class="indent">
-                    <li><h4><i>Syntax</i></h4>
-                        <ul class="indent">
-                            <li>You can filter by <b>edition</b> using the Scryfall notation <pre>s:CODE</pre></li>
-                            <li>You can filter by <b>collector number</b> using the Scryfall notation <pre>cn:NUMBER</pre></li>
-                            <li>You can filter by <b>condition</b> with <pre>c:COND</pre>, accepting <pre>NM</pre>, <pre>SP</pre>, <pre>MP</pre>, <pre>HP</pre>, and <pre>PO</pre>.</li>
-                            <li>You can filter by <b>foil</b> with <pre>f:VALUE</pre>, accepting <pre>true</pre>, or <pre>false</pre></li>
-                            <li>You can change the <b>search mode</b> with <pre>sm:VALUE</pre>, accepting <pre>exact</pre> (default), <pre>prefix</pre>, or <pre>any</pre></li>
-                            <li>Normally a card is searched with an "exact" strategy, you will get only cards with exactly the same name as searched.
-                                <br>For example <pre>Vesuva</pre> will return the card named Vesuva and no other Vesuvan counterpart.</li>
-                            <li>If you search in "prefix" mode, you will get all the cards with the name starting with what you searched.
-                                <br>For example <pre>"Dragonlord"</pre> will return all the cards starting with "Dragonlord".</li>
-                            <li>If you search in in "any" mode, you will get all the cards containing any of the text present in card names.
-                                <br>For example <pre>*Draco*</pre> will return the card named Draco and all the cards that have "draco" in their names.</li>
-                        </ul>
-                    </li>
-                    <br>
 
-                    <li>Data is refreshed periodically over the day.</li>
-                    <li>Entries are formatted as <i>card name (foil status) - edition (collector #)</i>.</li>
-                    <li>The percentage found in buylist offers is the <b>price ratio</b>, the higher it is, the more a vendor is looking to purchase that card.</li>
-                    <li>This percentage is available only if the seller is selling copies of the same card at the same conditions.</li>
-                    <li>Inventory prices refer to the stated conditions (and their accuracy depends on the data provider).</li>
-                    <li>Buylist prices are always referring to NM conditions.</li>
-                    <li>TCG Low is a special value referring to TCG algorithms that may differ from quantity and quality of listings.</li>
-                    <li>In case of mistakes or incongruities, please notify the devs in the BAN Discord.</li>
-                    <li>Should you find this content useful, consider clicking on one of the provided links to make a purchase on the website, and directly support BAN.</li>
-                </ul>
-             </div>
-        {{end}}
-        <div style="clear:both;"></div>
+        <div class="indent" style="max-width: 700px;">
+            <h2>Instructions</h2>
+            <br>
+            <ul class="indent">
+                <li>This tool allows you to search for cards or sealed across a wide range of websites, by opening a bunch of tabs in the background from a single query.</li>
+                <li>Contrary to the <a href="search?sig={{.Signature}}">Search tool</a>, you will get only retail results, but they will be live from the seller site. You may find some gems, especially after a card spiked!</li>
+                <li>Works in <i>Firefox</i> out of the box, in <i>Chrome</i> it may need to get a special permission: follow the steps here <a href="https://support.google.com/chrome/answer/95472">Allow pop-ups from a site</a>, and enable popups for mtgban.com.<br>
+                    It does not work in <i>Safari</i>, and it is untested elsewhere.</li>
+                <li>Note that this may be a very resource-intensive operation, and may crash your browser if you try to open too many tabs at once.</li>
+            </ul>
+        </div>
     {{end}}
     <br>
 </div>
