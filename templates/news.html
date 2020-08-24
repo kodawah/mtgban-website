@@ -14,7 +14,9 @@
         <li><a href="https://discord.gg/hcXpMZB"><img src="img/misc/discord.png" width=48></a></li>
         {{range .Nav}}
             <li>
-                <a {{if .Active}}class="{{.Class}}"{{end}} href="{{.Link}}">{{.Name}}</a>
+                <a {{if .Active}}class="{{.Class}}"{{end}} href="{{.Link}}">
+                    <span>{{.Name}}</span>
+                </a>
             </li>
         {{end}}
         <li>Last data refresh: {{.LastUpdate}}</li>
