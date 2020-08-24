@@ -37,15 +37,15 @@
             <form class="search autocomplete" action="search" autocomplete="off" id="searchform">
                 <label style="clear: both; float: left;" for="searchbox">
                     {{if eq .SearchQuery "" }}
-                        Enter a card name
+                        Search for a card
                     {{else}}
-                        Enter another card, or <a href="search?q={{.SearchQuery}}&b=true&sig={{.Signature}}">sort results by best price</a>
+                        Search for another card, or <a href="search?q={{.SearchQuery}}&b=true&sig={{.Signature}}">sort results by best price</a>
                     {{end}}
                 </label>
                 {{if ne .Signature ""}}
                     <input type="hidden" name="sig" value="{{.Signature}}">
                 {{end}}
-                <input id="searchbox" class="w3-input w3-border w3-round-small search-input" onFocus="this.setSelectionRange(0, this.value.length)" type="text" name="q" placeholder="Search BAN" value="{{.SearchQuery}}">
+                <input id="searchbox" class="w3-input w3-border w3-round-small search-input" onFocus="this.setSelectionRange(0, this.value.length)" type="text" name="q" placeholder="Enter a card name" value="{{.SearchQuery}}">
             </form>
         </div>
 
