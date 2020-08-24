@@ -86,7 +86,9 @@ var DefaultNav = []NavElem{
 	},
 }
 
-var OrderNav = []string{"Search", "Newspaper", "Arbit"}
+var OrderNav = []string{
+	"Search", "Newspaper", "Explore", "Arbit",
+}
 
 var ExtraNavs = map[string]NavElem{
 	"Search": NavElem{
@@ -98,6 +100,11 @@ var ExtraNavs = map[string]NavElem{
 		Name:  "🗞️ Newspaper",
 		Short: "🗞️",
 		Link:  "/newspaper",
+	},
+	"Explore": NavElem{
+		Name:  "🚠 Explore",
+		Short: "🚠",
+		Link:  "/explore",
 	},
 	"Arbit": NavElem{
 		Name:  "📈 Arbitrage",
@@ -126,6 +133,7 @@ var Sellers []mtgban.Seller
 var Vendors []mtgban.Vendor
 var CardDB *sql.DB
 var NewspaperDB *sql.DB
+var ExploreDB *sql.DB
 
 func Favicon(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "img/misc/favicon.ico")
@@ -268,6 +276,10 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	ExploreDB, err = sql.Open("mysql", Config.DBAddress+"/sites")
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	// load website up
 	go func() {
@@ -335,6 +347,7 @@ func main() {
 	http.Handle("/", noSigning(http.HandlerFunc(Home)))
 	http.Handle("/search", enforceSigning(http.HandlerFunc(Search)))
 	http.Handle("/newspaper", enforceSigning(http.HandlerFunc(Newspaper)))
+	http.Handle("/explore", enforceSigning(http.HandlerFunc(Explore)))
 	http.Handle("/arbit", enforceSigning(http.HandlerFunc(Arbit)))
 	http.Handle("/api/mtgjson/ck.json", enforceSigning(http.HandlerFunc(API)))
 	http.HandleFunc("/favicon.ico", Favicon)

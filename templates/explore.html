@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Rosario:400' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../css/main.css">
+    <link href="//cdn.jsdelivr.net/npm/keyrune@latest/css/keyrune.css" rel="stylesheet" type="text/css" />
+    <title>{{.Title}}</title>
+    <script type="text/javascript" src="../js/autocomplete.js"></script>
+    <script type="text/javascript" src="../js/fetchnames.js"></script>
+</head>
+<body>
+
+<nav>
+    <ul>
+        <li><a href="https://www.patreon.com/ban_community"><img src="img/misc/patreon.png" width=48></a></li>
+        <li><a href="https://discord.gg/hcXpMZB"><img src="img/misc/discord.png" width=48></a></li>
+        {{range .Nav}}
+            <li>
+                <a {{if .Active}}class="{{.Class}}"{{end}} href="{{.Link}}">
+                    <span>{{.Name}}</span>
+                </a>
+            </li>
+        {{end}}
+        <li>Last data refresh: {{.LastUpdate}}</li>
+    </ul>
+</nav>
+
+<div class="mainbody">
+    {{if ne .ErrorMessage ""}}
+        <h1>{{.ErrorMessage}}</h1>
+        {{if .ShowPromo}}
+            <img class="center" src="img/promo/search.jpg">
+        {{end}}
+    {{else}}
+        <h1>Welcome to BAN Explore</h1>
+
+        <script type="text/javascript">
+            var sites = [];
+            sites.push("/explore?site=1&sig={{.Signature}}");
+            sites.push("/explore?site=2&sig={{.Signature}}");
+            sites.push("/explore?site=3&sig={{.Signature}}");
+            sites.push("/explore?site=4&sig={{.Signature}}");
+            sites.push("/explore?site=5&sig={{.Signature}}");
+
+            function openWindow(value, index, array) {
+                let link     = document.createElement('a');
+                link.href    = value + "&q="+ document.getElementById('searchbox').value;
+                link.target  = '_blank';
+                setTimeout(link.click(), 1000);
+            }
+        </script>
+
+        <div class="indent sticky" style="top:48px; background-color:#f8f8f8; z-index: 1; width: min-content;">
+            <form class="search autocomplete" autocomplete="off" id="searchform" onSubmit="javascript:sites.reverse().forEach(openWindow)">
+                <label style="clear: both; float: left;" for="searchbox">Enter a card name</label>
+                {{if ne .Signature ""}}
+                    <input type="hidden" name="sig" value="{{.Signature}}">
+                {{end}}
+                <input id="searchbox" class="w3-input w3-border w3-round-small search-input" onFocus="this.setSelectionRange(0, this.value.length)" type="text" name="q" placeholder="Explore BAN" value="{{.SearchQuery}}">
+            </form>
+        </div>
+
+        <script type="text/javascript">
+            autocomplete(document.getElementById("searchform"), document.getElementById("searchbox"));
+        </script>
+        {{if eq .SearchQuery ""}}
+            <div class="indent">
+                <h2>Instructions</h2>
+                <br>
+                <ul class="indent">
+                    <li><h4><i>Syntax</i></h4>
+                        <ul class="indent">
+                            <li>You can filter by <b>edition</b> using the Scryfall notation <pre>s:CODE</pre></li>
+                            <li>You can filter by <b>collector number</b> using the Scryfall notation <pre>cn:NUMBER</pre></li>
+                            <li>You can filter by <b>condition</b> with <pre>c:COND</pre>, accepting <pre>NM</pre>, <pre>SP</pre>, <pre>MP</pre>, <pre>HP</pre>, and <pre>PO</pre>.</li>
+                            <li>You can filter by <b>foil</b> with <pre>f:VALUE</pre>, accepting <pre>true</pre>, or <pre>false</pre></li>
+                            <li>You can change the <b>search mode</b> with <pre>sm:VALUE</pre>, accepting <pre>exact</pre> (default), <pre>prefix</pre>, or <pre>any</pre></li>
+                            <li>Normally a card is searched with an "exact" strategy, you will get only cards with exactly the same name as searched.
+                                <br>For example <pre>Vesuva</pre> will return the card named Vesuva and no other Vesuvan counterpart.</li>
+                            <li>If you search in "prefix" mode, you will get all the cards with the name starting with what you searched.
+                                <br>For example <pre>"Dragonlord"</pre> will return all the cards starting with "Dragonlord".</li>
+                            <li>If you search in in "any" mode, you will get all the cards containing any of the text present in card names.
+                                <br>For example <pre>*Draco*</pre> will return the card named Draco and all the cards that have "draco" in their names.</li>
+                        </ul>
+                    </li>
+                    <br>
+
+                    <li>Data is refreshed periodically over the day.</li>
+                    <li>Entries are formatted as <i>card name (foil status) - edition (collector #)</i>.</li>
+                    <li>The percentage found in buylist offers is the <b>price ratio</b>, the higher it is, the more a vendor is looking to purchase that card.</li>
+                    <li>This percentage is available only if the seller is selling copies of the same card at the same conditions.</li>
+                    <li>Inventory prices refer to the stated conditions (and their accuracy depends on the data provider).</li>
+                    <li>Buylist prices are always referring to NM conditions.</li>
+                    <li>TCG Low is a special value referring to TCG algorithms that may differ from quantity and quality of listings.</li>
+                    <li>In case of mistakes or incongruities, please notify the devs in the BAN Discord.</li>
+                    <li>Should you find this content useful, consider clicking on one of the provided links to make a purchase on the website, and directly support BAN.</li>
+                </ul>
+             </div>
+        {{end}}
+        <div style="clear:both;"></div>
+    {{end}}
+    <br>
+</div>
+</body>
+</html>

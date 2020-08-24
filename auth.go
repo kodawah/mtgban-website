@@ -362,6 +362,7 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) string {
 	case "Admin", "Root":
 		v.Set("Search", "true")
 		v.Set("Newspaper", "true")
+		v.Set("Explore", "true")
 		v.Set("Arbit", "true")
 	}
 	if v.Get("Arbit") == "true" {
@@ -369,6 +370,20 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) string {
 			v.Set("Enabled", "ALL")
 		} else {
 			v.Set("Enabled", "DEFAULT")
+		}
+	}
+	if v.Get("Explore") == "true" {
+		switch tierTitle {
+		case "Root":
+			v.Set("Enabled", "ALL")
+		case "Admin":
+			v.Set("Enabled", "FULL")
+		case "Master of Coin":
+			v.Set("Enabled", "MOST")
+		case "Merchant":
+			v.Set("Enabled", "ENTRY")
+		case "Squire":
+			v.Set("Enabled", "DEMO")
 		}
 	}
 
