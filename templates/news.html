@@ -30,7 +30,7 @@
             <img class="center" src="img/promo/arbit.jpg">
         {{end}}
     {{else}}
-        <h1>Welcome to BAN Newspaper</h1>
+        <h1>Welcome to BAN Newspaper{{if .IsOneDay}}, <i>early edition</i>{{end}}</h1>
         <div class="indent" style="max-width: 1000px;">
             <h2>Table of contents</h2>
             <ol class="indent index">
@@ -44,6 +44,15 @@
 
         {{if eq .Title "Index"}}
             <div class="indent" style="max-width: 900px;">
+                <br>
+                <p class="indent">
+                    Your patronage gives you access to the
+                    {{if .IsOneDay}}
+                        <i>early edition</i>, aka the 1-day newspaper.
+                    {{else}}
+                        3-day newspaper.
+                    {{end}}
+                </p>
                 <h3>Instructions</h3>
                 <ul class="indent">
                     <li>The Market Review provides an overall market health overview.</li>
@@ -64,14 +73,16 @@
                     <li>This newspaper is not a crystal ball.</li>
                     <li>More often then not, the trend of the card is what we're aiming to predict and the sharpness of that trend velocity.</li>
                     <li>These forecasts hereafter attempt to show, based off time series analysis, the potential future values (7 days out) for key metrics.</li>
-                    <li>The values shown demonstrate the value and forecast value from one week prior. We then can compare the forecast value (what the model thought the value would be in present day (or on a 3 or 7 day lag, depending on the edition you're reading)).</li>
+                    <li>The values shown demonstrate the value and forecast value from one week prior. We then can compare the forecast value (what the model thought the value would be {{if .IsOneDay}}in present day{{else}}on a 3 day lag{{end}}).</li>
                     <li>Then it will demonstrate today's value, and the current projection moving forward.</li>
                     <li>In your own review of how my model performed last week to this week, <b>it is left up to the reader</b> to decide whether or not to believe it will continue to hold true into the future week, or if trends will change. What is being represented is historical patterns and their predicted end result.</li>
                     <ul class="indent">
                         <li>Things in the present, oftentimes, do not follow historical trends, and herein lies the risk.</li>
                         <li>If they should follow historical patterns though...</li>
                     </ul>
-                    <li>Please also remember, this edition IS LAGGED 3 DAYS BEHIND PRESENT DATE</li>
+                    {{if not .IsOneDay}}
+                        <li>Please also remember, this edition IS LAGGED 3 DAYS BEHIND PRESENT DATE</li>
+                    {{end}}
                 </ul>
                 <br>
 

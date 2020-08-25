@@ -76,6 +76,7 @@ type PageVars struct {
 	Cards       []GenericCard
 	Table       [][]string
 	HasReserved bool
+	IsOneDay    bool
 }
 
 var DefaultNav = []NavElem{
@@ -87,7 +88,7 @@ var DefaultNav = []NavElem{
 }
 
 var OptionalFields = []string{
-	"ArbitEnabled", "ExpEnabled", "API",
+	"ArbitEnabled", "ExpEnabled", "NewsEnabled", "API",
 }
 
 var OrderNav = []string{
@@ -136,7 +137,8 @@ var DatabaseLoaded bool
 var Sellers []mtgban.Seller
 var Vendors []mtgban.Vendor
 var CardDB *sql.DB
-var NewspaperDB *sql.DB
+var Newspaper3dayDB *sql.DB
+var Newspaper1dayDB *sql.DB
 var ExploreDB *sql.DB
 
 func Favicon(w http.ResponseWriter, r *http.Request) {
@@ -276,7 +278,11 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	NewspaperDB, err = sql.Open("mysql", Config.DBAddress+"/newspaper")
+	Newspaper3dayDB, err = sql.Open("mysql", Config.DBAddress+"/three_day_newspaper")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	Newspaper1dayDB, err = sql.Open("mysql", Config.DBAddress+"/newspaper")
 	if err != nil {
 		log.Fatalln(err)
 	}

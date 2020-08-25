@@ -116,10 +116,20 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 		render(w, "news.html", pageVars)
 		return
 	}
-	// TODO check for 3day or 1day newspaper
-	enabled, _ := GetParamFromSig(sig, "type")
-	if enabled == "ALL" {
-	} else if enabled == "DEFAULT" {
+
+	var db *sql.DB
+	enabled, _ := GetParamFromSig(sig, "NewsEnabled")
+	if enabled == "1day" {
+		db = Newspaper1dayDB
+		pageVars.IsOneDay = true
+	} else if enabled == "3day" {
+		db = Newspaper3dayDB
+	} else {
+		pageVars.Title = "This feature is BANned"
+		pageVars.ErrorMessage = ErrMsgDenied
+
+		render(w, "news.html", pageVars)
+		return
 	}
 
 	pageVars.ToC = NewspaperPages
@@ -182,7 +192,7 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	}
 	query = fmt.Sprintf("%s LIMIT %d", query, newsPageSize)
 
-	results, err := NewspaperDB.Query(query)
+	results, err := db.Query(query)
 	if err != nil {
 		log.Println(query, err)
 		return

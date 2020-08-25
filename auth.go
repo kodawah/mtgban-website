@@ -36,6 +36,7 @@ const (
 const (
 	ErrMsg        = "Join the BAN Community and gain access to exclusive tools!"
 	ErrMsgPlus    = "Increase your pledge to gain access to this feature!"
+	ErrMsgDenied  = "Something went wrong while accessing this page"
 	ErrMsgExpired = "You've been logged out"
 )
 
@@ -384,6 +385,13 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) string {
 			v.Set("ExpEnabled", "ENTRY")
 		case "Squire":
 			v.Set("ExpEnabled", "DEMO")
+		}
+	}
+	if v.Get("Newspaper") == "true" {
+		if tierTitle == "Merchant" {
+			v.Set("NewsEnabled", "3day")
+		} else {
+			v.Set("NewsEnabled", "1day")
 		}
 	}
 
