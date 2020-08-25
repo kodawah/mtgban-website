@@ -316,7 +316,7 @@ func enforceSigning(next http.Handler) http.Handler {
 		}
 
 		q := url.Values{}
-		for _, optional := range append([]string{"Enabled", "API"}, OrderNav...) {
+		for _, optional := range append(OrderNav, OptionalFields...) {
 			val := v.Get(optional)
 			if val != "" {
 				q.Set(optional, val)
@@ -367,23 +367,23 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) string {
 	}
 	if v.Get("Arbit") == "true" {
 		if tierTitle == "Root" {
-			v.Set("Enabled", "ALL")
+			v.Set("ArbitEnabled", "ALL")
 		} else {
-			v.Set("Enabled", "DEFAULT")
+			v.Set("ArbitEnabled", "DEFAULT")
 		}
 	}
 	if v.Get("Explore") == "true" {
 		switch tierTitle {
 		case "Root":
-			v.Set("Enabled", "ALL")
+			v.Set("ExpEnabled", "ALL")
 		case "Admin":
-			v.Set("Enabled", "FULL")
+			v.Set("ExpEnabled", "FULL")
 		case "Master of Coin":
-			v.Set("Enabled", "MOST")
+			v.Set("ExpEnabled", "MOST")
 		case "Merchant":
-			v.Set("Enabled", "ENTRY")
+			v.Set("ExpEnabled", "ENTRY")
 		case "Squire":
-			v.Set("Enabled", "DEMO")
+			v.Set("ExpEnabled", "DEMO")
 		}
 	}
 

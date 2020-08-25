@@ -86,6 +86,10 @@ var DefaultNav = []NavElem{
 	},
 }
 
+var OptionalFields = []string{
+	"ArbitEnabled", "ExpEnabled", "API",
+}
+
 var OrderNav = []string{
 	"Search", "Newspaper", "Explore", "Arbit",
 }

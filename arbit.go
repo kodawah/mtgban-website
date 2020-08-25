@@ -48,7 +48,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		render(w, "arbit.html", pageVars)
 		return
 	}
-	enabled, _ := GetParamFromSig(sig, "Enabled")
+	enabled, _ := GetParamFromSig(sig, "ArbitEnabled")
 	if enabled == "" && !SigCheck {
 		enabled = "ALL"
 	}
