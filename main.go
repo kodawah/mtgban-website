@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -366,16 +367,31 @@ func main() {
 }
 
 func render(w http.ResponseWriter, tmpl string, pageVars PageVars) {
-	tmpl = fmt.Sprintf("templates/%s", tmpl) // prefix the name passed in with templates/
+	funcMap := template.FuncMap{
+		"inc": func(i, j int) int {
+			return i + j
+		},
+		"perc": func(s string) string {
+			n, _ := strconv.ParseFloat(s, 64)
+			return fmt.Sprintf("%0.2f", n*100)
+		},
+	}
 
-	t, err := template.ParseFiles(tmpl) // parse the template file held in the templates folder
-	if err != nil {                     // if there is an error
-		log.Print("template parsing error: ", err) // log it
+	// Give each template a name
+	name := path.Base(tmpl)
+	// Prefix the name passed in with templates/
+	tmpl = fmt.Sprintf("templates/%s", tmpl)
+
+	// Parse the template file held in the templates folder, add any Funcs to parsing
+	t, err := template.New(name).Funcs(funcMap).ParseFiles(tmpl)
+	if err != nil {
+		log.Print("template parsing error: ", err)
 		return
 	}
 
-	err = t.Execute(w, pageVars) // execute the template and pass in the variables to fill the gaps
-	if err != nil {              // if there is an error
-		log.Print("template executing error: ", err) //log it
+	// Execute the template and pass in the variables to fill the gaps
+	err = t.Execute(w, pageVars)
+	if err != nil {
+		log.Print("template executing error: ", err)
 	}
 }
