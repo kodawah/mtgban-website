@@ -128,9 +128,11 @@
                     {{range $i, $card := .Cards}}
                         {{$table := (index $.Table $i)}}
                         <tr onmouseover="document.getElementById('hoverImage').src={{$card.ImageURL}};">
-                            <td>
-                                <center>{{index $table 0}}</center>
-                            </td>
+                            {{if eq (index $.Headings 0).Title "Ranking"}}
+                                <td>
+                                    <center>{{index $table 0}}</center>
+                                </td>
+                            {{end}}
                             <td>
                                 <a href="search?q={{$card.Name}} s:{{$card.SetCode}} cn:{{$card.Number}}&sig={{$.Signature}}">{{$card.Name}}</a> {{if $card.Reserved}}*{{end}}
                             </td>
@@ -141,9 +143,15 @@
                                 {{$card.Number}}
                             </td>
                             {{range $i, $row := $table}}
-                                {{if ne $i 0}}
+                                {{if eq (index $.Headings 0).Title "Ranking"}}
+                                    {{if ne $i 0}}
+                                        <td>
+                                            <center>{{$row}}</center>
+                                        </td>
+                                    {{end}}
+                                {{else}}
                                     <td>
-                                        {{$row}}
+                                        <center>{{$row}}</center>
                                     </td>
                                 {{end}}
                             {{end}}

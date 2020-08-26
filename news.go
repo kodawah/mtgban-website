@@ -11,15 +11,6 @@ import (
 	"github.com/kodabb/go-mtgmatcher/mtgmatcher"
 )
 
-type Top25 struct {
-	RowNames string
-	UUID     string
-	Ranking  int
-	Retail   sql.NullFloat64
-	Buylist  sql.NullFloat64
-	Vendors  sql.NullInt64
-}
-
 type GenericCard struct {
 	Name     string
 	Edition  string
@@ -43,6 +34,9 @@ type NewspaperPage struct {
 	Title  string
 	Desc   string
 	Option string
+	Query  string
+	Sort   string
+	Head   []Heading
 }
 
 var NewspaperPages = []NewspaperPage{
@@ -50,6 +44,35 @@ var NewspaperPages = []NewspaperPage{
 		Title:  "Top 25 Singles (3 Week Market Review)",
 		Desc:   "Rankings are weighted via prior 21, 15, and 7 days via Retail, Buy list, and several other criteria to arrive at an overall ranking",
 		Option: "review",
+		Query:  "SELECT * FROM top_25",
+		Sort:   "Ranking",
+		Head: []Heading{
+			Heading{
+				Title:   "Ranking",
+				CanSort: true,
+			},
+			Heading{
+				Title: "Card Name",
+			},
+			Heading{
+				Title: "Edition",
+			},
+			Heading{
+				Title: "#",
+			},
+			Heading{
+				Title:   "Retail",
+				CanSort: true,
+			},
+			Heading{
+				Title:   "Buylist",
+				CanSort: true,
+			},
+			Heading{
+				Title:   "Vendors",
+				CanSort: true,
+			},
+		},
 	},
 	NewspaperPage{
 		Title:  "Greatest Decrease in Vendor Listings",
@@ -138,50 +161,30 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	page := r.FormValue("page")
 	sort := r.FormValue("sort")
 	dir := r.FormValue("dir")
+	var query, defSort string
 
 	if page == "" {
 		pageVars.Title = "Index"
-	} else {
-		for _, newspage := range NewspaperPages {
-			if newspage.Option == page {
-				pageVars.Page = newspage.Option
-				pageVars.Title = newspage.Title
-				pageVars.InfoMessage = newspage.Desc
-				break
-			}
+
+		render(w, "news.html", pageVars)
+
+		return
+	}
+
+	for _, newspage := range NewspaperPages {
+		if newspage.Option == page {
+			pageVars.Page = newspage.Option
+			pageVars.Title = newspage.Title
+			pageVars.InfoMessage = newspage.Desc
+			pageVars.Headings = newspage.Head
+
+			query = newspage.Query
+			defSort = newspage.Sort
+			break
 		}
 	}
 
-	pageVars.Headings = []Heading{
-		Heading{
-			Title:   "Ranking",
-			CanSort: true,
-		},
-		Heading{
-			Title: "Card Name",
-		},
-		Heading{
-			Title: "Edition",
-		},
-		Heading{
-			Title: "#",
-		},
-		Heading{
-			Title:   "Retail",
-			CanSort: true,
-		},
-		Heading{
-			Title:   "Buylist",
-			CanSort: true,
-		},
-		Heading{
-			Title:   "Vendors",
-			CanSort: true,
-		},
-	}
-	pageVars.Table = make([][]string, newsPageSize)
-
-	query := "SELECT * FROM top_25"
+	// Set sorting options
 	if sort != "" {
 		// Make sure this field is allowed to be sorted
 		canSort := false
@@ -199,57 +202,89 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 				query += " DESC"
 			}
 		}
+	} else if defSort != "" {
+		query += " ORDER BY " + defSort
 	}
+	// Keep things limited
 	query = fmt.Sprintf("%s LIMIT %d", query, newsPageSize)
 
-	results, err := db.Query(query)
+	// GO GO GO
+	rows, err := db.Query(query)
 	if err != nil {
 		log.Println(query, err)
 		return
 	}
 
+	// Retrieve columns to know how many fields to read
+	cols, err := rows.Columns()
+	if err != nil {
+		log.Println("Failed to get columns", err)
+		return
+	}
+
+	// Result is your slice string
+	rawResult := make([][]byte, len(cols))
+	result := make([]string, len(cols))
+
+	// A temporary interface{} slice, containing a variable number of fields
+	dest := make([]interface{}, len(cols))
+	for i := range rawResult {
+		// Put pointers to each string in the interface slice
+		dest[i] = &rawResult[i]
+	}
+
+	// Allocate the main table scheleton
+	pageVars.Table = make([][]string, newsPageSize)
+
 	i := 0
 	uuids := mtgmatcher.GetUUIDs()
-	for results.Next() {
-		var row Top25
-		err := results.Scan(&row.RowNames, &row.UUID, &row.Ranking, &row.Retail, &row.Buylist, &row.Vendors)
+	for rows.Next() {
+		err := rows.Scan(dest...)
 		if err != nil {
 			log.Println(err)
 			continue
 		}
 
-		co, found := uuids[row.UUID]
-		if !found {
-			log.Println(row.UUID, "not found")
+		// Convert the parsed fields into usable strings
+		for j, raw := range rawResult {
+			if raw == nil {
+				result[j] = "n/a"
+			} else {
+				result[j] = string(raw)
+			}
+		}
+
+		if len(result) < 2 {
+			log.Println("empty row")
 			continue
 		}
 
+		uuid := result[1]
+		co, found := uuids[uuid]
+		if !found {
+			log.Println(uuid, "not found")
+			continue
+		}
+
+		// Load card data
 		pageVars.Cards = append(pageVars.Cards, GenericCard{
 			Name:     co.Card.Name,
 			Edition:  co.Edition,
 			SetCode:  co.SetCode,
 			Number:   co.Card.Number,
-			Keyrune:  keyruneForCardSet(row.UUID),
+			Keyrune:  keyruneForCardSet(uuid),
 			ImageURL: fmt.Sprintf("https://api.scryfall.com/cards/%s/%s?format=image&version=small", strings.ToLower(co.SetCode), co.Card.Number),
 			Reserved: co.Card.IsReserved,
 		})
 
-		pageVars.Table[i] = []string{fmt.Sprintf("%d", row.Ranking)}
-		if row.Retail.Valid {
-			pageVars.Table[i] = append(pageVars.Table[i], fmt.Sprintf("%0.2f", row.Retail.Float64))
-		} else {
-			pageVars.Table[i] = append(pageVars.Table[i], "n/a")
+		// Allocate a table row with as many fields as returned by the SELECT
+		// minus the two well-known fields
+		pageVars.Table[i] = make([]string, len(result)-2)
+		for j := range pageVars.Table[i] {
+			pageVars.Table[i][j] = result[2+j]
 		}
-		if row.Buylist.Valid {
-			pageVars.Table[i] = append(pageVars.Table[i], fmt.Sprintf("%0.2f", row.Buylist.Float64))
-		} else {
-			pageVars.Table[i] = append(pageVars.Table[i], "n/a")
-		}
-		if row.Vendors.Valid {
-			pageVars.Table[i] = append(pageVars.Table[i], fmt.Sprintf("%d", row.Vendors.Int64))
-		} else {
-			pageVars.Table[i] = append(pageVars.Table[i], "n/a")
-		}
+
+		// Next row!
 		i++
 	}
 
