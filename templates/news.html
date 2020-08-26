@@ -119,8 +119,10 @@
                             <th class="stickyHeaderShort">
                                 {{.Title}}
                                 {{if .CanSort}}
-                                <a href="newspaper?page={{$.Page}}&sort={{.Title}}&dir=desc&sig={{$.Signature}}">▼</a>
-                                <a href="newspaper?page={{$.Page}}&sort={{.Title}}&dir=asc&sig={{$.Signature}}">▲</a>
+                                <nobr>
+                                    <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=desc&sig={{$.Signature}}">▼</a>
+                                    <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=asc&sig={{$.Signature}}">▲</a>
+                                </nobr>
                                 {{end}}
                             </th>
                         {{end}}

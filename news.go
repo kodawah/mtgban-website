@@ -28,6 +28,7 @@ type GenericCard struct {
 type Heading struct {
 	Title    string
 	CanSort  bool
+	Field    string
 	IsDollar bool
 	IsPerc   bool
 }
@@ -52,6 +53,7 @@ var NewspaperPages = []NewspaperPage{
 			Heading{
 				Title:   "Ranking",
 				CanSort: true,
+				Field:   "Ranking",
 			},
 			Heading{
 				Title: "Card Name",
@@ -65,16 +67,19 @@ var NewspaperPages = []NewspaperPage{
 			Heading{
 				Title:    "Retail",
 				CanSort:  true,
+				Field:    "Retail",
 				IsDollar: true,
 			},
 			Heading{
 				Title:    "Buylist",
 				CanSort:  true,
+				Field:    "Buylist",
 				IsDollar: true,
 			},
 			Heading{
 				Title:   "Vendors",
 				CanSort: true,
+				Field:   "Vendors",
 			},
 		},
 	},
@@ -193,7 +198,7 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 		// Make sure this field is allowed to be sorted
 		canSort := false
 		for _, head := range pageVars.Headings {
-			if head.Title == sort {
+			if head.Field == sort {
 				canSort = head.CanSort
 				break
 			}
