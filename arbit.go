@@ -134,9 +134,6 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		if !strings.Contains(enabled, newSeller.Info().Shorthand) {
 			continue
 		}
-		if newSeller.Info().Name == "TCG Direct Low" {
-			continue
-		}
 
 		nav := NavElem{
 			Name:  newSeller.Info().Name,
