@@ -151,7 +151,14 @@
                                     {{end}}
                                 {{else}}
                                     <td>
-                                        <center>{{$row}}</center>
+                                        <center>
+                                            {{if (index $.Headings (inc $i 3)).IsDollar}}${{end}}
+                                            {{if (index $.Headings (inc $i 3)).IsPerc}}
+                                                {{perc $row}} %
+                                            {{else}}
+                                                {{$row}}
+                                            {{end}}
+                                        </center>
                                     </td>
                                 {{end}}
                             {{end}}

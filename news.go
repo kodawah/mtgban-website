@@ -11,6 +11,10 @@ import (
 	"github.com/kodabb/go-mtgmatcher/mtgmatcher"
 )
 
+const (
+	newsPageSize = 25
+)
+
 type GenericCard struct {
 	Name     string
 	Edition  string
@@ -22,13 +26,11 @@ type GenericCard struct {
 }
 
 type Heading struct {
-	Title   string
-	CanSort bool
+	Title    string
+	CanSort  bool
+	IsDollar bool
+	IsPerc   bool
 }
-
-const (
-	newsPageSize = 25
-)
 
 type NewspaperPage struct {
 	Title  string
@@ -61,12 +63,14 @@ var NewspaperPages = []NewspaperPage{
 				Title: "#",
 			},
 			Heading{
-				Title:   "Retail",
-				CanSort: true,
+				Title:    "Retail",
+				CanSort:  true,
+				IsDollar: true,
 			},
 			Heading{
-				Title:   "Buylist",
-				CanSort: true,
+				Title:    "Buylist",
+				CanSort:  true,
+				IsDollar: true,
 			},
 			Heading{
 				Title:   "Vendors",
