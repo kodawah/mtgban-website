@@ -87,21 +87,183 @@ var NewspaperPages = []NewspaperPage{
 		Title:  "Greatest Decrease in Vendor Listings",
 		Desc:   "Information Sourced from TCG: Stock decreases indicate that there is not enough supply to meet current demand across the reviewed time period (tl:dr - Seek these out)",
 		Option: "stock_dec",
+		Query: `SELECT n.row_names, n.uuid, n.Todays_Sellers, n.Week_Ago_Sellers, n.Month_Ago_Sellers, n.Week_Ago_Sellers_Chg
+                FROM vendor_levels n
+                WHERE n.Week_Ago_Sellers_Chg is not NULL and n.Week_Ago_Sellers_Chg != 0`,
+		Sort: "n.Week_Ago_Sellers_Chg DESC",
+		Head: []Heading{
+			Heading{
+				Title: "Card Name",
+			},
+			Heading{
+				Title: "Edition",
+			},
+			Heading{
+				Title: "#",
+			},
+			Heading{
+				Title:   "Today's Seller",
+				CanSort: true,
+				Field:   "Todays_Sellers",
+			},
+			Heading{
+				Title:   "Last Week Sellers",
+				CanSort: true,
+				Field:   "Week_Ago_Sellers",
+			},
+			Heading{
+				Title:   "Month Ago Sellers",
+				CanSort: true,
+				Field:   "Month_Ago_Sellers",
+			},
+			Heading{
+				Title:   "Weekly % Change",
+				CanSort: true,
+				Field:   "Week_Ago_Sellers_Chg",
+				IsPerc:  true,
+			},
+		},
 	},
 	NewspaperPage{
 		Title:  "Greatest Increase in Vendor Listings",
 		Desc:   "Information Sourced from TCG: Stock Increases indicate that there is more than enough supply to meet current demand across the reviewed time period (tl:dr - Avoid These)",
 		Option: "stock_inc",
+		Query: `SELECT n.row_names, n.uuid, n.Todays_Sellers, n.Week_Ago_Sellers, n.Month_Ago_Sellers, n.Week_Ago_Sellers_Chg
+                FROM vendor_levels n
+                WHERE n.Week_Ago_Sellers_Chg is not NULL and n.Week_Ago_Sellers_Chg != 0`,
+		Sort: "n.Week_Ago_Sellers_Chg ASC",
+		Head: []Heading{
+			Heading{
+				Title: "Card Name",
+			},
+			Heading{
+				Title: "Edition",
+			},
+			Heading{
+				Title: "#",
+			},
+			Heading{
+				Title:   "Today's Seller",
+				CanSort: true,
+				Field:   "Todays_Sellers",
+			},
+			Heading{
+				Title:   "Last Week Sellers",
+				CanSort: true,
+				Field:   "Week_Ago_Sellers",
+			},
+			Heading{
+				Title:   "Month Ago Sellers",
+				CanSort: true,
+				Field:   "Month_Ago_Sellers",
+			},
+			Heading{
+				Title:   "Weekly % Change",
+				CanSort: true,
+				Field:   "Week_Ago_Sellers_Chg",
+				IsPerc:  true,
+			},
+		},
 	},
 	NewspaperPage{
 		Title:  "Greatest Increase in Buy List Offer",
 		Desc:   "Information Sourced from CK: Buy List increases indicate a higher sales rate (eg. higher demand). These may be fleeting, do not base a purchase solely off this metric unless dropshipping",
 		Option: "buylist_inc",
+		Query: `SELECT n.row_names, n.uuid, n.Todays_BL, n.Yesterday_BL, n.Week_Ago_BL, n.Month_Ago_BL, n.Week_Ago_BL_Chg
+                FROM buylist_levels n
+                WHERE n.Week_Ago_BL_Chg is not NULL and n.Week_Ago_BL_Chg != 0 and n.Yesterday_BL >= 1.25 and n.Todays_BL >= 1.25`,
+		Sort: "n.Week_Ago_BL_Chg DESC",
+		Head: []Heading{
+			Heading{
+				Title: "Card Name",
+			},
+			Heading{
+				Title: "Edition",
+			},
+			Heading{
+				Title: "#",
+			},
+			Heading{
+				Title:    "Today's Buylist",
+				CanSort:  true,
+				Field:    "Todays_BL",
+				IsDollar: true,
+			},
+			Heading{
+				Title:    "Yesterday Buylist",
+				CanSort:  true,
+				Field:    "Yesterday_BL",
+				IsDollar: true,
+			},
+			Heading{
+				Title:    "Last Week Buylist",
+				CanSort:  true,
+				Field:    "Week_Ago_BL",
+				IsDollar: true,
+			},
+			Heading{
+				Title:    "Last Month Buylist",
+				CanSort:  true,
+				Field:    "Month_Ago_BL",
+				IsDollar: true,
+			},
+			Heading{
+				Title:   "Weekly % Change",
+				CanSort: true,
+				Field:   "Week_Ago_Sellers_Chg",
+				IsPerc:  true,
+			},
+		},
 	},
 	NewspaperPage{
 		Title:  "Greatest Decrease in Buy List Offer",
 		Desc:   "Information Sourced from CK: Buy List Decreases indicate a declining sales rate (eg, Less demand). These may be fleeting, do not base a purchase solely off this metric unless dropshipping",
 		Option: "buylist_dec",
+		Query: `SELECT n.row_names, n.uuid, n.Todays_BL, n.Yesterday_BL, n.Week_Ago_BL, n.Month_Ago_BL, n.Week_Ago_BL_Chg
+                FROM buylist_levels n
+                WHERE n.Week_Ago_BL_Chg is not NULL and n.Week_Ago_BL_Chg != 0 and n.Yesterday_BL >= 1.25 and n.Todays_BL >= 1.25`,
+		Sort: "n.Week_Ago_BL_Chg ASC",
+		Head: []Heading{
+			Heading{
+				Title: "Card Name",
+			},
+			Heading{
+				Title: "Edition",
+			},
+			Heading{
+				Title: "#",
+			},
+			Heading{
+				Title:    "Today's Buylist",
+				CanSort:  true,
+				Field:    "Todays_BL",
+				IsDollar: true,
+			},
+			Heading{
+				Title:    "Yesterday Buylist",
+				CanSort:  true,
+				Field:    "Yesterday_BL",
+				IsDollar: true,
+			},
+			Heading{
+				Title:    "Last Week Buylist",
+				CanSort:  true,
+				Field:    "Week_Ago_BL",
+				IsDollar: true,
+			},
+			Heading{
+				Title:    "Last Month Buylist",
+				CanSort:  true,
+				Field:    "Month_Ago_BL",
+				IsDollar: true,
+			},
+			Heading{
+				Title:   "Weekly % Change",
+				CanSort: true,
+				Field:   "Week_Ago_Sellers_Chg",
+				IsPerc:  true,
+			},
+		},
 	},
 	NewspaperPage{
 		Title:  "Buy List Growth - 7 Day Forecast",
