@@ -183,11 +183,21 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 
 	query := "SELECT * FROM top_25"
 	if sort != "" {
-		query += " ORDER BY " + sort
-		if dir == "asc" {
-			query += " ASC"
-		} else if dir == "desc" {
-			query += " DESC"
+		// Make sure this field is allowed to be sorted
+		canSort := false
+		for _, head := range pageVars.Headings {
+			if head.Title == sort {
+				canSort = head.CanSort
+				break
+			}
+		}
+		if canSort {
+			query += " ORDER BY " + sort
+			if dir == "asc" {
+				query += " ASC"
+			} else if dir == "desc" {
+				query += " DESC"
+			}
 		}
 	}
 	query = fmt.Sprintf("%s LIMIT %d", query, newsPageSize)
