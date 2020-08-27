@@ -45,7 +45,7 @@ type NewspaperPage struct {
 var NewspaperPages = []NewspaperPage{
 	NewspaperPage{
 		Title:  "Top 25 Singles (3 Week Market Review)",
-		Desc:   "Rankings are weighted via prior 21, 15, and 7 days via Retail, Buy list, and several other criteria to arrive at an overall ranking",
+		Desc:   "Rankings are weighted via prior 21, 15, and 7 days via Retail, Buylist, and several other criteria to arrive at an overall ranking",
 		Option: "review",
 		Query:  "SELECT * FROM top_25",
 		Sort:   "Ranking",
@@ -166,8 +166,8 @@ var NewspaperPages = []NewspaperPage{
 		},
 	},
 	NewspaperPage{
-		Title:  "Greatest Increase in Buy List Offer",
-		Desc:   "Information Sourced from CK: Buy List increases indicate a higher sales rate (eg. higher demand). These may be fleeting, do not base a purchase solely off this metric unless dropshipping",
+		Title:  "Greatest Increase in Buylist Offer",
+		Desc:   "Information Sourced from CK: buylist increases indicate a higher sales rate (eg. higher demand). These may be fleeting, do not base a purchase solely off this metric unless dropshipping",
 		Option: "buylist_inc",
 		Query: `SELECT n.row_names, n.uuid, n.Todays_BL, n.Yesterday_BL, n.Week_Ago_BL, n.Month_Ago_BL, n.Week_Ago_BL_Chg
                 FROM buylist_levels n
@@ -216,8 +216,8 @@ var NewspaperPages = []NewspaperPage{
 		},
 	},
 	NewspaperPage{
-		Title:  "Greatest Decrease in Buy List Offer",
-		Desc:   "Information Sourced from CK: Buy List Decreases indicate a declining sales rate (eg, Less demand). These may be fleeting, do not base a purchase solely off this metric unless dropshipping",
+		Title:  "Greatest Decrease in Buylist Offer",
+		Desc:   "Information Sourced from CK: Buylist Decreases indicate a declining sales rate (eg, Less demand). These may be fleeting, do not base a purchase solely off this metric unless dropshipping",
 		Option: "buylist_dec",
 		Query: `SELECT n.row_names, n.uuid, n.Todays_BL, n.Yesterday_BL, n.Week_Ago_BL, n.Month_Ago_BL, n.Week_Ago_BL_Chg
                 FROM buylist_levels n
@@ -266,13 +266,13 @@ var NewspaperPages = []NewspaperPage{
 		},
 	},
 	NewspaperPage{
-		Title:  "Buy List Growth - 7 Day Forecast",
-		Desc:   "Forecasting Card Kingdom's Buy List Offers on Cards",
+		Title:  "Buylist Growth - 7 Day Forecast",
+		Desc:   "Forecasting Card Kingdom's Buylist Offers on Cards",
 		Option: "buylist_growth",
 	},
 	NewspaperPage{
-		Title:  "Buy List Forecast - Performance Review",
-		Desc:   "Comparing the Buy List forecasts from a week ago with current, to provide additional context of how well one might expect them to perform moving forward",
+		Title:  "Buylist Forecast - Performance Review",
+		Desc:   "Comparing the Buylist forecasts from a week ago with current, to provide additional context of how well one might expect them to perform moving forward",
 		Option: "buylist_perf",
 	},
 	NewspaperPage{
