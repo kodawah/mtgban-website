@@ -269,21 +269,220 @@ var NewspaperPages = []NewspaperPage{
 		Title:  "Buylist Growth - 7 Day Forecast",
 		Desc:   "Forecasting Card Kingdom's Buylist Offers on Cards",
 		Option: "buylist_growth",
+		Query: `SELECT n.row_names, n.uuid, n.Todays_BL, n.Day_1, n.Day_3, n.Day_5, n.Day_7, n.RMSE_Pct_Volatility as Plus_Minus
+                FROM bl_growth_forecast n
+                LEFT JOIN mtgjson.cards c on c.uuid = n.uuid
+                WHERE c.rarity not like "%common%" and n.Todays_BL >= 1.5 and n.Todays_BL <= 1000`,
+		Sort: "n.Dollar_Pct_Chg DESC",
+		Head: []Heading{
+			Heading{
+				Title: "Card Name",
+			},
+			Heading{
+				Title: "Edition",
+			},
+			Heading{
+				Title: "#",
+			},
+			Heading{
+				Title:    "Today's Buylist",
+				CanSort:  true,
+				Field:    "Todays_BL",
+				IsDollar: true,
+			},
+			Heading{
+				Title:    "Tomorrow",
+				CanSort:  true,
+				Field:    "Day_1",
+				IsDollar: true,
+			},
+			Heading{
+				Title:    "In 3 Days",
+				CanSort:  true,
+				Field:    "Day_3",
+				IsDollar: true,
+			},
+			Heading{
+				Title:    "In 5 Days",
+				CanSort:  true,
+				Field:    "Day_5",
+				IsDollar: true,
+			},
+			Heading{
+				Title:    "Next Week Buylist",
+				CanSort:  true,
+				Field:    "Day_7",
+				IsDollar: true,
+			},
+			Heading{
+				Title:   "+/-",
+				CanSort: true,
+				Field:   "Plus_Minus",
+				IsPerc:  true,
+			},
+		},
 	},
 	NewspaperPage{
 		Title:  "Buylist Forecast - Performance Review",
 		Desc:   "Comparing the Buylist forecasts from a week ago with current, to provide additional context of how well one might expect them to perform moving forward",
 		Option: "buylist_perf",
+		Query: `SELECT n.row_names, n.uuid, n.Weeks_Ago as WA, n.Weeks_Ago_Forecast as WA_Forecast, n.Plus_Minus_WA as "P/M_WA", n.Today, n.Current_Fore as Forecast, n.Plus_Minus as "P/M"
+                FROM bl_forecast_perform n
+                LEFT JOIN mtgjson.cards c on c.uuid = n.uuid
+                WHERE c.rarity not like "%common%"`,
+		Sort: "n.Diff DESC",
+		Head: []Heading{
+			Heading{
+				Title: "Card Name",
+			},
+			Heading{
+				Title: "Edition",
+			},
+			Heading{
+				Title: "#",
+			},
+			Heading{
+				Title:    "Last Week Buylist",
+				CanSort:  true,
+				Field:    "WA",
+				IsDollar: true,
+			},
+			Heading{
+				Title:    "Last Week Forecast",
+				CanSort:  true,
+				Field:    "P/M_WA",
+				IsDollar: true,
+			},
+			Heading{
+				Title:   "Last Week +/-",
+				CanSort: true,
+				Field:   "Plus_Minus",
+				IsPerc:  true,
+			},
+			Heading{
+				Title:    "Today's Buylist",
+				CanSort:  true,
+				Field:    "Today",
+				IsDollar: true,
+			},
+			Heading{
+				Title:    "Forecast",
+				CanSort:  true,
+				Field:    "Forecast",
+				IsDollar: true,
+			},
+			Heading{
+				Title:   "+/-",
+				CanSort: true,
+				Field:   "P/M",
+				IsPerc:  true,
+			},
+		},
 	},
 	NewspaperPage{
 		Title:  "Vendor Growth - 7 Day Forecast",
 		Desc:   "Forecasting TCG Vendor Levels for Individual Cards",
 		Option: "vendor_forecast",
+		Query: `SELECT n.row_names, n.uuid, n.Todays_BL, n.Day_1, n.Day_3, n.Day_5, n.Day_7, n.RMSE_Pct_Volatility as Plus_Minus
+                        FROM vendor_decline_forecast n
+                        LEFT JOIN mtgjson.cards c on c.uuid = n.uuid
+                        WHERE c.rarity not like "%common%" and n.Todays_BL <= 100`,
+		Sort: "n.Dollar_Pct_Chg DESC",
+		Head: []Heading{
+			Heading{
+				Title: "Card Name",
+			},
+			Heading{
+				Title: "Edition",
+			},
+			Heading{
+				Title: "#",
+			},
+			Heading{
+				Title:   "Today's Vendors",
+				CanSort: true,
+				Field:   "Todays_BL",
+			},
+			Heading{
+				Title:   "Tomorrow",
+				CanSort: true,
+				Field:   "Day_1",
+			},
+			Heading{
+				Title:   "In 3 Days",
+				CanSort: true,
+				Field:   "Day_3",
+			},
+			Heading{
+				Title:   "In 5 Days",
+				CanSort: true,
+				Field:   "Day_5",
+			},
+			Heading{
+				Title:   "Next Week Vendors",
+				CanSort: true,
+				Field:   "Day_7",
+			},
+			Heading{
+				Title:   "+/-",
+				CanSort: true,
+				Field:   "Plus_Minus",
+				IsPerc:  true,
+			},
+		},
 	},
 	NewspaperPage{
 		Title:  "Vendor Forecast - Performance Review",
 		Desc:   "Comparing the TCG Vendor forecasts from a week ago with current, to provide additional context of how well one might expect them to perform moving forward",
 		Option: "vendor_growth",
+		Query: `SELECT n.row_names, n.uuid, n.Weeks_Ago as WA, n.Weeks_Ago_Forecast as WA_Forecast, n.Plus_Minus_WA as "P/M_WA", n.Today, n.Current_Fore as Forecast, n.Plus_Minus as "P/M"
+                FROM vendor_forecast_perform n
+                LEFT JOIN mtgjson.cards c on c.uuid = n.uuid
+                WHERE c.rarity not like "%common%" and n.Weeks_Ago is not NULL`,
+		Sort: "n.Diff DESC",
+		Head: []Heading{
+			Heading{
+				Title: "Card Name",
+			},
+			Heading{
+				Title: "Edition",
+			},
+			Heading{
+				Title: "#",
+			},
+			Heading{
+				Title:   "Last Week Vendors",
+				CanSort: true,
+				Field:   "WA",
+			},
+			Heading{
+				Title:   "Last Week Forecast",
+				CanSort: true,
+				Field:   "P/M_WA",
+			},
+			Heading{
+				Title:   "Last Week +/-",
+				CanSort: true,
+				Field:   "Plus_Minus",
+				IsPerc:  true,
+			},
+			Heading{
+				Title:   "Today's Vendors",
+				CanSort: true,
+				Field:   "Today",
+			},
+			Heading{
+				Title:   "Forecast",
+				CanSort: true,
+				Field:   "Forecast",
+			},
+			Heading{
+				Title:   "Last Week +/-",
+				CanSort: true,
+				Field:   "P/M",
+				IsPerc:  true,
+			},
+		},
 	},
 }
 
