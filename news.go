@@ -326,7 +326,7 @@ var NewspaperPages = []NewspaperPage{
 		Title:  "Buylist Forecast - Performance Review",
 		Desc:   "Comparing the Buylist forecasts from a week ago with current, to provide additional context of how well one might expect them to perform moving forward",
 		Option: "buylist_perf",
-		Query: `SELECT n.row_names, n.uuid, n.Weeks_Ago as WA, n.Weeks_Ago_Forecast as WA_Forecast, n.Plus_Minus_WA as "P/M_WA", n.Today, n.Current_Fore as Forecast, n.Plus_Minus as "P/M"
+		Query: `SELECT n.row_names, n.uuid, n.Weeks_Ago as WA, n.Weeks_Ago_Forecast as WA_Forecast, n.Plus_Minus_WA as "PM_WA", n.Today, n.Current_Fore as Forecast, n.Plus_Minus as "PM"
                 FROM bl_forecast_perform n
                 LEFT JOIN mtgjson.cards c on c.uuid = n.uuid
                 WHERE c.rarity not like "%common%"`,
@@ -350,13 +350,13 @@ var NewspaperPages = []NewspaperPage{
 			Heading{
 				Title:    "Last Week Forecast",
 				CanSort:  true,
-				Field:    "P/M_WA",
+				Field:    "WA_Forecast",
 				IsDollar: true,
 			},
 			Heading{
 				Title:   "Last Week +/-",
 				CanSort: true,
-				Field:   "Plus_Minus",
+				Field:   "PM_WA",
 				IsPerc:  true,
 			},
 			Heading{
@@ -374,7 +374,7 @@ var NewspaperPages = []NewspaperPage{
 			Heading{
 				Title:   "+/-",
 				CanSort: true,
-				Field:   "P/M",
+				Field:   "PM",
 				IsPerc:  true,
 			},
 		},
@@ -435,7 +435,7 @@ var NewspaperPages = []NewspaperPage{
 		Title:  "Vendor Forecast - Performance Review",
 		Desc:   "Comparing the TCG Vendor forecasts from a week ago with current, to provide additional context of how well one might expect them to perform moving forward",
 		Option: "vendor_growth",
-		Query: `SELECT n.row_names, n.uuid, n.Weeks_Ago as WA, n.Weeks_Ago_Forecast as WA_Forecast, n.Plus_Minus_WA as "P/M_WA", n.Today, n.Current_Fore as Forecast, n.Plus_Minus as "P/M"
+		Query: `SELECT n.row_names, n.uuid, n.Weeks_Ago as WA, n.Weeks_Ago_Forecast as WA_Forecast, n.Plus_Minus_WA as "PM_WA", n.Today, n.Current_Fore as Forecast, n.Plus_Minus as "PM"
                 FROM vendor_forecast_perform n
                 LEFT JOIN mtgjson.cards c on c.uuid = n.uuid
                 WHERE c.rarity not like "%common%" and n.Weeks_Ago is not NULL`,
@@ -458,12 +458,12 @@ var NewspaperPages = []NewspaperPage{
 			Heading{
 				Title:   "Last Week Forecast",
 				CanSort: true,
-				Field:   "P/M_WA",
+				Field:   "WA_Forecast",
 			},
 			Heading{
 				Title:   "Last Week +/-",
 				CanSort: true,
-				Field:   "Plus_Minus",
+				Field:   "PM_WA",
 				IsPerc:  true,
 			},
 			Heading{
@@ -479,7 +479,7 @@ var NewspaperPages = []NewspaperPage{
 			Heading{
 				Title:   "Last Week +/-",
 				CanSort: true,
-				Field:   "P/M",
+				Field:   "PM",
 				IsPerc:  true,
 			},
 		},
