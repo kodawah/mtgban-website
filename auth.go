@@ -359,6 +359,7 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) string {
 		v.Set("Search", "true")
 	case "Master of Coin":
 		v.Set("Search", "true")
+		v.Set("Newspaper", "true")
 		v.Set("Arbit", "true")
 	case "Admin", "Root":
 		v.Set("Search", "true")
