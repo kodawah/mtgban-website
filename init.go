@@ -11,7 +11,6 @@ import (
 
 	"github.com/kodabb/go-mtgban/abugames"
 	"github.com/kodabb/go-mtgban/cardkingdom"
-	"github.com/kodabb/go-mtgban/channelfireball"
 	"github.com/kodabb/go-mtgban/coolstuffinc"
 	"github.com/kodabb/go-mtgban/miniaturemarket"
 	"github.com/kodabb/go-mtgban/ninetyfive"
@@ -315,14 +314,6 @@ var options = map[string]*scraperOption{
 			scraper := cardkingdom.NewScraper()
 			scraper.LogCallback = log.Printf
 			scraper.Partner = Config.Affiliate["CK"]
-			return scraper, nil
-		},
-	},
-	"channelfireball": &scraperOption{
-		Init: func() (mtgban.Scraper, error) {
-			scraper := channelfireball.NewScraper()
-			scraper.LogCallback = log.Printf
-			scraper.MaxConcurrency = 6
 			return scraper, nil
 		},
 	},
