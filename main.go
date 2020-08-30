@@ -332,16 +332,16 @@ func main() {
 
 		// Set up new refreshes as needed
 		c := cron.New()
-		// refresh every day at 13:00
-		c.AddFunc("0 13 * * *", func() {
+		// refresh every day at 13:10
+		c.AddFunc("10 13 * * *", func() {
 			loadScrapers(true, true)
 		})
-		// refresh CK at every 8th hour
-		c.AddFunc("0 */8 * * *", loadCK)
-		// refresh TCG every day at 1:00
-		c.AddFunc("0 1 * * *", loadTCG)
-		// refresh at 12:00 every Tuesday
-		c.AddFunc("0 12 * * 2", func() {
+		// refresh CK at every 8th hour, 10 minutes past the hour
+		c.AddFunc("10 */8 * * *", loadCK)
+		// refresh TCG every day at 1:10
+		c.AddFunc("10 1 * * *", loadTCG)
+		// refresh at 12:10 every Tuesday
+		c.AddFunc("10 12 * * 2", func() {
 			log.Println("Reloading MTGJSON")
 			err := loadDB()
 			if err != nil {
