@@ -123,7 +123,7 @@
                         <th class="stickyHeaderTiny"><center>#</center></th>
                         <th class="stickyHeaderTiny">F/NF</th>
                         <th class="stickyHeaderTiny">Conditions</th>
-                        {{if ne $.SellerShort "TCG Low"}}
+                        {{if not $.SellerNoAvailable}}
                             <th class="stickyHeaderTiny">
                                 <a href="javascript:sortBy('available', '{{.Name}}')">Available</a>
                             </th>
@@ -166,7 +166,7 @@
                             <td>
                                 <center>{{.InventoryEntry.Conditions}}</center>
                             </td>
-                            {{if ne $.SellerShort "TCG Low"}}
+                            {{if not $.SellerNoAvailable}}
                                 <td>
                                     <center>
                                         {{.InventoryEntry.Quantity}}
@@ -211,7 +211,7 @@
                         </tr>
                     {{end}}
                     <tr style="background-color: #f8f8f8;">
-                        <td colspan={{if eq $.SellerShort "TCG Low"}}12{{else}}13{{end}}>
+                        <td colspan={{if $.SellerNoAvailable}}12{{else}}13{{end}}>
                             <p style="float: left;">
                                 <i>Last update: {{.LastUpdate}}</i>
                             </p>
@@ -232,7 +232,7 @@
         </div>
         <br>
         <p>
-            {{if or (eq .SellerFull "Card Kingdom") (eq .SellerFull "TCG Low")}}
+            {{if .SellerAffiliate}}
                 By visiting {{.SellerFull}} through the links on this page you're supporting the continuos development of this site ♥
             {{end}}
         </p>

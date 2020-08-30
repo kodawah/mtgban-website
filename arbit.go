@@ -170,6 +170,14 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	pageVars.FilterFoil = nofoil
 	pageVars.FilterComm = nocomm
 	pageVars.FilterNega = noposi
+	switch pageVars.SellerFull {
+	case "TCG Low", "TCG Direct Low", "Card Kingdom":
+		pageVars.SellerAffiliate = true
+	}
+	switch pageVars.SellerFull {
+	case "TCG Low", "TCG Direct Low":
+		pageVars.SellerNoAvailable = true
+	}
 
 	pageVars.Arb = []Arbitrage{}
 	pageVars.Images = map[mtgdb.Card]string{}

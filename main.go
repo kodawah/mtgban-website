@@ -60,9 +60,11 @@ type PageVars struct {
 	Images       map[mtgdb.Card]string
 	Metadata     map[mtgdb.Card]CardMeta
 
-	SellerShort  string
-	SellerFull   string
-	SellerUpdate string
+	SellerShort       string
+	SellerFull        string
+	SellerUpdate      string
+	SellerAffiliate   bool
+	SellerNoAvailable bool
 
 	Arb        []Arbitrage
 	UseCredit  bool
