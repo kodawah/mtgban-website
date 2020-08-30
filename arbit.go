@@ -144,6 +144,9 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		if newSeller.Info().Name == "TCG Low" {
 			nav.Short = "TCG"
 		}
+		if newSeller.Info().Name == "TCG Direct Low" {
+			nav.Short = "Direct"
+		}
 		if sig != "" {
 			nav.Link += "&sig=" + sig
 		}
