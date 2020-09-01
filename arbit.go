@@ -155,6 +155,9 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			nav.Link += "&sig=" + sig
 		}
 
+		// Preserve sorting and filtering options
+		nav.Link += fmt.Sprintf("&credit=%t&nocond=%t&nofoil=%t&nocomm=%t&noposi=%t&nopenny=%t&sort=%s", useCredit, nocond, nofoil, nocomm, noposi, nopenny, sorting)
+
 		if source != nil && source.Info().Name == newSeller.Info().Name {
 			nav.Active = true
 			nav.Class = "selected"
