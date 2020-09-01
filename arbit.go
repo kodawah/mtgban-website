@@ -237,6 +237,10 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 			arbit = tmp
+
+			if len(arbit) == 0 {
+				continue
+			}
 		}
 		if nofoil {
 			tmp := arbit[:0]
@@ -246,6 +250,10 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 			arbit = tmp
+
+			if len(arbit) == 0 {
+				continue
+			}
 		}
 		if nocomm {
 			tmp := arbit[:0]
@@ -255,6 +263,10 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 			arbit = tmp
+
+			if len(arbit) == 0 {
+				continue
+			}
 		}
 		if nopenny {
 			tmp := arbit[:0]
@@ -264,6 +276,10 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 			arbit = tmp
+
+			if len(arbit) == 0 {
+				continue
+			}
 		}
 
 		if len(arbit) > MaxArbitResults {
@@ -285,6 +301,10 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		arbit = tmp
+
+		if len(arbit) == 0 {
+			continue
+		}
 
 		// Sort as requested
 		switch sorting {
