@@ -265,6 +265,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
+		// Sort by Spread, so that we can skip erraneous matches
 		sort.Slice(arbit, func(i, j int) bool {
 			return arbit[i].Spread > arbit[j].Spread
 		})
@@ -276,6 +277,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
+		// Sort as requested
 		switch sorting {
 		case "available":
 			sort.Slice(arbit, func(i, j int) bool {
