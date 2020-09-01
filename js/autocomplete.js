@@ -53,7 +53,7 @@ async function autocomplete(form, inp) {
                     closeAllLists();
 
                     /* Submit the form (so that onSubmit may trigger) */
-                    form.dispatchEvent(new Event('submit'));
+                    form.requestSubmit();
                 });
                 a.appendChild(b);
             }
