@@ -16,6 +16,9 @@ import (
 
 const (
 	MaxArbitResults = 600
+	MaxPriceRatio   = 100.0
+	MaxSpread       = 650.0
+	MinSpread       = 10.0
 )
 
 type Arbitrage struct {
@@ -202,12 +205,15 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
+		maxSpread := MaxSpread
+
 		opts := &mtgban.ArbitOpts{
-			MinSpread: 10,
+			MinSpread: MinSpread,
 		}
 		if noposi {
 			opts.MinSpread = -30
 			opts.MinDiff = -100
+			maxSpread = MinSpread
 		}
 		if vendor.Info().Shorthand == "ABU" {
 			opts.UseTrades = useCredit
@@ -271,28 +277,14 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			pageVars.Images[card] = link
 		}
 
-		// Sort by PriceRatio, so that we can skip invalid entries
-		sort.Slice(arbit, func(i, j int) bool {
-			return arbit[i].BuylistEntry.PriceRatio > arbit[j].BuylistEntry.PriceRatio
-		})
-		for i := len(arbit) - 1; i >= 0; i-- {
-			if arbit[i].BuylistEntry.PriceRatio > 100 {
-				arbit = arbit[i:]
-				break
+		// Filter out entries that are invalid
+		tmp := arbit[:0]
+		for i := range arbit {
+			if math.Abs(arbit[i].BuylistEntry.PriceRatio) < MaxPriceRatio && arbit[i].Spread < maxSpread {
+				tmp = append(tmp, arbit[i])
 			}
 		}
-
-		// Sort by Spread, so that we can skip erraneous matches
-		sort.Slice(arbit, func(i, j int) bool {
-			return arbit[i].Spread > arbit[j].Spread
-		})
-		for i := len(arbit) - 1; i >= 0; i-- {
-			if arbit[i].Spread > 650 || (noposi && arbit[i].Spread > 10) {
-				log.Printf("Skipping spread of %f", arbit[i].Spread)
-				arbit = arbit[i:]
-				break
-			}
-		}
+		arbit = tmp
 
 		// Sort as requested
 		switch sorting {
