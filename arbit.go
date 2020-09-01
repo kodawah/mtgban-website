@@ -321,6 +321,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 				return arbit[i].Spread > arbit[j].Spread
 			})
 		}
+		pageVars.SortOption = sorting
 
 		pageVars.Arb = append(pageVars.Arb, Arbitrage{
 			Name:       vendor.Info().Name,

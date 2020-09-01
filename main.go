@@ -73,6 +73,7 @@ type PageVars struct {
 	FilterComm  bool
 	FilterNega  bool
 	FilterPenny bool
+	SortOption  string
 
 	Page        string
 	ToC         []NewspaperPage
