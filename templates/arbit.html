@@ -81,32 +81,16 @@
                     </p>
                     <p>
                         Show
-                        {{if $.FilterCond}}
-                            <a class="btn success" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}{{if $.FilterFoil}}&nofoil=true{{end}}{{if $.FilterComm}}&nocomm=true{{end}}{{if $.FilterNega}}&noposi=true{{end}}"><b>only NM/SP</b></a>
-                        {{else}}
-                            <a class="btn normal" href="arbit?source={{$.SellerShort}}&nocond=true&sig={{$.Signature}}{{if $.FilterFoil}}&nofoil=true{{end}}{{if $.FilterComm}}&nocomm=true{{end}}{{if $.FilterNega}}&noposi=true{{end}}">only NM/SP</a>
-                        {{end}}
-                        {{if $.FilterFoil}}
-                            <a class="btn success" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}{{if $.FilterCond}}&nocond=true{{end}}{{if $.FilterComm}}&nocomm=true{{end}}{{if $.FilterNega}}&noposi=true{{end}}"><b>only non-Foil</b></a>
-                        {{else}}
-                            <a class="btn normal" href="arbit?source={{$.SellerShort}}&nofoil=true&sig={{$.Signature}}{{if $.FilterCond}}&nocond=true{{end}}{{if $.FilterComm}}&nocomm=true{{end}}{{if $.FilterNega}}&noposi=true{{end}}">only non-Foil</a>
-                        {{end}}
-                        {{if $.FilterComm}}
-                            <a class="btn success" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}{{if $.FilterFoil}}&nofoil=true{{end}}{{if $.FilterCond}}&nocond=true{{end}}{{if $.FilterNega}}&noposi=true{{end}}"><b>only Rare/Mythic</b></a>
-                        {{else}}
-                            <a class="btn normal" href="arbit?source={{$.SellerShort}}&nocomm=true&sig={{$.Signature}}{{if $.FilterFoil}}&nofoil=true{{end}}{{if $.FilterCond}}&nocond=true{{end}}{{if $.FilterNega}}&noposi=true{{end}}">only Rare/Mythic</a>
-                        {{end}}
-                        {{if $.FilterNega}}
-                            <a class="btn success" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}{{if $.FilterComm}}&nocomm=true{{end}}{{if $.FilterFoil}}&nofoil=true{{end}}{{if $.FilterCond}}&nocond=true{{end}}"><b>only Negative</b></a>
-                        {{else}}
-                            <a class="btn normal" href="arbit?source={{$.SellerShort}}&noposi=true&sig={{$.Signature}}{{if $.FilterComm}}&nocomm=true{{end}}{{if $.FilterFoil}}&nofoil=true{{end}}{{if $.FilterCond}}&nocond=true{{end}}">only Negative</a>
-                        {{end}}
+                        <a class="btn {{if $.FilterCond}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}&nocond={{not $.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}">only NM/SP</a>
+                        <a class="btn {{if $.FilterFoil}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}&nocond={{$.FilterCond}}&nofoil={{not $.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}">only non-Foil</a>
+                        <a class="btn {{if $.FilterComm}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{not $.FilterComm}}&noposi={{$.FilterNega}}">only Rare/Mythic</a>
+                        <a class="btn {{if $.FilterNega}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{not $.FilterNega}}">only Negative</a>
                     </p>
                 </div>
             {{end}}
             <script type='text/javascript'>
                 function sortBy(sort, name) {
-                    window.location.href = "arbit?&source={{$.SellerShort}}&sort=" + sort + "&sig={{$.Signature}}{{if $.FilterCond}}&nocond=true{{end}}{{if $.FilterFoil}}&nofoil=true{{end}}{{if $.FilterComm}}&nocomm=true{{end}}{{if $.FilterNega}}&noposi=true{{end}}#" + name;
+                    window.location.href = "arbit?&source={{$.SellerShort}}&sig={{$.Signature}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&sort=" + sort + "#" + name;
                 }
             </script>
             {{range .Arb}}
