@@ -81,16 +81,16 @@
                     </p>
                     <p>
                         Show
-                        <a class="btn {{if $.FilterCond}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}&nocond={{not $.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}">only NM/SP</a>
-                        <a class="btn {{if $.FilterFoil}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}&nocond={{$.FilterCond}}&nofoil={{not $.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}">only non-Foil</a>
-                        <a class="btn {{if $.FilterComm}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{not $.FilterComm}}&noposi={{$.FilterNega}}">only Rare/Mythic</a>
-                        <a class="btn {{if $.FilterNega}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{not $.FilterNega}}">only Negative</a>
+                        <a class="btn {{if $.FilterCond}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}&credit={{$.UseCredit}}&nocond={{not $.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}">only NM/SP</a>
+                        <a class="btn {{if $.FilterFoil}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{not $.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}">only non-Foil</a>
+                        <a class="btn {{if $.FilterComm}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{not $.FilterComm}}&noposi={{$.FilterNega}}">only Rare/Mythic</a>
+                        <a class="btn {{if $.FilterNega}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{not $.FilterNega}}">only Negative</a>
                     </p>
                 </div>
             {{end}}
             <script type='text/javascript'>
                 function sortBy(sort, name) {
-                    window.location.href = "arbit?&source={{$.SellerShort}}&sig={{$.Signature}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&sort=" + sort + "#" + name;
+                    window.location.href = "arbit?&source={{$.SellerShort}}&sig={{$.Signature}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&sort=" + sort + "#" + name;
                 }
             </script>
             {{range .Arb}}
@@ -202,11 +202,7 @@
 
                             <a class="btn default" style="float: right;" href="#top">back to top</a>
                             {{if eq .Name "ABU Games"}}
-                                {{if $.UseCredit}}
-                                    <a class="btn success" style="float: right;" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}">Return to Cash Arbitrage</a>
-                                {{else}}
-                                    <a class="btn warning" style="float: right;" href="arbit?source={{$.SellerShort}}&credit=true&sig={{$.Signature}}">Check Credit Arbitrage</a>
-                                {{end}}
+                                <a class="btn {{if $.UseCredit}}success{{else}}warning{{end}}" style="float: right;" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}&credit={{not $.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}">{{if $.UseCredit}}Return to Cash Arbitrage{{else}}Check Credit Arbitrage{{end}}</a>
                             {{end}}
                         </td>
                     </tr>
