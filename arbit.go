@@ -254,6 +254,17 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			pageVars.Images[card] = link
 		}
 
+		// Sort by PriceRatio, so that we can skip invalid entries
+		sort.Slice(arbit, func(i, j int) bool {
+			return arbit[i].BuylistEntry.PriceRatio > arbit[j].BuylistEntry.PriceRatio
+		})
+		for i := len(arbit) - 1; i >= 0; i-- {
+			if arbit[i].BuylistEntry.PriceRatio > 100 {
+				arbit = arbit[i:]
+				break
+			}
+		}
+
 		sort.Slice(arbit, func(i, j int) bool {
 			return arbit[i].Spread > arbit[j].Spread
 		})
