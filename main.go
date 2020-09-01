@@ -66,12 +66,13 @@ type PageVars struct {
 	SellerAffiliate   bool
 	SellerNoAvailable bool
 
-	Arb        []Arbitrage
-	UseCredit  bool
-	FilterCond bool
-	FilterFoil bool
-	FilterComm bool
-	FilterNega bool
+	Arb         []Arbitrage
+	UseCredit   bool
+	FilterCond  bool
+	FilterFoil  bool
+	FilterComm  bool
+	FilterNega  bool
+	FilterPenny bool
 
 	Page        string
 	ToC         []NewspaperPage
