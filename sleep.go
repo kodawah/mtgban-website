@@ -24,6 +24,10 @@ type SleeperEntry struct {
 	BGColor string
 }
 
+const (
+	MaxSleepers = 34
+)
+
 var SleeperLetters = []string{
 	"S", "A", "B", "C", "D", "E", "F",
 }
@@ -156,6 +160,10 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 
 		if level >= len(pageVars.Sleepers) {
 			break
+		}
+
+		if len(pageVars.Sleepers[level].Meta) > MaxSleepers {
+			continue
 		}
 
 		card := res.Card
