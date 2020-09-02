@@ -393,3 +393,18 @@ span {
         display: none;
     }
 }
+
+table.tiers {
+    margin: 10px;
+}
+
+tr.tiers{
+    background-color: #1a1a1a;
+    vertical-align: middle;}
+
+td.tiers {
+    min-width: 50px;
+    text-align: center;
+    font-size: 24px;
+    margin: auto;
+}

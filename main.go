@@ -32,6 +32,7 @@ type NavElem struct {
 }
 
 type CardMeta struct {
+	SearchURL    string
 	ImageURL     string
 	KeyruneHTML  string
 	KeyruneTitle string
@@ -82,6 +83,8 @@ type PageVars struct {
 	Table       [][]string
 	HasReserved bool
 	IsOneDay    bool
+
+	Sleepers [7]SleeperEntry
 }
 
 var DefaultNav = []NavElem{
@@ -97,7 +100,7 @@ var OptionalFields = []string{
 }
 
 var OrderNav = []string{
-	"Search", "Newspaper", "Explore", "Arbit",
+	"Search", "Newspaper", "Explore", "Sleepers", "Arbit",
 }
 
 var ExtraNavs = map[string]NavElem{
@@ -115,6 +118,11 @@ var ExtraNavs = map[string]NavElem{
 		Name:  "🚠 Explore",
 		Short: "🚠",
 		Link:  "/explore",
+	},
+	"Sleepers": NavElem{
+		Name:  "💤 Sleepers",
+		Short: "💤",
+		Link:  "/sleepers",
 	},
 	"Arbit": NavElem{
 		Name:  "📈 Arbitrage",
@@ -363,6 +371,7 @@ func main() {
 	http.Handle("/search", enforceSigning(http.HandlerFunc(Search)))
 	http.Handle("/newspaper", enforceSigning(http.HandlerFunc(Newspaper)))
 	http.Handle("/explore", enforceSigning(http.HandlerFunc(Explore)))
+	http.Handle("/sleepers", enforceSigning(http.HandlerFunc(Sleepers)))
 	http.Handle("/arbit", enforceSigning(http.HandlerFunc(Arbit)))
 	http.Handle("/api/mtgjson/ck.json", enforceSigning(http.HandlerFunc(API)))
 	http.HandleFunc("/favicon.ico", Favicon)
