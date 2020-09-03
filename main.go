@@ -350,8 +350,8 @@ func main() {
 		c.AddFunc("10 */8 * * *", loadCK)
 		// refresh TCG every day at 1:10
 		c.AddFunc("10 1 * * *", loadTCG)
-		// refresh at 12:10 every Tuesday
-		c.AddFunc("10 12 * * 2", func() {
+		// refresh at 12 every day
+		c.AddFunc("0 12 * * *", func() {
 			log.Println("Reloading MTGJSON")
 			err := loadDB()
 			if err != nil {
