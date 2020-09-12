@@ -362,6 +362,10 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 				Keyrune:  keyruneForCardSet(cardId),
 				ImageURL: scryfallImageURL(cardId, true),
 				Title:    editionTitle(cardId),
+				Reserved: co.Card.IsReserved,
+			}
+			if co.Card.IsReserved {
+				pageVars.HasReserved = true
 			}
 		}
 	}

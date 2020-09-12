@@ -3,6 +3,7 @@
 <head>
     <link href='https://fonts.googleapis.com/css?family=Rosario:400' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="../css/main.css">
+    <link href="//cdn.jsdelivr.net/npm/keyrune@latest/css/keyrune.css" rel="stylesheet" type="text/css" />
     <title>{{.Title}}</title>
 </head>
 <body>
@@ -95,7 +96,7 @@
                 }
             </script>
             {{range .Arb}}
-                <div class="sticky" style="top: 48px; background-color: #f8f8f8; z-index: 1;">
+                <div class="sticky" style="top: 48px; background-color: #f8f8f8;">
                     <span class="anchor" id="{{.Name}}"></span>
                     <h3 class="storename">{{.Name}}</a></h3>
                     <hr width=20%>
@@ -137,10 +138,10 @@
                     {{range .Arbit}}
                         <tr onmouseover="document.getElementById('hoverImage').src={{(index $.Metadata .CardId).ImageURL}};">
                             <td>
-                                {{(index $.Metadata .CardId).Name}}
+                                {{(index $.Metadata .CardId).Name}} {{if (index $.Metadata .CardId).Reserved}}*{{end}}
                             </td>
                             <td>
-                                {{(index $.Metadata .CardId).Edition}}
+                                <i class="ss {{(index $.Metadata .CardId).Keyrune}} ss-1x ss-fw"></i> {{(index $.Metadata .CardId).Edition}}
                             </td>
                             <td>
                                 {{(index $.Metadata .CardId).Number}}
@@ -208,7 +209,10 @@
                         </td>
                     </tr>
                 </table>
-                <br>
+            {{end}}
+
+            {{if .HasReserved}}
+                <h4>* = Part of the <a href="https://mtg.gamepedia.com/Reserved_List">Reserved List</a></h4>
             {{end}}
         </div>
         <br>

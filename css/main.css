@@ -273,6 +273,7 @@ a.selected:hover{
 .sticky {
     position: -webkit-sticky;
     position: sticky;
+    z-index: 2;
 }
 
 th.stickyCategory {
@@ -288,6 +289,7 @@ th.stickyHeader {
     top: 84px;
     background-color: #eaeaea;
     height: 40px;
+    z-index: 1;
 }
 
 th.stickyHeaderTiny {
@@ -295,6 +297,7 @@ th.stickyHeaderTiny {
     position: sticky;
     top: 72px;
     background-color: #eaeaea;
+    z-index: 1;
 }
 
 th.stickyHeaderShort {
