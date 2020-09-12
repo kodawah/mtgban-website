@@ -41,6 +41,14 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	blocklist, _ := GetParamFromSig(sig, "SearchDisabled")
+	if blocklist == "NONE" && !SigCheck {
+		blocklist = ""
+	}
+	if blocklist == "DEFAULT" {
+		blocklist = strings.Join(Config.SearchBlockList, ",")
+	}
+
 	query := r.FormValue("q")
 	bestSorting, _ := strconv.ParseBool(r.FormValue("b"))
 
@@ -111,6 +119,11 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		for i, seller := range Sellers {
 			if seller == nil {
 				log.Println("nil seller at position", i)
+				continue
+			}
+
+			// Skip any seller explicitly in blocklist
+			if strings.Contains(blocklist, seller.Info().Shorthand) {
 				continue
 			}
 
@@ -235,6 +248,10 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		for i, vendor := range Vendors {
 			if vendor == nil {
 				log.Println("nil vendor at position", i)
+				continue
+			}
+
+			if strings.Contains(blocklist, vendor.Info().Shorthand) {
 				continue
 			}
 

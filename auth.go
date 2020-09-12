@@ -376,6 +376,13 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) string {
 			v.Set("ArbitEnabled", "DEFAULT")
 		}
 	}
+	if v.Get("Search") == "true" {
+		if tierTitle == "Root" {
+			v.Set("SearchDisabled", "NONE")
+		} else {
+			v.Set("SearchDisabled", "DEFAULT")
+		}
+	}
 	if v.Get("Explore") == "true" {
 		switch tierTitle {
 		case "Root":
