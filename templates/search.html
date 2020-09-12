@@ -86,17 +86,24 @@
                 </ul>
              </div>
         {{else}}
-            <div class="indent sticky" style="top: 120px; z-index: -1;">
+            <div class="indent sticky" style="top: 120px;">
                 <table style="float: left;">
                     <tr>
                         <td>
                             <img id="cardImage" src="" width="354" height="493"/>
                         </td>
                     </tr>
+                    <tr>
+                        <td style="background-color: #f8f8f8;">
+                            {{if .HasReserved}}
+                                <h4>* = Part of the <a href="https://mtg.gamepedia.com/Reserved_List">Reserved List</a></h4>
+                            {{end}}
+                        </td>
+                    </tr>
                 </table>
             </div>
 
-            <div class="indent">
+            <div class="indent sticky">
                 {{$firstImg := ""}}
                 <table class="searchResults">
                     <tr>
@@ -108,7 +115,7 @@
                         {{end}}
                         <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $cardId).ImageURL}};" title="{{(index $.Metadata $cardId).Title}}">
                             <th colspan="2" class="wrap stickyHeader" style="text-align: left; vertical-align: middle;">
-                                <i class="ss {{(index $.Metadata $cardId).Keyrune}} ss-2x ss-fw"></i> {{(index $.Metadata $cardId).Name}}
+                                <i class="ss {{(index $.Metadata $cardId).Keyrune}} ss-2x ss-fw"></i> {{(index $.Metadata $cardId).Name}} {{if (index $.Metadata $cardId).Reserved}}*{{end}}
                             </th>
                             <th class="wrap stickyHeader" style="text-align: center; vertical-align: middle;">
                                 <h4>{{(index $.Metadata $cardId).Number}}</h4>
@@ -165,7 +172,7 @@
                     {{range $cardId, $entries := .FoundVendors}}
                         <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $cardId).ImageURL}};" title="{{(index $.Metadata $cardId).Title}}">
                             <th colspan="3" class="wrap stickyHeader" style="text-align: left; vertical-align: middle;">
-                                <i class="ss {{(index $.Metadata $cardId).Keyrune}} ss-2x ss-fw"></i> {{(index $.Metadata $cardId).Name}}
+                                <i class="ss {{(index $.Metadata $cardId).Keyrune}} ss-2x ss-fw"></i> {{(index $.Metadata $cardId).Name}} {{if (index $.Metadata $cardId).Reserved}}*{{end}}
                             </th>
                             <th class="wrap stickyHeader" style="text-align: center; vertical-align: middle;">
                                 <h4>{{(index $.Metadata $cardId).Number}}</h4>

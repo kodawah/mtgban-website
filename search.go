@@ -136,6 +136,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 				// Run the comparison function set above
 				if cmpFunc(co.Card.Name, query) {
+					if co.Card.IsReserved {
+						pageVars.HasReserved = true
+					}
 					// Skip cards that are not of the desired set
 					if filterEdition != "" && filterEdition != co.SetCode {
 						continue
@@ -169,6 +172,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 								Keyrune:  keyruneForCardSet(cardId),
 								ImageURL: scryfallImageURL(cardId, false),
 								Title:    editionTitle(cardId),
+								Reserved: co.Card.IsReserved,
 							}
 						}
 
@@ -269,6 +273,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				}
 
 				if cmpFunc(co.Card.Name, query) {
+					if co.Card.IsReserved {
+						pageVars.HasReserved = true
+					}
 					_, found := pageVars.Metadata[cardId]
 					if !found {
 						pageVars.Metadata[cardId] = GenericCard{
@@ -279,6 +286,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 							Keyrune:  keyruneForCardSet(cardId),
 							ImageURL: scryfallImageURL(cardId, false),
 							Title:    editionTitle(cardId),
+							Reserved: co.Card.IsReserved,
 						}
 					}
 
