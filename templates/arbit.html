@@ -135,18 +135,18 @@
                         <th class="stickyHeaderTiny"><center>Quicklinks</center></th>
                     </tr>
                     {{range .Arbit}}
-                        <tr onmouseover="document.getElementById('hoverImage').src={{index $.Images .Card}};">
+                        <tr onmouseover="document.getElementById('hoverImage').src={{(index $.Metadata .CardId).ImageURL}};">
                             <td>
-                                {{.Card.Name}}
+                                {{(index $.Metadata .CardId).Name}}
                             </td>
                             <td>
-                                {{.Card.Edition}}
+                                {{(index $.Metadata .CardId).Edition}}
                             </td>
                             <td>
-                                {{.Card.Number}}
+                                {{(index $.Metadata .CardId).Number}}
                             </td>
                             <td>
-                                {{if .Card.Foil}}FOIL{{end}}
+                                {{if (index $.Metadata .CardId).Foil}}FOIL{{end}}
                             </td>
                             <td>
                                 <center>{{.InventoryEntry.Conditions}}</center>

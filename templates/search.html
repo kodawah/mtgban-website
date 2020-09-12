@@ -102,29 +102,29 @@
                     <tr>
                         <th colspan="3" class="stickyCategory"><h2 align=center>Sellers</h2></th>
                     </tr>
-                    {{range $card, $condsEntry := .FoundSellers}}
+                    {{range $cardId, $condsEntry := .FoundSellers}}
                         {{if eq $firstImg ""}}
-                            {{$firstImg = (index $.Metadata $card).ImageURL}}
+                            {{$firstImg = (index $.Metadata $cardId).ImageURL}}
                         {{end}}
-                        <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $card).ImageURL}};" title="{{(index $.Metadata $card).KeyruneTitle}}">
+                        <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $cardId).ImageURL}};" title="{{(index $.Metadata $cardId).Title}}">
                             <th colspan="2" class="wrap stickyHeader" style="text-align: left; vertical-align: middle;">
-                                <i class="ss {{(index $.Metadata $card).KeyruneHTML}} ss-2x ss-fw"></i> {{$card.Name}}
+                                <i class="ss {{(index $.Metadata $cardId).Keyrune}} ss-2x ss-fw"></i> {{(index $.Metadata $cardId).Name}}
                             </th>
                             <th class="wrap stickyHeader" style="text-align: center; vertical-align: middle;">
-                                <h4>{{$card.Number}}</h4>
+                                <h4>{{(index $.Metadata $cardId).Number}}</h4>
                             </th>
                         </tr>
                         {{range $conditions := $.CondKeys}}
                             {{$entries := (index $condsEntry $conditions)}}
                             {{if ne $conditions "TCG"}}
                                 {{if $entries}}
-                                    <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $card).ImageURL}};">
+                                    <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $cardId).ImageURL}};">
                                         <td colspan="3"><i>Conditions: {{$conditions}}</i></th>
                                     </tr>
                                 {{end}}
                             {{end}}
                             {{range $entries}}
-                                <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $card).ImageURL}};">
+                                <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $cardId).ImageURL}};">
                                     <td>
                                         {{if ne .URL ""}}
                                             <a class="btn normal" href="{{.URL}}" target="_blank">
@@ -162,17 +162,17 @@
                     <tr>
                         <th colspan="4" class="stickyCategory"><h2 align=center>Buyers</h2></th>
                     </tr>
-                    {{range $card, $entries := .FoundVendors}}
-                        <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $card).ImageURL}};" title="{{(index $.Metadata $card).KeyruneTitle}}">
+                    {{range $cardId, $entries := .FoundVendors}}
+                        <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $cardId).ImageURL}};" title="{{(index $.Metadata $cardId).Title}}">
                             <th colspan="3" class="wrap stickyHeader" style="text-align: left; vertical-align: middle;">
-                                <i class="ss {{(index $.Metadata $card).KeyruneHTML}} ss-2x ss-fw"></i> {{$card.Name}}
+                                <i class="ss {{(index $.Metadata $cardId).Keyrune}} ss-2x ss-fw"></i> {{(index $.Metadata $cardId).Name}}
                             </th>
                             <th class="wrap stickyHeader" style="text-align: center; vertical-align: middle;">
-                                <h4>{{$card.Number}}</h4>
+                                <h4>{{(index $.Metadata $cardId).Number}}</h4>
                             </th>
                         </tr>
                         {{range $entries}}
-                            <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $card).ImageURL}};">
+                            <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $cardId).ImageURL}};">
                                 <td>
                                     {{if ne .URL ""}}
                                         <a class="btn normal" href="{{.URL}}" target="_blank">

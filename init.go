@@ -20,8 +20,7 @@ import (
 	"github.com/kodabb/go-mtgban/trollandtoad"
 
 	"github.com/kodabb/go-mtgban/mtgban"
-	"github.com/kodabb/go-mtgban/mtgdb"
-	"github.com/kodabb/go-mtgmatcher/mtgmatcher"
+	"github.com/kodabb/go-mtgban/mtgmatcher"
 )
 
 const (
@@ -29,10 +28,6 @@ const (
 	TCG_DIRECT_LOW = "TCG Direct Low"
 	TCG_BUYLIST    = "TCG Player"
 )
-
-func loadDB() error {
-	return mtgdb.RegisterWithPaths("allprintings.json", "allcards.json")
-}
 
 func loadDatastore() error {
 	allPrintingsReader, err := os.Open("allprintings5.json")

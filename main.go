@@ -20,7 +20,6 @@ import (
 	cron "gopkg.in/robfig/cron.v2"
 
 	"github.com/kodabb/go-mtgban/mtgban"
-	"github.com/kodabb/go-mtgban/mtgdb"
 )
 
 type NavElem struct {
@@ -31,11 +30,17 @@ type NavElem struct {
 	Short  string
 }
 
-type CardMeta struct {
-	SearchURL    string
-	ImageURL     string
-	KeyruneHTML  string
-	KeyruneTitle string
+type GenericCard struct {
+	Name      string
+	Edition   string
+	SetCode   string
+	Number    string
+	Keyrune   string
+	ImageURL  string
+	Foil      bool
+	Reserved  bool
+	Title     string
+	SearchURL string
 }
 
 type PageVars struct {
@@ -56,10 +61,9 @@ type PageVars struct {
 
 	SearchQuery  string
 	CondKeys     []string
-	FoundSellers map[mtgdb.Card]map[string][]mtgban.CombineEntry
-	FoundVendors map[mtgdb.Card][]mtgban.CombineEntry
-	Images       map[mtgdb.Card]string
-	Metadata     map[mtgdb.Card]CardMeta
+	FoundSellers map[string]map[string][]mtgban.CombineEntry
+	FoundVendors map[string][]mtgban.CombineEntry
+	Metadata     map[string]GenericCard
 
 	SellerShort       string
 	SellerFull        string
@@ -314,12 +318,6 @@ func main() {
 			log.Fatalln(err)
 		}
 
-		log.Println("Loading MTGJSON")
-		err = loadDB()
-		if err != nil {
-			log.Fatalln(err)
-		}
-
 		loadScrapers(true, true)
 		DatabaseLoaded = true
 
@@ -352,8 +350,8 @@ func main() {
 		c.AddFunc("10 1 * * *", loadTCG)
 		// refresh at 12 every day
 		c.AddFunc("0 12 * * *", func() {
-			log.Println("Reloading MTGJSON")
-			err := loadDB()
+			log.Println("Reloading MTGJSONv5")
+			err := loadDatastore()
 			if err != nil {
 				log.Println(err)
 			}

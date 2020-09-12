@@ -8,22 +8,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kodabb/go-mtgmatcher/mtgmatcher"
+	"github.com/kodabb/go-mtgban/mtgmatcher"
 )
 
 const (
 	newsPageSize = 25
 )
-
-type GenericCard struct {
-	Name     string
-	Edition  string
-	SetCode  string
-	Number   string
-	Keyrune  string
-	ImageURL string
-	Reserved bool
-}
 
 type Heading struct {
 	Title    string
@@ -607,7 +597,6 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	pageVars.Table = make([][]string, newsPageSize)
 
 	i := 0
-	uuids := mtgmatcher.GetUUIDs()
 	for rows.Next() {
 		err := rows.Scan(dest...)
 		if err != nil {
@@ -630,9 +619,9 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 		}
 
 		uuid := result[1]
-		co, found := uuids[uuid]
-		if !found {
-			log.Println(uuid, "not found")
+		co, err := mtgmatcher.GetUUID(uuid)
+		if err != nil {
+			log.Println(uuid, "not found", err)
 			continue
 		}
 

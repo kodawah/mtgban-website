@@ -8,8 +8,7 @@ import (
 	"strings"
 
 	"github.com/kodabb/go-mtgban/mtgban"
-	"github.com/kodabb/go-mtgban/mtgdb"
-	"github.com/kodabb/go-mtgban/mtgjson"
+	"github.com/kodabb/go-mtgban/mtgmatcher"
 )
 
 const (
@@ -53,12 +52,12 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		pageVars.SearchQuery = query
 		// Setup conditions keys, all etnries, and images
 		pageVars.CondKeys = []string{"TCG", "NM", "SP", "MP", "HP", "PO"}
-		pageVars.FoundSellers = map[mtgdb.Card]map[string][]mtgban.CombineEntry{}
-		pageVars.FoundVendors = map[mtgdb.Card][]mtgban.CombineEntry{}
-		pageVars.Metadata = map[mtgdb.Card]CardMeta{}
+		pageVars.FoundSellers = map[string]map[string][]mtgban.CombineEntry{}
+		pageVars.FoundVendors = map[string][]mtgban.CombineEntry{}
+		pageVars.Metadata = map[string]GenericCard{}
 
 		// Set which comparison function to use depending on the search syntax
-		cmpFunc := mtgjson.NormEquals
+		cmpFunc := mtgmatcher.Equals
 
 		// Filter out any element from the search syntax
 		filterEdition := ""
@@ -76,7 +75,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 						code := strings.TrimPrefix(field, tag)
 						switch tag {
 						case "s:":
-							filterEdition, _ = mtgdb.EditionCode2Name(code)
+							filterEdition = strings.ToUpper(code)
 							break
 						case "c:":
 							filterCondition = code
@@ -95,11 +94,11 @@ func Search(w http.ResponseWriter, r *http.Request) {
 						case "sm:":
 							switch code {
 							case "exact":
-								cmpFunc = mtgjson.NormEquals
+								cmpFunc = mtgmatcher.Equals
 							case "prefix":
-								cmpFunc = mtgjson.NormPrefix
+								cmpFunc = mtgmatcher.HasPrefix
 							case "any":
-								cmpFunc = mtgjson.NormContains
+								cmpFunc = mtgmatcher.Contains
 							}
 							break
 						}
@@ -129,24 +128,29 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			}
 
 			// Loop through cards
-			for card, entries := range inventory {
+			for cardId, entries := range inventory {
+				co, err := mtgmatcher.GetUUID(cardId)
+				if err != nil {
+					continue
+				}
+
 				// Run the comparison function set above
-				if cmpFunc(card.Name, query) {
+				if cmpFunc(co.Card.Name, query) {
 					// Skip cards that are not of the desired set
-					if filterEdition != "" && filterEdition != card.Edition {
+					if filterEdition != "" && filterEdition != co.SetCode {
 						continue
 					}
 					// Skip cards that are not of the desired collector number
-					if filterNumber != "" && filterNumber != card.Number {
+					if filterNumber != "" && filterNumber != co.Card.Number {
 						continue
 					}
 					// Skip cards that are not as desired foil
 					if filterFoil != "" {
 						foilStatus, err := strconv.ParseBool(filterFoil)
 						if err == nil {
-							if foilStatus && !card.Foil {
+							if foilStatus && !co.Foil {
 								continue
-							} else if !foilStatus && card.Foil {
+							} else if !foilStatus && co.Foil {
 								continue
 							}
 						}
@@ -155,20 +159,16 @@ func Search(w http.ResponseWriter, r *http.Request) {
 					// Loop thorugh available conditions
 					for _, entry := range entries {
 						// Load up image links
-						_, found := pageVars.Metadata[card]
+						_, found := pageVars.Metadata[cardId]
 						if !found {
-							link, err := ScryfallImageURL(card, false)
-							if err != nil {
-								log.Println(err)
-							}
-							html, title, err := KeyruneCodes(card)
-							if err != nil {
-								log.Println(err)
-							}
-							pageVars.Metadata[card] = CardMeta{
-								ImageURL:     link,
-								KeyruneHTML:  html,
-								KeyruneTitle: title,
+							pageVars.Metadata[cardId] = GenericCard{
+								Name:     co.Card.Name,
+								Edition:  co.Edition,
+								SetCode:  co.SetCode,
+								Number:   co.Card.Number,
+								Keyrune:  keyruneForCardSet(cardId),
+								ImageURL: scryfallImageURL(cardId, false),
+								Title:    editionTitle(cardId),
 							}
 						}
 
@@ -183,14 +183,14 @@ func Search(w http.ResponseWriter, r *http.Request) {
 						}
 
 						// Check if card already has any entry
-						_, found = pageVars.FoundSellers[card]
+						_, found = pageVars.FoundSellers[cardId]
 						if !found {
 							// Skip when you have too many results
 							if len(pageVars.FoundSellers) > MaxSearchResults {
 								pageVars.InfoMessage = TooManyMessage
 								continue
 							}
-							pageVars.FoundSellers[card] = map[string][]mtgban.CombineEntry{}
+							pageVars.FoundSellers[cardId] = map[string][]mtgban.CombineEntry{}
 						}
 
 						// Set conditions - handle the special TCG one that appears
@@ -200,9 +200,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 							conditions = "TCG"
 						}
 						// Check if the current entry has any condition
-						_, found = pageVars.FoundSellers[card][conditions]
+						_, found = pageVars.FoundSellers[cardId][conditions]
 						if !found {
-							pageVars.FoundSellers[card][conditions] = []mtgban.CombineEntry{}
+							pageVars.FoundSellers[cardId][conditions] = []mtgban.CombineEntry{}
 						}
 
 						// Prepare all the deets
@@ -217,17 +217,17 @@ func Search(w http.ResponseWriter, r *http.Request) {
 						}
 
 						// Touchdown
-						pageVars.FoundSellers[card][conditions] = append(pageVars.FoundSellers[card][conditions], res)
+						pageVars.FoundSellers[cardId][conditions] = append(pageVars.FoundSellers[cardId][conditions], res)
 					}
 				}
 			}
 		}
 
 		if bestSorting {
-			for card := range pageVars.FoundSellers {
-				for cond := range pageVars.FoundSellers[card] {
-					sort.Slice(pageVars.FoundSellers[card][cond], func(i, j int) bool {
-						return pageVars.FoundSellers[card][cond][i].Price < pageVars.FoundSellers[card][cond][j].Price
+			for cardId := range pageVars.FoundSellers {
+				for cond := range pageVars.FoundSellers[cardId] {
+					sort.Slice(pageVars.FoundSellers[cardId][cond], func(i, j int) bool {
+						return pageVars.FoundSellers[cardId][cond][i].Price < pageVars.FoundSellers[cardId][cond][j].Price
 					})
 				}
 			}
@@ -245,49 +245,50 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				log.Println(err)
 				continue
 			}
-			for card, entry := range buylist {
-				if filterEdition != "" && filterEdition != card.Edition {
+			for cardId, entry := range buylist {
+				co, err := mtgmatcher.GetUUID(cardId)
+				if err != nil {
 					continue
 				}
-				if filterNumber != "" && filterNumber != card.Number {
+
+				if filterEdition != "" && filterEdition != co.SetCode {
+					continue
+				}
+				if filterNumber != "" && filterNumber != co.Card.Number {
 					continue
 				}
 				if filterFoil != "" {
 					foilStatus, err := strconv.ParseBool(filterFoil)
 					if err == nil {
-						if foilStatus && !card.Foil {
+						if foilStatus && !co.Foil {
 							continue
-						} else if !foilStatus && card.Foil {
+						} else if !foilStatus && co.Foil {
 							continue
 						}
 					}
 				}
 
-				if cmpFunc(card.Name, query) {
-					_, found := pageVars.Metadata[card]
+				if cmpFunc(co.Card.Name, query) {
+					_, found := pageVars.Metadata[cardId]
 					if !found {
-						link, err := ScryfallImageURL(card, false)
-						if err != nil {
-							log.Println(err)
-						}
-						html, title, err := KeyruneCodes(card)
-						if err != nil {
-							log.Println(err)
-						}
-						pageVars.Metadata[card] = CardMeta{
-							ImageURL:     link,
-							KeyruneHTML:  html,
-							KeyruneTitle: title,
+						pageVars.Metadata[cardId] = GenericCard{
+							Name:     co.Card.Name,
+							Edition:  co.Edition,
+							SetCode:  co.SetCode,
+							Number:   co.Card.Number,
+							Keyrune:  keyruneForCardSet(cardId),
+							ImageURL: scryfallImageURL(cardId, false),
+							Title:    editionTitle(cardId),
 						}
 					}
 
-					_, found = pageVars.FoundVendors[card]
+					_, found = pageVars.FoundVendors[cardId]
 					if !found {
 						if len(pageVars.FoundVendors) > MaxSearchResults {
 							pageVars.InfoMessage = TooManyMessage
 							continue
 						}
-						pageVars.FoundVendors[card] = []mtgban.CombineEntry{}
+						pageVars.FoundVendors[cardId] = []mtgban.CombineEntry{}
 					}
 					res := mtgban.CombineEntry{
 						ScraperName: vendor.Info().Name,
@@ -299,15 +300,15 @@ func Search(w http.ResponseWriter, r *http.Request) {
 					if vendor.Info().CountryFlag != "" {
 						res.ScraperName += " " + vendor.Info().CountryFlag
 					}
-					pageVars.FoundVendors[card] = append(pageVars.FoundVendors[card], res)
+					pageVars.FoundVendors[cardId] = append(pageVars.FoundVendors[cardId], res)
 				}
 			}
 		}
 
 		if bestSorting {
-			for card := range pageVars.FoundVendors {
-				sort.Slice(pageVars.FoundVendors[card], func(i, j int) bool {
-					return pageVars.FoundVendors[card][i].Price > pageVars.FoundVendors[card][j].Price
+			for cardId := range pageVars.FoundVendors {
+				sort.Slice(pageVars.FoundVendors[cardId], func(i, j int) bool {
+					return pageVars.FoundVendors[cardId][i].Price > pageVars.FoundVendors[cardId][j].Price
 				})
 			}
 		}

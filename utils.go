@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kodabb/go-mtgmatcher/mtgmatcher"
+	"github.com/kodabb/go-mtgban/mtgmatcher"
 )
 
 func fileExists(filename string) bool {
@@ -53,30 +53,58 @@ func stringSliceContains(slice []string, pb string) bool {
 	return false
 }
 
-func keyruneForCardSet(uuid string) string {
-	uuids := mtgmatcher.GetUUIDs()
-	co, found := uuids[uuid]
-	if !found {
+func keyruneForCardSet(cardId string) string {
+	co, err := mtgmatcher.GetUUID(cardId)
+	if err != nil {
 		return ""
 	}
 
-	sets := mtgmatcher.GetSets()
-	set, found := sets[co.SetCode]
-	if !found {
+	set, err := mtgmatcher.GetSet(co.SetCode)
+	if err != nil {
 		return ""
 	}
 
 	keyrune := set.KeyruneCode
-	if keyrune == "STAR" {
-		keyrune = "PMEI"
-	}
 
 	rarity := co.Card.Rarity
 	if co.SetCode == "TSB" {
 		rarity = "timeshifted"
 	}
+	out := fmt.Sprintf("ss-%s ss-%s", strings.ToLower(keyrune), rarity)
 
-	return fmt.Sprintf("ss-%s ss-%s", strings.ToLower(keyrune), rarity)
+	if co.Foil {
+		out += " ss-foil ss-grad"
+	}
+
+	return out
+}
+
+func scryfallImageURL(cardId string, small bool) string {
+	co, err := mtgmatcher.GetUUID(cardId)
+	if err != nil {
+		return ""
+	}
+
+	version := "normal"
+	if small {
+		version = "small"
+	}
+
+	return fmt.Sprintf("https://api.scryfall.com/cards/%s/%s?format=image&version=%s", strings.ToLower(co.SetCode), co.Card.Number, version)
+}
+
+func editionTitle(cardId string) string {
+	co, err := mtgmatcher.GetUUID(cardId)
+	if err != nil {
+		return ""
+	}
+
+	foil := ""
+	if co.Foil {
+		foil = " Foil"
+	}
+
+	return fmt.Sprintf("%s -%s %s #%s", co.Edition, foil, strings.Title(co.Card.Rarity), co.Card.Number)
 }
 
 func insertNavBar(page string, nav []NavElem, extra []NavElem) []NavElem {

@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/kodabb/go-mtgban/mtgban"
-	"github.com/kodabb/go-mtgban/mtgdb"
+	"github.com/kodabb/go-mtgban/mtgmatcher"
 )
 
 const (
@@ -194,7 +194,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pageVars.Arb = []Arbitrage{}
-	pageVars.Images = map[mtgdb.Card]string{}
+	pageVars.Metadata = map[string]GenericCard{}
 
 	for i, vendor := range Vendors {
 		if vendor == nil {
@@ -245,7 +245,11 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		if nofoil {
 			tmp := arbit[:0]
 			for i := range arbit {
-				if !arbit[i].Card.Foil {
+				co, err := mtgmatcher.GetUUID(arbit[i].CardId)
+				if err != nil {
+					continue
+				}
+				if !co.Foil {
 					tmp = append(tmp, arbit[i])
 				}
 			}
@@ -258,7 +262,11 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		if nocomm {
 			tmp := arbit[:0]
 			for i := range arbit {
-				if arbit[i].Card.Rarity == "R" || arbit[i].Card.Rarity == "M" {
+				co, err := mtgmatcher.GetUUID(arbit[i].CardId)
+				if err != nil {
+					continue
+				}
+				if co.Card.Rarity == "rare" || co.Card.Rarity == "mythic" {
 					tmp = append(tmp, arbit[i])
 				}
 			}
@@ -284,13 +292,6 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 
 		if len(arbit) > MaxArbitResults {
 			arbit = arbit[:MaxArbitResults]
-		}
-
-		for _, arb := range arbit {
-			card := arb.Card
-			code, _ := mtgdb.EditionName2Code(card.Edition)
-			link := fmt.Sprintf("https://api.scryfall.com/cards/%s/%s?format=image&version=small", strings.ToLower(code), card.Number)
-			pageVars.Images[card] = link
 		}
 
 		// Filter out entries that are invalid
@@ -342,6 +343,27 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			Len:        len(arbit),
 			HasCredit:  !vendor.Info().NoCredit,
 		})
+		for i := range arbit {
+			cardId := arbit[i].CardId
+			_, found := pageVars.Metadata[cardId]
+			if found {
+				continue
+			}
+			co, err := mtgmatcher.GetUUID(cardId)
+			if err != nil {
+				continue
+			}
+			pageVars.Metadata[cardId] = GenericCard{
+				Name:     co.Card.Name,
+				Edition:  co.Edition,
+				SetCode:  co.SetCode,
+				Number:   co.Card.Number,
+				Foil:     co.Foil,
+				Keyrune:  keyruneForCardSet(cardId),
+				ImageURL: scryfallImageURL(cardId, true),
+				Title:    editionTitle(cardId),
+			}
+		}
 	}
 
 	if len(pageVars.Arb) == 0 {

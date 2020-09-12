@@ -7,19 +7,18 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
-	"strings"
 
 	"github.com/kodabb/go-mtgban/mtgban"
-	"github.com/kodabb/go-mtgban/mtgdb"
+	"github.com/kodabb/go-mtgban/mtgmatcher"
 )
 
 type Sleeper struct {
-	Card  mtgdb.Card
-	Level int
+	CardId string
+	Level  int
 }
 
 type SleeperEntry struct {
-	Meta    []CardMeta
+	Meta    []GenericCard
 	Letter  string
 	BGColor string
 }
@@ -58,9 +57,8 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 		render(w, "sleep.html", pageVars)
 		return
 	}
-	pageVars.Images = map[mtgdb.Card]string{}
 
-	tiers := map[mtgdb.Card]int{}
+	tiers := map[string]int{}
 
 	for i, seller := range Sellers {
 		if seller == nil {
@@ -98,14 +96,14 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 			// Filter out entries that are invalid
 			tmp := arbit[:0]
 			for i := range arbit {
-				if math.Abs(arbit[i].BuylistEntry.PriceRatio) < MaxPriceRatio && arbit[i].Spread < MaxSpread {
+				if math.Abs(arbit[i].BuylistEntry.PriceRatio) < MaxPriceRatio && arbit[i].Spread < MaxSpread && arbit[i].InventoryEntry.Conditions == "NM" {
 					tmp = append(tmp, arbit[i])
 				}
 			}
 			arbit = tmp
 
 			for _, arb := range arbit {
-				tiers[arb.Card]++
+				tiers[arb.CardId]++
 			}
 		}
 	}
@@ -114,8 +112,8 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 	for c := range tiers {
 		if tiers[c] > 1 {
 			results = append(results, Sleeper{
-				Card:  c,
-				Level: tiers[c],
+				CardId: c,
+				Level:  tiers[c],
 			})
 		}
 	}
@@ -146,7 +144,7 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for i := range pageVars.Sleepers {
-		pageVars.Sleepers[i].Meta = []CardMeta{}
+		pageVars.Sleepers[i].Meta = []GenericCard{}
 		pageVars.Sleepers[i].Letter = SleeperLetters[i]
 		pageVars.Sleepers[i].BGColor = SleeperColors[i]
 	}
@@ -166,13 +164,14 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		card := res.Card
-		code, _ := mtgdb.EditionName2Code(card.Edition)
-		link := fmt.Sprintf("https://api.scryfall.com/cards/%s/%s?format=image&version=small", strings.ToLower(code), card.Number)
-		search := fmt.Sprintf("/search?q=%s s:%s cn:%s f:%t&sig=%s", card.Name, code, card.Number, card.Foil, sig)
-		pageVars.Sleepers[level].Meta = append(pageVars.Sleepers[level].Meta, CardMeta{
+		co, err := mtgmatcher.GetUUID(res.CardId)
+		if err != nil {
+			continue
+		}
+		search := fmt.Sprintf("/search?q=%s s:%s cn:%s f:%t&sig=%s", co.Card.Name, co.SetCode, co.Card.Number, co.Foil, sig)
+		pageVars.Sleepers[level].Meta = append(pageVars.Sleepers[level].Meta, GenericCard{
 			SearchURL: search,
-			ImageURL:  link,
+			ImageURL:  scryfallImageURL(res.CardId, true),
 		})
 	}
 

@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/kodabb/go-mtgmatcher/cklite"
-	"github.com/kodabb/go-mtgmatcher/mtgmatcher"
+	"github.com/kodabb/go-mtgban/cardkingdom"
+	"github.com/kodabb/go-mtgban/mtgmatcher"
 )
 
 type meta struct {
@@ -33,19 +33,20 @@ func API(w http.ResponseWriter, r *http.Request) {
 
 	output := map[string]*ck2id{}
 
-	list, err := cklite.GetPriceList()
+	ckclient := cardkingdom.NewCKClient()
+	list, err := ckclient.GetPriceList()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	for _, card := range list.Data {
-		theCard, err := cklite.Preprocess(card)
+		theCard, err := cardkingdom.Preprocess(card)
 		if err != nil {
 			continue
 		}
 
-		cc, err := mtgmatcher.Match(theCard)
+		cardId, err := mtgmatcher.Match(theCard)
 		if err != nil {
 			log.Println(err)
 			log.Println(theCard)
@@ -60,12 +61,19 @@ func API(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		id := strings.TrimSuffix(cc.Id, "_f")
+		co, err := mtgmatcher.GetUUID(cardId)
+		if err != nil {
+			log.Println(cardId, err)
+			continue
+		}
+
+		id := strings.TrimSuffix(cardId, "_f")
+
 		_, found := output[id]
 		if !found {
 			output[id] = &ck2id{}
 		}
-		if !cc.Foil {
+		if !co.Foil {
 			output[id].Normal = &meta{}
 			output[id].Normal.Id = card.Id
 			output[id].Normal.URL = "https://www.cardkingdom.com/" + card.URL
