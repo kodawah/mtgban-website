@@ -107,12 +107,6 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		// Handle split cards
-		if strings.Contains(query, " // ") {
-			s := strings.Split(query, " // ")
-			query = s[0]
-		}
-
 		// Search sellers
 		for i, seller := range Sellers {
 			if seller == nil {
