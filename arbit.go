@@ -52,11 +52,11 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		render(w, "arbit.html", pageVars)
 		return
 	}
-	enabled, _ := GetParamFromSig(sig, "ArbitEnabled")
-	if enabled == "" && !SigCheck {
-		enabled = "ALL"
+	allowList, _ := GetParamFromSig(sig, "ArbitEnabled")
+	if allowList == "" && !SigCheck {
+		allowList = "ALL"
 	}
-	if enabled == "ALL" {
+	if allowList == "ALL" {
 		shorthands := []string{}
 		for i, seller := range Sellers {
 			if seller == nil {
@@ -65,9 +65,9 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			}
 			shorthands = append(shorthands, seller.Info().Shorthand)
 		}
-		enabled = strings.Join(shorthands, ",")
-	} else if enabled == "DEFAULT" {
-		enabled = strings.Join(Config.DefaultSellers, ",")
+		allowList = strings.Join(shorthands, ",")
+	} else if allowList == "DEFAULT" {
+		allowList = strings.Join(Config.DefaultSellers, ",")
 	}
 
 	r.ParseForm()
@@ -81,7 +81,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	for k, v := range r.Form {
 		switch k {
 		case "source":
-			if !strings.Contains(enabled, v[0]) {
+			if !strings.Contains(allowList, v[0]) {
 				log.Println("Unauthorized attempt with", v[0])
 				message = "Unknown " + v[0] + " seller"
 				break
@@ -138,7 +138,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			log.Println("nil seller at position", i)
 			continue
 		}
-		if !strings.Contains(enabled, newSeller.Info().Shorthand) {
+		if !strings.Contains(allowList, newSeller.Info().Shorthand) {
 			continue
 		}
 
