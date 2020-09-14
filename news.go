@@ -6,9 +6,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
-
-	"github.com/kodabb/go-mtgban/mtgmatcher"
 )
 
 const (
@@ -618,23 +615,9 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		uuid := result[1]
-		co, err := mtgmatcher.GetUUID(uuid)
-		if err != nil {
-			log.Println(uuid, "not found", err)
-			continue
-		}
-
 		// Load card data
-		pageVars.Cards = append(pageVars.Cards, GenericCard{
-			Name:     co.Card.Name,
-			Edition:  co.Edition,
-			SetCode:  co.SetCode,
-			Number:   co.Card.Number,
-			Keyrune:  keyruneForCardSet(uuid),
-			ImageURL: fmt.Sprintf("https://api.scryfall.com/cards/%s/%s?format=image&version=small", strings.ToLower(co.SetCode), co.Card.Number),
-			Reserved: co.Card.IsReserved,
-		})
+		cardId := result[1]
+		pageVars.Cards = append(pageVars.Cards, uuid2card(cardId, true))
 
 		// Allocate a table row with as many fields as returned by the SELECT
 		// minus the two well-known fields

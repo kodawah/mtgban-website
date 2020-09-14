@@ -118,3 +118,23 @@ func insertNavBar(page string, nav []NavElem, extra []NavElem) []NavElem {
 	nav = append(nav[:i], extra...)
 	return append(nav, tail...)
 }
+
+func uuid2card(cardId string, smallImg bool) GenericCard {
+	co, err := mtgmatcher.GetUUID(cardId)
+	if err != nil {
+		return GenericCard{}
+	}
+
+	return GenericCard{
+		Name:      co.Card.Name,
+		Edition:   co.Edition,
+		SetCode:   co.SetCode,
+		Number:    co.Card.Number,
+		Foil:      co.Foil,
+		Keyrune:   keyruneForCardSet(cardId),
+		ImageURL:  scryfallImageURL(cardId, smallImg),
+		Title:     editionTitle(cardId),
+		Reserved:  co.Card.IsReserved,
+		SearchURL: fmt.Sprintf("/search?q=%s s:%s cn:%s f:%t", co.Card.Name, co.SetCode, co.Card.Number, co.Foil),
+	}
+}

@@ -349,22 +349,8 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			if found {
 				continue
 			}
-			co, err := mtgmatcher.GetUUID(cardId)
-			if err != nil {
-				continue
-			}
-			pageVars.Metadata[cardId] = GenericCard{
-				Name:     co.Card.Name,
-				Edition:  co.Edition,
-				SetCode:  co.SetCode,
-				Number:   co.Card.Number,
-				Foil:     co.Foil,
-				Keyrune:  keyruneForCardSet(cardId),
-				ImageURL: scryfallImageURL(cardId, true),
-				Title:    editionTitle(cardId),
-				Reserved: co.Card.IsReserved,
-			}
-			if co.Card.IsReserved {
+			pageVars.Metadata[cardId] = uuid2card(cardId, true)
+			if pageVars.Metadata[cardId].Reserved {
 				pageVars.HasReserved = true
 			}
 		}

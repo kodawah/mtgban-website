@@ -171,16 +171,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 						// Load up image links
 						_, found := pageVars.Metadata[cardId]
 						if !found {
-							pageVars.Metadata[cardId] = GenericCard{
-								Name:     co.Card.Name,
-								Edition:  co.Edition,
-								SetCode:  co.SetCode,
-								Number:   co.Card.Number,
-								Keyrune:  keyruneForCardSet(cardId),
-								ImageURL: scryfallImageURL(cardId, false),
-								Title:    editionTitle(cardId),
-								Reserved: co.Card.IsReserved,
-							}
+							pageVars.Metadata[cardId] = uuid2card(cardId, false)
 						}
 
 						// Skip cards that have not the desired condition
@@ -289,16 +280,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 					}
 					_, found := pageVars.Metadata[cardId]
 					if !found {
-						pageVars.Metadata[cardId] = GenericCard{
-							Name:     co.Card.Name,
-							Edition:  co.Edition,
-							SetCode:  co.SetCode,
-							Number:   co.Card.Number,
-							Keyrune:  keyruneForCardSet(cardId),
-							ImageURL: scryfallImageURL(cardId, false),
-							Title:    editionTitle(cardId),
-							Reserved: co.Card.IsReserved,
-						}
+						pageVars.Metadata[cardId] = uuid2card(cardId, false)
 					}
 
 					_, found = pageVars.FoundVendors[cardId]

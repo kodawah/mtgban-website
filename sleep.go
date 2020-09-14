@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"math"
 	"net/http"
@@ -9,7 +8,6 @@ import (
 	"strconv"
 
 	"github.com/kodabb/go-mtgban/mtgban"
-	"github.com/kodabb/go-mtgban/mtgmatcher"
 )
 
 type Sleeper struct {
@@ -164,15 +162,7 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		co, err := mtgmatcher.GetUUID(res.CardId)
-		if err != nil {
-			continue
-		}
-		search := fmt.Sprintf("/search?q=%s s:%s cn:%s f:%t&sig=%s", co.Card.Name, co.SetCode, co.Card.Number, co.Foil, sig)
-		pageVars.Sleepers[level].Meta = append(pageVars.Sleepers[level].Meta, GenericCard{
-			SearchURL: search,
-			ImageURL:  scryfallImageURL(res.CardId, true),
-		})
+		pageVars.Sleepers[level].Meta = append(pageVars.Sleepers[level].Meta, uuid2card(res.CardId, true))
 	}
 
 	pageVars.Title = "Sleeper cards"
