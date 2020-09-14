@@ -41,6 +41,7 @@ type GenericCard struct {
 	Reserved  bool
 	Title     string
 	SearchURL string
+	Stocks    bool
 }
 
 type PageVars struct {
@@ -89,6 +90,8 @@ type PageVars struct {
 	IsOneDay    bool
 
 	Sleepers [7]SleeperEntry
+
+	HasStocks bool
 }
 
 var DefaultNav = []NavElem{
@@ -154,6 +157,7 @@ var LastUpdate time.Time
 var DatabaseLoaded bool
 var Sellers []mtgban.Seller
 var Vendors []mtgban.Vendor
+var Infos map[string]mtgban.InventoryRecord
 var CardDB *sql.DB
 var Newspaper3dayDB *sql.DB
 var Newspaper1dayDB *sql.DB

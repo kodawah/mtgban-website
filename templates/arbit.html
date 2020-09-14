@@ -138,7 +138,7 @@
                     {{range .Arbit}}
                         <tr onmouseover="document.getElementById('hoverImage').src={{(index $.Metadata .CardId).ImageURL}};">
                             <td>
-                                {{(index $.Metadata .CardId).Name}} {{if (index $.Metadata .CardId).Reserved}}*{{end}}
+                                {{(index $.Metadata .CardId).Name}}{{if (index $.Metadata .CardId).Reserved}} *{{end}}{{if (index $.Metadata .CardId).Stocks}} •{{end}}
                             </td>
                             <td>
                                 <i class="ss {{(index $.Metadata .CardId).Keyrune}} ss-1x ss-fw"></i> {{(index $.Metadata .CardId).Edition}}
@@ -213,6 +213,9 @@
 
             {{if .HasReserved}}
                 <h4>* = Part of the <a href="https://mtg.gamepedia.com/Reserved_List">Reserved List</a></h4>
+            {{end}}
+            {{if .HasStocks}}
+                <h4>• = On <a href="https://mtgstocks.com/interests">MTGStocks Interests</a> page</h4>
             {{end}}
         </div>
         <br>

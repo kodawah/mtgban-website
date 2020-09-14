@@ -635,6 +635,9 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 			pageVars.HasReserved = true
 			break
 		}
+		if c.Stocks {
+			pageVars.HasStocks = true
+		}
 	}
 
 	if len(pageVars.Cards) == 0 {

@@ -125,6 +125,8 @@ func uuid2card(cardId string, smallImg bool) GenericCard {
 		return GenericCard{}
 	}
 
+	_, stocks := Infos["STKS"][cardId]
+
 	return GenericCard{
 		Name:      co.Card.Name,
 		Edition:   co.Edition,
@@ -136,5 +138,6 @@ func uuid2card(cardId string, smallImg bool) GenericCard {
 		Title:     editionTitle(cardId),
 		Reserved:  co.Card.IsReserved,
 		SearchURL: fmt.Sprintf("/search?q=%s s:%s cn:%s f:%t", co.Card.Name, co.SetCode, co.Card.Number, co.Foil),
+		Stocks:    stocks,
 	}
 }

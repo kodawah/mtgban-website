@@ -135,7 +135,7 @@
                                 </td>
                             {{end}}
                             <td>
-                                <a href="search?q={{$card.Name}} s:{{$card.SetCode}} cn:{{$card.Number}}&sig={{$.Signature}}">{{$card.Name}}</a> {{if $card.Reserved}}*{{end}}
+                                <a href="search?q={{$card.Name}} s:{{$card.SetCode}} cn:{{$card.Number}}&sig={{$.Signature}}">{{$card.Name}}</a>{{if $card.Reserved}} *{{end}}{{if $card.Stocks}} •{{end}}
                             </td>
                             <td>
                                 <i class="ss {{$card.Keyrune}} ss-1x ss-fw"></i> {{$card.Edition}}
@@ -171,6 +171,9 @@
                     <p>{{.InfoMessage}}</p>
                     {{if .HasReserved}}
                         <p>* = Part of the <a href="https://mtg.gamepedia.com/Reserved_List">Reserved List</a></p>
+                    {{end}}
+                    {{if .HasStocks}}
+                        <p>• = On <a href="https://mtgstocks.com/interests">MTGStocks Interests</a> page</p>
                     {{end}}
                 </h4>
                 <br><br><br>

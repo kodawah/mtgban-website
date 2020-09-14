@@ -353,6 +353,9 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			if pageVars.Metadata[cardId].Reserved {
 				pageVars.HasReserved = true
 			}
+			if pageVars.Metadata[cardId].Stocks {
+				pageVars.HasStocks = true
+			}
 		}
 	}
 

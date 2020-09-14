@@ -13,6 +13,7 @@ import (
 	"github.com/kodabb/go-mtgban/cardkingdom"
 	"github.com/kodabb/go-mtgban/coolstuffinc"
 	"github.com/kodabb/go-mtgban/miniaturemarket"
+	"github.com/kodabb/go-mtgban/mtgstocks"
 	"github.com/kodabb/go-mtgban/ninetyfive"
 	"github.com/kodabb/go-mtgban/starcitygames"
 	"github.com/kodabb/go-mtgban/strikezone"
@@ -438,6 +439,9 @@ func loadScrapers(doSellers, doVendors bool) {
 	if Vendors == nil {
 		Vendors = make([]mtgban.Vendor, len(newVendors))
 	}
+	if Infos == nil {
+		Infos = map[string]mtgban.InventoryRecord{}
+	}
 
 	if doSellers {
 		loadSellers(newSellers)
@@ -445,6 +449,8 @@ func loadScrapers(doSellers, doVendors bool) {
 	if doVendors {
 		loadVendors(newVendors)
 	}
+
+	go loadInfos()
 
 	LastUpdate = time.Now()
 
@@ -539,4 +545,15 @@ func loadVendors(newVendors []mtgban.Vendor) {
 		}
 		log.Println("-- OK")
 	}
+}
+
+func loadInfos() {
+	seller := mtgstocks.NewScraper()
+	inv, err := seller.Inventory()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	Infos[seller.Info().Shorthand] = inv
+	log.Println("stocks refreshed")
 }

@@ -143,9 +143,6 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 				// Run the comparison function set above
 				if cmpFunc(co.Card.Name, query) {
-					if co.Card.IsReserved {
-						pageVars.HasReserved = true
-					}
 					// Skip cards that are not of the desired set
 					if filterEdition != "" && filterEdition != co.SetCode {
 						continue
@@ -172,6 +169,13 @@ func Search(w http.ResponseWriter, r *http.Request) {
 						_, found := pageVars.Metadata[cardId]
 						if !found {
 							pageVars.Metadata[cardId] = uuid2card(cardId, false)
+						}
+
+						if pageVars.Metadata[cardId].Reserved {
+							pageVars.HasReserved = true
+						}
+						if pageVars.Metadata[cardId].Stocks {
+							pageVars.HasStocks = true
 						}
 
 						// Skip cards that have not the desired condition
@@ -275,12 +279,16 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				}
 
 				if cmpFunc(co.Card.Name, query) {
-					if co.Card.IsReserved {
-						pageVars.HasReserved = true
-					}
 					_, found := pageVars.Metadata[cardId]
 					if !found {
 						pageVars.Metadata[cardId] = uuid2card(cardId, false)
+					}
+
+					if pageVars.Metadata[cardId].Reserved {
+						pageVars.HasReserved = true
+					}
+					if pageVars.Metadata[cardId].Stocks {
+						pageVars.HasStocks = true
 					}
 
 					_, found = pageVars.FoundVendors[cardId]
