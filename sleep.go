@@ -58,6 +58,14 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 
 	tiers := map[string]int{}
 
+	var tcgSeller mtgban.Seller
+	for _, seller := range Sellers {
+		if seller.Info().Shorthand == "TCG Low" {
+			tcgSeller = seller
+			break
+		}
+	}
+
 	for i, seller := range Sellers {
 		if seller == nil {
 			log.Println("nil seller at position", i)
@@ -102,6 +110,27 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 
 			for _, arb := range arbit {
 				tiers[arb.CardId]++
+			}
+		}
+
+		if tcgSeller != nil {
+			mismatch, err := mtgban.Mismatch(nil, tcgSeller, seller)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+
+			// Filter out entries that are invalid
+			tmp := mismatch[:0]
+			for i := range mismatch {
+				if mismatch[i].InventoryEntry.Conditions == "NM" {
+					tmp = append(tmp, mismatch[i])
+				}
+			}
+			mismatch = tmp
+
+			for _, mis := range mismatch {
+				tiers[mis.CardId]++
 			}
 		}
 	}
