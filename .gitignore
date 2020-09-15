@@ -17,3 +17,9 @@ mtgban-website
 
 # Dependency directories (remove the comment below to include it)
 vendor/
+
+# Scraper daily cache
+cache_*
+
+# Configuration files
+*.json
