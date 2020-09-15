@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/kodabb/go-mtgban/mtgban"
 	"github.com/kodabb/go-mtgban/mtgmatcher"
@@ -229,6 +230,41 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
+		sortedKeysSeller := make([]string, 0, len(pageVars.FoundSellers))
+		for cardId := range pageVars.FoundSellers {
+			sortedKeysSeller = append(sortedKeysSeller, cardId)
+		}
+
+		sort.Slice(sortedKeysSeller, func(i, j int) bool {
+			co, err := mtgmatcher.GetUUID(sortedKeysSeller[i])
+			if err != nil {
+				return false
+			}
+			set, err := mtgmatcher.GetSet(co.SetCode)
+			if err != nil {
+				return false
+			}
+			setDateI, err := time.Parse("2006-01-02", set.ReleaseDate)
+			if err != nil {
+				return false
+			}
+
+			co, err = mtgmatcher.GetUUID(sortedKeysSeller[j])
+			if err != nil {
+				return false
+			}
+			set, err = mtgmatcher.GetSet(co.SetCode)
+			if err != nil {
+				return false
+			}
+			setDateJ, err := time.Parse("2006-01-02", set.ReleaseDate)
+			if err != nil {
+				return false
+			}
+
+			return setDateI.After(setDateJ)
+		})
+
 		if bestSorting {
 			for cardId := range pageVars.FoundSellers {
 				for cond := range pageVars.FoundSellers[cardId] {
@@ -314,6 +350,41 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
+		sortedKeysVendor := make([]string, 0, len(pageVars.FoundVendors))
+		for cardId := range pageVars.FoundVendors {
+			sortedKeysVendor = append(sortedKeysVendor, cardId)
+		}
+
+		sort.Slice(sortedKeysVendor, func(i, j int) bool {
+			co, err := mtgmatcher.GetUUID(sortedKeysVendor[i])
+			if err != nil {
+				return false
+			}
+			set, err := mtgmatcher.GetSet(co.SetCode)
+			if err != nil {
+				return false
+			}
+			setDateI, err := time.Parse("2006-01-02", set.ReleaseDate)
+			if err != nil {
+				return false
+			}
+
+			co, err = mtgmatcher.GetUUID(sortedKeysVendor[j])
+			if err != nil {
+				return false
+			}
+			set, err = mtgmatcher.GetSet(co.SetCode)
+			if err != nil {
+				return false
+			}
+			setDateJ, err := time.Parse("2006-01-02", set.ReleaseDate)
+			if err != nil {
+				return false
+			}
+
+			return setDateI.After(setDateJ)
+		})
+
 		if bestSorting {
 			for cardId := range pageVars.FoundVendors {
 				sort.Slice(pageVars.FoundVendors[cardId], func(i, j int) bool {
@@ -325,6 +396,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		if len(pageVars.FoundSellers) == 0 && len(pageVars.FoundVendors) == 0 {
 			pageVars.InfoMessage = NoResultsMessage
 		}
+
+		pageVars.SellerKeys = sortedKeysSeller
+		pageVars.VendorKeys = sortedKeysVendor
 	}
 
 	render(w, "search.html", pageVars)

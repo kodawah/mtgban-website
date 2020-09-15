@@ -112,7 +112,8 @@
                     <tr>
                         <th colspan="3" class="stickyCategory"><h2 align=center>Sellers</h2></th>
                     </tr>
-                    {{range $cardId, $condsEntry := .FoundSellers}}
+                    {{range $cardId := .SellerKeys}}
+                        {{$condsEntry := (index $.FoundSellers $cardId)}}
                         {{if eq $firstImg ""}}
                             {{$firstImg = (index $.Metadata $cardId).ImageURL}}
                         {{end}}
@@ -172,7 +173,8 @@
                     <tr>
                         <th colspan="4" class="stickyCategory"><h2 align=center>Buyers</h2></th>
                     </tr>
-                    {{range $cardId, $entries := .FoundVendors}}
+                    {{range $cardId := .VendorKeys}}
+                        {{$entries := (index $.FoundVendors $cardId)}}
                         <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $cardId).ImageURL}};" title="{{(index $.Metadata $cardId).Title}}">
                             <th colspan="3" class="wrap stickyHeader" style="text-align: left; vertical-align: middle;">
                                 <i class="ss {{(index $.Metadata $cardId).Keyrune}} ss-2x ss-fw"></i> {{(index $.Metadata $cardId).Name}}{{if (index $.Metadata $cardId).Reserved}} *{{end}}{{if (index $.Metadata $cardId).Stocks}} •{{end}}

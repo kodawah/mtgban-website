@@ -60,6 +60,8 @@ type PageVars struct {
 	InfoMessage  string
 	LastUpdate   string
 
+	SellerKeys   []string
+	VendorKeys   []string
 	SearchQuery  string
 	CondKeys     []string
 	FoundSellers map[string]map[string][]mtgban.CombineEntry
