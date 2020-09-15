@@ -126,7 +126,7 @@
                         </tr>
                         {{range $conditions := $.CondKeys}}
                             {{$entries := (index $condsEntry $conditions)}}
-                            {{if ne $conditions "TCG"}}
+                            {{if ne $conditions "INDEX"}}
                                 {{if $entries}}
                                     <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $cardId).ImageURL}};">
                                         <td colspan="3"><i>Conditions: {{$conditions}}</i></th>
@@ -148,7 +148,7 @@
                                         $ {{printf "%.2f" .Price}}
                                     </td>
                                     <td style="text-align: center; vertical-align: middle;">
-                                        {{if ne $conditions "TCG"}}
+                                        {{if ne $conditions "INDEX"}}
                                             {{.Quantity}}
                                         {{end}}
                                         {{if eq .ScraperName "TCG Direct Low"}}

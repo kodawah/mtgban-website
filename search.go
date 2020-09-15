@@ -59,7 +59,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		// Keep track of what was searched
 		pageVars.SearchQuery = query
 		// Setup conditions keys, all etnries, and images
-		pageVars.CondKeys = []string{"TCG", "NM", "SP", "MP", "HP", "PO"}
+		pageVars.CondKeys = []string{"INDEX", "NM", "SP", "MP", "HP", "PO"}
 		pageVars.FoundSellers = map[string]map[string][]mtgban.CombineEntry{}
 		pageVars.FoundVendors = map[string][]mtgban.CombineEntry{}
 		pageVars.Metadata = map[string]GenericCard{}
@@ -203,7 +203,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 						// at the top of the results
 						conditions := entry.Conditions
 						if seller.Info().Name == "TCG Low" || seller.Info().Name == "TCG Direct Low" {
-							conditions = "TCG"
+							conditions = "INDEX"
 						}
 						// Check if the current entry has any condition
 						_, found = pageVars.FoundSellers[cardId][conditions]
