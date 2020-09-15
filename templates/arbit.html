@@ -138,7 +138,7 @@
                     {{range .Arbit}}
                         <tr onmouseover="document.getElementById('hoverImage').src={{(index $.Metadata .CardId).ImageURL}};">
                             <td>
-                                {{(index $.Metadata .CardId).Name}}{{if (index $.Metadata .CardId).Reserved}} *{{end}}{{if (index $.Metadata .CardId).Stocks}} •{{end}}
+                                <a href="{{(index $.Metadata .CardId).SearchURL}}">{{(index $.Metadata .CardId).Name}}</a>{{if (index $.Metadata .CardId).Reserved}} *{{end}}{{if (index $.Metadata .CardId).Stocks}} •{{end}}
                             </td>
                             <td>
                                 <i class="ss {{(index $.Metadata .CardId).Keyrune}} ss-1x ss-fw"></i> {{(index $.Metadata .CardId).Edition}}
