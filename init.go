@@ -56,7 +56,7 @@ func loadInventoryFromFile(info mtgban.ScraperInfo, fname string) (mtgban.Seller
 	defer file.Close()
 
 	// Load inventory
-	inv, err := mtgban.LoadInventoryFromCSV(file)
+	inv, err := mtgban.LoadInventoryFromCSV(file, false)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +103,7 @@ func loadBuylistFromFile(info mtgban.ScraperInfo, fname string) (mtgban.Vendor, 
 	defer file.Close()
 
 	// Load inventory
-	bl, err := mtgban.LoadBuylistFromCSV(file)
+	bl, err := mtgban.LoadBuylistFromCSV(file, false)
 	if err != nil {
 		return nil, err
 	}
