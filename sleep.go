@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/kodabb/go-mtgban/mtgban"
+	"github.com/kodabb/go-mtgban/mtgmatcher"
 )
 
 type Sleeper struct {
@@ -186,6 +187,9 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 		r := (value - min) / (max - min)
 		// Scale to the size of the table
 		level := int(math.Floor(r*exp) + maxrange)
+
+		cc, _ := mtgmatcher.Unmatch(res.CardId)
+		log.Println(level, res.Level, cc)
 
 		if level >= len(pageVars.Sleepers) {
 			break
