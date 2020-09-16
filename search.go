@@ -236,11 +236,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		}
 
 		sort.Slice(sortedKeysSeller, func(i, j int) bool {
-			co, err := mtgmatcher.GetUUID(sortedKeysSeller[i])
-			if err != nil {
-				return false
-			}
-			set, err := mtgmatcher.GetSet(co.SetCode)
+			set, err := mtgmatcher.GetSetUUID(sortedKeysSeller[i])
 			if err != nil {
 				return false
 			}
@@ -249,11 +245,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				return false
 			}
 
-			co, err = mtgmatcher.GetUUID(sortedKeysSeller[j])
-			if err != nil {
-				return false
-			}
-			set, err = mtgmatcher.GetSet(co.SetCode)
+			set, err = mtgmatcher.GetSetUUID(sortedKeysSeller[j])
 			if err != nil {
 				return false
 			}
@@ -356,11 +348,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		}
 
 		sort.Slice(sortedKeysVendor, func(i, j int) bool {
-			co, err := mtgmatcher.GetUUID(sortedKeysVendor[i])
-			if err != nil {
-				return false
-			}
-			set, err := mtgmatcher.GetSet(co.SetCode)
+			set, err := mtgmatcher.GetSetUUID(sortedKeysVendor[i])
 			if err != nil {
 				return false
 			}
@@ -369,11 +357,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				return false
 			}
 
-			co, err = mtgmatcher.GetUUID(sortedKeysVendor[j])
-			if err != nil {
-				return false
-			}
-			set, err = mtgmatcher.GetSet(co.SetCode)
+			set, err = mtgmatcher.GetSetUUID(sortedKeysVendor[j])
 			if err != nil {
 				return false
 			}
