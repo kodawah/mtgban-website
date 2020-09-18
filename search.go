@@ -236,7 +236,10 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		}
 
 		sort.Slice(sortedKeysSeller, func(i, j int) bool {
-			set, err := mtgmatcher.GetSetUUID(sortedKeysSeller[i])
+			uuidI := sortedKeysSeller[i]
+			uuidJ := sortedKeysSeller[j]
+
+			set, err := mtgmatcher.GetSetUUID(uuidI)
 			if err != nil {
 				return false
 			}
@@ -244,14 +247,35 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				return false
 			}
+			editionI := set.Name
 
-			set, err = mtgmatcher.GetSetUUID(sortedKeysSeller[j])
+			set, err = mtgmatcher.GetSetUUID(uuidJ)
 			if err != nil {
 				return false
 			}
 			setDateJ, err := time.Parse("2006-01-02", set.ReleaseDate)
 			if err != nil {
 				return false
+			}
+			editionJ := set.Name
+
+			// If the two sets have the same release date, let's dig more
+			if setDateI.Equal(setDateJ) {
+				// If they are part of the same edition, check for their collector number
+				if editionI == editionJ {
+					cI, _ := mtgmatcher.GetUUID(uuidI)
+					cJ, _ := mtgmatcher.GetUUID(uuidJ)
+					// If their number is the same, check for foiling status
+					if cI.Card.Number == cJ.Card.Number {
+						return cJ.Foil
+					}
+					cInum, _ := strconv.Atoi(cI.Card.Number)
+					cJnum, _ := strconv.Atoi(cJ.Card.Number)
+					return cInum < cJnum
+					// For the special case of set promos, always keeps them after
+				} else if editionJ == editionI+" Promos" {
+					return true
+				}
 			}
 
 			return setDateI.After(setDateJ)
@@ -348,7 +372,10 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		}
 
 		sort.Slice(sortedKeysVendor, func(i, j int) bool {
-			set, err := mtgmatcher.GetSetUUID(sortedKeysVendor[i])
+			uuidI := sortedKeysVendor[i]
+			uuidJ := sortedKeysVendor[j]
+
+			set, err := mtgmatcher.GetSetUUID(uuidI)
 			if err != nil {
 				return false
 			}
@@ -356,14 +383,31 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				return false
 			}
+			editionI := set.Name
 
-			set, err = mtgmatcher.GetSetUUID(sortedKeysVendor[j])
+			set, err = mtgmatcher.GetSetUUID(uuidJ)
 			if err != nil {
 				return false
 			}
 			setDateJ, err := time.Parse("2006-01-02", set.ReleaseDate)
 			if err != nil {
 				return false
+			}
+			editionJ := set.Name
+
+			if setDateI.Equal(setDateJ) {
+				if editionI == editionJ {
+					cI, _ := mtgmatcher.GetUUID(uuidI)
+					cJ, _ := mtgmatcher.GetUUID(uuidJ)
+					if cI.Card.Number == cJ.Card.Number {
+						return cJ.Foil
+					}
+					cInum, _ := strconv.Atoi(cI.Card.Number)
+					cJnum, _ := strconv.Atoi(cJ.Card.Number)
+					return cInum < cJnum
+				} else if editionJ == editionI+" Promos" {
+					return true
+				}
 			}
 
 			return setDateI.After(setDateJ)
