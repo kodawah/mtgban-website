@@ -378,7 +378,7 @@ func main() {
 	http.Handle("/explore", enforceSigning(http.HandlerFunc(Explore)))
 	http.Handle("/sleepers", enforceSigning(http.HandlerFunc(Sleepers)))
 	http.Handle("/arbit", enforceSigning(http.HandlerFunc(Arbit)))
-	http.Handle("/api/mtgjson/ck.json", enforceSigning(http.HandlerFunc(API)))
+	http.Handle("/api/mtgjson/ck.json", enforceAPISigning(http.HandlerFunc(API)))
 	http.HandleFunc("/favicon.ico", Favicon)
 	http.HandleFunc("/auth", Auth)
 	log.Fatal(http.ListenAndServe(":"+fmt.Sprint(Config.Port), nil))

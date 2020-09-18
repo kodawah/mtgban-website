@@ -283,6 +283,42 @@ func noSigning(next http.Handler) http.Handler {
 	})
 }
 
+func enforceAPISigning(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		sign := r.FormValue("sig")
+		raw, err := base64.StdEncoding.DecodeString(sign)
+		if err != nil {
+			log.Println("API error, no sig", err)
+			http.NotFound(w, r)
+			return
+		}
+
+		v, err := url.ParseQuery(string(raw))
+		if SigCheck && err != nil {
+			log.Println("API error, no b64", err)
+			http.NotFound(w, r)
+			return
+		}
+
+		q := url.Values{}
+		q.Set("API", v.Get("API"))
+
+		sig := v.Get("Signature")
+		exp := v.Get("Expires")
+
+		data := fmt.Sprintf("%s%s%s%s", r.Method, exp, getBaseURL(r), q.Encode())
+		valid := signHMACSHA1Base64([]byte(os.Getenv("BAN_SECRET")), []byte(data))
+		expires, err := strconv.ParseInt(exp, 10, 64)
+		if err != nil || valid != sig || expires < time.Now().Unix() {
+			log.Println("API error, invalid")
+			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			return
+		}
+
+		gziphandler.GzipHandler(next).ServeHTTP(w, r)
+	})
+}
+
 func enforceSigning(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if PatreonHost == "" {
