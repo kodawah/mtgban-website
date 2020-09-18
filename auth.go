@@ -286,6 +286,12 @@ func noSigning(next http.Handler) http.Handler {
 func enforceAPISigning(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		sign := r.FormValue("sig")
+		if sign == "" {
+			log.Println("API error, empty signature")
+			http.NotFound(w, r)
+			return
+		}
+
 		raw, err := base64.StdEncoding.DecodeString(sign)
 		if err != nil {
 			log.Println("API error, no sig", err)
