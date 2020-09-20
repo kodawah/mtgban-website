@@ -378,16 +378,34 @@ func sortSets(uuidI, uuidJ string) bool {
 	// If the two sets have the same release date, let's dig more
 	if setDateI.Equal(setDateJ) {
 		// If they are part of the same edition, check for their collector number
+		// taking their foiling into consideration
 		if editionI == editionJ {
-			cI, _ := mtgmatcher.GetUUID(uuidI)
-			cJ, _ := mtgmatcher.GetUUID(uuidJ)
+			cI, errI := mtgmatcher.GetUUID(uuidI)
+			cJ, errJ := mtgmatcher.GetUUID(uuidJ)
+			// This should be impossible
+			if errI != nil || errJ != nil {
+				return false
+			}
+
 			// If their number is the same, check for foiling status
 			if cI.Card.Number == cJ.Card.Number {
-				return cJ.Foil
+				if cI.Foil == true && cJ.Foil == false {
+					return false
+				} else if cI.Foil == false && cJ.Foil == true {
+					return true
+				}
 			}
-			cInum, _ := strconv.Atoi(cI.Card.Number)
-			cJnum, _ := strconv.Atoi(cJ.Card.Number)
-			return cInum < cJnum
+
+			// If both are foil or both are non-foil, check their number
+			cInum, errI := strconv.Atoi(cI.Card.Number)
+			cJnum, errJ := strconv.Atoi(cJ.Card.Number)
+			if errI == nil && errJ == nil {
+				return cInum < cJnum
+			}
+			// If either one is not a number (due to extra letters) just
+			// do a normal string comparison
+			return cI.Card.Number < cJ.Card.Number
+
 			// For the special case of set promos, always keeps them after
 		} else if editionJ == editionI+" Promos" {
 			return true
