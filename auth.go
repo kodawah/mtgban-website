@@ -246,6 +246,7 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 			switch foundTitle {
 			case "Squire",
 				"Merchant",
+				"Bard",
 				"Master of Coin":
 				tierTitle = foundTitle
 			case "Upkeep (Early Adopters)",
