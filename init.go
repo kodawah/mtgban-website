@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/kodabb/go-mtgban/abugames"
+	"github.com/kodabb/go-mtgban/blueprint"
 	"github.com/kodabb/go-mtgban/cardkingdom"
 	"github.com/kodabb/go-mtgban/coolstuffinc"
 	"github.com/kodabb/go-mtgban/magiccorner"
@@ -383,6 +384,14 @@ var options = map[string]*scraperOption{
 			if err != nil {
 				return nil, err
 			}
+			scraper.LogCallback = log.Printf
+			return scraper, nil
+		},
+	},
+	"blueprint": &scraperOption{
+		DevEnabled: true,
+		Init: func() (mtgban.Scraper, error) {
+			scraper := blueprint.NewScraper()
 			scraper.LogCallback = log.Printf
 			return scraper, nil
 		},
