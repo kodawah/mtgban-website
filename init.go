@@ -403,11 +403,15 @@ func loadScrapers(doSellers, doVendors bool) {
 		}
 
 		if key == "tcg_market" {
-			err := specialTCGhandle(init, currentDir, newbc, scraper.(mtgban.Market))
-			if err != nil {
-				log.Println(err)
+			if !opt.OnlyVendor {
+				err := specialTCGhandle(init, currentDir, newbc, scraper.(mtgban.Market))
+				if err != nil {
+					log.Println(err)
+				}
 			}
-			newbc.RegisterVendor(scraper)
+			if !opt.OnlySeller {
+				newbc.RegisterVendor(scraper)
+			}
 		} else if opt.OnlySeller {
 			newbc.RegisterSeller(scraper)
 		} else if opt.OnlyVendor {
