@@ -12,6 +12,7 @@ import (
 	"github.com/kodabb/go-mtgban/abugames"
 	"github.com/kodabb/go-mtgban/cardkingdom"
 	"github.com/kodabb/go-mtgban/coolstuffinc"
+	"github.com/kodabb/go-mtgban/magiccorner"
 	"github.com/kodabb/go-mtgban/miniaturemarket"
 	"github.com/kodabb/go-mtgban/mtgstocks"
 	"github.com/kodabb/go-mtgban/ninetyfive"
@@ -372,6 +373,16 @@ var options = map[string]*scraperOption{
 		Init: func() (mtgban.Scraper, error) {
 			scraper := tcgplayer.NewScraperMarket(Config.Api["tcg_public"], Config.Api["tcg_private"])
 			scraper.Affiliate = Config.Affiliate["TCG"]
+			scraper.LogCallback = log.Printf
+			return scraper, nil
+		},
+	},
+	"magiccorner": &scraperOption{
+		Init: func() (mtgban.Scraper, error) {
+			scraper, err := magiccorner.NewScraper()
+			if err != nil {
+				return nil, err
+			}
 			scraper.LogCallback = log.Printf
 			return scraper, nil
 		},
