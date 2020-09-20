@@ -80,6 +80,9 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 		if seller.Info().MetadataOnly {
 			continue
 		}
+		if seller.Info().CountryFlag != "" {
+			continue
+		}
 
 		for j, vendor := range Vendors {
 			if vendor == nil {
