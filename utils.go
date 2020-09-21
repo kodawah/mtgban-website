@@ -127,11 +127,33 @@ func uuid2card(cardId string, smallImg bool) GenericCard {
 
 	_, stocks := Infos["STKS"][cardId]
 
+	variant := ""
+	switch {
+	case co.Card.HasPromoType("prerelease") && strings.HasSuffix(co.Edition, "Promos"):
+		variant = "Prerelease"
+	case co.Card.HasPromoType("promopack"):
+		variant = "Promo Pack"
+	case co.Card.HasPromoType("bundle"):
+		variant = "Bundle Promo"
+	case co.Card.HasPromoType("boosterfun"):
+		switch {
+		case co.Card.HasFrameEffect("showcase"):
+			variant = "Showcase"
+		case co.Card.HasFrameEffect("extendedart"):
+			variant = "Extended Art"
+		case co.Card.HasPromoType("godzillaseries"):
+			variant = "Godzilla"
+		case co.Card.BorderColor == "borderless":
+			variant = "Borderless"
+		}
+	}
+
 	return GenericCard{
 		Name:      co.Card.Name,
 		Edition:   co.Edition,
 		SetCode:   co.SetCode,
 		Number:    co.Card.Number,
+		Variant:   variant,
 		Foil:      co.Foil,
 		Keyrune:   keyruneForCardSet(cardId),
 		ImageURL:  scryfallImageURL(cardId, smallImg),

@@ -35,6 +35,7 @@ type GenericCard struct {
 	Edition   string
 	SetCode   string
 	Number    string
+	Variant   string
 	Keyrune   string
 	ImageURL  string
 	Foil      bool
