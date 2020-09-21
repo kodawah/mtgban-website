@@ -355,25 +355,25 @@ func Search(w http.ResponseWriter, r *http.Request) {
 }
 
 func sortSets(uuidI, uuidJ string) bool {
-	set, err := mtgmatcher.GetSetUUID(uuidI)
+	setI, err := mtgmatcher.GetSetUUID(uuidI)
 	if err != nil {
 		return false
 	}
-	setDateI, err := time.Parse("2006-01-02", set.ReleaseDate)
+	setDateI, err := time.Parse("2006-01-02", setI.ReleaseDate)
 	if err != nil {
 		return false
 	}
-	editionI := set.Name
+	editionI := setI.Name
 
-	set, err = mtgmatcher.GetSetUUID(uuidJ)
+	setJ, err := mtgmatcher.GetSetUUID(uuidJ)
 	if err != nil {
 		return false
 	}
-	setDateJ, err := time.Parse("2006-01-02", set.ReleaseDate)
+	setDateJ, err := time.Parse("2006-01-02", setJ.ReleaseDate)
 	if err != nil {
 		return false
 	}
-	editionJ := set.Name
+	editionJ := setJ.Name
 
 	// If the two sets have the same release date, let's dig more
 	if setDateI.Equal(setDateJ) {
@@ -407,8 +407,12 @@ func sortSets(uuidI, uuidJ string) bool {
 			return cI.Card.Number < cJ.Card.Number
 
 			// For the special case of set promos, always keeps them after
-		} else if editionJ == editionI+" Promos" {
+		} else if setI.ParentCode == "" && setJ.ParentCode != "" {
 			return true
+		} else if setJ.ParentCode == "" && setI.ParentCode != "" {
+			return false
+		} else {
+			return editionI < editionJ
 		}
 	}
 
