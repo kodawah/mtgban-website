@@ -66,7 +66,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			shorthands = append(shorthands, seller.Info().Shorthand)
 		}
 		allowListSellers = strings.Join(shorthands, ",")
-	} else if allowListSellers == "DEFAULT" {
+	} else if allowListSellers == "DEFAULT" || allowListSellers == "" {
 		allowListSellers = strings.Join(Config.ArbitDefaultSellers, ",")
 	}
 
