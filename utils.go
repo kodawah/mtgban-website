@@ -148,6 +148,10 @@ func uuid2card(cardId string, smallImg bool) GenericCard {
 		}
 	}
 
+	if co.Card.HasUniqueLanguage("Japanese") {
+		variant = "JPN " + variant
+	}
+
 	return GenericCard{
 		Name:      co.Card.Name,
 		Edition:   co.Edition,
