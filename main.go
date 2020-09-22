@@ -111,7 +111,12 @@ var DefaultNav = []NavElem{
 }
 
 var OptionalFields = []string{
-	"SearchDisabled", "ArbitEnabled", "ExpEnabled", "NewsEnabled", "API",
+	"SearchDisabled",
+	"ArbitEnabled",
+	"ArbitDisabledVendors",
+	"ExpEnabled",
+	"NewsEnabled",
+	"API",
 }
 
 var OrderNav = []string{
@@ -152,6 +157,7 @@ var Config struct {
 	Affiliate           map[string]string `json:"affiliate"`
 	Api                 map[string]string `json:"api"`
 	ArbitDefaultSellers []string          `json:"arbit_default_sellers"`
+	ArbitBlockVendors   []string          `json:"arbit_block_vendors"`
 	SearchBlockList     []string          `json:"search_block_list"`
 	Patreon             struct {
 		Secret map[string]string   `json:"secret"`

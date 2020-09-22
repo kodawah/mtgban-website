@@ -481,8 +481,10 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) (string, string)
 	if v.Get("Arbit") == "true" {
 		if tierTitle == "Root" {
 			v.Set("ArbitEnabled", "ALL")
+			v.Set("ArbitDisabledVendors", "NONE")
 		} else {
 			v.Set("ArbitEnabled", "DEFAULT")
+			v.Set("ArbitDisabledVendors", "DEFAULT")
 		}
 	}
 	if v.Get("Search") == "true" {

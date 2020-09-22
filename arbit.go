@@ -56,6 +56,11 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	if allowListSellers == "" && !SigCheck {
 		allowListSellers = "ALL"
 	}
+	blockListSellers, _ := GetParamFromSig(sig, "ArbitDisabledVendors")
+	if blockListSellers == "" && !SigCheck {
+		blockListSellers = "NONE"
+	}
+
 	if allowListSellers == "ALL" {
 		shorthands := []string{}
 		for i, seller := range Sellers {
@@ -68,6 +73,12 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		allowListSellers = strings.Join(shorthands, ",")
 	} else if allowListSellers == "DEFAULT" || allowListSellers == "" {
 		allowListSellers = strings.Join(Config.ArbitDefaultSellers, ",")
+	}
+
+	if blockListSellers == "NONE" {
+		blockListSellers = ""
+	} else if blockListSellers == "DEFAULT" || blockListSellers == "" {
+		blockListSellers = strings.Join(Config.ArbitBlockVendors, ",")
 	}
 
 	r.ParseForm()
@@ -202,6 +213,9 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		if vendor.Info().Name == source.Info().Name {
+			continue
+		}
+		if strings.Contains(blockListSellers, vendor.Info().Shorthand) {
 			continue
 		}
 
