@@ -263,7 +263,22 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Println(userIds, tierTitle)
-	targetURL := sign(tierTitle, r.URL, baseURL)
+	targetURL, sig := sign(tierTitle, r.URL, baseURL)
+
+	year, month, _ := time.Now().Date()
+	endOfThisMonth := time.Date(year, month+1, 1, 0, 0, 0, 0, time.Now().Location())
+	cookie := http.Cookie{
+		Name:    "MTGBAN",
+		Domain:  baseURL,
+		Path:    "/",
+		Expires: endOfThisMonth,
+	}
+
+	// value of cookie
+	cookie.Value = sig
+
+	// write the cookie to response
+	http.SetCookie(w, &cookie)
 
 	http.Redirect(w, r, targetURL, http.StatusFound)
 }
@@ -274,12 +289,45 @@ func signHMACSHA1Base64(key []byte, data []byte) string {
 	return base64.StdEncoding.EncodeToString(h.Sum(nil))
 }
 
+func getSignatureFromCookies(r *http.Request) string {
+	var sig string
+	for _, cookie := range r.Cookies() {
+		if cookie.Name == "MTGBAN" {
+			sig = cookie.Value
+			break
+		}
+	}
+
+	exp, err := GetParamFromSig(sig, "Expires")
+	if err != nil {
+		return ""
+	}
+	expires, err := strconv.ParseInt(exp, 10, 64)
+	if err != nil || expires < time.Now().Unix() {
+		return ""
+	}
+
+	return sig
+}
+
 // This function is mostly here only for initializing the host
 func noSigning(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if PatreonHost == "" {
 			PatreonHost = getBaseURL(r) + "/auth"
 		}
+
+		if r.FormValue("sig") == "" && r.FormValue("errmsg") == "" {
+			sig := getSignatureFromCookies(r)
+			if sig != "" {
+				form, _ := url.ParseQuery(r.URL.RawQuery)
+				form.Add("sig", sig)
+				r.URL.RawQuery = form.Encode()
+				http.Redirect(w, r, r.URL.String(), http.StatusSeeOther)
+				return
+			}
+		}
+
 		next.ServeHTTP(w, r)
 	})
 }
@@ -332,6 +380,17 @@ func enforceSigning(next http.Handler) http.Handler {
 			PatreonHost = getBaseURL(r) + "/auth"
 		}
 		sign := r.FormValue("sig")
+
+		if r.FormValue("sig") == "" {
+			sig := getSignatureFromCookies(r)
+			if sig != "" {
+				form, _ := url.ParseQuery(r.URL.RawQuery)
+				form.Add("sig", sig)
+				r.URL.RawQuery = form.Encode()
+				http.Redirect(w, r, r.URL.String(), http.StatusSeeOther)
+				return
+			}
+		}
 
 		pageVars := genPageNav("Error", sign)
 
@@ -389,8 +448,8 @@ func enforceSigning(next http.Handler) http.Handler {
 	})
 }
 
-func sign(tierTitle string, sourceURL *url.URL, baseURL string) string {
-	duration := 3 * time.Hour
+func sign(tierTitle string, sourceURL *url.URL, baseURL string) (string, string) {
+	duration := 10 * 24 * time.Hour
 	expires := time.Now().Add(duration)
 
 	v := url.Values{}
@@ -471,7 +530,7 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) string {
 	sourceURL.RawQuery = q.Encode()
 	sourceURL.Path = ""
 
-	return sourceURL.String()
+	return sourceURL.String(), str
 }
 
 func GetParamFromSig(sig, param string) (string, error) {
