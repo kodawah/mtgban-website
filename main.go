@@ -147,13 +147,13 @@ var ExtraNavs = map[string]NavElem{
 }
 
 var Config struct {
-	Port            int               `json:"port"`
-	DBAddress       string            `json:"db_address"`
-	Affiliate       map[string]string `json:"affiliate"`
-	Api             map[string]string `json:"api"`
-	DefaultSellers  []string          `json:"default_sellers"`
-	SearchBlockList []string          `json:"search_block_list"`
-	Patreon         struct {
+	Port                int               `json:"port"`
+	DBAddress           string            `json:"db_address"`
+	Affiliate           map[string]string `json:"affiliate"`
+	Api                 map[string]string `json:"api"`
+	ArbitDefaultSellers []string          `json:"arbit_default_sellers"`
+	SearchBlockList     []string          `json:"search_block_list"`
+	Patreon             struct {
 		Secret map[string]string   `json:"secret"`
 		Ids    map[string][]string `json:"ids"`
 	} `json:"patreon"`
