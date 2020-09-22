@@ -92,7 +92,9 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 			if vendor.Info().Name == seller.Info().Name {
 				continue
 			}
-
+			if vendor.Info().CountryFlag != "" {
+				continue
+			}
 			if vendor.Info().Name == "TCG Player" {
 				continue
 			}
