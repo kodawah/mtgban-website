@@ -16,6 +16,7 @@ import (
 	"github.com/kodabb/go-mtgban/magiccorner"
 	"github.com/kodabb/go-mtgban/miniaturemarket"
 	"github.com/kodabb/go-mtgban/mtgstocks"
+	"github.com/kodabb/go-mtgban/mythicmtg"
 	"github.com/kodabb/go-mtgban/ninetyfive"
 	"github.com/kodabb/go-mtgban/starcitygames"
 	"github.com/kodabb/go-mtgban/strikezone"
@@ -392,6 +393,13 @@ var options = map[string]*scraperOption{
 		DevEnabled: true,
 		Init: func() (mtgban.Scraper, error) {
 			scraper := blueprint.NewScraper()
+			scraper.LogCallback = log.Printf
+			return scraper, nil
+		},
+	},
+	"mythicmtg": &scraperOption{
+		Init: func() (mtgban.Scraper, error) {
+			scraper := mythicmtg.NewScraper()
 			scraper.LogCallback = log.Printf
 			return scraper, nil
 		},
