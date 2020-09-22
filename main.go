@@ -84,13 +84,18 @@ type PageVars struct {
 	FilterPenny bool
 	SortOption  string
 
-	Page        string
-	ToC         []NewspaperPage
-	Headings    []Heading
-	Cards       []GenericCard
-	Table       [][]string
-	HasReserved bool
-	IsOneDay    bool
+	Page         string
+	ToC          []NewspaperPage
+	Headings     []Heading
+	Cards        []GenericCard
+	Table        [][]string
+	HasReserved  bool
+	IsOneDay     bool
+	TotalIndex   int
+	CurrentIndex int
+	PrevIndex    int
+	NextIndex    int
+	SortDir      string
 
 	Sleepers [7]SleeperEntry
 

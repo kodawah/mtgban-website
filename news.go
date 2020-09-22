@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -518,7 +519,10 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	page := r.FormValue("page")
 	sort := r.FormValue("sort")
 	dir := r.FormValue("dir")
+	pageIndexStr := r.FormValue("index")
+	pageIndex, _ := strconv.Atoi(pageIndexStr)
 	var query, defSort string
+	var pages int
 
 	if page == "" {
 		pageVars.Title = "Index"
@@ -528,12 +532,42 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	pageVars.SortOption = sort
+	pageVars.SortDir = dir
+
 	for _, newspage := range NewspaperPages {
 		if newspage.Option == page {
 			pageVars.Page = newspage.Option
 			pageVars.Title = newspage.Title
 			pageVars.InfoMessage = newspage.Desc
 			pageVars.Headings = newspage.Head
+
+			// Get the total number of rows for the query
+			qs := strings.Split(newspage.Query, "FROM")
+			if len(qs) != 2 {
+				pageVars.Title = "Errors have been made"
+				pageVars.ErrorMessage = ErrMsgDenied
+
+				render(w, "news.html", pageVars)
+				return
+			}
+			err := db.QueryRow("SELECT COUNT(*) FROM" + qs[1]).Scan(&pages)
+			if err != nil {
+				log.Println("pages disabled", err)
+			}
+			// This integer division is equivalent to math.Floor()
+			pages /= newsPageSize
+
+			pageVars.TotalIndex = pages
+			if pageIndex >= 0 && pageIndex <= pages {
+				pageVars.CurrentIndex = pageIndex
+			}
+			if pageVars.CurrentIndex > 0 {
+				pageVars.PrevIndex = pageVars.CurrentIndex - 1
+			}
+			if pageVars.CurrentIndex < pages {
+				pageVars.NextIndex = pageVars.CurrentIndex + 1
+			}
 
 			query = newspage.Query
 			defSort = newspage.Sort
@@ -562,8 +596,8 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	} else if defSort != "" {
 		query += " ORDER BY " + defSort
 	}
-	// Keep things limited
-	query = fmt.Sprintf("%s LIMIT %d", query, newsPageSize)
+	// Keep things limited + pagination
+	query = fmt.Sprintf("%s LIMIT %d OFFSET %d", query, newsPageSize, newsPageSize*pageIndex)
 
 	// GO GO GO
 	rows, err := db.Query(query)

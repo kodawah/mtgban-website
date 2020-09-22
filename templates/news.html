@@ -165,6 +165,21 @@
                             {{end}}
                         </tr>
                     {{end}}
+                    <tr>
+                        <td colspan="{{len .Headings}}">
+                            <p style="text-align: center; vertical-align: middle;">
+                            {{if ne .CurrentIndex 0}}
+                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&sig={{.Signature}}&index=">&lt;</a>
+                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&sig={{.Signature}}&index={{.PrevIndex}}">◀</a>
+                            {{end}}
+                            {{inc .CurrentIndex 1}} / {{inc .TotalIndex 1}}
+                            {{if ne .CurrentIndex .TotalIndex}}
+                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&sig={{.Signature}}&index={{.NextIndex}}">▶</a>
+                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&sig={{.Signature}}&index={{.TotalIndex}}">&gt;</a>
+                            {{end}}
+                            </p>
+                        </td>
+                    </tr>
                 </table>
                 <br>
                 <h4>
