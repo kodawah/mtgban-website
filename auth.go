@@ -267,15 +267,17 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 
 	year, month, _ := time.Now().Date()
 	endOfThisMonth := time.Date(year, month+1, 1, 0, 0, 0, 0, time.Now().Location())
+	domain := "mtgban.com"
+	if strings.Contains(baseURL, "localhost") {
+		domain = "localhost"
+	}
 	cookie := http.Cookie{
 		Name:    "MTGBAN",
-		Domain:  baseURL,
+		Domain:  domain,
 		Path:    "/",
 		Expires: endOfThisMonth,
+		Value:   sig,
 	}
-
-	// value of cookie
-	cookie.Value = sig
 
 	// write the cookie to response
 	http.SetCookie(w, &cookie)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -18,9 +19,14 @@ func Home(w http.ResponseWriter, r *http.Request) {
 	case "UserNotFound", "TierNotFound":
 		pageVars.ErrorMessage = ErrMsg
 	case "logout":
+		domain := "mtgban.com"
+		if strings.Contains(getBaseURL(r), "localhost") {
+			domain = "localhost"
+		}
+
 		cookie := http.Cookie{
 			Name:    "MTGBAN",
-			Domain:  getBaseURL(r),
+			Domain:  domain,
 			Path:    "/",
 			Expires: time.Now(),
 		}
