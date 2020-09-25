@@ -247,6 +247,7 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 			case "Squire",
 				"Merchant",
 				"Bard",
+				"Test Role",
 				"Master of Coin":
 				tierTitle = foundTitle
 			case "Upkeep (Early Adopters)",
@@ -466,7 +467,7 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) (string, string)
 		v.Set("Search", "true")
 		v.Set("Newspaper", "true")
 		v.Set("Sleepers", "true")
-	case "Master of Coin":
+	case "Master of Coin", "Test Role":
 		v.Set("Search", "true")
 		v.Set("Newspaper", "true")
 		v.Set("Sleepers", "true")
