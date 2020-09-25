@@ -47,7 +47,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		blocklistOpt = ""
 	}
 	var blocklist []string
-	if blocklistOpt == "DEFAULT" {
+	if blocklistOpt == "DEFAULT" || blocklistOpt == "" {
 		blocklist = Config.SearchBlockList
 	}
 
