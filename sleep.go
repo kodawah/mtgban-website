@@ -57,6 +57,16 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var blocklist []string
+
+	blocklistOpt, _ := GetParamFromSig(sig, "SearchDisabled")
+	if blocklistOpt == "NONE" && !SigCheck {
+		blocklistOpt = ""
+	}
+	if blocklistOpt == "DEFAULT" || blocklistOpt == "" {
+		blocklist = Config.SearchBlockList
+	}
+
 	tiers := map[string]int{}
 
 	var tcgSeller mtgban.Seller
@@ -83,6 +93,10 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 		if seller.Info().CountryFlag != "" {
 			continue
 		}
+		// Skip any seller explicitly in blocklist
+		if SliceStringHas(blocklist, seller.Info().Shorthand) {
+			continue
+		}
 
 		for j, vendor := range Vendors {
 			if vendor == nil {
@@ -96,6 +110,10 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 			if vendor.Info().Name == "TCG Player" {
+				continue
+			}
+			// Skip any vendor explicitly in blocklist
+			if SliceStringHas(blocklist, vendor.Info().Shorthand) {
 				continue
 			}
 
