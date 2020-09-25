@@ -167,3 +167,12 @@ func uuid2card(cardId string, smallImg bool) GenericCard {
 		Stocks:    stocks,
 	}
 }
+
+func SliceStringHas(slice []string, probe string) bool {
+	for i := range slice {
+		if slice[i] == probe {
+			return true
+		}
+	}
+	return false
+}

@@ -42,12 +42,13 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	blocklist, _ := GetParamFromSig(sig, "SearchDisabled")
-	if blocklist == "NONE" && !SigCheck {
-		blocklist = ""
+	blocklistOpt, _ := GetParamFromSig(sig, "SearchDisabled")
+	if blocklistOpt == "NONE" && !SigCheck {
+		blocklistOpt = ""
 	}
-	if blocklist == "DEFAULT" {
-		blocklist = strings.Join(Config.SearchBlockList, ",")
+	var blocklist []string
+	if blocklistOpt == "DEFAULT" {
+		blocklist = Config.SearchBlockList
 	}
 
 	query := r.FormValue("q")
@@ -127,7 +128,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Skip any seller explicitly in blocklist
-		if strings.Contains(blocklist, seller.Info().Shorthand) {
+		if SliceStringHas(blocklist, seller.Info().Shorthand) {
 			continue
 		}
 
@@ -259,7 +260,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		if strings.Contains(blocklist, vendor.Info().Shorthand) {
+		if SliceStringHas(blocklist, vendor.Info().Shorthand) {
 			continue
 		}
 

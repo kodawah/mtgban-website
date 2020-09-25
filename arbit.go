@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/kodabb/go-mtgban/mtgban"
@@ -52,33 +51,32 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		render(w, "arbit.html", pageVars)
 		return
 	}
-	allowListSellers, _ := GetParamFromSig(sig, "ArbitEnabled")
-	if allowListSellers == "" && !SigCheck {
-		allowListSellers = "ALL"
+
+	allowlistSellersOpt, _ := GetParamFromSig(sig, "ArbitEnabled")
+	if allowlistSellersOpt == "" && !SigCheck {
+		allowlistSellersOpt = "ALL"
 	}
-	blockListSellers, _ := GetParamFromSig(sig, "ArbitDisabledVendors")
-	if blockListSellers == "" && !SigCheck {
-		blockListSellers = "NONE"
+	blocklistVendorsOpt, _ := GetParamFromSig(sig, "ArbitDisabledVendors")
+	if blocklistVendorsOpt == "" && !SigCheck {
+		blocklistVendorsOpt = "NONE"
 	}
 
-	if allowListSellers == "ALL" {
-		shorthands := []string{}
+	var allowlistSellers []string
+	if allowlistSellersOpt == "ALL" {
 		for i, seller := range Sellers {
 			if seller == nil {
 				log.Println("nil seller at position", i)
 				continue
 			}
-			shorthands = append(shorthands, seller.Info().Shorthand)
+			allowlistSellers = append(allowlistSellers, seller.Info().Shorthand)
 		}
-		allowListSellers = strings.Join(shorthands, ",")
-	} else if allowListSellers == "DEFAULT" || allowListSellers == "" {
-		allowListSellers = strings.Join(Config.ArbitDefaultSellers, ",")
+	} else if allowlistSellersOpt == "DEFAULT" || allowlistSellersOpt == "" {
+		allowlistSellers = Config.ArbitDefaultSellers
 	}
 
-	if blockListSellers == "NONE" {
-		blockListSellers = ""
-	} else if blockListSellers == "DEFAULT" || blockListSellers == "" {
-		blockListSellers = strings.Join(Config.ArbitBlockVendors, ",")
+	var blocklistVendors []string
+	if blocklistVendorsOpt == "DEFAULT" || blocklistVendorsOpt == "" {
+		blocklistVendors = Config.ArbitBlockVendors
 	}
 
 	r.ParseForm()
@@ -92,7 +90,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	for k, v := range r.Form {
 		switch k {
 		case "source":
-			if !strings.Contains(allowListSellers, v[0]) {
+			if !SliceStringHas(allowlistSellers, v[0]) {
 				log.Println("Unauthorized attempt with", v[0])
 				message = "Unknown " + v[0] + " seller"
 				break
@@ -149,7 +147,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			log.Println("nil seller at position", i)
 			continue
 		}
-		if !strings.Contains(allowListSellers, newSeller.Info().Shorthand) {
+		if !SliceStringHas(allowlistSellers, newSeller.Info().Shorthand) {
 			continue
 		}
 
@@ -215,7 +213,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		if vendor.Info().Name == source.Info().Name {
 			continue
 		}
-		if strings.Contains(blockListSellers, vendor.Info().Shorthand) {
+		if SliceStringHas(blocklistVendors, vendor.Info().Shorthand) {
 			continue
 		}
 
