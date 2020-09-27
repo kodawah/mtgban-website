@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kodabb/go-mtgban/mtgban"
 	"github.com/kodabb/go-mtgban/mtgmatcher"
 )
 
@@ -17,6 +16,14 @@ const (
 	TooManyMessage   = "More results available, try adjusting your filters"
 	NoResultsMessage = "No results found"
 )
+
+type CombineEntry struct {
+	ScraperName string
+	Price       float64
+	Ratio       float64
+	Quantity    int
+	URL         string
+}
 
 func Search(w http.ResponseWriter, r *http.Request) {
 	sig := r.FormValue("sig")
@@ -65,8 +72,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	pageVars.SearchQuery = query
 	// Setup conditions keys, all etnries, and images
 	pageVars.CondKeys = []string{"INDEX", "NM", "SP", "MP", "HP", "PO"}
-	pageVars.FoundSellers = map[string]map[string][]mtgban.CombineEntry{}
-	pageVars.FoundVendors = map[string][]mtgban.CombineEntry{}
+	pageVars.FoundSellers = map[string]map[string][]CombineEntry{}
+	pageVars.FoundVendors = map[string][]CombineEntry{}
 	pageVars.Metadata = map[string]GenericCard{}
 
 	// Set which comparison function to use depending on the search syntax
@@ -201,7 +208,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 							pageVars.InfoMessage = TooManyMessage
 							continue
 						}
-						pageVars.FoundSellers[cardId] = map[string][]mtgban.CombineEntry{}
+						pageVars.FoundSellers[cardId] = map[string][]CombineEntry{}
 					}
 
 					// Set conditions - handle the special TCG one that appears
@@ -213,11 +220,11 @@ func Search(w http.ResponseWriter, r *http.Request) {
 					// Check if the current entry has any condition
 					_, found = pageVars.FoundSellers[cardId][conditions]
 					if !found {
-						pageVars.FoundSellers[cardId][conditions] = []mtgban.CombineEntry{}
+						pageVars.FoundSellers[cardId][conditions] = []CombineEntry{}
 					}
 
 					// Prepare all the deets
-					res := mtgban.CombineEntry{
+					res := CombineEntry{
 						ScraperName: seller.Info().Name,
 						Price:       entry.Price,
 						Quantity:    entry.Quantity,
@@ -322,9 +329,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 						pageVars.InfoMessage = TooManyMessage
 						continue
 					}
-					pageVars.FoundVendors[cardId] = []mtgban.CombineEntry{}
+					pageVars.FoundVendors[cardId] = []CombineEntry{}
 				}
-				res := mtgban.CombineEntry{
+				res := CombineEntry{
 					ScraperName: vendor.Info().Name,
 					Price:       entry.BuyPrice,
 					Ratio:       entry.PriceRatio,

@@ -65,8 +65,8 @@ type PageVars struct {
 	VendorKeys   []string
 	SearchQuery  string
 	CondKeys     []string
-	FoundSellers map[string]map[string][]mtgban.CombineEntry
-	FoundVendors map[string][]mtgban.CombineEntry
+	FoundSellers map[string]map[string][]CombineEntry
+	FoundVendors map[string][]CombineEntry
 	Metadata     map[string]GenericCard
 
 	SellerShort       string
