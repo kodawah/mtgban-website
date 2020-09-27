@@ -28,6 +28,7 @@ import (
 )
 
 const (
+	TCG_LOW     = "TCG Low"
 	TCG_MAIN    = "TCG Player"
 	TCG_DIRECT  = "TCG Direct"
 	TCG_BUYLIST = "TCG Player"
@@ -389,6 +390,15 @@ var options = map[string]*scraperOption{
 			return scraper, nil
 		},
 		Keepers: []string{TCG_MAIN, TCG_DIRECT},
+	},
+	"tcg_index": &scraperOption{
+		Init: func() (mtgban.Scraper, error) {
+			scraper := tcgplayer.NewScraperIndex(Config.Api["tcg_public"], Config.Api["tcg_private"])
+			scraper.Affiliate = Config.Affiliate["TCG"]
+			scraper.LogCallback = log.Printf
+			return scraper, nil
+		},
+		Keepers: []string{TCG_LOW},
 	},
 	"magiccorner": &scraperOption{
 		Init: func() (mtgban.Scraper, error) {
