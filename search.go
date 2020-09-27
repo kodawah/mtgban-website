@@ -269,11 +269,22 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 			continue
 		}
-		for cardId, entry := range buylist {
+		for cardId, blEntries := range buylist {
 			co, err := mtgmatcher.GetUUID(cardId)
 			if err != nil {
 				continue
 			}
+
+			// Look up the NM printing
+			nmIndex := 0
+			if vendor.Info().MultiCondBuylist {
+				for nmIndex = range blEntries {
+					if blEntries[nmIndex].Conditions == "NM" {
+						break
+					}
+				}
+			}
+			entry := blEntries[nmIndex]
 
 			if filterEdition != "" && filterEdition != co.SetCode {
 				continue

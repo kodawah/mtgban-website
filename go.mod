@@ -18,7 +18,7 @@ require (
 	github.com/hashicorp/go-cleanhttp v0.5.1
 	github.com/hashicorp/go-retryablehttp v0.6.6
 	github.com/kennygrant/sanitize v1.2.4
-	github.com/kodabb/go-mtgban v0.0.0-20200922193426-99c4c2addf9e
+	github.com/kodabb/go-mtgban v0.0.0-20200927121845-1de97ddbdfa2
 	github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca
 	github.com/temoto/robotstxt v1.1.1
 	golang.org/x/net v0.0.0-20200506145744-7e3656a0809f
