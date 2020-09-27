@@ -202,7 +202,7 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 
 	// Save and register sellers that were requested earlier
 	for _, seller := range sellers {
-		for _, name := range names {
+		for i, name := range names {
 			if seller.Info().Name == name {
 				fname := dirName + name + "-latest.csv"
 				err = dumpInventoryToFile(seller, currentDir, fname)
@@ -211,6 +211,8 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 				}
 				newbc.RegisterSeller(seller)
 				log.Println("Dumped", fname)
+				// Mark as done
+				names[i] = ""
 			}
 		}
 	}
