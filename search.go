@@ -207,7 +207,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 					// Set conditions - handle the special TCG one that appears
 					// at the top of the results
 					conditions := entry.Conditions
-					if seller.Info().Name == "TCG Low" || seller.Info().Name == "TCG Direct Low" {
+					if seller.Info().MetadataOnly {
 						conditions = "INDEX"
 					}
 					// Check if the current entry has any condition
