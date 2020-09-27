@@ -150,6 +150,9 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		if !SliceStringHas(allowlistSellers, newSeller.Info().Shorthand) {
 			continue
 		}
+		if newSeller.Info().MetadataOnly {
+			continue
+		}
 
 		nav := NavElem{
 			Name:  newSeller.Info().Name,
