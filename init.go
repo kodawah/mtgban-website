@@ -28,9 +28,9 @@ import (
 )
 
 const (
-	TCG_LOW        = "TCG Low"
-	TCG_DIRECT_LOW = "TCG Direct Low"
-	TCG_BUYLIST    = "TCG Player"
+	TCG_MAIN    = "TCG Low"
+	TCG_DIRECT  = "TCG Direct Low"
+	TCG_BUYLIST = "TCG Player"
 )
 
 func loadDatastore() error {
@@ -234,9 +234,9 @@ func loadTCG() {
 
 	var tcgLow, tcgDirectLow mtgban.Seller
 	for i := range tcgSellers {
-		if tcgSellers[i].Info().Shorthand == TCG_LOW {
+		if tcgSellers[i].Info().Shorthand == TCG_MAIN {
 			tcgLow = tcgSellers[i]
-		} else if tcgSellers[i].Info().Shorthand == TCG_DIRECT_LOW {
+		} else if tcgSellers[i].Info().Shorthand == TCG_DIRECT {
 			tcgDirectLow = tcgSellers[i]
 		}
 	}
@@ -245,12 +245,12 @@ func loadTCG() {
 		if Sellers[i] == nil {
 			continue
 		}
-		if Sellers[i].Info().Shorthand == TCG_LOW {
+		if Sellers[i].Info().Shorthand == TCG_MAIN {
 			Sellers[i] = tcgLow
-			log.Println(TCG_LOW, "updated")
-		} else if Sellers[i].Info().Shorthand == TCG_DIRECT_LOW {
+			log.Println(TCG_MAIN, "updated")
+		} else if Sellers[i].Info().Shorthand == TCG_DIRECT {
 			Sellers[i] = tcgDirectLow
-			log.Println(TCG_DIRECT_LOW, "updated")
+			log.Println(TCG_DIRECT, "updated")
 		}
 	}
 
@@ -388,7 +388,7 @@ var options = map[string]*scraperOption{
 			scraper.LogCallback = log.Printf
 			return scraper, nil
 		},
-		Keepers: []string{TCG_LOW, TCG_DIRECT_LOW},
+		Keepers: []string{TCG_MAIN, TCG_DIRECT},
 	},
 	"magiccorner": &scraperOption{
 		Init: func() (mtgban.Scraper, error) {
