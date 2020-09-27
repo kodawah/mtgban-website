@@ -75,7 +75,7 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 			log.Println("nil seller at position", i)
 			continue
 		}
-		if seller.Info().Shorthand == "TCG Low" {
+		if seller.Info().Shorthand == TCG_LOW {
 			tcgSeller = seller
 			break
 		}
@@ -109,9 +109,7 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 			if vendor.Info().CountryFlag != "" {
 				continue
 			}
-			if vendor.Info().Name == "TCG Player" {
-				continue
-			}
+
 			// Skip any vendor explicitly in blocklist
 			if SliceStringHas(blocklist, vendor.Info().Shorthand) {
 				continue
