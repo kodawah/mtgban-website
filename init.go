@@ -137,36 +137,44 @@ func dumpBuylistToFile(vendor mtgban.Vendor, currentDir, fname string) error {
 	return os.Symlink(outName, fname)
 }
 
-func specialTCGhandle(init bool, currentDir string, newbc *mtgban.BanClient, tcg mtgban.Market) error {
+func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scraper mtgban.Market, names []string) error {
 	dirName := path.Clean(currentDir+"/..") + "/"
 
 	// Check if both sub seller files are present
-	lowname := dirName + TCG_LOW + "-latest.csv"
-	lowdirectname := dirName + TCG_DIRECT_LOW + "-latest.csv"
-	if init && fileExists(lowname) && fileExists(lowdirectname) {
-		log.Println("Found TCG subseller files")
-
-		for _, name := range []string{TCG_LOW, TCG_DIRECT_LOW} {
-			info := tcg.Info()
-			info.Name = name
-			info.Shorthand = name
-			// Empty inventory, since the real loading will happen later
-			seller := mtgban.NewSellerFromInventory(nil, info)
-			newbc.Register(seller)
-			log.Println("Spoofed", name)
+	if init {
+		ok := true
+		for _, name := range names {
+			if !fileExists(dirName + name + "-latest.csv") {
+				ok = false
+				break
+			}
 		}
-		return nil
+
+		if ok {
+			log.Println("Found Market subvendor files")
+
+			for _, name := range names {
+				info := scraper.Info()
+				info.Name = name
+				info.Shorthand = name
+				// Empty inventory, since the real loading will happen later
+				seller := mtgban.NewSellerFromInventory(nil, info)
+				newbc.Register(seller)
+				log.Println("Spoofed", name)
+			}
+			return nil
+		}
 	}
 
 	sellers := []mtgban.Seller{}
 	var err error
 
 	// Check if the main file is present and load it
-	fname := dirName + tcg.Info().Name + "-latest.csv"
+	fname := dirName + scraper.Info().Name + "-latest.csv"
 	if init && fileExists(fname) {
-		log.Println("Found TCG file")
+		log.Println("Found", scraper.Info().Name, "main file")
 
-		seller, err := loadInventoryFromFile(tcg.Info(), fname)
+		seller, err := loadInventoryFromFile(scraper.Info(), fname)
 		if err != nil {
 			return err
 		}
@@ -175,32 +183,34 @@ func specialTCGhandle(init bool, currentDir string, newbc *mtgban.BanClient, tcg
 			return err
 		}
 
-		log.Println("TCG preloaded from file")
+		log.Println(scraper.Info().Name, "preloaded from file")
 	} else {
 		// Split subsellers (either from file or from web)
-		sellers, err = mtgban.Seller2Sellers(tcg)
+		sellers, err = mtgban.Seller2Sellers(scraper)
 		if err != nil {
 			return err
 		}
 
 		// Dump main file
-		err = dumpInventoryToFile(tcg, currentDir, fname)
+		err = dumpInventoryToFile(scraper, currentDir, fname)
 		if err != nil {
 			return err
 		}
 		log.Println("Dumped", fname)
 	}
 
-	// Save and register sellers that matter
+	// Save and register sellers that were requested earlier
 	for _, seller := range sellers {
-		if seller.Info().Name == TCG_LOW || seller.Info().Name == TCG_DIRECT_LOW {
-			fname := dirName + seller.Info().Name + "-latest.csv"
-			err = dumpInventoryToFile(seller, currentDir, fname)
-			if err != nil {
-				return err
+		for _, name := range names {
+			if seller.Info().Name == name {
+				fname := dirName + name + "-latest.csv"
+				err = dumpInventoryToFile(seller, currentDir, fname)
+				if err != nil {
+					return err
+				}
+				newbc.RegisterSeller(seller)
+				log.Println("Dumped", fname)
 			}
-			newbc.RegisterSeller(seller)
-			log.Println("Dumped", fname)
 		}
 	}
 
@@ -255,7 +265,6 @@ func loadTCG() {
 			log.Println("TCG Buylist updated")
 		}
 	}
-
 }
 
 func loadCK() {
@@ -297,6 +306,7 @@ type scraperOption struct {
 	OnlySeller bool
 	OnlyVendor bool
 	Init       func() (mtgban.Scraper, error)
+	Keepers    []string
 }
 
 var options = map[string]*scraperOption{
@@ -378,6 +388,7 @@ var options = map[string]*scraperOption{
 			scraper.LogCallback = log.Printf
 			return scraper, nil
 		},
+		Keepers: []string{TCG_LOW, TCG_DIRECT_LOW},
 	},
 	"magiccorner": &scraperOption{
 		Init: func() (mtgban.Scraper, error) {
@@ -430,9 +441,9 @@ func loadScrapers(doSellers, doVendors bool) {
 			continue
 		}
 
-		if key == "tcg_market" {
+		if len(opt.Keepers) != 0 {
 			if !opt.OnlyVendor {
-				err := specialTCGhandle(init, currentDir, newbc, scraper.(mtgban.Market))
+				err := untangleMarket(init, currentDir, newbc, scraper.(mtgban.Market), opt.Keepers)
 				if err != nil {
 					log.Println(err)
 				}
