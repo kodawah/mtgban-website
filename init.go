@@ -197,7 +197,7 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 		if err != nil {
 			return err
 		}
-		log.Println("Dumped", fname)
+		log.Println("Dumped main file for", scraper.Info().Name, "to", fname)
 	}
 
 	// Save and register sellers that were requested earlier
