@@ -28,8 +28,8 @@ import (
 )
 
 const (
-	TCG_MAIN    = "TCG Low"
-	TCG_DIRECT  = "TCG Direct Low"
+	TCG_MAIN    = "TCG Player"
+	TCG_DIRECT  = "TCG Direct"
 	TCG_BUYLIST = "TCG Player"
 )
 
