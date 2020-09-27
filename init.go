@@ -141,8 +141,8 @@ func specialTCGhandle(init bool, currentDir string, newbc *mtgban.BanClient, tcg
 	dirName := path.Clean(currentDir+"/..") + "/"
 
 	// Check if both sub seller files are present
-	lowname := dirName + "TCG Low-latest.csv"
-	lowdirectname := dirName + "TCG Direct Low-latest.csv"
+	lowname := dirName + TCG_LOW + "-latest.csv"
+	lowdirectname := dirName + TCG_DIRECT_LOW + "-latest.csv"
 	if init && fileExists(lowname) && fileExists(lowdirectname) {
 		log.Println("Found TCG subseller files")
 
@@ -164,7 +164,7 @@ func specialTCGhandle(init bool, currentDir string, newbc *mtgban.BanClient, tcg
 	// Check if the main file is present and load it
 	fname := dirName + tcg.Info().Name + "-latest.csv"
 	if init && fileExists(fname) {
-		log.Println("Found TCG Market file")
+		log.Println("Found TCG file")
 
 		seller, err := loadInventoryFromFile(tcg.Info(), fname)
 		if err != nil {
@@ -175,7 +175,7 @@ func specialTCGhandle(init bool, currentDir string, newbc *mtgban.BanClient, tcg
 			return err
 		}
 
-		log.Println("TCG Market preloaded from file")
+		log.Println("TCG preloaded from file")
 	} else {
 		// Split subsellers (either from file or from web)
 		sellers, err = mtgban.Seller2Sellers(tcg)
@@ -208,7 +208,7 @@ func specialTCGhandle(init bool, currentDir string, newbc *mtgban.BanClient, tcg
 }
 
 func loadTCG() {
-	log.Println("Reloading TCG")
+	log.Println("Reloading TCG Market")
 
 	scraper, err := options["tcg_market"].Init()
 	if err != nil {
@@ -237,10 +237,10 @@ func loadTCG() {
 		}
 		if Sellers[i].Info().Shorthand == TCG_LOW {
 			Sellers[i] = tcgLow
-			log.Println("TCG Low updated")
+			log.Println(TCG_LOW, "updated")
 		} else if Sellers[i].Info().Shorthand == TCG_DIRECT_LOW {
 			Sellers[i] = tcgDirectLow
-			log.Println("TCG Direct Low updated")
+			log.Println(TCG_DIRECT_LOW, "updated")
 		}
 	}
 

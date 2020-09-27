@@ -157,10 +157,10 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			Link:  "/arbit?source=" + newSeller.Info().Shorthand,
 		}
 
-		if newSeller.Info().Name == "TCG Low" {
+		if newSeller.Info().Name == TCG_LOW {
 			nav.Short = "TCG"
 		}
-		if newSeller.Info().Name == "TCG Direct Low" {
+		if newSeller.Info().Name == TCG_DIRECT_LOW {
 			nav.Short = "Direct"
 		}
 		if sig != "" {
@@ -194,11 +194,11 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	pageVars.FilterNega = noposi
 	pageVars.FilterPenny = nopenny
 	switch pageVars.SellerFull {
-	case "TCG Low", "TCG Direct Low", "Card Kingdom":
+	case TCG_LOW, TCG_DIRECT_LOW, "Card Kingdom":
 		pageVars.SellerAffiliate = true
 	}
 	switch pageVars.SellerFull {
-	case "TCG Low", "TCG Direct Low":
+	case TCG_LOW, TCG_DIRECT_LOW:
 		pageVars.SellerNoAvailable = true
 	}
 
