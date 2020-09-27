@@ -149,11 +149,10 @@
                                         $ {{printf "%.2f" .Price}}
                                     </td>
                                     <td style="text-align: center; vertical-align: middle;">
-                                        {{if ne $conditions "INDEX"}}
+                                        {{if .ShowDirect}}
+                                            <img style="padding-top:4px;" src="img/misc/direct.png">
+                                        {{else if not .NoQuantity}}
                                             {{.Quantity}}
-                                        {{end}}
-                                        {{if eq .ScraperName "TCG Direct Low"}}
-                                        <img style="padding-top:4px;" src="img/misc/direct.png">
                                         {{end}}
                                     </td>
                                 </tr>

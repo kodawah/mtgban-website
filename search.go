@@ -23,6 +23,8 @@ type CombineEntry struct {
 	Ratio       float64
 	Quantity    int
 	URL         string
+	NoQuantity  bool
+	ShowDirect  bool
 }
 
 func Search(w http.ResponseWriter, r *http.Request) {
@@ -229,6 +231,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 						Price:       entry.Price,
 						Quantity:    entry.Quantity,
 						URL:         entry.URL,
+						NoQuantity:  seller.Info().NoQuantityInventory || seller.Info().MetadataOnly,
+						ShowDirect:  seller.Info().Name == TCG_DIRECT,
 					}
 					if seller.Info().CountryFlag != "" {
 						res.ScraperName += " " + seller.Info().CountryFlag
