@@ -351,8 +351,13 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		}
 		pageVars.SortOption = sorting
 
+		name := vendor.Info().Name
+		if name == "TCG Player Market" {
+			name = "TCG Player Buylist"
+		}
+
 		pageVars.Arb = append(pageVars.Arb, Arbitrage{
-			Name:       vendor.Info().Name,
+			Name:       name,
 			LastUpdate: vendor.Info().BuylistTimestamp.Format(time.RFC3339),
 			Arbit:      arbit,
 			Len:        len(arbit),

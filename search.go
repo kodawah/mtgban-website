@@ -335,8 +335,12 @@ func Search(w http.ResponseWriter, r *http.Request) {
 					}
 					pageVars.FoundVendors[cardId] = []CombineEntry{}
 				}
+				name := vendor.Info().Name
+				if name == "TCG Player Market" {
+					name = "TCG Player Buylist"
+				}
 				res := CombineEntry{
-					ScraperName: vendor.Info().Name,
+					ScraperName: name,
 					Price:       entry.BuyPrice,
 					Ratio:       entry.PriceRatio,
 					Quantity:    entry.Quantity,
