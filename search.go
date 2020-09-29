@@ -158,7 +158,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			// Run the comparison function set above
 			if cmpFunc(co.Card.Name, query) {
 				// Skip cards that are not of the desired set
-				if filterEdition != "" && filterEdition != co.SetCode {
+				if filterEdition != "" && filterEdition != co.Card.SetCode {
 					continue
 				}
 				// Skip cards that are not of the desired collector number
@@ -297,7 +297,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			}
 			entry := blEntries[nmIndex]
 
-			if filterEdition != "" && filterEdition != co.SetCode {
+			if filterEdition != "" && filterEdition != co.Card.SetCode {
 				continue
 			}
 			if filterNumber != "" && filterNumber != co.Card.Number {

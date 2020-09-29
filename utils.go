@@ -59,7 +59,7 @@ func keyruneForCardSet(cardId string) string {
 		return ""
 	}
 
-	set, err := mtgmatcher.GetSet(co.SetCode)
+	set, err := mtgmatcher.GetSet(co.Card.SetCode)
 	if err != nil {
 		return ""
 	}
@@ -67,7 +67,7 @@ func keyruneForCardSet(cardId string) string {
 	keyrune := set.KeyruneCode
 
 	rarity := co.Card.Rarity
-	if co.SetCode == "TSB" {
+	if co.Card.SetCode == "TSB" {
 		rarity = "timeshifted"
 	}
 	out := fmt.Sprintf("ss-%s ss-%s", strings.ToLower(keyrune), rarity)
@@ -155,7 +155,7 @@ func uuid2card(cardId string, smallImg bool) GenericCard {
 	return GenericCard{
 		Name:      co.Card.Name,
 		Edition:   co.Edition,
-		SetCode:   co.SetCode,
+		SetCode:   co.Card.SetCode,
 		Number:    co.Card.Number,
 		Variant:   variant,
 		Foil:      co.Foil,
@@ -163,7 +163,7 @@ func uuid2card(cardId string, smallImg bool) GenericCard {
 		ImageURL:  scryfallImageURL(cardId, smallImg),
 		Title:     editionTitle(cardId),
 		Reserved:  co.Card.IsReserved,
-		SearchURL: fmt.Sprintf("/search?q=%s s:%s cn:%s f:%t", co.Card.Name, co.SetCode, co.Card.Number, co.Foil),
+		SearchURL: fmt.Sprintf("/search?q=%s s:%s cn:%s f:%t", co.Card.Name, co.Card.SetCode, co.Card.Number, co.Foil),
 		Stocks:    stocks,
 	}
 }
