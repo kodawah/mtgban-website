@@ -31,7 +31,7 @@ const (
 	TCG_LOW     = "TCG Low"
 	TCG_MAIN    = "TCG Player"
 	TCG_DIRECT  = "TCG Direct"
-	TCG_BUYLIST = "TCG Player"
+	TCG_BUYLIST = "TCG Player Market"
 )
 
 func loadDatastore() error {
