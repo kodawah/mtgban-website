@@ -201,10 +201,12 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 	}
 
 	// Save and register sellers that were requested earlier
+	notdone := make([]string, len(names))
+	copy(notdone, names)
 	for _, seller := range sellers {
-		for i, name := range names {
-			if seller.Info().Name == name {
-				fname := dirName + name + "-latest.csv"
+		for i := range notdone {
+			if seller.Info().Name == notdone[i] {
+				fname := dirName + notdone[i] + "-latest.csv"
 				err = dumpInventoryToFile(seller, currentDir, fname)
 				if err != nil {
 					return err
@@ -212,7 +214,7 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 				newbc.RegisterSeller(seller)
 				log.Println("Dumped", fname)
 				// Mark as done
-				names[i] = ""
+				notdone[i] = ""
 			}
 		}
 	}
