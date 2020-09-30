@@ -225,9 +225,13 @@ func Search(w http.ResponseWriter, r *http.Request) {
 						pageVars.FoundSellers[cardId][conditions] = []CombineEntry{}
 					}
 
+					name := seller.Info().Name
+					if name == TCG_MAIN {
+						name = "TCG Player (+s&h)"
+					}
 					// Prepare all the deets
 					res := CombineEntry{
-						ScraperName: seller.Info().Name,
+						ScraperName: name,
 						Price:       entry.Price,
 						Quantity:    entry.Quantity,
 						URL:         entry.URL,
