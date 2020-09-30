@@ -382,21 +382,37 @@ func Search(w http.ResponseWriter, r *http.Request) {
 }
 
 func sortSets(uuidI, uuidJ string) bool {
-	setI, err := mtgmatcher.GetSetUUID(uuidI)
+	cI, err := mtgmatcher.GetUUID(uuidI)
 	if err != nil {
 		return false
 	}
-	setDateI, err := time.Parse("2006-01-02", setI.ReleaseDate)
+	setI, err := mtgmatcher.GetSet(cI.Card.SetCode)
+	if err != nil {
+		return false
+	}
+	dateI := setI.ReleaseDate
+	if cI.Card.OriginalReleaseDate != "" {
+		dateI = cI.Card.OriginalReleaseDate
+	}
+	setDateI, err := time.Parse("2006-01-02", dateI)
 	if err != nil {
 		return false
 	}
 	editionI := setI.Name
 
-	setJ, err := mtgmatcher.GetSetUUID(uuidJ)
+	cJ, err := mtgmatcher.GetUUID(uuidJ)
 	if err != nil {
 		return false
 	}
-	setDateJ, err := time.Parse("2006-01-02", setJ.ReleaseDate)
+	setJ, err := mtgmatcher.GetSet(cJ.Card.SetCode)
+	if err != nil {
+		return false
+	}
+	dateJ := setI.ReleaseDate
+	if cJ.Card.OriginalReleaseDate != "" {
+		dateJ = cI.Card.OriginalReleaseDate
+	}
+	setDateJ, err := time.Parse("2006-01-02", dateJ)
 	if err != nil {
 		return false
 	}
@@ -407,13 +423,6 @@ func sortSets(uuidI, uuidJ string) bool {
 		// If they are part of the same edition, check for their collector number
 		// taking their foiling into consideration
 		if editionI == editionJ {
-			cI, errI := mtgmatcher.GetUUID(uuidI)
-			cJ, errJ := mtgmatcher.GetUUID(uuidJ)
-			// This should be impossible
-			if errI != nil || errJ != nil {
-				return false
-			}
-
 			// If their number is the same, check for foiling status
 			if cI.Card.Number == cJ.Card.Number {
 				if cI.Foil == true && cJ.Foil == false {
