@@ -148,8 +148,11 @@ func uuid2card(cardId string, smallImg bool) GenericCard {
 		}
 	}
 
-	if co.Card.HasUniqueLanguage("Japanese") {
-		variant = "JPN " + variant
+	if strings.Contains(co.Card.Number, "★") && co.Card.HasUniqueLanguage("Japanese") {
+		if variant != "" {
+			variant = " " + variant
+		}
+		variant = "JPN" + variant
 	}
 
 	return GenericCard{
