@@ -24,8 +24,7 @@ import (
 var PatreonHost string
 
 const (
-	PatreonClientId  = "VrjStFvhtp7HhF1xItHm83FMY7PK3nptpls1xVkYL5IDufXNVW4Xb-pHPXBIuWZ4"
-	PatreonPartnerId = "ZZHIY-2izbIqHEz-ZMB8rJYZI-rcMizlHVpG_rJP0iViW34IeCQZZWYMvc_-HCF7"
+	PatreonClientId = "VrjStFvhtp7HhF1xItHm83FMY7PK3nptpls1xVkYL5IDufXNVW4Xb-pHPXBIuWZ4"
 
 	PatreonTokenURL    = "https://www.patreon.com/api/oauth2/token"
 	PatreonIdentityURL = "https://www.patreon.com/api/oauth2/v2/identity?include=memberships&fields%5Buser%5D=email,first_name,full_name,image_url,last_name,social_connections,thumb_url,url,vanity"
@@ -43,10 +42,7 @@ const (
 func getUserToken(code, baseURL, ref string) (string, error) {
 	clientId := PatreonClientId
 	secret := Config.Patreon.Secret["ban"]
-	if ref == "CG" {
-		clientId = PatreonPartnerId
-		secret = Config.Patreon.Secret["cg"]
-	}
+
 	resp, err := cleanhttp.DefaultClient().PostForm(PatreonTokenURL, url.Values{
 		"code":          {code},
 		"grant_type":    {"authorization_code"},
@@ -234,7 +230,7 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tierTitle := ""
-	for _, tier := range []string{"root", "admin", "partner"} {
+	for _, tier := range []string{"root", "admin"} {
 		if stringSliceContains(Config.Patreon.Ids[tier], userIds[0]) {
 			tierTitle = strings.Title(tier)
 		}
@@ -250,9 +246,6 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 				"Test Role",
 				"Master of Coin":
 				tierTitle = foundTitle
-			case "Upkeep (Early Adopters)",
-				"The Main Phase":
-				tierTitle = "Partner"
 			}
 		}
 	}
@@ -458,7 +451,7 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) (string, string)
 	v := url.Values{}
 	// Enable option according to tier
 	switch tierTitle {
-	case "Squire", "Partner":
+	case "Squire":
 		v.Set("Search", "true")
 	case "Merchant":
 		v.Set("Search", "true")
