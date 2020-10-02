@@ -158,12 +158,18 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			// Run the comparison function set above
 			if cmpFunc(co.Card.Name, query) {
 				// Skip cards that are not of the desired set
-				if filterEdition != "" && filterEdition != co.Card.SetCode {
-					continue
+				if filterEdition != "" {
+					filters := strings.Split(filterEdition, ",")
+					if !SliceStringHas(filters, co.Card.SetCode) {
+						continue
+					}
 				}
 				// Skip cards that are not of the desired collector number
-				if filterNumber != "" && filterNumber != co.Card.Number {
-					continue
+				if filterNumber != "" {
+					filters := strings.Split(filterNumber, ",")
+					if !SliceStringHas(filters, co.Card.Number) {
+						continue
+					}
 				}
 				// Skip cards that are not as desired foil
 				if filterFoil != "" {
@@ -193,8 +199,11 @@ func Search(w http.ResponseWriter, r *http.Request) {
 					}
 
 					// Skip cards that have not the desired condition
-					if filterCondition != "" && filterCondition != entry.Conditions {
-						continue
+					if filterCondition != "" {
+						filters := strings.Split(filterCondition, ",")
+						if !SliceStringHas(filters, entry.Conditions) {
+							continue
+						}
 					}
 
 					// No price no dice
@@ -301,11 +310,17 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			}
 			entry := blEntries[nmIndex]
 
-			if filterEdition != "" && filterEdition != co.Card.SetCode {
-				continue
+			if filterEdition != "" {
+				filters := strings.Split(filterEdition, ",")
+				if !SliceStringHas(filters, co.Card.SetCode) {
+					continue
+				}
 			}
-			if filterNumber != "" && filterNumber != co.Card.Number {
-				continue
+			if filterNumber != "" {
+				filters := strings.Split(filterNumber, ",")
+				if !SliceStringHas(filters, co.Card.Number) {
+					continue
+				}
 			}
 			if filterFoil != "" {
 				foilStatus, err := strconv.ParseBool(filterFoil)
