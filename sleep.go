@@ -126,16 +126,10 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 			}
 
 			// Filter out entries that are invalid
-			tmp := arbit[:0]
 			for i := range arbit {
 				if math.Abs(arbit[i].BuylistEntry.PriceRatio) < MaxPriceRatio && arbit[i].Spread < MaxSpread && arbit[i].InventoryEntry.Conditions == "NM" {
-					tmp = append(tmp, arbit[i])
+					tiers[arbit[i].CardId]++
 				}
-			}
-			arbit = tmp
-
-			for _, arb := range arbit {
-				tiers[arb.CardId]++
 			}
 		}
 
@@ -147,16 +141,10 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 			}
 
 			// Filter out entries that are invalid
-			tmp := mismatch[:0]
 			for i := range mismatch {
 				if mismatch[i].InventoryEntry.Conditions == "NM" {
-					tmp = append(tmp, mismatch[i])
+					tiers[mismatch[i].CardId]++
 				}
-			}
-			mismatch = tmp
-
-			for _, mis := range mismatch {
-				tiers[mis.CardId]++
 			}
 		}
 	}
