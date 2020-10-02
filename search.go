@@ -427,9 +427,9 @@ func sortSets(uuidI, uuidJ string) bool {
 	if err != nil {
 		return false
 	}
-	dateJ := setI.ReleaseDate
+	dateJ := setJ.ReleaseDate
 	if cJ.Card.OriginalReleaseDate != "" {
-		dateJ = cI.Card.OriginalReleaseDate
+		dateJ = cJ.Card.OriginalReleaseDate
 	}
 	setDateJ, err := time.Parse("2006-01-02", dateJ)
 	if err != nil {
