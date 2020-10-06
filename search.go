@@ -51,13 +51,12 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	blocklistOpt, _ := GetParamFromSig(sig, "SearchDisabled")
-	if blocklistOpt == "NONE" && !SigCheck {
-		blocklistOpt = ""
-	}
 	var blocklist []string
+	blocklistOpt, _ := GetParamFromSig(sig, "SearchDisabled")
 	if blocklistOpt == "DEFAULT" || blocklistOpt == "" {
 		blocklist = Config.SearchBlockList
+	} else if blocklistOpt != "NONE" {
+		blocklist = strings.Split(blocklistOpt, ",")
 	}
 
 	query := r.FormValue("q")

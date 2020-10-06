@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/kodabb/go-mtgban/mtgban"
 	"github.com/kodabb/go-mtgban/mtgmatcher"
@@ -58,13 +59,11 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var blocklist []string
-
 	blocklistOpt, _ := GetParamFromSig(sig, "SearchDisabled")
-	if blocklistOpt == "NONE" && !SigCheck {
-		blocklistOpt = ""
-	}
 	if blocklistOpt == "DEFAULT" || blocklistOpt == "" {
 		blocklist = Config.SearchBlockList
+	} else if blocklistOpt != "NONE" {
+		blocklist = strings.Split(blocklistOpt, ",")
 	}
 
 	tiers := map[string]int{}

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/kodabb/go-mtgban/mtgban"
@@ -52,16 +53,11 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var allowlistSellers []string
 	allowlistSellersOpt, _ := GetParamFromSig(sig, "ArbitEnabled")
 	if allowlistSellersOpt == "" && !SigCheck {
 		allowlistSellersOpt = "ALL"
 	}
-	blocklistVendorsOpt, _ := GetParamFromSig(sig, "ArbitDisabledVendors")
-	if blocklistVendorsOpt == "" && !SigCheck {
-		blocklistVendorsOpt = "NONE"
-	}
-
-	var allowlistSellers []string
 	if allowlistSellersOpt == "ALL" {
 		for i, seller := range Sellers {
 			if seller == nil {
@@ -72,11 +68,16 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		}
 	} else if allowlistSellersOpt == "DEFAULT" || allowlistSellersOpt == "" {
 		allowlistSellers = Config.ArbitDefaultSellers
+	} else {
+		allowlistSellers = strings.Split(allowlistSellersOpt, ",")
 	}
 
 	var blocklistVendors []string
+	blocklistVendorsOpt, _ := GetParamFromSig(sig, "ArbitDisabledVendors")
 	if blocklistVendorsOpt == "DEFAULT" || blocklistVendorsOpt == "" {
 		blocklistVendors = Config.ArbitBlockVendors
+	} else if blocklistVendorsOpt != "NONE" {
+		blocklistVendors = strings.Split(blocklistVendorsOpt, ",")
 	}
 
 	r.ParseForm()
