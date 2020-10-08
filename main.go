@@ -51,10 +51,11 @@ type PageVars struct {
 	PatreonLogin bool
 	ShowPromo    bool
 
-	Title        string
-	ErrorMessage string
-	InfoMessage  string
-	LastUpdate   string
+	Title          string
+	ErrorMessage   string
+	WarningMessage string
+	InfoMessage    string
+	LastUpdate     string
 
 	SellerKeys   []string
 	VendorKeys   []string
@@ -124,6 +125,12 @@ type PageVars struct {
 	EditionSort []string
 	EditionList map[string][]EditionEntry
 	IsSealed    bool
+
+	CompactEntries map[string]map[string]*BanPrice
+	ScraperKeys    []string
+	UploadEntries  []UploadEntry
+	IsBuylist      bool
+	TotalEntries   map[string]float64
 }
 
 type NavElem struct {
@@ -187,6 +194,7 @@ var OrderNav = []string{
 	"Newspaper",
 	"Explore",
 	"Sleepers",
+	"Upload",
 	"Global",
 	"Arbit",
 	"Reverse",
@@ -228,6 +236,13 @@ func init() {
 			Link:   "/sleepers",
 			Handle: Sleepers,
 			Page:   "sleep.html",
+		},
+		"Upload": NavElem{
+			Name:   "Upload",
+			Short:  "🚢",
+			Link:   "/upload",
+			Handle: Upload,
+			Page:   "upload.html",
 		},
 		"Global": NavElem{
 			Name:   "Global",
@@ -579,6 +594,18 @@ func render(w http.ResponseWriter, tmpl string, pageVars PageVars) {
 		"perc": func(s string) string {
 			n, _ := strconv.ParseFloat(s, 64)
 			return fmt.Sprintf("%0.2f", n*100)
+		},
+		"scraper_name": func(s string) string {
+			return ScraperNames[s]
+		},
+		"banprice2price": func(p *BanPrice) float64 {
+			if p == nil {
+				return 0
+			}
+			if p.Regular != 0 {
+				return p.Regular
+			}
+			return p.Foil
 		},
 	}
 

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Rosario:400' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../css/main.css">
+    <link href="//cdn.jsdelivr.net/npm/keyrune@latest/css/keyrune.css" rel="stylesheet" type="text/css" />
+    <title>{{.Title}}</title>
+</head>
+<body>
+
+<nav>
+    <ul>
+        <li><a href="https://www.patreon.com/ban_community"><img src="img/misc/patreon.png" width=48></a></li>
+        <li><a href="https://discord.gg/hcXpMZB"><img src="img/misc/discord.png" width=48></a></li>
+        {{range .Nav}}
+            <li>
+                <a {{if .Active}}class="{{.Class}}"{{end}} href="{{.Link}}">
+                    <span>{{.Short}} {{.Name}}</span>
+                </a>
+            </li>
+        {{end}}
+        <li>Last data refresh: {{.LastUpdate}}</li>
+    </ul>
+</nav>
+
+<div class="mainbody">
+    {{if ne .ErrorMessage ""}}
+        <h1>{{.ErrorMessage}}</h1>
+        {{if .ShowPromo}}
+            <img class="center" src="img/promo/search.jpg">
+        {{end}}
+    {{else}}
+        <h1>Welcome to BAN Upload</h1>
+        <div class="indent">
+            <center>
+                <form enctype="multipart/form-data" action="/upload" method="post">
+                    <input type="radio" id="retail" name="mode" value="false" {{if not .IsBuylist}}checked{{end}}>
+                    <label for="retail">Retail</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="radio" id="buylist" name="mode" value="true" {{if .IsBuylist}}checked{{end}}>
+                    <label for="buylist">Buylist</label><br>
+                    <input type="file" id="file" name="cardListFile" accept=".csv,text/csv" style="display:none;" onchange="pressed()"><br>
+                    <a class="btn default">
+                        <label for="file" id="fileLabel">Select file</label><br>
+                    </a><br>
+                    <input type="submit" id="submit" value="&nbsp;&nbsp;Upload&nbsp;&nbsp;" disabled>
+                </form>
+            </center>
+        </div>
+        <script type="text/javascript">
+            window.pressed = function(){
+                var a = document.getElementById('file');
+                if (a.value != "")    {
+                    var theSplit = a.value.split('\\');
+                    fileLabel.innerHTML = theSplit[theSplit.length-1];
+                    var btn = document.getElementById('submit');
+                    btn.disabled = false;
+                }
+            };
+        </script>
+
+        <br><hr width=30% style="border: 1px dotted; margin: auto;"><br>
+
+        {{if eq .SearchQuery ""}}
+            {{if .WarningMessage}}
+                <div class="indent">
+                    <h4>There was a problem uploading your file: <i>{{.WarningMessage}}</i></h4>
+                </div>
+            {{end}}
+
+            <br>
+            <div class="indent">
+                <h2>Instructions</h2>
+                <br>
+                <ul class="indent">
+                    <li>Upload a file and let the Magic begin!</li>
+                </ul>
+             </div>
+        {{else}}
+            <div class="indent sticky">
+                <table class="searchResults">
+                    {{range $.UploadEntries}}
+                        {{$card := (index $.Metadata .CardId)}}
+                        <tr class="no-hover" >
+                            <td rowspan=2>
+                                <center>
+                                    {{if .MismatchError}}
+                                        <a href="/search?q={{.Card.Name}}" target="_blank">
+                                            <img src="https://c1.scryfall.com/file/scryfall-card-backs/large/0a/0aeebaf5-8c7d-4636-9e82-8c27447861f7.jpg" width="87" height="122">
+                                        </a>
+                                    {{else}}
+                                        <a href="{{$card.SearchURL}}" target="_blank">
+                                            <img src="{{$card.ImageURL}}" width="60%" height="60%">
+                                        </a>
+                                    {{end}}
+                                </center>
+                            </td>
+                            <td>
+                                <table style="margin:0 0 0 0; width:100%; height:100%;">
+                                    <tr style="background-color:rgba(0, 0, 0, 0);">
+                                    {{if .MismatchError}}
+                                        <td>
+                                            <a class="btn default" href="/search?q={{.Card.Name}}" target="_blank">
+                                                <i class="ss ss-1x"></i>
+                                                {{if .Card.Name}}
+                                                    <b>Unable to find</b> {{.Card.Name}} {{if .Card.Variation}}({{.Card.Variation}}){{end}} <b>in</b> {{.Card.Edition}}
+                                                {{else}}
+                                                    <b>Unable to parse one entry from your list</b>
+                                                {{end}}
+                                                <h6>{{.MismatchError}}</h6>
+                                            </a>
+                                        </td>
+                                    {{else}}
+                                        <td width="{{if .OriginalPrice}}80%{{else}}100%{{end}}">
+                                            <a class="btn default" href="{{$card.SearchURL}}" target="_blank">
+                                                <i class="ss {{$card.Keyrune}} ss-1x ss-fw"></i>
+                                                <b>{{$card.Name}}</b>
+                                                {{if ne $card.Variant ""}}
+                                                    <i>({{$card.Variant}})</i>
+                                                {{end}}
+                                                {{if $card.Reserved}}
+                                                    *
+                                                {{end}}
+                                                {{if $card.Stocks}}
+                                                    •
+                                                {{end}}
+                                                <h6>{{$card.Title}}</h6>
+                                            </a>
+                                        </td>
+                                        {{if .OriginalPrice}}
+                                            <td width=100%>
+                                                Your price: <b><nobr>$ {{printf "%.2f" .OriginalPrice}}</nobr></b>
+                                            </td>
+                                        {{end}}
+                                        <td width=100%>
+                                            <span class="emoji">
+                                                <a href="/search?chart={{.CardId}}" title="See historical data" target="_blank">📊</a>
+                                            </span>
+                                        </td>
+                                    {{end}}
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr class="no-hover" >
+                            <td>
+                                <table style="margin:0 0 0 0; width:100%; height:100%">
+                                        <tr class="no-hover" style="background-color:rgba(0, 0, 0, 0);">
+                                            {{$scraperEntries := (index $.CompactEntries .CardId)}}
+                                            {{$cardId := .CardId}}
+                                            {{$oPrice := .OriginalPrice}}
+                                            {{range $.ScraperKeys}}
+                                                {{$entry := (index $scraperEntries .)}}
+                                                {{$price := banprice2price $entry}}
+                                                <td style="border:1px solid black;min-width:50px">
+                                                    <a class="btn {{if $entry}}{{if and $.IsBuylist (and (ne $oPrice 0.0) (lt $oPrice $price))}}success{{else}}normal{{end}}{{else}}default{{end}}" {{if $entry}}href="https://mtgban.com/go/{{if $.IsBuylist}}b/{{end}}{{.}}/{{$cardId}}"{{end}} target="_blank">
+                                                        {{scraper_name .}}
+                                                    </a>
+                                                </td>
+                                            {{end}}
+                                        </tr>
+                                        <tr class="no-hover"  style="background-color:rgba(0, 0, 0, 0);">
+                                            {{range $.ScraperKeys}}
+                                                {{$entry := (index $scraperEntries .)}}
+                                                <td style="border:1px solid black">
+                                                    <h4 style="text-align:center">
+                                                            {{if not $entry}}
+                                                                -
+                                                            {{else}}
+                                                                $ {{printf "%.2f" (banprice2price $entry)}}
+                                                            {{end}}
+                                                    </h4>
+                                                </td>
+                                            {{end}}
+                                        </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    {{end}}
+                    <tr class="no-hover" style="background-color:#e0f0ff;">
+                        <td>
+                            <center>
+                                <br>
+                                    <h3>Totals</h3>
+                                <br>
+                            </center>
+                        </td>
+                        <td>
+                            <br>
+                            <table style="margin:0 0 0 0; width:100%; height:100%">
+                                <tr class="no-hover" style="background-color:rgba(0, 0, 0, 0);">
+                                    {{range $.ScraperKeys}}
+                                        {{$entry := (index $.TotalEntries .)}}
+                                        <td style="border:1px solid black;min-width:50px">
+                                            <a class="btn default">
+                                                {{scraper_name .}}
+                                            </a>
+                                        </td>
+                                    {{end}}
+                                </tr>
+                                <tr class="no-hover"  style="background-color:rgba(0, 0, 0, 0);">
+                                    {{range $.ScraperKeys}}
+                                        {{$price := (index $.TotalEntries .)}}
+                                        <td style="border:1px solid black">
+                                            <h4 style="text-align:center">
+                                                {{if eq $price 0.0}}
+                                                    -
+                                                {{else}}
+                                                    $ {{printf "%.2f" $price}}
+                                                {{end}}
+                                            </h4>
+                                        </td>
+                                    {{end}}
+                                </tr>
+                            </table>
+                            <br>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        {{end}}
+    {{end}}
+
+    <div style="clear:both;"></div>
+
+    <br>
+    <div class="indent">
+        {{if .HasReserved}}
+            <h4>* = Part of the <a href="https://mtg.gamepedia.com/Reserved_List">Reserved List</a></h4>
+        {{end}}
+        {{if .HasStocks}}
+            <h4>• = On <a href="https://mtgstocks.com/interests">MTGStocks Interests</a> page</h4>
+        {{end}}
+    </div>
+
+    {{if ne .InfoMessage ""}}
+        <br>
+        <div class="indent">
+            <h4><i>{{.InfoMessage}}</i></h4>
+        </div>
+    {{end}}
+    <br>
+    <br>
+</div>
+</body>
+</html>

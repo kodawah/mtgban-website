@@ -69,6 +69,14 @@ tr:hover {
     background-color: #e0f0ff;
 }
 
+tr:nth-child(even).no-hover:hover{
+    background-color: #f2f2ff;
+}
+
+tr:nth-child(odd).no-hover:hover{
+    background-color: #f8f8f8;
+}
+
 th.wrap {
     white-space;
     text-overflow: ellipsis;
@@ -82,6 +90,7 @@ table.searchResults {
 }
 
 table.setValue {
+    border-collapse: collapse;
     table-layout: fixed;
     width: 95%;
 }
@@ -94,6 +103,16 @@ td.setValue {
     width: 65%;
     white-space: nowrap;
 }
+
+td a {
+    display: block;
+    width: 100%;
+}
+
+td img {
+    vertical-align: top;
+}
+
 
 tr.setValue:hover {
     background-color: rgba(0, 0, 0, 0.0) !important;

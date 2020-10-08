@@ -444,6 +444,11 @@ func enforceSigning(next http.Handler) http.Handler {
 			putSignatureInCookies(w, r, querySig)
 		}
 
+		if r.Method != "GET" && r.URL.Path != "/upload" {
+			http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
 		pageVars := genPageNav("Error", sig)
 
 		raw, err := base64.StdEncoding.DecodeString(sig)
@@ -481,10 +486,14 @@ func enforceSigning(next http.Handler) http.Handler {
 		expectedSig := v.Get("Signature")
 		exp := v.Get("Expires")
 
-		data := fmt.Sprintf("%s%s%s%s", r.Method, exp, getBaseURL(r), q.Encode())
+		data := fmt.Sprintf("GET%s%s%s", exp, getBaseURL(r), q.Encode())
 		valid := signHMACSHA1Base64([]byte(os.Getenv("BAN_SECRET")), []byte(data))
 		expires, err := strconv.ParseInt(exp, 10, 64)
 		if SigCheck && (err != nil || valid != expectedSig || expires < time.Now().Unix()) {
+			if r.Method != "GET" {
+				http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
+				return
+			}
 			pageVars.Title = "Unauthorized"
 			pageVars.ErrorMessage = ErrMsg
 			if valid == expectedSig && expires < time.Now().Unix() {
@@ -549,6 +558,7 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 		v.Set("Admin", "true")
 		fallthrough
 	case "Developer", "Mods":
+		v.Set("Upload", "true")
 		fallthrough
 	case "Test Role":
 		v.Set("Arbit", "true")
