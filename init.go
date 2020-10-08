@@ -407,6 +407,7 @@ var options = map[string]*scraperOption{
 		Keepers: []string{TCG_LOW},
 	},
 	"magiccorner": &scraperOption{
+		OnlySeller: true,
 		Init: func() (mtgban.Scraper, error) {
 			scraper, err := magiccorner.NewScraper()
 			if err != nil {
