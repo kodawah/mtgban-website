@@ -243,8 +243,7 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 			case "Squire",
 				"Merchant",
 				"Bard",
-				"Test Role",
-				"Master of Coin":
+				"Test Role":
 				tierTitle = foundTitle
 			}
 		}
@@ -460,7 +459,7 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) (string, string)
 		v.Set("Search", "true")
 		v.Set("Newspaper", "true")
 		v.Set("Sleepers", "true")
-	case "Master of Coin", "Test Role":
+	case "Test Role":
 		v.Set("Search", "true")
 		v.Set("Newspaper", "true")
 		v.Set("Sleepers", "true")
@@ -494,7 +493,7 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) (string, string)
 			v.Set("ExpEnabled", "ALL")
 		case "Admin":
 			v.Set("ExpEnabled", "FULL")
-		case "Master of Coin":
+		case "Test Role":
 			v.Set("ExpEnabled", "MOST")
 		case "Merchant":
 			v.Set("ExpEnabled", "ENTRY")
