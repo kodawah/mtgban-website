@@ -84,7 +84,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 
 	var source mtgban.Seller
 	var useCredit bool
-	var nocond, nofoil, nocomm, noposi, nopenny bool
+	var nocond, nofoil, nocomm, noposi, nopenny, nolow, noqty bool
 	var message string
 	var sorting string
 
@@ -132,6 +132,12 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 
 		case "nopenny":
 			nopenny, _ = strconv.ParseBool(v[0])
+
+		case "nolow":
+			nolow, _ = strconv.ParseBool(v[0])
+
+		case "noqty":
+			noqty, _ = strconv.ParseBool(v[0])
 		}
 	}
 
@@ -197,6 +203,8 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	pageVars.FilterComm = nocomm
 	pageVars.FilterNega = noposi
 	pageVars.FilterPenny = nopenny
+	pageVars.FilterSpread = nolow
+	pageVars.FilterQuantity = noqty
 	switch pageVars.SellerFull {
 	case TCG_MAIN, TCG_DIRECT, "Card Kingdom":
 		pageVars.SellerAffiliate = true
@@ -231,6 +239,10 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			opts.MinDiff = -100
 			maxSpread = MinSpread
 		}
+		if nolow {
+			opts.MinSpread = 100
+		}
+
 		if vendor.Info().Shorthand == "ABU" {
 			opts.UseTrades = useCredit
 		}
@@ -296,6 +308,19 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			tmp := arbit[:0]
 			for i := range arbit {
 				if math.Abs(arbit[i].InventoryEntry.Price) > 1 && math.Abs(arbit[i].Difference) > 1 {
+					tmp = append(tmp, arbit[i])
+				}
+			}
+			arbit = tmp
+
+			if len(arbit) == 0 {
+				continue
+			}
+		}
+		if noqty {
+			tmp := arbit[:0]
+			for i := range arbit {
+				if arbit[i].InventoryEntry.Quantity > 1 {
 					tmp = append(tmp, arbit[i])
 				}
 			}
