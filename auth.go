@@ -464,10 +464,12 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) (string, string)
 		v.Set("Newspaper", "true")
 		v.Set("Sleepers", "true")
 		v.Set("Arbit", "true")
-	case "Admin", "Root":
+	case "Root":
+		v.Set("Explore", "true")
+		fallthrough
+	case "Admin":
 		v.Set("Search", "true")
 		v.Set("Newspaper", "true")
-		v.Set("Explore", "true")
 		v.Set("Sleepers", "true")
 		v.Set("Arbit", "true")
 	}
