@@ -186,6 +186,8 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		v.Set("nocomm", fmt.Sprint(nocomm))
 		v.Set("noposi", fmt.Sprint(noposi))
 		v.Set("nopenny", fmt.Sprint(nopenny))
+		v.Set("nolow", fmt.Sprint(nolow))
+		v.Set("noqty", fmt.Sprint(noqty))
 		v.Set("sort", fmt.Sprint(sorting))
 
 		nav.Link += "?" + v.Encode()
