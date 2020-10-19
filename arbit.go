@@ -5,6 +5,7 @@ import (
 	"log"
 	"math"
 	"net/http"
+	"net/url"
 	"sort"
 	"strconv"
 	"strings"
@@ -164,7 +165,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		nav := NavElem{
 			Name:  newSeller.Info().Name,
 			Short: newSeller.Info().Shorthand,
-			Link:  "/arbit?source=" + newSeller.Info().Shorthand,
+			Link:  "/arbit",
 		}
 
 		if newSeller.Info().Name == TCG_MAIN {
@@ -173,12 +174,21 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		if newSeller.Info().Name == TCG_DIRECT {
 			nav.Short = "Direct"
 		}
-		if sig != "" {
-			nav.Link += "&sig=" + sig
-		}
 
-		// Preserve sorting and filtering options
-		nav.Link += fmt.Sprintf("&credit=%t&nocond=%t&nofoil=%t&nocomm=%t&noposi=%t&nopenny=%t&sort=%s", useCredit, nocond, nofoil, nocomm, noposi, nopenny, sorting)
+		v := url.Values{}
+		v.Set("source", newSeller.Info().Shorthand)
+		if sig != "" {
+			v.Set("sig", sig)
+		}
+		v.Set("credit", fmt.Sprint(useCredit))
+		v.Set("nocond", fmt.Sprint(nocond))
+		v.Set("nofoil", fmt.Sprint(nofoil))
+		v.Set("nocomm", fmt.Sprint(nocomm))
+		v.Set("noposi", fmt.Sprint(noposi))
+		v.Set("nopenny", fmt.Sprint(nopenny))
+		v.Set("sort", fmt.Sprint(sorting))
+
+		nav.Link += "?" + v.Encode()
 
 		if source != nil && source.Info().Name == newSeller.Info().Name {
 			nav.Active = true
