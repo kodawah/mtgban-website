@@ -227,6 +227,12 @@ func Search(w http.ResponseWriter, r *http.Request) {
 					if seller.Info().MetadataOnly {
 						conditions = "INDEX"
 					}
+
+					// Only add Poor prices if there are no NM entries
+					if conditions == "PO" && len(pageVars.FoundSellers[cardId]["NM"]) != 0 {
+						continue
+					}
+
 					// Check if the current entry has any condition
 					_, found = pageVars.FoundSellers[cardId][conditions]
 					if !found {
