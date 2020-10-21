@@ -182,21 +182,21 @@ func Search(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 
+				// Load up image links
+				_, found := pageVars.Metadata[cardId]
+				if !found {
+					pageVars.Metadata[cardId] = uuid2card(cardId, false)
+				}
+
+				if pageVars.Metadata[cardId].Reserved {
+					pageVars.HasReserved = true
+				}
+				if pageVars.Metadata[cardId].Stocks {
+					pageVars.HasStocks = true
+				}
+
 				// Loop thorugh available conditions
 				for _, entry := range entries {
-					// Load up image links
-					_, found := pageVars.Metadata[cardId]
-					if !found {
-						pageVars.Metadata[cardId] = uuid2card(cardId, false)
-					}
-
-					if pageVars.Metadata[cardId].Reserved {
-						pageVars.HasReserved = true
-					}
-					if pageVars.Metadata[cardId].Stocks {
-						pageVars.HasStocks = true
-					}
-
 					// Skip cards that have not the desired condition
 					if filterCondition != "" {
 						filters := strings.Split(filterCondition, ",")
@@ -338,19 +338,19 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 
+			_, found := pageVars.Metadata[cardId]
+			if !found {
+				pageVars.Metadata[cardId] = uuid2card(cardId, false)
+			}
+
+			if pageVars.Metadata[cardId].Reserved {
+				pageVars.HasReserved = true
+			}
+			if pageVars.Metadata[cardId].Stocks {
+				pageVars.HasStocks = true
+			}
+
 			if cmpFunc(co.Card.Name, query) {
-				_, found := pageVars.Metadata[cardId]
-				if !found {
-					pageVars.Metadata[cardId] = uuid2card(cardId, false)
-				}
-
-				if pageVars.Metadata[cardId].Reserved {
-					pageVars.HasReserved = true
-				}
-				if pageVars.Metadata[cardId].Stocks {
-					pageVars.HasStocks = true
-				}
-
 				_, found = pageVars.FoundVendors[cardId]
 				if !found {
 					if len(pageVars.FoundVendors) > MaxSearchResults {
