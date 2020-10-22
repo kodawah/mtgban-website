@@ -364,8 +364,9 @@ func main() {
 		})
 		// refresh CK at every 6th hour, 10 minutes past the hour
 		c.AddFunc("10 */6 * * *", loadCK)
-		// refresh TCG every day at 1:10
-		c.AddFunc("10 1 * * *", loadTCG)
+		// refresh TCG every day at 5.10 and 21:10
+		c.AddFunc("10 5 * * *", loadTCG)
+		c.AddFunc("10 21 * * *", loadTCG)
 		// refresh CSI every day at 2:10
 		c.AddFunc("10 2 * * *", loadCSI)
 		// refresh at 12 every day
