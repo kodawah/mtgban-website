@@ -306,6 +306,40 @@ func loadCK() {
 	}
 }
 
+func loadCSI() {
+	log.Println("Reloading CSI")
+
+	scraper, err := options["coolstuffinc"].Init()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	for i := range Sellers {
+		if Sellers[i] != nil && Sellers[i].Info().Shorthand == "CSI" {
+			_, err := scraper.(mtgban.Seller).Inventory()
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			log.Println("CSI Inventory updated")
+			Sellers[i] = scraper.(mtgban.Seller)
+		}
+	}
+
+	for i := range Vendors {
+		if Vendors[i] != nil && Vendors[i].Info().Shorthand == "CSI" {
+			_, err := scraper.(mtgban.Vendor).Buylist()
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			log.Println("CSI Buylist updated")
+			Vendors[i] = scraper.(mtgban.Vendor)
+		}
+	}
+}
+
 type scraperOption struct {
 	DevEnabled bool
 	OnlySeller bool
