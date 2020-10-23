@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"sort"
@@ -397,6 +398,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	if len(pageVars.FoundSellers) == 0 && len(pageVars.FoundVendors) == 0 {
 		pageVars.InfoMessage = NoResultsMessage
+	} else {
+		Notify("search", fmt.Sprintf("[[%s]]", query))
 	}
 
 	pageVars.SellerKeys = sortedKeysSeller

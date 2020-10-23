@@ -270,6 +270,9 @@ func loadTCG() {
 			log.Println("TCG Buylist updated")
 		}
 	}
+
+	Notify("refresh", "tcgplayer refresh completed")
+
 }
 
 func loadCK() {
@@ -304,6 +307,8 @@ func loadCK() {
 			Vendors[i] = scraper.(mtgban.Vendor)
 		}
 	}
+
+	Notify("refresh", "cardkingdom refresh completed")
 }
 
 func loadCSI() {
@@ -338,6 +343,8 @@ func loadCSI() {
 			Vendors[i] = scraper.(mtgban.Vendor)
 		}
 	}
+
+	Notify("refresh", "coolstuffinc refresh completed")
 }
 
 func loadMM() {
@@ -372,6 +379,8 @@ func loadMM() {
 			Vendors[i] = scraper.(mtgban.Vendor)
 		}
 	}
+
+	Notify("refresh", "miniaturemarket refresh completed")
 }
 
 type scraperOption struct {
@@ -506,8 +515,10 @@ func loadScrapers(doSellers, doVendors bool) {
 	init := !DatabaseLoaded
 	if init {
 		log.Println("Loading data")
+		Notify("init", "loading started")
 	} else {
 		log.Println("Updating data")
+		Notify("refresh", "full refresh started")
 	}
 
 	dirName := "cache_inv/"
@@ -583,6 +594,11 @@ func loadScrapers(doSellers, doVendors bool) {
 	LastUpdate = time.Now()
 
 	log.Println("Scrapers loaded")
+	if init {
+		Notify("init", "loading completed")
+	} else {
+		Notify("refresh", "full refresh completed")
+	}
 }
 
 func loadSellers(newSellers []mtgban.Seller) {
@@ -684,4 +700,5 @@ func loadInfos() {
 	}
 	Infos[seller.Info().Shorthand] = inv
 	log.Println("stocks refreshed")
+	Notify("refresh", "stocks refreshed")
 }
