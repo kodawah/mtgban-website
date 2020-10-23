@@ -391,7 +391,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 
 		name := vendor.Info().Name
 		if name == "TCG Player Market" {
-			name = "TCG Player Buylist"
+			name = "TCG Player Trade-In"
 		}
 
 		pageVars.Arb = append(pageVars.Arb, Arbitrage{

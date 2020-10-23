@@ -361,7 +361,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				}
 				name := vendor.Info().Name
 				if name == "TCG Player Market" {
-					name = "TCG Player Buylist"
+					name = "TCG Player Trade-In"
 				}
 				res := CombineEntry{
 					ScraperName: name,
