@@ -154,6 +154,7 @@ var ExtraNavs = map[string]NavElem{
 var Config struct {
 	Port                int               `json:"port"`
 	DBAddress           string            `json:"db_address"`
+	DiscordHook         string            `json:"discord_hook"`
 	Affiliate           map[string]string `json:"affiliate"`
 	Api                 map[string]string `json:"api"`
 	ArbitDefaultSellers []string          `json:"arbit_default_sellers"`

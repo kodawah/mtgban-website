@@ -1,7 +1,11 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"log"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -178,4 +182,35 @@ func SliceStringHas(slice []string, probe string) bool {
 		}
 	}
 	return false
+}
+
+type Notification struct {
+	Username string `json:"username"`
+	Content  string `json:"content"`
+}
+
+func Notify(kind, message string) {
+	if Config.DiscordHook == "" {
+		return
+	}
+	go func() {
+		var payload Notification
+		payload.Username = kind
+		payload.Content = message
+
+		reqBody, err := json.Marshal(&payload)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		resp, err := http.Post(Config.DiscordHook, "application/json", bytes.NewReader(reqBody))
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		defer resp.Body.Close()
+	}()
+
+	return
 }
