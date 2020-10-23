@@ -14,9 +14,11 @@ import (
 )
 
 const (
-	MaxSearchResults = 64
-	TooManyMessage   = "More results available, try adjusting your filters"
-	NoResultsMessage = "No results found"
+	MaxSearchQueryLen = 200
+	MaxSearchResults  = 64
+	TooLongMessage    = "Your query planeswalked away, try a shorter one"
+	TooManyMessage    = "More results available, try adjusting your filters"
+	NoResultsMessage  = "No results found"
 )
 
 type CombineEntry struct {
@@ -62,6 +64,13 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	query := r.FormValue("q")
+	if len(query) > MaxSearchQueryLen {
+		pageVars.ErrorMessage = TooLongMessage
+
+		render(w, "search.html", pageVars)
+		return
+	}
+
 	bestSorting, _ := strconv.ParseBool(r.FormValue("b"))
 
 	// Query is not null, let's get processing

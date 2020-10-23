@@ -45,7 +45,7 @@
                 {{if ne .Signature ""}}
                     <input type="hidden" name="sig" value="{{.Signature}}">
                 {{end}}
-                <input id="searchbox" class="w3-input w3-border w3-round-small search-input" onFocus="this.setSelectionRange(0, this.value.length)" type="text" name="q" placeholder="Enter a card name" value="{{.SearchQuery}}">
+                <input id="searchbox" class="w3-input w3-border w3-round-small search-input" onFocus="this.setSelectionRange(0, this.value.length)" type="text" name="q" placeholder="Enter a card name" value="{{.SearchQuery}}" maxlength="200">
             </form>
         </div>
 
