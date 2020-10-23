@@ -369,6 +369,8 @@ func main() {
 		c.AddFunc("10 21 * * *", loadTCG)
 		// refresh CSI every day at 2:10
 		c.AddFunc("10 2 * * *", loadCSI)
+		// refresh MM every day at 1:10
+		c.AddFunc("10 1 * * *", loadMM)
 		// refresh at 12 every day
 		c.AddFunc("0 12 * * *", func() {
 			log.Println("Reloading MTGJSONv5")

@@ -340,6 +340,40 @@ func loadCSI() {
 	}
 }
 
+func loadMM() {
+	log.Println("Reloading MM")
+
+	scraper, err := options["miniaturemarket"].Init()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	for i := range Sellers {
+		if Sellers[i] != nil && Sellers[i].Info().Shorthand == "MM" {
+			_, err := scraper.(mtgban.Seller).Inventory()
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			log.Println("MM Inventory updated")
+			Sellers[i] = scraper.(mtgban.Seller)
+		}
+	}
+
+	for i := range Vendors {
+		if Vendors[i] != nil && Vendors[i].Info().Shorthand == "MM" {
+			_, err := scraper.(mtgban.Vendor).Buylist()
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			log.Println("MM Buylist updated")
+			Vendors[i] = scraper.(mtgban.Vendor)
+		}
+	}
+}
+
 type scraperOption struct {
 	DevEnabled bool
 	OnlySeller bool
