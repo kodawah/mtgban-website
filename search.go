@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"sort"
 	"strconv"
 	"strings"
@@ -69,6 +70,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Println(query)
+	rawQuery := query
 
 	// Keep track of what was searched
 	pageVars.SearchQuery = query
@@ -399,7 +401,14 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	if len(pageVars.FoundSellers) == 0 && len(pageVars.FoundVendors) == 0 {
 		pageVars.InfoMessage = NoResultsMessage
 	} else {
-		Notify("search", fmt.Sprintf("[[%s]]", query))
+		var source string
+		u, err := url.Parse(r.Referer())
+		if err != nil {
+			source = err.Error()
+		} else {
+			source = u.Path
+		}
+		Notify("search", fmt.Sprintf("[%s] from %s", rawQuery, source))
 	}
 
 	pageVars.SellerKeys = sortedKeysSeller
