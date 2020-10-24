@@ -79,15 +79,109 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Println(query)
-	rawQuery := query
 
 	// Keep track of what was searched
 	pageVars.SearchQuery = query
 	// Setup conditions keys, all etnries, and images
 	pageVars.CondKeys = []string{"INDEX", "NM", "SP", "MP", "HP", "PO"}
-	pageVars.FoundSellers = map[string]map[string][]SearchEntry{}
-	pageVars.FoundVendors = map[string][]SearchEntry{}
 	pageVars.Metadata = map[string]GenericCard{}
+
+	// SEARCH
+	foundSellers, foundVendors, tooMany := search(query, blocklist)
+
+	// Display a message if there are too many entries
+	if tooMany {
+		pageVars.InfoMessage = TooManyMessage
+	}
+
+	// Early exit if there no matches are found
+	if len(foundSellers) == 0 && len(foundVendors) == 0 {
+		pageVars.InfoMessage = NoResultsMessage
+		render(w, "search.html", pageVars)
+		return
+	}
+
+	// Make a cardId arrays so that they can be sorted later
+	sortedKeysSeller := make([]string, 0, len(foundSellers))
+	sortedKeysVendor := make([]string, 0, len(foundVendors))
+
+	// Load up image links
+	for cardId := range foundSellers {
+		_, found := pageVars.Metadata[cardId]
+		if !found {
+			pageVars.Metadata[cardId] = uuid2card(cardId, false)
+		}
+		if pageVars.Metadata[cardId].Reserved {
+			pageVars.HasReserved = true
+		}
+		if pageVars.Metadata[cardId].Stocks {
+			pageVars.HasStocks = true
+		}
+		sortedKeysSeller = append(sortedKeysSeller, cardId)
+	}
+	for cardId := range foundVendors {
+		_, found := pageVars.Metadata[cardId]
+		if !found {
+			pageVars.Metadata[cardId] = uuid2card(cardId, false)
+		}
+		if pageVars.Metadata[cardId].Reserved {
+			pageVars.HasReserved = true
+		}
+		if pageVars.Metadata[cardId].Stocks {
+			pageVars.HasStocks = true
+		}
+		sortedKeysVendor = append(sortedKeysVendor, cardId)
+	}
+
+	// Sort keys according to the sortSets() function, chronologically
+	sort.Slice(sortedKeysSeller, func(i, j int) bool {
+		return sortSets(sortedKeysSeller[i], sortedKeysSeller[j])
+	})
+	sort.Slice(sortedKeysVendor, func(i, j int) bool {
+		return sortSets(sortedKeysVendor[i], sortedKeysVendor[j])
+	})
+
+	// Optionally sort according to price
+	if bestSorting {
+		for cardId := range foundSellers {
+			for cond := range foundSellers[cardId] {
+				sort.Slice(foundSellers[cardId][cond], func(i, j int) bool {
+					return foundSellers[cardId][cond][i].Price < foundSellers[cardId][cond][j].Price
+				})
+			}
+		}
+		for cardId := range foundVendors {
+			sort.Slice(foundVendors[cardId], func(i, j int) bool {
+				return foundVendors[cardId][i].Price > foundVendors[cardId][j].Price
+			})
+		}
+	}
+
+	pageVars.FoundSellers = foundSellers
+	pageVars.FoundVendors = foundVendors
+	pageVars.SellerKeys = sortedKeysSeller
+	pageVars.VendorKeys = sortedKeysVendor
+
+	var source string
+	u, err := url.Parse(r.Referer())
+	if err != nil {
+		log.Println(err)
+		source = "n/a"
+	} else {
+		source = u.Path
+	}
+	Notify("search", fmt.Sprintf("[%s] from %s", query, source))
+
+	render(w, "search.html", pageVars)
+}
+
+func search(query string, blocklist []string) (
+	foundSellers map[string]map[string][]SearchEntry,
+	foundVendors map[string][]SearchEntry,
+	tooMany bool) {
+	// Allocate memory
+	foundSellers = map[string]map[string][]SearchEntry{}
+	foundVendors = map[string][]SearchEntry{}
 
 	// Set which comparison function to use depending on the search syntax
 	cmpFunc := mtgmatcher.Equals
@@ -97,6 +191,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	filterCondition := ""
 	filterFoil := ""
 	filterNumber := ""
+
+	// Iterate over the various possible filters
 	for _, tag := range []string{"s:", "c:", "f:", "sm:", "cn:"} {
 		if strings.Contains(query, tag) {
 			fields := strings.Fields(query)
@@ -194,19 +290,6 @@ func Search(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 
-				// Load up image links
-				_, found := pageVars.Metadata[cardId]
-				if !found {
-					pageVars.Metadata[cardId] = uuid2card(cardId, false)
-				}
-
-				if pageVars.Metadata[cardId].Reserved {
-					pageVars.HasReserved = true
-				}
-				if pageVars.Metadata[cardId].Stocks {
-					pageVars.HasStocks = true
-				}
-
 				// Loop thorugh available conditions
 				for _, entry := range entries {
 					// Skip cards that have not the desired condition
@@ -223,14 +306,14 @@ func Search(w http.ResponseWriter, r *http.Request) {
 					}
 
 					// Check if card already has any entry
-					_, found = pageVars.FoundSellers[cardId]
+					_, found := foundSellers[cardId]
 					if !found {
 						// Skip when you have too many results
-						if len(pageVars.FoundSellers) > MaxSearchResults {
-							pageVars.InfoMessage = TooManyMessage
+						if len(foundSellers) > MaxSearchResults {
+							tooMany = true
 							continue
 						}
-						pageVars.FoundSellers[cardId] = map[string][]SearchEntry{}
+						foundSellers[cardId] = map[string][]SearchEntry{}
 					}
 
 					// Set conditions - handle the special TCG one that appears
@@ -241,14 +324,14 @@ func Search(w http.ResponseWriter, r *http.Request) {
 					}
 
 					// Only add Poor prices if there are no NM entries
-					if conditions == "PO" && len(pageVars.FoundSellers[cardId]["NM"]) != 0 {
+					if conditions == "PO" && len(foundSellers[cardId]["NM"]) != 0 {
 						continue
 					}
 
 					// Check if the current entry has any condition
-					_, found = pageVars.FoundSellers[cardId][conditions]
+					_, found = foundSellers[cardId][conditions]
 					if !found {
-						pageVars.FoundSellers[cardId][conditions] = []SearchEntry{}
+						foundSellers[cardId][conditions] = []SearchEntry{}
 					}
 
 					name := seller.Info().Name
@@ -269,27 +352,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 					}
 
 					// Touchdown
-					pageVars.FoundSellers[cardId][conditions] = append(pageVars.FoundSellers[cardId][conditions], res)
+					foundSellers[cardId][conditions] = append(foundSellers[cardId][conditions], res)
 				}
-			}
-		}
-	}
-
-	sortedKeysSeller := make([]string, 0, len(pageVars.FoundSellers))
-	for cardId := range pageVars.FoundSellers {
-		sortedKeysSeller = append(sortedKeysSeller, cardId)
-	}
-
-	sort.Slice(sortedKeysSeller, func(i, j int) bool {
-		return sortSets(sortedKeysSeller[i], sortedKeysSeller[j])
-	})
-
-	if bestSorting {
-		for cardId := range pageVars.FoundSellers {
-			for cond := range pageVars.FoundSellers[cardId] {
-				sort.Slice(pageVars.FoundSellers[cardId][cond], func(i, j int) bool {
-					return pageVars.FoundSellers[cardId][cond][i].Price < pageVars.FoundSellers[cardId][cond][j].Price
-				})
 			}
 		}
 	}
@@ -350,26 +414,14 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 
-			_, found := pageVars.Metadata[cardId]
-			if !found {
-				pageVars.Metadata[cardId] = uuid2card(cardId, false)
-			}
-
-			if pageVars.Metadata[cardId].Reserved {
-				pageVars.HasReserved = true
-			}
-			if pageVars.Metadata[cardId].Stocks {
-				pageVars.HasStocks = true
-			}
-
 			if cmpFunc(co.Card.Name, query) {
-				_, found = pageVars.FoundVendors[cardId]
+				_, found := foundVendors[cardId]
 				if !found {
-					if len(pageVars.FoundVendors) > MaxSearchResults {
-						pageVars.InfoMessage = TooManyMessage
+					if len(foundVendors) > MaxSearchResults {
+						tooMany = true
 						continue
 					}
-					pageVars.FoundVendors[cardId] = []SearchEntry{}
+					foundVendors[cardId] = []SearchEntry{}
 				}
 				name := vendor.Info().Name
 				if name == "TCG Player Market" {
@@ -385,45 +437,12 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				if vendor.Info().CountryFlag != "" {
 					res.ScraperName += " " + vendor.Info().CountryFlag
 				}
-				pageVars.FoundVendors[cardId] = append(pageVars.FoundVendors[cardId], res)
+				foundVendors[cardId] = append(foundVendors[cardId], res)
 			}
 		}
 	}
 
-	sortedKeysVendor := make([]string, 0, len(pageVars.FoundVendors))
-	for cardId := range pageVars.FoundVendors {
-		sortedKeysVendor = append(sortedKeysVendor, cardId)
-	}
-
-	sort.Slice(sortedKeysVendor, func(i, j int) bool {
-		return sortSets(sortedKeysVendor[i], sortedKeysVendor[j])
-	})
-
-	if bestSorting {
-		for cardId := range pageVars.FoundVendors {
-			sort.Slice(pageVars.FoundVendors[cardId], func(i, j int) bool {
-				return pageVars.FoundVendors[cardId][i].Price > pageVars.FoundVendors[cardId][j].Price
-			})
-		}
-	}
-
-	if len(pageVars.FoundSellers) == 0 && len(pageVars.FoundVendors) == 0 {
-		pageVars.InfoMessage = NoResultsMessage
-	} else {
-		var source string
-		u, err := url.Parse(r.Referer())
-		if err != nil {
-			source = err.Error()
-		} else {
-			source = u.Path
-		}
-		Notify("search", fmt.Sprintf("[%s] from %s", rawQuery, source))
-	}
-
-	pageVars.SellerKeys = sortedKeysSeller
-	pageVars.VendorKeys = sortedKeysVendor
-
-	render(w, "search.html", pageVars)
+	return
 }
 
 func sortSets(uuidI, uuidJ string) bool {
