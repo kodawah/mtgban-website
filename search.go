@@ -21,7 +21,7 @@ const (
 	NoResultsMessage  = "No results found"
 )
 
-type CombineEntry struct {
+type SearchEntry struct {
 	ScraperName string
 	Price       float64
 	Ratio       float64
@@ -85,8 +85,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	pageVars.SearchQuery = query
 	// Setup conditions keys, all etnries, and images
 	pageVars.CondKeys = []string{"INDEX", "NM", "SP", "MP", "HP", "PO"}
-	pageVars.FoundSellers = map[string]map[string][]CombineEntry{}
-	pageVars.FoundVendors = map[string][]CombineEntry{}
+	pageVars.FoundSellers = map[string]map[string][]SearchEntry{}
+	pageVars.FoundVendors = map[string][]SearchEntry{}
 	pageVars.Metadata = map[string]GenericCard{}
 
 	// Set which comparison function to use depending on the search syntax
@@ -230,7 +230,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 							pageVars.InfoMessage = TooManyMessage
 							continue
 						}
-						pageVars.FoundSellers[cardId] = map[string][]CombineEntry{}
+						pageVars.FoundSellers[cardId] = map[string][]SearchEntry{}
 					}
 
 					// Set conditions - handle the special TCG one that appears
@@ -248,7 +248,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 					// Check if the current entry has any condition
 					_, found = pageVars.FoundSellers[cardId][conditions]
 					if !found {
-						pageVars.FoundSellers[cardId][conditions] = []CombineEntry{}
+						pageVars.FoundSellers[cardId][conditions] = []SearchEntry{}
 					}
 
 					name := seller.Info().Name
@@ -256,7 +256,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 						name = "TCG Player (+s&h)"
 					}
 					// Prepare all the deets
-					res := CombineEntry{
+					res := SearchEntry{
 						ScraperName: name,
 						Price:       entry.Price,
 						Quantity:    entry.Quantity,
@@ -369,13 +369,13 @@ func Search(w http.ResponseWriter, r *http.Request) {
 						pageVars.InfoMessage = TooManyMessage
 						continue
 					}
-					pageVars.FoundVendors[cardId] = []CombineEntry{}
+					pageVars.FoundVendors[cardId] = []SearchEntry{}
 				}
 				name := vendor.Info().Name
 				if name == "TCG Player Market" {
 					name = "TCG Player Trade-In"
 				}
-				res := CombineEntry{
+				res := SearchEntry{
 					ScraperName: name,
 					Price:       entry.BuyPrice,
 					Ratio:       entry.PriceRatio,
