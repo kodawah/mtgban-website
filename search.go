@@ -236,6 +236,19 @@ func search(query string, blocklist []string) (
 		}
 	}
 
+	// Support Scryfall bot syntax
+	if strings.Contains(query, "|") {
+		elements := strings.Split(query, "|")
+		query = elements[0]
+		if len(elements) > 1 {
+			filterEdition = strings.TrimSpace(strings.ToUpper(elements[1]))
+		}
+		if len(elements) > 2 {
+			filterNumber = strings.TrimSpace(elements[2])
+		}
+		cmpFunc = mtgmatcher.Equals
+	}
+
 	// Search sellers
 	for i, seller := range Sellers {
 		if seller == nil {
