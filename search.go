@@ -247,6 +247,16 @@ func search(query string, blocklist []string) (
 			filterNumber = strings.TrimSpace(elements[2])
 		}
 		cmpFunc = mtgmatcher.Equals
+	} else {
+		// Also support our own ID style
+		card, err := mtgmatcher.GetUUID(strings.TrimSpace(query))
+		if err == nil {
+			query = card.Name
+			filterEdition = card.SetCode
+			filterNumber = card.Number
+			filterFoil = fmt.Sprint(card.Foil)
+			cmpFunc = mtgmatcher.Equals
+		}
 	}
 
 	// Search sellers
