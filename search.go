@@ -183,9 +183,6 @@ func search(query string, blocklist []string) (
 	foundSellers = map[string]map[string][]SearchEntry{}
 	foundVendors = map[string][]SearchEntry{}
 
-	// Set which comparison function to use depending on the search syntax
-	cmpFunc := mtgmatcher.Equals
-
 	// Filter out any element from the search syntax
 	options := map[string]string{}
 
@@ -218,14 +215,7 @@ func search(query string, blocklist []string) (
 						}
 						break
 					case "sm:":
-						switch code {
-						case "exact":
-							cmpFunc = mtgmatcher.Equals
-						case "prefix":
-							cmpFunc = mtgmatcher.HasPrefix
-						case "any":
-							cmpFunc = mtgmatcher.Contains
-						}
+						options["search_mode"] = code
 						break
 					}
 				}
@@ -248,7 +238,7 @@ func search(query string, blocklist []string) (
 		} else if strings.HasSuffix(query, "*") {
 			options["foil"] = "true"
 		}
-		cmpFunc = mtgmatcher.Equals
+		options["search_mode"] = "exact"
 	} else {
 		// Also support our own ID style
 		card, err := mtgmatcher.GetUUID(strings.TrimSpace(query))
@@ -257,8 +247,19 @@ func search(query string, blocklist []string) (
 			options["edition"] = card.SetCode
 			options["number"] = card.Number
 			options["foil"] = fmt.Sprint(card.Foil)
-			cmpFunc = mtgmatcher.Equals
+			options["search_mode"] = "exact"
 		}
+	}
+
+	// Set which comparison function to use depending on the search syntax
+	cmpFunc := mtgmatcher.Equals
+	switch options["search_mode"] {
+	case "exact":
+		cmpFunc = mtgmatcher.Equals
+	case "prefix":
+		cmpFunc = mtgmatcher.HasPrefix
+	case "any":
+		cmpFunc = mtgmatcher.Contains
 	}
 
 	// Search sellers
