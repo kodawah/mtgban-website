@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -159,6 +160,8 @@ func uuid2card(cardId string, smallImg bool) GenericCard {
 		variant = "JPN" + variant
 	}
 
+	query := fmt.Sprintf("%s s:%s cn:%s f:%t", co.Name, co.SetCode, co.Number, co.Foil)
+
 	return GenericCard{
 		Name:      co.Card.Name,
 		Edition:   co.Edition,
@@ -170,7 +173,7 @@ func uuid2card(cardId string, smallImg bool) GenericCard {
 		ImageURL:  scryfallImageURL(cardId, smallImg),
 		Title:     editionTitle(cardId),
 		Reserved:  co.Card.IsReserved,
-		SearchURL: fmt.Sprintf("/search?q=%s s:%s cn:%s f:%t", co.Card.Name, co.Card.SetCode, co.Card.Number, co.Foil),
+		SearchURL: fmt.Sprintf("/search?q=%s", url.QueryEscape(query)),
 		Stocks:    stocks,
 	}
 }
