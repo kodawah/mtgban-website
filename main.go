@@ -157,6 +157,7 @@ var Config struct {
 	DiscordHook         string            `json:"discord_hook"`
 	Affiliate           map[string]string `json:"affiliate"`
 	Api                 map[string]string `json:"api"`
+	DiscordToken        string            `json:"discord_token"`
 	ArbitDefaultSellers []string          `json:"arbit_default_sellers"`
 	ArbitBlockVendors   []string          `json:"arbit_block_vendors"`
 	SearchBlockList     []string          `json:"search_block_list"`
@@ -382,6 +383,11 @@ func main() {
 		})
 		c.Start()
 	}()
+
+	err = setupDiscord()
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	// serve everything in known folders as a file
 	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(&FileSystem{http.Dir("css")})))
