@@ -246,6 +246,11 @@ func search(query string, blocklist []string) (
 		if len(elements) > 2 {
 			filterNumber = strings.TrimSpace(elements[2])
 		}
+		if strings.HasSuffix(query, "&") {
+			filterFoil = "false"
+		} else if strings.HasSuffix(query, "*") {
+			filterFoil = "true"
+		}
 		cmpFunc = mtgmatcher.Equals
 	} else {
 		// Also support our own ID style
