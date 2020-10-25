@@ -44,9 +44,11 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	wantSellers := strings.HasPrefix(m.Content, "!")
-	if wantSellers {
+	wantVendors := strings.HasPrefix(m.Content, "?")
+	if wantSellers || wantVendors {
 		// Strip away bang character
 		content := strings.TrimPrefix(m.Content, "!")
+		content = strings.TrimPrefix(content, "?")
 
 		// Clean up query and only search for NM
 		query, options := parseSearchOptions(content)
@@ -88,6 +90,29 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			matches = len(sortedKeysSeller)
 			cardId = sortedKeysSeller[0]
 			results = foundSellers[cardId]["NM"]
+		} else if wantVendors {
+			// Search
+			foundVendors, _ := searchVendors(query, Config.SearchBlockList, options)
+			if len(foundVendors) == 0 {
+				s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+					Description: "Nobody is buying that card ┻━┻ ヘ╰( •̀ε•́ ╰)",
+				})
+				return
+			}
+
+			sortedKeysVendor := make([]string, 0, len(foundVendors))
+			for cardId := range foundVendors {
+				sortedKeysVendor = append(sortedKeysVendor, cardId)
+			}
+			if len(sortedKeysVendor) > 1 {
+				sort.Slice(sortedKeysVendor, func(i, j int) bool {
+					return sortSets(sortedKeysVendor[i], sortedKeysVendor[j])
+				})
+			}
+
+			matches = len(sortedKeysVendor)
+			cardId = sortedKeysVendor[0]
+			results = foundVendors[cardId]
 		}
 
 		// Results are limited to 10 by API, sort by best price, trim,
@@ -96,6 +121,10 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			if wantSellers {
 				sort.Slice(results, func(i, j int) bool {
 					return results[i].Price < results[j].Price
+				})
+			} else if wantSellers {
+				sort.Slice(results, func(i, j int) bool {
+					return results[i].Price > results[j].Price
 				})
 			}
 			results = results[:10]
