@@ -187,10 +187,7 @@ func search(query string, blocklist []string) (
 	cmpFunc := mtgmatcher.Equals
 
 	// Filter out any element from the search syntax
-	filterEdition := ""
-	filterCondition := ""
-	filterFoil := ""
-	filterNumber := ""
+	options := map[string]string{}
 
 	// Iterate over the various possible filters
 	for _, tag := range []string{"s:", "c:", "f:", "sm:", "cn:"} {
@@ -204,20 +201,20 @@ func search(query string, blocklist []string) (
 					code := strings.TrimPrefix(field, tag)
 					switch tag {
 					case "s:":
-						filterEdition = strings.ToUpper(code)
+						options["edition"] = strings.ToUpper(code)
 						break
 					case "c:":
-						filterCondition = code
+						options["condition"] = code
 						break
 					case "cn:":
-						filterNumber = code
+						options["number"] = code
 						break
 					case "f:":
-						filterFoil = code
-						if filterFoil == "yes" || filterFoil == "y" {
-							filterFoil = "true"
-						} else if filterFoil == "no" || filterFoil == "n" {
-							filterFoil = "false"
+						options["foil"] = code
+						if options["foil"] == "yes" || options["foil"] == "y" {
+							options["foil"] = "true"
+						} else if options["foil"] == "no" || options["foil"] == "n" {
+							options["foil"] = "false"
 						}
 						break
 					case "sm:":
@@ -241,15 +238,15 @@ func search(query string, blocklist []string) (
 		elements := strings.Split(query, "|")
 		query = elements[0]
 		if len(elements) > 1 {
-			filterEdition = strings.TrimSpace(strings.ToUpper(elements[1]))
+			options["edition"] = strings.TrimSpace(strings.ToUpper(elements[1]))
 		}
 		if len(elements) > 2 {
-			filterNumber = strings.TrimSpace(elements[2])
+			options["number"] = strings.TrimSpace(elements[2])
 		}
 		if strings.HasSuffix(query, "&") {
-			filterFoil = "false"
+			options["foil"] = "false"
 		} else if strings.HasSuffix(query, "*") {
-			filterFoil = "true"
+			options["foil"] = "true"
 		}
 		cmpFunc = mtgmatcher.Equals
 	} else {
@@ -257,9 +254,9 @@ func search(query string, blocklist []string) (
 		card, err := mtgmatcher.GetUUID(strings.TrimSpace(query))
 		if err == nil {
 			query = card.Name
-			filterEdition = card.SetCode
-			filterNumber = card.Number
-			filterFoil = fmt.Sprint(card.Foil)
+			options["edition"] = card.SetCode
+			options["number"] = card.Number
+			options["foil"] = fmt.Sprint(card.Foil)
 			cmpFunc = mtgmatcher.Equals
 		}
 	}
@@ -293,22 +290,22 @@ func search(query string, blocklist []string) (
 			// Run the comparison function set above
 			if cmpFunc(co.Card.Name, query) {
 				// Skip cards that are not of the desired set
-				if filterEdition != "" {
-					filters := strings.Split(filterEdition, ",")
+				if options["edition"] != "" {
+					filters := strings.Split(options["edition"], ",")
 					if !SliceStringHas(filters, co.Card.SetCode) {
 						continue
 					}
 				}
 				// Skip cards that are not of the desired collector number
-				if filterNumber != "" {
-					filters := strings.Split(filterNumber, ",")
+				if options["number"] != "" {
+					filters := strings.Split(options["number"], ",")
 					if !SliceStringHas(filters, co.Card.Number) {
 						continue
 					}
 				}
 				// Skip cards that are not as desired foil
-				if filterFoil != "" {
-					foilStatus, err := strconv.ParseBool(filterFoil)
+				if options["foil"] != "" {
+					foilStatus, err := strconv.ParseBool(options["foil"])
 					if err == nil {
 						if foilStatus && !co.Foil {
 							continue
@@ -321,8 +318,8 @@ func search(query string, blocklist []string) (
 				// Loop thorugh available conditions
 				for _, entry := range entries {
 					// Skip cards that have not the desired condition
-					if filterCondition != "" {
-						filters := strings.Split(filterCondition, ",")
+					if options["condition"] != "" {
+						filters := strings.Split(options["condition"], ",")
 						if !SliceStringHas(filters, entry.Conditions) {
 							continue
 						}
@@ -419,20 +416,20 @@ func search(query string, blocklist []string) (
 			}
 			entry := blEntries[nmIndex]
 
-			if filterEdition != "" {
-				filters := strings.Split(filterEdition, ",")
+			if options["edition"] != "" {
+				filters := strings.Split(options["edition"], ",")
 				if !SliceStringHas(filters, co.Card.SetCode) {
 					continue
 				}
 			}
-			if filterNumber != "" {
-				filters := strings.Split(filterNumber, ",")
+			if options["number"] != "" {
+				filters := strings.Split(options["number"], ",")
 				if !SliceStringHas(filters, co.Card.Number) {
 					continue
 				}
 			}
-			if filterFoil != "" {
-				foilStatus, err := strconv.ParseBool(filterFoil)
+			if options["foil"] != "" {
+				foilStatus, err := strconv.ParseBool(options["foil"])
 				if err == nil {
 					if foilStatus && !co.Foil {
 						continue
