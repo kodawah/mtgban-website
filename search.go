@@ -175,14 +175,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	render(w, "search.html", pageVars)
 }
 
-func search(query string, blocklist []string) (
-	foundSellers map[string]map[string][]SearchEntry,
-	foundVendors map[string][]SearchEntry,
-	tooMany bool) {
-	// Allocate memory
-	foundSellers = map[string]map[string][]SearchEntry{}
-	foundVendors = map[string][]SearchEntry{}
-
+func parseSearchOptions(query string) (string, map[string]string) {
 	// Filter out any element from the search syntax
 	options := map[string]string{}
 
@@ -250,6 +243,13 @@ func search(query string, blocklist []string) (
 			options["search_mode"] = "exact"
 		}
 	}
+
+	return query, options
+}
+
+func searchSellers(query string, blocklist []string, options map[string]string) (foundSellers map[string]map[string][]SearchEntry, tooMany bool) {
+	// Allocate memory
+	foundSellers = map[string]map[string][]SearchEntry{}
 
 	// Set which comparison function to use depending on the search syntax
 	cmpFunc := mtgmatcher.Equals
@@ -384,7 +384,22 @@ func search(query string, blocklist []string) (
 		}
 	}
 
-	// Really same as above
+	return
+}
+
+func searchVendors(query string, blocklist []string, options map[string]string) (foundVendors map[string][]SearchEntry, tooMany bool) {
+	foundVendors = map[string][]SearchEntry{}
+
+	cmpFunc := mtgmatcher.Equals
+	switch options["search_mode"] {
+	case "exact":
+		cmpFunc = mtgmatcher.Equals
+	case "prefix":
+		cmpFunc = mtgmatcher.HasPrefix
+	case "any":
+		cmpFunc = mtgmatcher.Contains
+	}
+
 	for i, vendor := range Vendors {
 		if vendor == nil {
 			log.Println("nil vendor at position", i)
@@ -469,6 +484,18 @@ func search(query string, blocklist []string) (
 	}
 
 	return
+}
+
+func search(query string, blocklist []string) (map[string]map[string][]SearchEntry,
+	map[string][]SearchEntry,
+	bool) {
+
+	cleanQuery, options := parseSearchOptions(query)
+
+	foundSellers, manySellers := searchSellers(cleanQuery, blocklist, options)
+	foundVendors, manyVendors := searchVendors(cleanQuery, blocklist, options)
+
+	return foundSellers, foundVendors, manySellers || manyVendors
 }
 
 func sortSets(uuidI, uuidJ string) bool {
