@@ -156,8 +156,19 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			searchQuery += " f:" + options["foil"]
 		}
 
+		variant := ""
+		if card.Foil {
+			variant = "(foil)"
+		}
+		title := fmt.Sprintf("%s %s", card.Name, variant)
+		if wantSellers {
+			title = "Retail prices for " + title
+		} else if wantVendors {
+			title = "Buylist prices for " + title
+		}
+
 		embed := discordgo.MessageEmbed{
-			Title: fmt.Sprintf("%s - %s # %s", card.Name, card.Edition, card.Number),
+			Title: title,
 			Color: 0xFF0000,
 			URL:   "https://www.mtgban.com/search?q=" + url.QueryEscape(searchQuery),
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
@@ -165,7 +176,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			},
 		}
 
-		embed.Description = "Printed in " + strings.Join(printings, ", ")
+		embed.Description = fmt.Sprintf("[%s] %s\nPrinted in %s", card.SetCode, card.Title, strings.Join(printings, ", "))
 
 		embed.Fields = fields
 
