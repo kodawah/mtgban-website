@@ -218,6 +218,15 @@ func parseSearchOptions(query string) (string, map[string]string) {
 
 	// Support Scryfall bot syntax
 	if strings.Contains(query, "|") {
+		// Filter out the out of standard syntax
+		if strings.HasSuffix(query, "&") {
+			query = strings.TrimSuffix(query, "&")
+			options["foil"] = "false"
+		} else if strings.HasSuffix(query, "*") {
+			query = strings.TrimSuffix(query, "*")
+			options["foil"] = "true"
+		}
+
 		elements := strings.Split(query, "|")
 		query = elements[0]
 		if len(elements) > 1 {
@@ -226,11 +235,7 @@ func parseSearchOptions(query string) (string, map[string]string) {
 		if len(elements) > 2 {
 			options["number"] = strings.TrimSpace(elements[2])
 		}
-		if strings.HasSuffix(query, "&") {
-			options["foil"] = "false"
-		} else if strings.HasSuffix(query, "*") {
-			options["foil"] = "true"
-		}
+
 		options["search_mode"] = "exact"
 	} else {
 		// Also support our own ID style
