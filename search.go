@@ -180,7 +180,7 @@ func parseSearchOptions(query string) (string, map[string]string) {
 	options := map[string]string{}
 
 	// Iterate over the various possible filters
-	for _, tag := range []string{"s:", "c:", "f:", "sm:", "cn:"} {
+	for _, tag := range []string{"s:", "c:", "f:", "sm:", "cn:", "vndr:"} {
 		if strings.Contains(query, tag) {
 			fields := strings.Fields(query)
 			for _, field := range fields {
@@ -209,6 +209,9 @@ func parseSearchOptions(query string) (string, map[string]string) {
 						break
 					case "sm:":
 						options["search_mode"] = code
+						break
+					case "vndr:":
+						options["scraper"] = strings.ToUpper(code)
 						break
 					}
 				}
@@ -277,6 +280,14 @@ func searchSellers(query string, blocklist []string, options map[string]string) 
 		// Skip any seller explicitly in blocklist
 		if SliceStringHas(blocklist, seller.Info().Shorthand) {
 			continue
+		}
+
+		// Skip any unwanted sellers
+		if options["scraper"] != "" {
+			filters := strings.Split(options["scraper"], ",")
+			if !SliceStringHas(filters, seller.Info().Shorthand) {
+				continue
+			}
 		}
 
 		// Get inventory
@@ -413,6 +424,13 @@ func searchVendors(query string, blocklist []string, options map[string]string) 
 
 		if SliceStringHas(blocklist, vendor.Info().Shorthand) {
 			continue
+		}
+
+		if options["scraper"] != "" {
+			filters := strings.Split(options["scraper"], ",")
+			if !SliceStringHas(filters, vendor.Info().Shorthand) {
+				continue
+			}
 		}
 
 		buylist, err := vendor.Buylist()
