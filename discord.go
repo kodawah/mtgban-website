@@ -56,10 +56,12 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		// Check if card exists
 		printings, err := mtgmatcher.GetPrintings(query)
 		if err != nil {
-			s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
-				Description: "No card found for \"" + query + "\" 乁| ･ิ ∧ ･ิ |ㄏ",
-			})
-			return
+			if options["search_mode"] == "" || options["search_mode"] == "exact" {
+				s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+					Description: "No card found for \"" + query + "\" 乁| ･ิ ∧ ･ิ |ㄏ",
+				})
+				return
+			}
 		}
 
 		var cardId string
@@ -140,6 +142,12 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 		card := uuid2card(cardId, true)
+
+		// Just in case the original array didn't survive
+		co, err := mtgmatcher.GetUUID(cardId)
+		if err == nil {
+			printings = co.Printings
+		}
 
 		// Rebuild the search query
 		searchQuery := card.Name
