@@ -62,7 +62,6 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
-		var matches int
 		var cardId string
 		var results []SearchEntry
 		if wantSellers {
@@ -87,7 +86,6 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				})
 			}
 
-			matches = len(sortedKeysSeller)
 			cardId = sortedKeysSeller[0]
 			results = foundSellers[cardId]["NM"]
 		} else if wantVendors {
@@ -110,7 +108,6 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				})
 			}
 
-			matches = len(sortedKeysVendor)
 			cardId = sortedKeysVendor[0]
 			results = foundVendors[cardId]
 		}
@@ -156,15 +153,11 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			searchQuery += " f:" + options["foil"]
 		}
 
-		variant := ""
-		if card.Foil {
-			variant = "(foil)"
-		}
-		title := fmt.Sprintf("%s %s", card.Name, variant)
+		var title string
 		if wantSellers {
-			title = "Retail prices for " + title
+			title = "Retail prices for " + card.Name
 		} else if wantVendors {
-			title = "Buylist prices for " + title
+			title = "Buylist prices for " + card.Name
 		}
 
 		embed := discordgo.MessageEmbed{
@@ -176,13 +169,17 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			},
 		}
 
-		embed.Description = fmt.Sprintf("[%s] %s\nPrinted in %s", card.SetCode, card.Title, strings.Join(printings, ", "))
+		variant := ""
+		if card.Foil {
+			variant = "(Foil)"
+		}
+		embed.Description = fmt.Sprintf("[%s] %s %s\nPrinted in %s", card.SetCode, card.Title, variant, strings.Join(printings, ", "))
 
 		embed.Fields = fields
 
-		if matches > 1 {
+		if card.Reserved {
 			embed.Footer = &discordgo.MessageEmbedFooter{
-				Text: "Multiple cards match \"" + query + "\", try refining your search",
+				Text: "Part of the Reserved List",
 			}
 		}
 
