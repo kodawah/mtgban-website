@@ -180,6 +180,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		variant := ""
 		if card.Foil {
 			variant = "(Foil)"
+			embed.Title += " ✨"
 		}
 		embed.Description = fmt.Sprintf("[%s] %s %s\nPrinted in %s", card.SetCode, card.Title, variant, strings.Join(printings, ", "))
 
