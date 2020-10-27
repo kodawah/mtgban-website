@@ -208,7 +208,7 @@ func parseSearchOptions(query string) (string, map[string]string) {
 						}
 						break
 					case "sm:":
-						options["search_mode"] = code
+						options["search_mode"] = strings.ToLower(code)
 						break
 					case "vndr:":
 						options["scraper"] = strings.ToUpper(code)
