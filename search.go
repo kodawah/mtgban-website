@@ -194,7 +194,7 @@ func parseSearchOptions(query string) (string, map[string]string) {
 						options["edition"] = strings.ToUpper(code)
 						break
 					case "c:":
-						options["condition"] = code
+						options["condition"] = strings.ToUpper(code)
 						break
 					case "cn:":
 						options["number"] = code
