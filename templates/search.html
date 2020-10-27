@@ -59,18 +59,22 @@
                 <ul class="indent">
                     <li><h4><i>Syntax</i></h4>
                         <ul class="indent">
+                            <li> You can search using the Scryfall-bot notation <pre>name[|code[|number]]</pre>.
                             <li>You can filter by <b>edition</b> using the Scryfall notation <pre>s:CODE</pre></li>
                             <li>You can filter by <b>collector number</b> using the Scryfall notation <pre>cn:NUMBER</pre></li>
                             <li>You can filter by <b>condition</b> with <pre>c:COND</pre>, accepting <pre>NM</pre>, <pre>SP</pre>, <pre>MP</pre>, <pre>HP</pre>, and <pre>PO</pre>.</li>
                             <li>You can filter by <b>foil</b> with <pre>f:VALUE</pre>, accepting <pre>true</pre>, or <pre>false</pre></li>
                             <li>You can change the <b>search mode</b> with <pre>sm:VALUE</pre>, accepting <pre>exact</pre> (default), <pre>prefix</pre>, or <pre>any</pre></li>
-                            <li>Normally a card is searched with an "exact" strategy, you will get only cards with exactly the same name as searched.
-                                <br>For example <pre>Vesuva</pre> will return the card named Vesuva and no other Vesuvan counterpart.</li>
-                            <li>If you search in "prefix" mode, you will get all the cards with the name starting with what you searched.
-                                <br>For example <pre>"Dragonlord"</pre> will return all the cards starting with "Dragonlord".</li>
-                            <li>If you search in in "any" mode, you will get all the cards containing any of the text present in card names.
-                                <br>For example <pre>*Draco*</pre> will return the card named Draco and all the cards that have "draco" in their names.</li>
+                            <ul class="indent">
+                                <li>Normally a card is searched with an <b>exact</b> strategy, you will get only cards with exactly the same name as searched.
+                                    <br>For example <pre>Vesuva</pre> will return the card named Vesuva and no other Vesuvan counterpart.</li>
+                                <li>If you search in <b>prefix</b> mode, you will get all the cards with the name starting with what you searched.
+                                    <br>For example <pre>"Dragonlord"</pre> will return all the cards starting with "Dragonlord".</li>
+                                <li>If you search in in <b>any</b> mode, you will get all the cards containing any of the text present in card names.
+                                    <br>For example <pre>*Draco*</pre> will return the card named Draco and all the cards that have "draco" in their names.</li>
+                            </ul>
                             <li>Filtering by <b>edition</b>, <b>collector number</b>, and <b>condition</b> supports specifying multiple values, separated by a comma ",".</li>
+                            <li>You can filter by <b>seller/vendor name</b> with <pre>vndr:shorthand</pre>.</li>
                         </ul>
                     </li>
                     <br>
