@@ -174,7 +174,7 @@ var DatabaseLoaded bool
 var Sellers []mtgban.Seller
 var Vendors []mtgban.Vendor
 var Infos map[string]mtgban.InventoryRecord
-var CardDB *sql.DB
+
 var Newspaper3dayDB *sql.DB
 var Newspaper1dayDB *sql.DB
 var ExploreDB *sql.DB
@@ -311,10 +311,6 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	CardDB, err = sql.Open("mysql", Config.DBAddress+"/mtgjson")
-	if err != nil {
-		log.Fatalln(err)
-	}
 	Newspaper3dayDB, err = sql.Open("mysql", Config.DBAddress+"/three_day_newspaper")
 	if err != nil {
 		log.Fatalln(err)
