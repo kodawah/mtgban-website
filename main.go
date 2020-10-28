@@ -313,15 +313,27 @@ func main() {
 
 	Newspaper3dayDB, err = sql.Open("mysql", Config.DBAddress+"/three_day_newspaper")
 	if err != nil {
-		log.Fatalln(err)
+		if DevMode {
+			log.Println("No connection available to /three_day_newspaper DB due to", err)
+		} else {
+			log.Fatalln(err)
+		}
 	}
 	Newspaper1dayDB, err = sql.Open("mysql", Config.DBAddress+"/newspaper")
 	if err != nil {
-		log.Fatalln(err)
+		if DevMode {
+			log.Println("No connection available to /newspaper DB due to", err)
+		} else {
+			log.Fatalln(err)
+		}
 	}
 	ExploreDB, err = sql.Open("mysql", Config.DBAddress+"/sites")
 	if err != nil {
-		log.Fatalln(err)
+		if DevMode {
+			log.Println("No connection available to /sites DB due to", err)
+		} else {
+			log.Fatalln(err)
+		}
 	}
 
 	// load website up
@@ -382,7 +394,11 @@ func main() {
 
 	err = setupDiscord()
 	if err != nil {
-		log.Fatalln(err)
+		if DevMode {
+			log.Println("No connection to Discord due to", err)
+		} else {
+			log.Fatalln(err)
+		}
 	}
 
 	// serve everything in known folders as a file
