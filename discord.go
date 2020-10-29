@@ -38,6 +38,11 @@ func setupDiscord() error {
 // This function will be called (due to AddHandler above) every time a new
 // message is created on any channel that the authenticated bot has access to.
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
+	// Ignore requests if starting up
+	if !DatabaseLoaded {
+		return
+	}
+
 	// Ignore all messages created by a bot
 	if m.Author.Bot {
 		return
