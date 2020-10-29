@@ -55,6 +55,11 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		// Clean up query and only search for NM
 		query, options := parseSearchOptions(content)
 
+		// Set a custom search mode since we want to try and find as much as possible
+		if options["search_mode"] == "" {
+			options["search_mode"] = "any"
+		}
+
 		// Clean up even more for this hybrid case
 		if wantBothSingle {
 			shorthand := strings.Fields(query)[0]
