@@ -73,14 +73,47 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 		// Check if card exists
-		printings, err := mtgmatcher.GetPrintings(query)
-		if err != nil {
-			if options["search_mode"] == "" || options["search_mode"] == "exact" {
+		nameFound := false
+		sets := mtgmatcher.GetSets()
+		if options["edition"] != "" {
+			set, found := sets[options["edition"]]
+			if !found {
 				s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
-					Description: "No card found for \"" + query + "\" 乁| ･ิ ∧ ･ิ |ㄏ",
+					Description: "No card found named \"" + query + "\" in \"" + options["edition"] + "\" 乁| ･ิ ∧ ･ิ |ㄏ",
 				})
 				return
 			}
+			for _, card := range set.Cards {
+				if mtgmatcher.Contains(card.Name, query) {
+					nameFound = true
+					break
+				}
+			}
+			if !nameFound {
+				s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+					Description: "No card found named \"" + query + "\" in " + set.Name + " 乁| ･ิ ∧ ･ิ |ㄏ",
+				})
+				return
+			}
+		}
+		if !nameFound {
+			for _, set := range sets {
+				for _, card := range set.Cards {
+					if mtgmatcher.Contains(card.Name, query) {
+						nameFound = true
+						break
+					}
+				}
+				if nameFound {
+					break
+				}
+			}
+		}
+		if !nameFound {
+			s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+				Description: "No card found for \"" + query + "\" 乁| ･ิ ∧ ･ิ |ㄏ",
+			})
+			return
 		}
 
 		var ogScraperName string
@@ -236,10 +269,14 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		card := uuid2card(cardId, true)
 
-		// Just in case the original array didn't survive
+		// Retrieve the first 12 editions this card is printed in
+		printings := "several sets"
 		co, err := mtgmatcher.GetUUID(cardId)
 		if err == nil {
-			printings = co.Printings
+			printings = strings.Join(co.Printings, ", ")
+			if len(co.Printings) > 12 {
+				printings = strings.Join(co.Printings[:12], ", ") + " and more"
+			}
 		}
 
 		var link string
@@ -288,7 +325,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if card.Foil {
 			embed.Title += " ✨"
 		}
-		embed.Description = fmt.Sprintf("[%s] %s\nPrinted in %s", card.SetCode, card.Title, strings.Join(printings, ", "))
+		embed.Description = fmt.Sprintf("[%s] %s\nPrinted in %s", card.SetCode, card.Title, printings)
 
 		embed.Fields = fields
 
