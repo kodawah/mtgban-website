@@ -174,7 +174,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 			if len(foundSellers) == 0 && len(foundVendors) == 0 {
 				s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
-					Description: "Not found (╯°□°）╯︵ ┻━┻",
+					Description: "No supply and no demand (╯°□°）╯︵ ┻━┻",
 				})
 				return
 			}
