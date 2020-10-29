@@ -169,9 +169,16 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 					return sortSets(sortedKeysVendor[i], sortedKeysVendor[j])
 				})
 
-				cardId = sortedKeysVendor[0]
-				foundBuylist = foundVendors[cardId][0]
-				ogScraperName = foundBuylist.ScraperName
+				// Do not overwrite existing id
+				if cardId == "" {
+					cardId = sortedKeysVendor[0]
+				}
+				// skip entry if the two do not match
+				entry, found := foundVendors[cardId]
+				if found {
+					foundBuylist = entry[0]
+					ogScraperName = entry[0].ScraperName
+				}
 			}
 			foundBuylist.ScraperName = "Buylist"
 			results = append(results, foundBuylist)
