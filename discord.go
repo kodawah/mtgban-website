@@ -62,8 +62,33 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		// Clean up even more for this hybrid case
 		if wantBothSingle {
-			shorthand := strings.Fields(query)[0]
-			options["scraper"] = strings.ToUpper(shorthand)
+			shorthand := strings.ToUpper(strings.Fields(query)[0])
+
+			// Look up and check if it exists
+			found := false
+			for _, seller := range Sellers {
+				if seller.Info().Shorthand == shorthand {
+					found = true
+					break
+				}
+			}
+			if !found {
+				for _, vendor := range Vendors {
+					if vendor.Info().Shorthand == shorthand {
+						found = true
+						break
+					}
+				}
+			}
+
+			if !found {
+				s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+					Description: "No store found with \"" + shorthand + "\" 乁| ･ิ ∧ ･ิ |ㄏ",
+				})
+				return
+			}
+
+			options["scraper"] = shorthand
 			query = strings.TrimPrefix(query, shorthand)
 		}
 
