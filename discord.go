@@ -55,16 +55,16 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		// Clean up query and only search for NM
 		query, options := parseSearchOptions(content)
 
-		// Prevent useless invocations
-		if len(query) < 3 && query != "Ow" && query != "X" {
-			return
-		}
-
 		// Clean up even more for this hybrid case
 		if wantBothSingle {
 			shorthand := strings.Fields(query)[0]
 			options["scraper"] = strings.ToUpper(shorthand)
 			query = strings.TrimPrefix(query, shorthand)
+		}
+
+		// Prevent useless invocations
+		if len(query) < 3 && query != "Ow" && query != "X" {
+			return
 		}
 
 		// Check if card exists
