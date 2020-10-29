@@ -217,6 +217,10 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				price = fmt.Sprintf("%0.2f %%", entry.Price)
 			} else if entry.Price > 0 {
 				price = fmt.Sprintf("$ %0.2f", entry.Price)
+				// Also add quantity for hybrid mode
+				if entry.Quantity > 0 && (entry.ScraperName == "Retail" || entry.ScraperName == "Buylist") {
+					price = fmt.Sprintf("%d @ %s", entry.Quantity, price)
+				}
 			}
 			fields = append(fields, &discordgo.MessageEmbedField{
 				Name:   entry.ScraperName,
