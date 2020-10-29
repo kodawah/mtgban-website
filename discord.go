@@ -45,13 +45,27 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	wantSellers := strings.HasPrefix(m.Content, "!")
 	wantVendors := strings.HasPrefix(m.Content, "?")
-	if wantSellers || wantVendors {
+	wantBothSingle := strings.HasPrefix(m.Content, "$")
+	if wantSellers || wantVendors || wantBothSingle {
 		// Strip away bang character
 		content := strings.TrimPrefix(m.Content, "!")
 		content = strings.TrimPrefix(content, "?")
+		content = strings.TrimPrefix(content, "$")
 
 		// Clean up query and only search for NM
 		query, options := parseSearchOptions(content)
+
+		// Prevent useless invocations
+		if len(query) < 3 && query != "Ow" && query != "X" {
+			return
+		}
+
+		// Clean up even more for this hybrid case
+		if wantBothSingle {
+			shorthand := strings.Fields(query)[0]
+			options["scraper"] = strings.ToUpper(shorthand)
+			query = strings.TrimPrefix(query, shorthand)
+		}
 
 		// Check if card exists
 		printings, err := mtgmatcher.GetPrintings(query)
@@ -64,6 +78,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 		}
 
+		var ogScraperName string
 		var cardId string
 		var results []SearchEntry
 		if wantSellers {
@@ -112,6 +127,62 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 			cardId = sortedKeysVendor[0]
 			results = foundVendors[cardId]
+		} else if wantBothSingle {
+			options["condition"] = "NM"
+
+			// Search
+			foundSellers, _ := searchSellers(query, Config.SearchBlockList, options)
+			foundVendors, _ := searchVendors(query, Config.SearchBlockList, options)
+
+			if len(foundSellers) == 0 && len(foundVendors) == 0 {
+				s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+					Description: "Not found (╯°□°）╯︵ ┻━┻",
+				})
+				return
+			}
+
+			// Sort
+			sortedKeysSeller := make([]string, 0, len(foundSellers))
+			for cardId := range foundSellers {
+				sortedKeysSeller = append(sortedKeysSeller, cardId)
+			}
+			var foundRetail SearchEntry
+			if len(sortedKeysSeller) > 1 {
+				sort.Slice(sortedKeysSeller, func(i, j int) bool {
+					return sortSets(sortedKeysSeller[i], sortedKeysSeller[j])
+				})
+
+				cardId = sortedKeysSeller[0]
+				foundRetail = foundSellers[cardId]["NM"][0]
+				ogScraperName = foundRetail.ScraperName
+			}
+			foundRetail.ScraperName = "Retail"
+			results = append(results, foundRetail)
+
+			sortedKeysVendor := make([]string, 0, len(foundVendors))
+			for cardId := range foundVendors {
+				sortedKeysVendor = append(sortedKeysVendor, cardId)
+			}
+			var foundBuylist SearchEntry
+			if len(sortedKeysVendor) > 1 {
+				sort.Slice(sortedKeysVendor, func(i, j int) bool {
+					return sortSets(sortedKeysVendor[i], sortedKeysVendor[j])
+				})
+
+				cardId = sortedKeysVendor[0]
+				foundBuylist = foundVendors[cardId][0]
+				ogScraperName = foundBuylist.ScraperName
+			}
+			foundBuylist.ScraperName = "Buylist"
+			results = append(results, foundBuylist)
+
+			// Add an extra value that compares the two
+			if foundRetail.Price != 0 && foundBuylist.Price != 0 {
+				results = append(results, SearchEntry{
+					ScraperName: "Ratio",
+					Price:       foundBuylist.Price / foundRetail.Price * 100,
+				})
+			}
 		}
 
 		// Results are limited to 10 by API, sort by best price, trim,
@@ -134,9 +205,15 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		var fields []*discordgo.MessageEmbedField
 		for _, entry := range results {
+			price := "N/A"
+			if entry.ScraperName == "Ratio" {
+				price = fmt.Sprintf("%0.2f %%", entry.Price)
+			} else if entry.Price > 0 {
+				price = fmt.Sprintf("$ %0.2f", entry.Price)
+			}
 			fields = append(fields, &discordgo.MessageEmbedField{
 				Name:   entry.ScraperName,
-				Value:  fmt.Sprintf("$ %0.2f", entry.Price),
+				Value:  price,
 				Inline: true,
 			})
 		}
@@ -149,16 +226,29 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			printings = co.Printings
 		}
 
-		// Rebuild the search query
-		searchQuery := card.Name
-		if options["edition"] != "" {
-			searchQuery += " s:" + options["edition"]
-		}
-		if options["number"] != "" {
-			searchQuery += " cn:" + options["number"]
-		}
-		if options["foil"] != "" {
-			searchQuery += " f:" + options["foil"]
+		var link string
+		// For hybrid mode, grab the first link that is available
+		if wantBothSingle {
+			for _, res := range results {
+				if res.URL == "" {
+					continue
+				}
+				link = res.URL
+				break
+			}
+		} else {
+			// Rebuild the search query
+			searchQuery := card.Name
+			if options["edition"] != "" {
+				searchQuery += " s:" + options["edition"]
+			}
+			if options["number"] != "" {
+				searchQuery += " cn:" + options["number"]
+			}
+			if options["foil"] != "" {
+				searchQuery += " f:" + options["foil"]
+			}
+			link = "https://www.mtgban.com/search?q=" + url.QueryEscape(searchQuery)
 		}
 
 		var title string
@@ -166,12 +256,14 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			title = "Retail prices for " + card.Name
 		} else if wantVendors {
 			title = "Buylist prices for " + card.Name
+		} else if wantBothSingle {
+			title = card.Name + " at " + ogScraperName
 		}
 
 		embed := discordgo.MessageEmbed{
 			Title: title,
 			Color: 0xFF0000,
-			URL:   "https://www.mtgban.com/search?q=" + url.QueryEscape(searchQuery),
+			URL:   link,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
 				URL: card.ImageURL,
 			},
