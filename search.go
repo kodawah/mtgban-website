@@ -212,6 +212,10 @@ func parseSearchOptions(query string) (string, map[string]string) {
 						break
 					case "vndr:":
 						options["scraper"] = strings.ToUpper(code)
+						// Hack to support the various subseller names of tcg
+						if strings.Contains(options["scraper"], "TCG") {
+							options["scraper"] = strings.Replace(options["scraper"], "TCG", "TCG Player,TCG Player Market", 1)
+						}
 						break
 					}
 				}

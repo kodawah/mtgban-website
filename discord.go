@@ -81,6 +81,12 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				}
 			}
 
+			// Hijack the shorthand to retrieve both retail and buylist values
+			if shorthand == "TCG" {
+				found = true
+				shorthand = "TCG Player,TCG Player Market"
+			}
+
 			if !found {
 				s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
 					Description: "No store found with \"" + shorthand + "\" 乁| ･ิ ∧ ･ิ |ㄏ",
