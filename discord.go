@@ -401,6 +401,11 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 		}
 
+		// Show data source on non-ban servers
+		if len(Config.DiscordAllowList) > 0 && m.GuildID != Config.DiscordAllowList[0] {
+			embed.Footer = &poweredByFooter
+		}
+
 		s.ChannelMessageSendEmbed(m.ChannelID, &embed)
 	}
 }
