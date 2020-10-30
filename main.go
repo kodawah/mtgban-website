@@ -158,6 +158,7 @@ var Config struct {
 	Affiliate           map[string]string `json:"affiliate"`
 	Api                 map[string]string `json:"api"`
 	DiscordToken        string            `json:"discord_token"`
+	DiscordAllowList    []string          `json:"discord_allowlist"`
 	ArbitDefaultSellers []string          `json:"arbit_default_sellers"`
 	ArbitBlockVendors   []string          `json:"arbit_block_vendors"`
 	SearchBlockList     []string          `json:"search_block_list"`

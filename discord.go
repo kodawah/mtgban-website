@@ -11,6 +11,11 @@ import (
 	"github.com/kodabb/go-mtgban/mtgmatcher"
 )
 
+var poweredByFooter = discordgo.MessageEmbedFooter{
+	IconURL: "https://www.mtgban.com/img/logo/ban-round.png",
+	Text:    "Powered by mtgban.com",
+}
+
 func setupDiscord() error {
 	// Create a new Discord session using the provided bot token.
 	dg, err := discordgo.New("Bot " + Config.DiscordToken)
@@ -18,11 +23,14 @@ func setupDiscord() error {
 		return err
 	}
 
+	// Register the guildCreate func as a callback for GuildCreat events
+	dg.AddHandler(guildCreate)
+
 	// Register the messageCreate func as a callback for MessageCreate events.
 	dg.AddHandler(messageCreate)
 
 	// In this example, we only care about receiving message events.
-	dg.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsGuildMessages)
+	dg.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsGuilds | discordgo.IntentsGuildMessages)
 
 	// Open a websocket connection to Discord and begin listening.
 	err = dg.Open()
@@ -35,11 +43,33 @@ func setupDiscord() error {
 	//dg.Close()
 }
 
+// This function will be called every time the bot is invited to a discord
+// server and tries to join it.
+func guildCreate(s *discordgo.Session, gc *discordgo.GuildCreate) {
+	// If guild is authorized, then we can proceed as normal
+	if stringSliceContains(Config.DiscordAllowList, gc.Guild.ID) {
+		return
+	}
+
+	// Otherwise we print a message, pick our stuff, and leave
+	s.ChannelMessageSendEmbed(gc.Guild.SystemChannelID, &discordgo.MessageEmbed{
+		Description: "Looks like I'm not authorized to be here ⋋〳 ᵕ _ʖ ᵕ 〵⋌",
+		Footer:      &poweredByFooter,
+	})
+	Notify("bot", gc.Guild.Name+" attempted to install me ▐ ✪ _ ✪▐")
+	s.GuildLeave(gc.Guild.ID)
+}
+
 // This function will be called (due to AddHandler above) every time a new
 // message is created on any channel that the authenticated bot has access to.
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Ignore requests if starting up
 	if !DatabaseLoaded {
+		return
+	}
+
+	// Ignore messages coming from unauthorized discords
+	if !stringSliceContains(Config.DiscordAllowList, m.GuildID) {
 		return
 	}
 
