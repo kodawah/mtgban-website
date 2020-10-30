@@ -223,17 +223,17 @@ func parseSearchOptions(query string) (string, map[string]string) {
 		}
 	}
 
+	// Filter out the out of standard syntax
+	if strings.HasSuffix(query, "&") {
+		query = strings.TrimSuffix(query, "&")
+		options["foil"] = "false"
+	} else if strings.HasSuffix(query, "*") {
+		query = strings.TrimSuffix(query, "*")
+		options["foil"] = "true"
+	}
+
 	// Support Scryfall bot syntax
 	if strings.Contains(query, "|") {
-		// Filter out the out of standard syntax
-		if strings.HasSuffix(query, "&") {
-			query = strings.TrimSuffix(query, "&")
-			options["foil"] = "false"
-		} else if strings.HasSuffix(query, "*") {
-			query = strings.TrimSuffix(query, "*")
-			options["foil"] = "true"
-		}
-
 		elements := strings.Split(query, "|")
 		query = elements[0]
 		if len(elements) > 1 {
