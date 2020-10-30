@@ -493,7 +493,7 @@ func searchVendors(query string, blocklist []string, options map[string]string) 
 				}
 				name := vendor.Info().Name
 				if name == "TCG Player Market" {
-					name = "TCG Player Trade-In"
+					name = "TCG Trade-In"
 				}
 				res := SearchEntry{
 					ScraperName: name,
