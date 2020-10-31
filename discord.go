@@ -263,8 +263,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 			// Sort
 			sortedKeysSeller := make([]string, 0, len(foundSellers))
-			for cardId := range foundSellers {
-				sortedKeysSeller = append(sortedKeysSeller, cardId)
+			for scardId := range foundSellers {
+				sortedKeysSeller = append(sortedKeysSeller, scardId)
 			}
 			var foundRetail SearchEntry
 			if len(sortedKeysSeller) > 1 {
@@ -280,8 +280,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			results = append(results, foundRetail)
 
 			sortedKeysVendor := make([]string, 0, len(foundVendors))
-			for cardId := range foundVendors {
-				sortedKeysVendor = append(sortedKeysVendor, cardId)
+			for vcardId := range foundVendors {
+				sortedKeysVendor = append(sortedKeysVendor, vcardId)
 			}
 			var foundBuylist SearchEntry
 			if len(sortedKeysVendor) > 1 {
