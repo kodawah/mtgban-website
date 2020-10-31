@@ -367,7 +367,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 					}
 					cn = append(cn, co.Number)
 				}
-				printings = fmt.Sprintf("%s. In %s numbered as %s", printings, options["edition"], strings.Join(cn, ", "))
+				printings = fmt.Sprintf("%s. Variants in %s are %s", printings, options["edition"], strings.Join(cn, ", "))
 			}
 		}
 
