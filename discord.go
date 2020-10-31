@@ -112,7 +112,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		// Clean up even more for this hybrid case
 		if wantBothSingle {
-			shorthand := strings.ToUpper(strings.Fields(query)[0])
+			ogShorthand := strings.Fields(query)[0]
+			shorthand := strings.ToUpper(ogShorthand)
 
 			// Look up and check if it exists
 			found := false
@@ -145,7 +146,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 
 			options["scraper"] = shorthand
-			query = strings.TrimPrefix(query, shorthand)
+			query = strings.TrimPrefix(query, ogShorthand)
 		}
 
 		// Prevent useless invocations
