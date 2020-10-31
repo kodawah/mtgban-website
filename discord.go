@@ -343,6 +343,17 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			if len(co.Printings) > 12 {
 				printings = strings.Join(co.Printings[:12], ", ") + " and more"
 			}
+			if options["edition"] != "" && len(co.Variations) > 0 {
+				var cn []string
+				for _, varid := range co.Variations {
+					co, err := mtgmatcher.GetUUID(varid)
+					if err != nil {
+						continue
+					}
+					cn = append(cn, co.Number)
+				}
+				printings = fmt.Sprintf("%s. In %s numbered as %s", printings, options["edition"], strings.Join(cn, ", "))
+			}
 		}
 
 		var link string
