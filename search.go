@@ -387,9 +387,6 @@ func searchSellers(query string, blocklist []string, options map[string]string) 
 					}
 
 					name := seller.Info().Name
-					if name == TCG_MAIN {
-						name = "TCG Player (+s&h)"
-					}
 					// Prepare all the deets
 					res := SearchEntry{
 						ScraperName: name,
