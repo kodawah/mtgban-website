@@ -163,12 +163,18 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	pageVars.VendorKeys = sortedKeysVendor
 
 	var source string
-	u, err := url.Parse(r.Referer())
-	if err != nil {
-		log.Println(err)
-		source = "n/a"
+	utm := r.FormValue("utm_source")
+	if utm == "banbot" {
+		id := r.FormValue("utm_affiliate")
+		source = fmt.Sprintf("banbot (%s)", id)
 	} else {
-		source = u.Path
+		u, err := url.Parse(r.Referer())
+		if err != nil {
+			log.Println(err)
+			source = "n/a"
+		} else {
+			source = u.Path
+		}
 	}
 	Notify("search", fmt.Sprintf("[%s] from %s", query, source))
 

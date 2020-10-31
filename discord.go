@@ -394,7 +394,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			if options["foil"] != "" {
 				searchQuery += " f:" + options["foil"]
 			}
-			link = "https://www.mtgban.com/search?q=" + url.QueryEscape(searchQuery)
+			link = "https://www.mtgban.com/search?q=" + url.QueryEscape(searchQuery) + "&utm_source=banbot&utm_affiliate=" + m.GuildID
 		}
 
 		var title string
