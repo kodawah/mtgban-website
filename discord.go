@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"sort"
 	"strings"
+	"unicode"
 
 	"github.com/bwmarrin/discordgo"
 
@@ -78,9 +79,15 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	// Ignore too short messages
+	if len(m.Content) < 2 {
+		return
+	}
+
 	wantSellers := strings.HasPrefix(m.Content, "!")
 	wantVendors := strings.HasPrefix(m.Content, "?")
-	wantBothSingle := strings.HasPrefix(m.Content, "$")
+	// Avoid invocations
+	wantBothSingle := strings.HasPrefix(m.Content, "$") && unicode.IsLetter(rune(m.Content[1]))
 	if wantSellers || wantVendors || wantBothSingle {
 		// Strip away bang character
 		content := strings.TrimPrefix(m.Content, "!")
