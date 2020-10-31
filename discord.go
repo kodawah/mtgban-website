@@ -140,7 +140,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 			if !found {
 				s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
-					Description: "No store found with \"" + shorthand + "\" 乁| ･ิ ∧ ･ิ |ㄏ",
+					Description: "No store found with \"" + ogShorthand + "\" 乁| ･ิ ∧ ･ิ |ㄏ",
 				})
 				return
 			}
