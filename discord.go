@@ -118,14 +118,14 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			// Look up and check if it exists
 			found := false
 			for _, seller := range Sellers {
-				if seller.Info().Shorthand == shorthand {
+				if seller != nil && seller.Info().Shorthand == shorthand {
 					found = true
 					break
 				}
 			}
 			if !found {
 				for _, vendor := range Vendors {
-					if vendor.Info().Shorthand == shorthand {
+					if vendor != nil && vendor.Info().Shorthand == shorthand {
 						found = true
 						break
 					}
