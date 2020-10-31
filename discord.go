@@ -271,7 +271,9 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				sort.Slice(sortedKeysSeller, func(i, j int) bool {
 					return sortSets(sortedKeysSeller[i], sortedKeysSeller[j])
 				})
+			}
 
+			if len(sortedKeysSeller) > 0 {
 				cardId = sortedKeysSeller[0]
 				foundRetail = foundSellers[cardId]["NM"][0]
 				ogScraperName = foundRetail.ScraperName
@@ -288,17 +290,17 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				sort.Slice(sortedKeysVendor, func(i, j int) bool {
 					return sortSets(sortedKeysVendor[i], sortedKeysVendor[j])
 				})
+			}
 
-				// Do not overwrite existing id
-				if cardId == "" {
-					cardId = sortedKeysVendor[0]
-				}
-				// skip entry if the two do not match
-				entry, found := foundVendors[cardId]
-				if found {
-					foundBuylist = entry[0]
-					ogScraperName = entry[0].ScraperName
-				}
+			// Do not overwrite existing id
+			if cardId == "" && len(sortedKeysVendor) > 0 {
+				cardId = sortedKeysVendor[0]
+			}
+			// Skip entry if the two do not match
+			entry, found := foundVendors[cardId]
+			if found {
+				foundBuylist = entry[0]
+				ogScraperName = entry[0].ScraperName
 			}
 			foundBuylist.ScraperName = "Buylist"
 			results = append(results, foundBuylist)
