@@ -359,7 +359,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				printings = strings.Join(co.Printings[:MaxPrintings], ", ") + " and more"
 			}
 			if options["edition"] != "" && len(co.Variations) > 0 {
-				var cn []string
+				cn := []string{co.Number}
 				for _, varid := range co.Variations {
 					co, err := mtgmatcher.GetUUID(varid)
 					if err != nil {
