@@ -17,6 +17,14 @@ var poweredByFooter = discordgo.MessageEmbedFooter{
 	Text:    "Powered by mtgban.com",
 }
 
+const (
+	// As defined by the discord API
+	MaxEmbeds = 10
+
+	// Avoid making messages overly long
+	MaxPrintings = 12
+)
+
 func setupDiscord() error {
 	// Create a new Discord session using the provided bot token.
 	dg, err := discordgo.New("Bot " + Config.DiscordToken)
@@ -305,7 +313,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		// Results are limited to 10 by API, sort by best price, trim,
 		// then sort the array back to original
-		if len(results) > 10 {
+		if len(results) > MaxEmbeds {
 			if wantSellers {
 				sort.Slice(results, func(i, j int) bool {
 					return results[i].Price < results[j].Price
@@ -315,7 +323,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 					return results[i].Price > results[j].Price
 				})
 			}
-			results = results[:10]
+			results = results[:MaxEmbeds]
 			sort.Slice(results, func(i, j int) bool {
 				return results[i].ScraperName < results[j].ScraperName
 			})
@@ -347,8 +355,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		co, err := mtgmatcher.GetUUID(cardId)
 		if err == nil {
 			printings = strings.Join(co.Printings, ", ")
-			if len(co.Printings) > 12 {
-				printings = strings.Join(co.Printings[:12], ", ") + " and more"
+			if len(co.Printings) > MaxPrintings {
+				printings = strings.Join(co.Printings[:MaxPrintings], ", ") + " and more"
 			}
 			if options["edition"] != "" && len(co.Variations) > 0 {
 				var cn []string
