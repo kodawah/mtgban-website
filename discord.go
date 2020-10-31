@@ -408,6 +408,11 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			title = card.Name + " at " + ogScraperName
 		}
 
+		// Add a tag for ease of debugging
+		if DevMode {
+			title = "[DEV] " + title
+		}
+
 		embed := discordgo.MessageEmbed{
 			Title: title,
 			Color: 0xFF0000,
