@@ -135,7 +135,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			// Hijack the shorthand to retrieve both retail and buylist values
 			if shorthand == "TCG" {
 				found = true
-				shorthand = "TCG Player,TCG Player Market"
+				shorthand = "TCG Player,TCGMkt"
 			}
 
 			if !found {
