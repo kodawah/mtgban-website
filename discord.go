@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"sort"
@@ -198,120 +199,61 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
+		var err error
 		var ogScraperName string
 		var cardId string
 		var results []SearchEntry
 		if wantSellers {
-			options["condition"] = "NM"
-
-			// Search
-			foundSellers, _ := searchSellers(query, Config.SearchBlockList, options)
-			if len(foundSellers) == 0 {
-				s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
-					Description: "Out of stock everywhere ┻━┻ ヘ╰( •̀ε•́ ╰)",
-				})
-				return
-			}
-
-			sortedKeysSeller := make([]string, 0, len(foundSellers))
-			for cardId := range foundSellers {
-				sortedKeysSeller = append(sortedKeysSeller, cardId)
-			}
-			if len(sortedKeysSeller) > 1 {
-				sort.Slice(sortedKeysSeller, func(i, j int) bool {
-					return sortSets(sortedKeysSeller[i], sortedKeysSeller[j])
-				})
-			}
-
-			cardId = sortedKeysSeller[0]
-			results = foundSellers[cardId]["NM"]
+			cardId, results, err = searchSellersFirstResult(query, options)
 		} else if wantVendors {
-			// Search
-			foundVendors, _ := searchVendors(query, Config.SearchBlockList, options)
-			if len(foundVendors) == 0 {
-				s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
-					Description: "Nobody is buying that card ┻━┻ ヘ╰( •̀ε•́ ╰)",
-				})
-				return
-			}
-
-			sortedKeysVendor := make([]string, 0, len(foundVendors))
-			for cardId := range foundVendors {
-				sortedKeysVendor = append(sortedKeysVendor, cardId)
-			}
-			if len(sortedKeysVendor) > 1 {
-				sort.Slice(sortedKeysVendor, func(i, j int) bool {
-					return sortSets(sortedKeysVendor[i], sortedKeysVendor[j])
-				})
-			}
-
-			cardId = sortedKeysVendor[0]
-			results = foundVendors[cardId]
+			cardId, results, err = searchVendorsFirstResult(query, options)
 		} else if wantBothSingle {
-			options["condition"] = "NM"
+			cardIdS, resultsS, errS := searchSellersFirstResult(query, options)
+			cardIdV, resultsV, errV := searchVendorsFirstResult(query, options)
 
-			// Search
-			foundSellers, _ := searchSellers(query, Config.SearchBlockList, options)
-			foundVendors, _ := searchVendors(query, Config.SearchBlockList, options)
+			if errS != nil && errV != nil {
+				err = errors.New("No supply and no demand (╯°□°）╯︵ ┻━┻")
+			} else {
+				// Add the retail price as first result
+				var foundRetail SearchEntry
+				if errS == nil {
+					cardId = cardIdS
+					foundRetail = resultsS[0]
+					ogScraperName = foundRetail.ScraperName
+				}
+				foundRetail.ScraperName = "Retail"
+				results = append(results, foundRetail)
 
-			if len(foundSellers) == 0 && len(foundVendors) == 0 {
-				s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
-					Description: "No supply and no demand (╯°□°）╯︵ ┻━┻",
-				})
-				return
-			}
+				// If both functions returned something, but it's a different card,
+				// search buylist again with the retail id
+				if errS == nil && errV == nil && cardIdS != cardIdV {
+					cardIdV, resultsV, errV = searchVendorsFirstResult(parseSearchOptions(cardId))
+				}
 
-			// Sort
-			sortedKeysSeller := make([]string, 0, len(foundSellers))
-			for scardId := range foundSellers {
-				sortedKeysSeller = append(sortedKeysSeller, scardId)
-			}
-			var foundRetail SearchEntry
-			if len(sortedKeysSeller) > 1 {
-				sort.Slice(sortedKeysSeller, func(i, j int) bool {
-					return sortSets(sortedKeysSeller[i], sortedKeysSeller[j])
-				})
-			}
+				// Add the buylist price as second result
+				var foundBuylist SearchEntry
+				if errV == nil {
+					cardId = cardIdV
+					foundBuylist = resultsV[0]
+					ogScraperName = foundBuylist.ScraperName
+				}
+				foundBuylist.ScraperName = "Buylist"
+				results = append(results, foundBuylist)
 
-			if len(sortedKeysSeller) > 0 {
-				cardId = sortedKeysSeller[0]
-				foundRetail = foundSellers[cardId]["NM"][0]
-				ogScraperName = foundRetail.ScraperName
+				// Add an extra value that compares the two
+				if foundRetail.Price != 0 && foundBuylist.Price != 0 {
+					results = append(results, SearchEntry{
+						ScraperName: "Ratio",
+						Price:       foundBuylist.Price / foundRetail.Price * 100,
+					})
+				}
 			}
-			foundRetail.ScraperName = "Retail"
-			results = append(results, foundRetail)
-
-			sortedKeysVendor := make([]string, 0, len(foundVendors))
-			for vcardId := range foundVendors {
-				sortedKeysVendor = append(sortedKeysVendor, vcardId)
-			}
-			var foundBuylist SearchEntry
-			if len(sortedKeysVendor) > 1 {
-				sort.Slice(sortedKeysVendor, func(i, j int) bool {
-					return sortSets(sortedKeysVendor[i], sortedKeysVendor[j])
-				})
-			}
-
-			// Do not overwrite existing id
-			if cardId == "" && len(sortedKeysVendor) > 0 {
-				cardId = sortedKeysVendor[0]
-			}
-			// Skip entry if the two do not match
-			entry, found := foundVendors[cardId]
-			if found {
-				foundBuylist = entry[0]
-				ogScraperName = entry[0].ScraperName
-			}
-			foundBuylist.ScraperName = "Buylist"
-			results = append(results, foundBuylist)
-
-			// Add an extra value that compares the two
-			if foundRetail.Price != 0 && foundBuylist.Price != 0 {
-				results = append(results, SearchEntry{
-					ScraperName: "Ratio",
-					Price:       foundBuylist.Price / foundRetail.Price * 100,
-				})
-			}
+		}
+		if err != nil {
+			s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+				Description: err.Error(),
+			})
+			return
 		}
 
 		// Results are limited to 10 by API, sort by best price, trim,
@@ -442,4 +384,53 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		s.ChannelMessageSendEmbed(m.ChannelID, &embed)
 	}
+}
+
+// Retrieve cards from Sellers using the very first result
+func searchSellersFirstResult(query string, options map[string]string) (cardId string, results []SearchEntry, err error) {
+	options["condition"] = "NM"
+
+	// Search
+	foundSellers, _ := searchSellers(query, Config.SearchBlockList, options)
+	if len(foundSellers) == 0 {
+		err = errors.New("Out of stock everywhere ┻━┻ ヘ╰( •̀ε•́ ╰)")
+		return
+	}
+
+	sortedKeysSeller := make([]string, 0, len(foundSellers))
+	for cardId := range foundSellers {
+		sortedKeysSeller = append(sortedKeysSeller, cardId)
+	}
+	if len(sortedKeysSeller) > 1 {
+		sort.Slice(sortedKeysSeller, func(i, j int) bool {
+			return sortSets(sortedKeysSeller[i], sortedKeysSeller[j])
+		})
+	}
+
+	cardId = sortedKeysSeller[0]
+	results = foundSellers[cardId]["NM"]
+	return
+}
+
+// Retrieve cards from Vendors using the very first result
+func searchVendorsFirstResult(query string, options map[string]string) (cardId string, results []SearchEntry, err error) {
+	foundVendors, _ := searchVendors(query, Config.SearchBlockList, options)
+	if len(foundVendors) == 0 {
+		err = errors.New("Nobody is buying that card ┻━┻ ヘ╰( •̀ε•́ ╰)")
+		return
+	}
+
+	sortedKeysVendor := make([]string, 0, len(foundVendors))
+	for cardId := range foundVendors {
+		sortedKeysVendor = append(sortedKeysVendor, cardId)
+	}
+	if len(sortedKeysVendor) > 1 {
+		sort.Slice(sortedKeysVendor, func(i, j int) bool {
+			return sortSets(sortedKeysVendor[i], sortedKeysVendor[j])
+		})
+	}
+
+	cardId = sortedKeysVendor[0]
+	results = foundVendors[cardId]
+	return
 }
