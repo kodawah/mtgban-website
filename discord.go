@@ -188,6 +188,9 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				}
 
 				field.Value += fmt.Sprintf("• **[`%s%s`](%s)** $%0.2f", entry.ScraperName, extraSpaces, entry.URL, entry.Price)
+				if entry.Ratio > 60 {
+					field.Value += fmt.Sprintf(" 🔥")
+				}
 				field.Value += "\n"
 			}
 			if len(results) == 0 {
