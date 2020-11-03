@@ -21,6 +21,9 @@ const (
 	// Avoid making messages overly long
 	MaxPrintings = 12
 
+	// Overflow prevention for field.Value size
+	MaxCustomEntries = 7
+
 	// Discord API constants
 	MaxEmbedFieldsValueLength = 1024
 	MaxEmbedFieldsNumber      = 25
@@ -181,6 +184,24 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			field := &discordgo.MessageEmbedField{
 				Name:   fieldsNames[i],
 				Inline: true,
+			}
+
+			// Results look really bad after MaxCustomEntries, and too much info
+			// does not help, so sort by best price, trim, then sort back to original
+			if len(results) > MaxCustomEntries {
+				if i == 0 {
+					sort.Slice(results, func(i, j int) bool {
+						return results[i].Price < results[j].Price
+					})
+				} else if i == 1 {
+					sort.Slice(results, func(i, j int) bool {
+						return results[i].Price > results[j].Price
+					})
+				}
+				results = results[:MaxCustomEntries]
+				sort.Slice(results, func(i, j int) bool {
+					return results[i].ScraperName < results[j].ScraperName
+				})
 			}
 
 			// Alsign to the longest name by appending whitespaces
