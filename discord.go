@@ -20,6 +20,10 @@ var poweredByFooter = discordgo.MessageEmbedFooter{
 const (
 	// Avoid making messages overly long
 	MaxPrintings = 12
+
+	// Discord API constants
+	MaxEmbedFieldsValueLength = 1024
+	MaxEmbedFieldsNumber      = 25
 )
 
 func setupDiscord() error {
@@ -187,11 +191,23 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 					extraSpaces += " "
 				}
 
-				field.Value += fmt.Sprintf("• **[`%s%s`](%s)** $%0.2f", entry.ScraperName, extraSpaces, entry.URL, entry.Price)
+				value := fmt.Sprintf("• **[`%s%s`](%s)** $%0.2f", entry.ScraperName, extraSpaces, entry.URL, entry.Price)
 				if entry.Ratio > 60 {
-					field.Value += fmt.Sprintf(" 🔥")
+					value += fmt.Sprintf(" 🔥")
 				}
-				field.Value += "\n"
+				value += "\n"
+
+				// If we go past the maximum value for embed field values,
+				// make a new field for any spillover, as long as we are within
+				// the limits of the number of embeds allowed
+				if len(field.Value)+len(value) > MaxEmbedFieldsValueLength && len(fields) < MaxEmbedFieldsNumber {
+					fields = append(fields, field)
+					field = &discordgo.MessageEmbedField{
+						Name:   fieldsNames[i] + " (cont'd)",
+						Inline: true,
+					}
+				}
+				field.Value += value
 			}
 			if len(results) == 0 {
 				field.Value = "N/A"
