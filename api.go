@@ -27,7 +27,7 @@ func API(w http.ResponseWriter, r *http.Request) {
 	param, _ := GetParamFromSig(sig, "API")
 	canAPI := strings.Contains(param, "CK")
 	if SigCheck && !canAPI {
-		http.Error(w, fmt.Sprintf("Invalid signature", param), http.StatusUnauthorized)
+		http.Error(w, fmt.Sprintf("Invalid signature: %s", param), http.StatusUnauthorized)
 		return
 	}
 
