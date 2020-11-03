@@ -258,17 +258,21 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
 				URL: card.ImageURL,
 			},
+			Footer: &discordgo.MessageEmbedFooter{},
 		}
 
+		// Some footer action, RL, stocks, powered by
 		if card.Reserved {
-			embed.Footer = &discordgo.MessageEmbedFooter{
-				Text: "Part of the Reserved List",
-			}
+			embed.Footer.Text = "Part of the Reserved List\n"
 		}
-
+		_, stocks := Infos["STKS"][cardId]
+		if stocks {
+			embed.Footer.Text += "On MTGStocks Interests page\n"
+		}
 		// Show data source on non-ban servers
 		if len(Config.DiscordAllowList) > 0 && m.GuildID != Config.DiscordAllowList[0] {
-			embed.Footer = &poweredByFooter
+			embed.Footer.IconURL = poweredByFooter.IconURL
+			embed.Footer.Text += poweredByFooter.Text
 		}
 
 		s.ChannelMessageSendEmbed(m.ChannelID, &embed)
