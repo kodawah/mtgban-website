@@ -350,6 +350,15 @@ func searchSellersFirstResult(query string, options map[string]string) (cardId s
 
 	cardId = sortedKeysSeller[0]
 	results = foundSellers[cardId]["NM"]
+
+	// Drop duplicates by looking at the last one as they are alredy sorted
+	tmp := append(results[:0], results[0])
+	for i := range results {
+		if results[i].ScraperName != tmp[len(tmp)-1].ScraperName {
+			tmp = append(tmp, results[i])
+		}
+	}
+	results = tmp
 	return
 }
 
