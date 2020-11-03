@@ -18,9 +18,6 @@ var poweredByFooter = discordgo.MessageEmbedFooter{
 }
 
 const (
-	// As defined by the discord API
-	MaxEmbeds = 10
-
 	// Avoid making messages overly long
 	MaxPrintings = 12
 )
@@ -92,14 +89,10 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	wantSellers := strings.HasPrefix(m.Content, "!")
-	wantVendors := strings.HasPrefix(m.Content, "?")
 	// Avoid invocations
-	if wantSellers || wantVendors {
+	if strings.HasPrefix(m.Content, "!") {
 		// Strip away bang character
 		content := strings.TrimPrefix(m.Content, "!")
-		content = strings.TrimPrefix(content, "?")
-		content = strings.TrimPrefix(content, "$")
 
 		// Clean up query and only search for NM
 		query, options := parseSearchOptions(content)
@@ -158,59 +151,53 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
-		var err error
-		var ogScraperName string
-		var cardId string
-		var results []SearchEntry
-		if wantSellers {
-			cardId, results, err = searchSellersFirstResult(query, options)
-		} else if wantVendors {
-			cardId, results, err = searchVendorsFirstResult(query, options)
-		}
-		if err != nil {
+		// Search both sellers and vendors
+		cardId, resultsSellers, errS := searchSellersFirstResult(query, options)
+		cardIdV, resultsVendors, errV := searchVendorsFirstResult(query, options)
+		switch {
+		// Both errored, card is oos
+		case errS != nil && errV != nil:
 			s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
-				Description: err.Error(),
+				Description: errS.Error(),
 			})
 			return
+		// Retail is oos, but buylist isn't, let's use it
+		case errS != nil:
+			cardId = cardIdV
+		// Buylist is not oos, but it returned a different card id,
+		// which means the original one is actually oos
+		case errV == nil && cardId != cardIdV:
+			resultsVendors = []SearchEntry{}
 		}
 
-		// Results are limited to 10 by API, sort by best price, trim,
-		// then sort the array back to original
-		if len(results) > MaxEmbeds {
-			if wantSellers {
-				sort.Slice(results, func(i, j int) bool {
-					return results[i].Price < results[j].Price
-				})
-			} else if wantSellers {
-				sort.Slice(results, func(i, j int) bool {
-					return results[i].Price > results[j].Price
-				})
-			}
-			results = results[:MaxEmbeds]
-			sort.Slice(results, func(i, j int) bool {
-				return results[i].ScraperName < results[j].ScraperName
-			})
-		}
-
+		// Add two embed filds, one for retail and one for buylist
+		fieldsNames := []string{"Retail", "Buylist"}
 		var fields []*discordgo.MessageEmbedField
-		for _, entry := range results {
-			price := "N/A"
-			if entry.ScraperName == "Ratio" {
-				price = fmt.Sprintf("%0.2f %%", entry.Price)
-			} else if entry.Price > 0 {
-				price = fmt.Sprintf("$ %0.2f", entry.Price)
-				// Also add quantity for hybrid mode
-				if entry.Quantity > 0 && (entry.ScraperName == "Retail" || entry.ScraperName == "Buylist") {
-					price = fmt.Sprintf("%d @ %s", entry.Quantity, price)
-				}
-			}
-			fields = append(fields, &discordgo.MessageEmbedField{
-				Name:   entry.ScraperName,
-				Value:  price,
+		for i, results := range [][]SearchEntry{resultsSellers, resultsVendors} {
+			field := &discordgo.MessageEmbedField{
+				Name:   fieldsNames[i],
 				Inline: true,
-			})
+			}
+
+			// Alsign to the longest name by appending whitespaces
+			alignLength := longestName(results)
+			for _, entry := range results {
+				extraSpaces := ""
+				for i := len(entry.ScraperName); i < alignLength; i++ {
+					extraSpaces += " "
+				}
+
+				field.Value += fmt.Sprintf("• **[`%s%s`](%s)** $%0.2f", entry.ScraperName, extraSpaces, entry.URL, entry.Price)
+				field.Value += "\n"
+			}
+			if len(results) == 0 {
+				field.Value = "N/A"
+			}
+
+			fields = append(fields, field)
 		}
 
+		// Prepare card data
 		card := uuid2card(cardId, true)
 
 		// Retrieve the first 12 editions this card is printed in
@@ -248,33 +235,27 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		link = "https://www.mtgban.com/search?q=" + url.QueryEscape(searchQuery) + "&utm_source=banbot&utm_affiliate=" + m.GuildID
 
-		var title string
-		if wantSellers {
-			title = "Retail prices for " + card.Name
-		} else if wantVendors {
-			title = "Buylist prices for " + card.Name
-		}
-
+		// Set title of the main message
+		title := "Prices for " + card.Name
 		// Add a tag for ease of debugging
 		if DevMode {
 			title = "[DEV] " + title
 		}
+		// Spark-ly
+		if card.Foil {
+			title += " ✨"
+		}
 
 		embed := discordgo.MessageEmbed{
-			Title: title,
-			Color: 0xFF0000,
-			URL:   link,
+			Title:       title,
+			Color:       0xFF0000,
+			URL:         link,
+			Description: fmt.Sprintf("[%s] %s\nPrinted in %s", card.SetCode, card.Title, printings),
+			Fields:      fields,
 			Thumbnail: &discordgo.MessageEmbedThumbnail{
 				URL: card.ImageURL,
 			},
 		}
-
-		if card.Foil {
-			embed.Title += " ✨"
-		}
-		embed.Description = fmt.Sprintf("[%s] %s\nPrinted in %s", card.SetCode, card.Title, printings)
-
-		embed.Fields = fields
 
 		if card.Reserved {
 			embed.Footer = &discordgo.MessageEmbedFooter{
@@ -289,6 +270,17 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		s.ChannelMessageSendEmbed(m.ChannelID, &embed)
 	}
+}
+
+// Obtain the length of the scraper with the longest name
+func longestName(results []SearchEntry) (out int) {
+	for _, entry := range results {
+		probe := len(entry.ScraperName)
+		if probe > out {
+			out = probe
+		}
+	}
+	return
 }
 
 // Retrieve cards from Sellers using the very first result
