@@ -332,7 +332,7 @@ func searchSellersFirstResult(query string, options map[string]string) (cardId s
 	options["condition"] = "NM"
 
 	// Search
-	foundSellers, _ := searchSellers(query, Config.SearchBlockList, options)
+	foundSellers, _ := searchSellers(query, append(Config.SearchBlockList, "TCG Direct"), options)
 	if len(foundSellers) == 0 {
 		err = errors.New("Out of stock everywhere ┻━┻ ヘ╰( •̀ε•́ ╰)")
 		return
