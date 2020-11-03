@@ -100,7 +100,7 @@ func getUserIds(tc *http.Client) ([]string, error) {
 						Id   string `json:"id"`
 						Type string `json:"type"`
 					} `json:"data"`
-				} `json:memberships"`
+				} `json:"memberships"`
 			} `json:"relationships"`
 			IdV1 string `json:"id"`
 		} `json:"data"`
