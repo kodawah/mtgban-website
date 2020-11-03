@@ -6,7 +6,6 @@ import (
 	"net/url"
 	"sort"
 	"strings"
-	"unicode"
 
 	"github.com/bwmarrin/discordgo"
 
@@ -96,8 +95,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	wantSellers := strings.HasPrefix(m.Content, "!")
 	wantVendors := strings.HasPrefix(m.Content, "?")
 	// Avoid invocations
-	wantBothSingle := strings.HasPrefix(m.Content, "$") && unicode.IsLetter(rune(m.Content[1]))
-	if wantSellers || wantVendors || wantBothSingle {
+	if wantSellers || wantVendors {
 		// Strip away bang character
 		content := strings.TrimPrefix(m.Content, "!")
 		content = strings.TrimPrefix(content, "?")
@@ -109,45 +107,6 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		// Set a custom search mode since we want to try and find as much as possible
 		if options["search_mode"] == "" {
 			options["search_mode"] = "any"
-		}
-
-		// Clean up even more for this hybrid case
-		if wantBothSingle {
-			ogShorthand := strings.Fields(query)[0]
-			shorthand := strings.ToUpper(ogShorthand)
-
-			// Look up and check if it exists
-			found := false
-			for _, seller := range Sellers {
-				if seller != nil && seller.Info().Shorthand == shorthand {
-					found = true
-					break
-				}
-			}
-			if !found {
-				for _, vendor := range Vendors {
-					if vendor != nil && vendor.Info().Shorthand == shorthand {
-						found = true
-						break
-					}
-				}
-			}
-
-			// Hijack the shorthand to retrieve both retail and buylist values
-			if shorthand == "TCG" {
-				found = true
-				shorthand = "TCG Player,TCGMkt"
-			}
-
-			if !found {
-				s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
-					Description: "No store found with \"" + ogShorthand + "\" 乁| ･ิ ∧ ･ิ |ㄏ",
-				})
-				return
-			}
-
-			options["scraper"] = shorthand
-			query = strings.TrimPrefix(query, ogShorthand)
 		}
 
 		// Prevent useless invocations
@@ -207,47 +166,6 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			cardId, results, err = searchSellersFirstResult(query, options)
 		} else if wantVendors {
 			cardId, results, err = searchVendorsFirstResult(query, options)
-		} else if wantBothSingle {
-			cardIdS, resultsS, errS := searchSellersFirstResult(query, options)
-			cardIdV, resultsV, errV := searchVendorsFirstResult(query, options)
-
-			if errS != nil && errV != nil {
-				err = errors.New("No supply and no demand (╯°□°）╯︵ ┻━┻")
-			} else {
-				// Add the retail price as first result
-				var foundRetail SearchEntry
-				if errS == nil {
-					cardId = cardIdS
-					foundRetail = resultsS[0]
-					ogScraperName = foundRetail.ScraperName
-				}
-				foundRetail.ScraperName = "Retail"
-				results = append(results, foundRetail)
-
-				// If both functions returned something, but it's a different card,
-				// search buylist again with the retail id
-				if errS == nil && errV == nil && cardIdS != cardIdV {
-					cardIdV, resultsV, errV = searchVendorsFirstResult(parseSearchOptions(cardId))
-				}
-
-				// Add the buylist price as second result
-				var foundBuylist SearchEntry
-				if errV == nil {
-					cardId = cardIdV
-					foundBuylist = resultsV[0]
-					ogScraperName = foundBuylist.ScraperName
-				}
-				foundBuylist.ScraperName = "Buylist"
-				results = append(results, foundBuylist)
-
-				// Add an extra value that compares the two
-				if foundRetail.Price != 0 && foundBuylist.Price != 0 {
-					results = append(results, SearchEntry{
-						ScraperName: "Ratio",
-						Price:       foundBuylist.Price / foundRetail.Price * 100,
-					})
-				}
-			}
 		}
 		if err != nil {
 			s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
@@ -317,37 +235,24 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 		var link string
-		// For hybrid mode, grab the first link that is available
-		if wantBothSingle {
-			for _, res := range results {
-				if res.URL == "" {
-					continue
-				}
-				link = res.URL
-				break
-			}
-		} else {
-			// Rebuild the search query
-			searchQuery := card.Name
-			if options["edition"] != "" {
-				searchQuery += " s:" + options["edition"]
-			}
-			if options["number"] != "" {
-				searchQuery += " cn:" + options["number"]
-			}
-			if options["foil"] != "" {
-				searchQuery += " f:" + options["foil"]
-			}
-			link = "https://www.mtgban.com/search?q=" + url.QueryEscape(searchQuery) + "&utm_source=banbot&utm_affiliate=" + m.GuildID
+		// Rebuild the search query
+		searchQuery := card.Name
+		if options["edition"] != "" {
+			searchQuery += " s:" + options["edition"]
 		}
+		if options["number"] != "" {
+			searchQuery += " cn:" + options["number"]
+		}
+		if options["foil"] != "" {
+			searchQuery += " f:" + options["foil"]
+		}
+		link = "https://www.mtgban.com/search?q=" + url.QueryEscape(searchQuery) + "&utm_source=banbot&utm_affiliate=" + m.GuildID
 
 		var title string
 		if wantSellers {
 			title = "Retail prices for " + card.Name
 		} else if wantVendors {
 			title = "Buylist prices for " + card.Name
-		} else if wantBothSingle {
-			title = card.Name + " at " + ogScraperName
 		}
 
 		// Add a tag for ease of debugging
