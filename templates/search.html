@@ -143,13 +143,9 @@
                             {{range $entries}}
                                 <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $cardId).ImageURL}};">
                                     <td>
-                                        {{if ne .URL ""}}
-                                            <a class="btn normal" href="{{.URL}}" target="_blank">
-                                                {{.ScraperName}}
-                                            </a>
-                                        {{else}}
-                                            &nbsp;&nbsp;{{.ScraperName}}
-                                        {{end}}
+                                        <a class="btn normal" href="{{.URL}}" target="_blank">
+                                            {{.ScraperName}}
+                                        </a>
                                     </td>
                                     <td style="text-align: center; vertical-align: middle;">
                                         $ {{printf "%.2f" .Price}}
@@ -202,13 +198,9 @@
                         {{range $entries}}
                             <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $cardId).ImageURL}};">
                                 <td>
-                                    {{if ne .URL ""}}
-                                        <a class="btn normal" href="{{.URL}}" target="_blank">
-                                            {{.ScraperName}}
-                                        </a>
-                                    {{else}}
-                                        &nbsp;&nbsp;{{.ScraperName}}
-                                    {{end}}
+                                    <a class="btn normal" href="{{.URL}}" target="_blank">
+                                        {{.ScraperName}}
+                                    </a>
                                 </td>
                                 <td>
                                     $ {{printf "%.2f" .Price}}
