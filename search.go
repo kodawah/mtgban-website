@@ -29,6 +29,9 @@ type SearchEntry struct {
 	URL         string
 	NoQuantity  bool
 	ShowDirect  bool
+
+	IndexCombined bool
+	Secondary     float64
 }
 
 func Search(w http.ResponseWriter, r *http.Request) {
@@ -145,6 +148,10 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	if bestSorting {
 		for cardId := range foundSellers {
 			for cond := range foundSellers[cardId] {
+				// These entries are special, do not sort them
+				if cond == "INDEX" {
+					continue
+				}
 				sort.Slice(foundSellers[cardId][cond], func(i, j int) bool {
 					return foundSellers[cardId][cond][i].Price < foundSellers[cardId][cond][j].Price
 				})
@@ -155,6 +162,37 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				return foundVendors[cardId][i].Price > foundVendors[cardId][j].Price
 			})
 		}
+	}
+
+	// Readjust array of INDEX entires
+	for cardId := range foundSellers {
+		indexArray := foundSellers[cardId]["INDEX"]
+		tmp := indexArray[:0]
+		tcgIndex := -1
+
+		// Iterate on array, always passthrough, except for specific entries
+		for i := range indexArray {
+			switch indexArray[i].ScraperName {
+			case TCG_LOW:
+				// Save reference to the array
+				tmp = append(tmp, indexArray[i])
+				tcgIndex = len(tmp) - 1
+			case TCG_MARKET:
+				// If the reference is found, add a secondary price
+				// otherwise just leave it as is
+				if tcgIndex >= 0 {
+					tmp[tcgIndex].Secondary = indexArray[i].Price
+					tmp[tcgIndex].ScraperName = "TCG (Low / Market)"
+					tmp[tcgIndex].IndexCombined = true
+				} else {
+					tmp = append(tmp, indexArray[i])
+				}
+			default:
+				tmp = append(tmp, indexArray[i])
+			}
+		}
+
+		foundSellers[cardId]["INDEX"] = tmp
 	}
 
 	pageVars.FoundSellers = foundSellers

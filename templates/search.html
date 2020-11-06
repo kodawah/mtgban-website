@@ -124,7 +124,7 @@
                             {{$firstImg = (index $.Metadata $cardId).ImageURL}}
                         {{end}}
                         <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $cardId).ImageURL}};" title="{{(index $.Metadata $cardId).Title}}">
-                            <th colspan="2" class="wrap stickyHeader" style="text-align: left; vertical-align: middle;">
+                            <th colspan="3" class="wrap stickyHeader" style="text-align: left; vertical-align: middle;">
                                 <i class="ss {{(index $.Metadata $cardId).Keyrune}} ss-2x ss-fw"></i> {{(index $.Metadata $cardId).Name}}{{if ne (index $.Metadata $cardId).Variant ""}} <i>({{(index $.Metadata $cardId).Variant}})</i>{{end}}{{if (index $.Metadata $cardId).Reserved}} *{{end}}{{if (index $.Metadata $cardId).Stocks}} •{{end}}
                             </th>
                             <th class="wrap stickyHeader" style="text-align: center; vertical-align: middle;">
@@ -136,7 +136,7 @@
                             {{if ne $conditions "INDEX"}}
                                 {{if $entries}}
                                     <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $cardId).ImageURL}};">
-                                        <td colspan="3"><i>Conditions: {{$conditions}}</i></th>
+                                        <td colspan="4"><i>Conditions: {{$conditions}}</i></th>
                                     </tr>
                                 {{end}}
                             {{end}}
@@ -151,16 +151,27 @@
                                             &nbsp;&nbsp;{{.ScraperName}}
                                         {{end}}
                                     </td>
-                                    <td>
+                                    <td style="text-align: center; vertical-align: middle;">
                                         $ {{printf "%.2f" .Price}}
                                     </td>
-                                    <td style="text-align: center; vertical-align: middle;">
-                                        {{if .ShowDirect}}
-                                            <img style="padding-top:4px;" src="img/misc/direct.png">
-                                        {{else if not .NoQuantity}}
-                                            {{.Quantity}}
-                                        {{end}}
-                                    </td>
+                                    {{if .IndexCombined}}
+                                        <td style="text-align: center; vertical-align: middle;">
+                                            /
+                                        </td>
+                                        <td style="text-align: center; vertical-align: middle;">
+                                            $ {{printf "%.2f" .Secondary}}
+                                        </td>
+                                    {{else}}
+                                        <td>
+                                        </td>
+                                        <td style="text-align: center; vertical-align: middle;">
+                                            {{if .ShowDirect}}
+                                                <img style="padding-top:4px;" src="img/misc/direct.png">
+                                            {{else if not .NoQuantity}}
+                                                {{.Quantity}}
+                                            {{end}}
+                                        </td>
+                                    {{end}}
                                 </tr>
                             {{end}}
                         {{end}}
