@@ -28,7 +28,11 @@ import (
 )
 
 const (
-	TCG_LOW     = "TCG Low"
+	// from TCGIndex
+	TCG_LOW    = "TCG Low"
+	TCG_MARKET = "TCG Market"
+
+	// from TCGMrkt
 	TCG_MAIN    = "TCG Player"
 	TCG_DIRECT  = "TCG Direct"
 	TCG_BUYLIST = "TCG Player Market"
@@ -481,7 +485,7 @@ var options = map[string]*scraperOption{
 			scraper.MaxConcurrency = 4
 			return scraper, nil
 		},
-		Keepers: []string{TCG_LOW},
+		Keepers: []string{TCG_LOW, TCG_MARKET},
 	},
 	"magiccorner": &scraperOption{
 		OnlySeller: true,
