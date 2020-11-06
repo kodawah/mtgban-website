@@ -170,11 +170,26 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	for cardId := range foundSellers {
 		indexArray := foundSellers[cardId]["INDEX"]
 		tmp := indexArray[:0]
+		mkmIndex := -1
 		tcgIndex := -1
 
 		// Iterate on array, always passthrough, except for specific entries
 		for i := range indexArray {
 			switch indexArray[i].ScraperName {
+			case MKM_LOW:
+				// Save reference to the array
+				tmp = append(tmp, indexArray[i])
+				mkmIndex = len(tmp) - 1
+			case MKM_TREND:
+				// If the reference is found, add a secondary price
+				// otherwise just leave it as is
+				if mkmIndex >= 0 {
+					tmp[mkmIndex].Secondary = indexArray[i].Price
+					tmp[mkmIndex].ScraperName = "MKM (Low / Trend)"
+					tmp[mkmIndex].IndexCombined = true
+				} else {
+					tmp = append(tmp, indexArray[i])
+				}
 			case TCG_LOW:
 				// Save reference to the array
 				tmp = append(tmp, indexArray[i])

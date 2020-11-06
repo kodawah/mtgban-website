@@ -12,6 +12,7 @@ import (
 	"github.com/kodabb/go-mtgban/abugames"
 	"github.com/kodabb/go-mtgban/blueprint"
 	"github.com/kodabb/go-mtgban/cardkingdom"
+	"github.com/kodabb/go-mtgban/cardmarket"
 	"github.com/kodabb/go-mtgban/coolstuffinc"
 	"github.com/kodabb/go-mtgban/magiccorner"
 	"github.com/kodabb/go-mtgban/miniaturemarket"
@@ -36,6 +37,10 @@ const (
 	TCG_MAIN    = "TCG Player"
 	TCG_DIRECT  = "TCG Direct"
 	TCG_BUYLIST = "TCG Player Market"
+
+	// from MKMIndex
+	MKM_LOW   = "MKM Low"
+	MKM_TREND = "MKM Trend"
 )
 
 func loadDatastore() error {
@@ -512,6 +517,18 @@ var options = map[string]*scraperOption{
 			scraper.LogCallback = log.Printf
 			return scraper, nil
 		},
+	},
+	"cardmarket": &scraperOption{
+		DevEnabled: true,
+		Init: func() (mtgban.Scraper, error) {
+			scraper, err := cardmarket.NewScraperIndex(Config.Api["mkm_app_token"], Config.Api["mkm_app_secret"])
+			if err != nil {
+				return nil, err
+			}
+			scraper.LogCallback = log.Printf
+			return scraper, nil
+		},
+		Keepers: []string{MKM_LOW, MKM_TREND},
 	},
 }
 
