@@ -30,6 +30,8 @@ type SearchEntry struct {
 	NoQuantity  bool
 	ShowDirect  bool
 
+	Country string
+
 	IndexCombined bool
 	Secondary     float64
 }
@@ -433,9 +435,7 @@ func searchSellers(query string, blocklist []string, options map[string]string) 
 						URL:         entry.URL,
 						NoQuantity:  seller.Info().NoQuantityInventory || seller.Info().MetadataOnly,
 						ShowDirect:  seller.Info().Name == TCG_DIRECT,
-					}
-					if seller.Info().CountryFlag != "" {
-						res.ScraperName += " " + seller.Info().CountryFlag
+						Country:     seller.Info().CountryFlag,
 					}
 
 					// Touchdown
@@ -542,9 +542,7 @@ func searchVendors(query string, blocklist []string, options map[string]string) 
 					Ratio:       entry.PriceRatio,
 					Quantity:    entry.Quantity,
 					URL:         entry.URL,
-				}
-				if vendor.Info().CountryFlag != "" {
-					res.ScraperName += " " + vendor.Info().CountryFlag
+					Country:     vendor.Info().CountryFlag,
 				}
 				foundVendors[cardId] = append(foundVendors[cardId], res)
 			}

@@ -145,6 +145,9 @@
                                     <td>
                                         <a class="btn normal" href="{{.URL}}" target="_blank">
                                             {{.ScraperName}}
+                                            {{if ne $conditions "INDEX"}}
+                                                {{.Country}}
+                                            {{end}}
                                         </a>
                                     </td>
                                     <td style="text-align: center; vertical-align: middle;">
@@ -199,7 +202,7 @@
                             <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $cardId).ImageURL}};">
                                 <td>
                                     <a class="btn normal" href="{{.URL}}" target="_blank">
-                                        {{.ScraperName}}
+                                        {{.ScraperName}} {{.Country}}
                                     </a>
                                 </td>
                                 <td>
