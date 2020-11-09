@@ -125,7 +125,25 @@
                         {{end}}
                         <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $cardId).ImageURL}};" title="{{(index $.Metadata $cardId).Title}}">
                             <th colspan="3" class="wrap stickyHeader" style="text-align: left; vertical-align: middle;">
-                                <i class="ss {{(index $.Metadata $cardId).Keyrune}} ss-2x ss-fw"></i> {{(index $.Metadata $cardId).Name}}{{if ne (index $.Metadata $cardId).Variant ""}} <i>({{(index $.Metadata $cardId).Variant}})</i>{{end}}{{if (index $.Metadata $cardId).Reserved}} *{{end}}{{if (index $.Metadata $cardId).Stocks}} •{{end}}
+                                <table style="margin:0 0">
+                                    <tr style="background-color:rgba(0, 0, 0, 0);">
+                                        <td>
+                                            <i class="ss {{(index $.Metadata $cardId).Keyrune}} ss-2x ss-fw"></i>
+                                        </td>
+                                        <td>
+                                            {{(index $.Metadata $cardId).Name}}
+                                            {{if ne (index $.Metadata $cardId).Variant ""}}
+                                                <i>({{(index $.Metadata $cardId).Variant}})</i>
+                                            {{end}}
+                                            {{if (index $.Metadata $cardId).Reserved}}
+                                                *
+                                            {{end}}
+                                            {{if (index $.Metadata $cardId).Stocks}}
+                                                •
+                                            {{end}}
+                                        </td>
+                                    </tr>
+                                </table>
                             </th>
                             <th class="wrap stickyHeader" style="text-align: center; vertical-align: middle;">
                                 <h4># {{(index $.Metadata $cardId).Number}}</h4>
@@ -192,7 +210,25 @@
                         {{$entries := (index $.FoundVendors $cardId)}}
                         <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $cardId).ImageURL}};" title="{{(index $.Metadata $cardId).Title}}">
                             <th colspan="3" class="wrap stickyHeader" style="text-align: left; vertical-align: middle;">
-                                <i class="ss {{(index $.Metadata $cardId).Keyrune}} ss-2x ss-fw"></i> {{(index $.Metadata $cardId).Name}}{{if ne (index $.Metadata $cardId).Variant ""}} <i>({{(index $.Metadata $cardId).Variant}})</i>{{end}}{{if (index $.Metadata $cardId).Reserved}} *{{end}}{{if (index $.Metadata $cardId).Stocks}} •{{end}}
+                                <table style="margin:0 0">
+                                    <tr style="background-color:rgba(0, 0, 0, 0);">
+                                        <td>
+                                            <i class="ss {{(index $.Metadata $cardId).Keyrune}} ss-2x ss-fw"></i>
+                                        </td>
+                                        <td>
+                                            {{(index $.Metadata $cardId).Name}}
+                                            {{if ne (index $.Metadata $cardId).Variant ""}}
+                                                <i>({{(index $.Metadata $cardId).Variant}})</i>
+                                            {{end}}
+                                            {{if (index $.Metadata $cardId).Reserved}}
+                                                *
+                                            {{end}}
+                                            {{if (index $.Metadata $cardId).Stocks}}
+                                                •
+                                            {{end}}
+                                        </td>
+                                    </tr>
+                                </table>
                             </th>
                             <th class="wrap stickyHeader" style="text-align: center; vertical-align: middle;">
                                 <h4># {{(index $.Metadata $cardId).Number}}</h4>
