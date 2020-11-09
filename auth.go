@@ -475,18 +475,26 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) (string, string)
 	}
 	if v.Get("Arbit") == "true" {
 		if tierTitle == "Root" {
-			v.Set("ArbitEnabled", "ALL")
+			var allowlistSellers []string
+			for i, seller := range Sellers {
+				if seller == nil {
+					log.Println("nil seller at position", i)
+					continue
+				}
+				allowlistSellers = append(allowlistSellers, seller.Info().Shorthand)
+			}
+			v.Set("ArbitEnabled", strings.Join(allowlistSellers, ","))
 			v.Set("ArbitDisabledVendors", "NONE")
 		} else {
-			v.Set("ArbitEnabled", "DEFAULT")
-			v.Set("ArbitDisabledVendors", "DEFAULT")
+			v.Set("ArbitEnabled", strings.Join(Config.ArbitDefaultSellers, ","))
+			v.Set("ArbitDisabledVendors", strings.Join(Config.ArbitBlockVendors, ","))
 		}
 	}
 	if v.Get("Search") == "true" {
 		if tierTitle == "Root" {
 			v.Set("SearchDisabled", "NONE")
 		} else {
-			v.Set("SearchDisabled", "DEFAULT")
+			v.Set("SearchDisabled", strings.Join(Config.SearchBlockList, ","))
 		}
 	}
 	if v.Get("Explore") == "true" {
