@@ -195,10 +195,10 @@
                             <td>
                                 <center>
                                     {{if ne .InventoryEntry.URL ""}}
-                                        <a class="btn normal" href="{{.InventoryEntry.URL}}" target="_blank">Buy</a>
+                                        <a class="btn normal" href="{{.InventoryEntry.URL}}" target="_blank" rel="nofollow">Buy</a>
                                     {{end}}
                                     {{if ne .BuylistEntry.URL ""}}
-                                        <a class="btn normal" href="{{.BuylistEntry.URL}}" target="_blank">Sell</a>
+                                        <a class="btn normal" href="{{.BuylistEntry.URL}}" target="_blank" rel="nofollow">Sell</a>
                                     {{end}}
                                 </center>
                             </td>

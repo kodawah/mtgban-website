@@ -161,7 +161,7 @@
                             {{range $entries}}
                                 <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $cardId).ImageURL}};">
                                     <td>
-                                        <a class="btn normal" href="{{.URL}}" target="_blank">
+                                        <a class="btn normal" href="{{.URL}}" target="_blank" rel="nofollow">
                                             {{.ScraperName}}
                                             {{if ne $conditions "INDEX"}}
                                                 {{.Country}}
@@ -237,7 +237,7 @@
                         {{range $entries}}
                             <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $cardId).ImageURL}};">
                                 <td>
-                                    <a class="btn normal" href="{{.URL}}" target="_blank">
+                                    <a class="btn normal" href="{{.URL}}" target="_blank" rel="nofollow">
                                         {{.ScraperName}} {{.Country}}
                                     </a>
                                 </td>
