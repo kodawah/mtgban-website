@@ -525,6 +525,7 @@ var options = map[string]*scraperOption{
 			if err != nil {
 				return nil, err
 			}
+			scraper.Affiliate = Config.Affiliate["MKM"]
 			scraper.LogCallback = log.Printf
 			return scraper, nil
 		},
