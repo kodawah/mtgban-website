@@ -23,6 +23,8 @@ import (
 
 var PatreonHost string
 
+const DefaultHost = "www.mtgban.com"
+
 const (
 	PatreonClientId = "VrjStFvhtp7HhF1xItHm83FMY7PK3nptpls1xVkYL5IDufXNVW4Xb-pHPXBIuWZ4"
 
@@ -195,7 +197,7 @@ func getUserTier(tc *http.Client, userId string) (string, error) {
 func getBaseURL(r *http.Request) string {
 	host := r.Host
 	if host == "localhost:"+fmt.Sprint(Config.Port) && !DevMode {
-		host = "www.mtgban.com"
+		host = DefaultHost
 	}
 	baseURL := "http://" + host
 	if r.TLS != nil {

@@ -212,7 +212,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 					extraSpaces += " "
 				}
 
-				value := fmt.Sprintf("• **[`%s%s`](%s)** $%0.2f", entry.ScraperName, extraSpaces, entry.URL, entry.Price)
+				link := "https://" + DefaultHost + "/go/" + strings.ToLower(string(fieldsNames[i][0])) + "/" + entry.Shorthand + "/" + cardId
+				value := fmt.Sprintf("• **[`%s%s`](%s)** $%0.2f", entry.ScraperName, extraSpaces, link, entry.Price)
 				if entry.Ratio > 60 {
 					value += fmt.Sprintf(" 🔥")
 				}

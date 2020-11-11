@@ -23,6 +23,7 @@ const (
 
 type SearchEntry struct {
 	ScraperName string
+	Shorthand   string
 	Price       float64
 	Ratio       float64
 	Quantity    int
@@ -445,6 +446,7 @@ func searchSellers(query string, blocklist []string, options map[string]string) 
 					// Prepare all the deets
 					res := SearchEntry{
 						ScraperName: name,
+						Shorthand:   seller.Info().Shorthand,
 						Price:       entry.Price,
 						Quantity:    entry.Quantity,
 						URL:         entry.URL,
@@ -553,6 +555,7 @@ func searchVendors(query string, blocklist []string, options map[string]string) 
 				}
 				res := SearchEntry{
 					ScraperName: name,
+					Shorthand:   vendor.Info().Shorthand,
 					Price:       entry.BuyPrice,
 					Ratio:       entry.PriceRatio,
 					Quantity:    entry.Quantity,
