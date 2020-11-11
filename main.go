@@ -407,6 +407,9 @@ func main() {
 	http.Handle("/img/", http.StripPrefix("/img/", http.FileServer(&FileSystem{http.Dir("img")})))
 	http.Handle("/js/", http.StripPrefix("/js/", http.FileServer(&FileSystem{http.Dir("js")})))
 
+	// custom redirector
+	http.HandleFunc("/go/", Redirect)
+
 	// when navigating to /home it should serve the home page
 	http.Handle("/", noSigning(http.HandlerFunc(Home)))
 	http.Handle("/search", enforceSigning(http.HandlerFunc(Search)))
