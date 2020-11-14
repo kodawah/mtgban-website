@@ -331,14 +331,14 @@ func noSigning(next http.Handler) http.Handler {
 
 func enforceAPISigning(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		sign := r.FormValue("sig")
-		if sign == "" {
+		sig := r.FormValue("sig")
+		if sig == "" {
 			log.Println("API error, empty signature")
 			http.NotFound(w, r)
 			return
 		}
 
-		raw, err := base64.StdEncoding.DecodeString(sign)
+		raw, err := base64.StdEncoding.DecodeString(sig)
 		if err != nil {
 			log.Println("API error, no sig", err)
 			http.NotFound(w, r)
@@ -355,7 +355,7 @@ func enforceAPISigning(next http.Handler) http.Handler {
 		q := url.Values{}
 		q.Set("API", v.Get("API"))
 
-		sig := v.Get("Signature")
+		sig = v.Get("Signature")
 		exp := v.Get("Expires")
 
 		data := fmt.Sprintf("%s%s%s%s", r.Method, exp, getBaseURL(r), q.Encode())
@@ -376,7 +376,7 @@ func enforceSigning(next http.Handler) http.Handler {
 		if PatreonHost == "" {
 			PatreonHost = getBaseURL(r) + "/auth"
 		}
-		sign := r.FormValue("sig")
+		sig := r.FormValue("sig")
 
 		if r.FormValue("sig") == "" {
 			sig := getSignatureFromCookies(r)
@@ -389,9 +389,9 @@ func enforceSigning(next http.Handler) http.Handler {
 			}
 		}
 
-		pageVars := genPageNav("Error", sign)
+		pageVars := genPageNav("Error", sig)
 
-		raw, err := base64.StdEncoding.DecodeString(sign)
+		raw, err := base64.StdEncoding.DecodeString(sig)
 		if SigCheck && err != nil {
 			pageVars.Title = "Unauthorized"
 			pageVars.ErrorMessage = ErrMsg
@@ -423,7 +423,7 @@ func enforceSigning(next http.Handler) http.Handler {
 			}
 		}
 
-		sig := v.Get("Signature")
+		sig = v.Get("Signature")
 		exp := v.Get("Expires")
 
 		data := fmt.Sprintf("%s%s%s%s", r.Method, exp, getBaseURL(r), q.Encode())
