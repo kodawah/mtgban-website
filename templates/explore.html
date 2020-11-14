@@ -36,11 +36,11 @@
 
         <script type="text/javascript">
             var sites = [];
-            sites.push("/explore?site=1&sig={{.Signature}}");
-            sites.push("/explore?site=2&sig={{.Signature}}");
-            sites.push("/explore?site=3&sig={{.Signature}}");
-            sites.push("/explore?site=4&sig={{.Signature}}");
-            sites.push("/explore?site=5&sig={{.Signature}}");
+            sites.push("/explore?site=1");
+            sites.push("/explore?site=2");
+            sites.push("/explore?site=3");
+            sites.push("/explore?site=4");
+            sites.push("/explore?site=5");
 
             function openWindow(value, index, array) {
                 let link     = document.createElement('a');
@@ -53,9 +53,6 @@
         <div class="indent">
         <h3>Search across a multitude of MTG stores</h3>
             <form class="search autocomplete" autocomplete="off" id="searchform" onSubmit="javascript:sites.reverse().forEach(openWindow)">
-                {{if ne .Signature ""}}
-                    <input type="hidden" name="sig" value="{{.Signature}}">
-                {{end}}
                 <input id="searchbox" class="w3-input w3-border w3-round-small search-input" onFocus="this.setSelectionRange(0, this.value.length)" type="text" name="q" placeholder="Enter a card name or anything really" value="{{.SearchQuery}}">
             </form>
         </div>
@@ -69,7 +66,7 @@
             <br>
             <ul class="indent">
                 <li>This tool allows you to search for cards or sealed across a wide range of websites, by opening a bunch of tabs in the background from a single query.</li>
-                <li>Contrary to the <a href="search?sig={{.Signature}}">Search tool</a>, you will get only retail results, but they will be live from the seller site. You may find some gems, especially after a card spiked!</li>
+                <li>Contrary to the <a href="search">Search tool</a>, you will get only retail results, but they will be live from the seller site. You may find some gems, especially after a card spiked!</li>
                 <li>Works in <i>Firefox</i> out of the box, in <i>Chrome</i> it may need to get a special permission: follow the steps here <a href="https://support.google.com/chrome/answer/95472">Allow pop-ups from a site</a>, and enable popups for mtgban.com.<br>
                     It does not work in <i>Safari</i>, and it is untested elsewhere.</li>
                 <li>Note that this may be a very resource-intensive operation, and may crash your browser if you try to open too many tabs at once.</li>

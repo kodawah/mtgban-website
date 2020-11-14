@@ -314,17 +314,6 @@ func noSigning(next http.Handler) http.Handler {
 			PatreonHost = getBaseURL(r) + "/auth"
 		}
 
-		if r.FormValue("sig") == "" && r.FormValue("errmsg") == "" {
-			sig := getSignatureFromCookies(r)
-			if sig != "" {
-				form, _ := url.ParseQuery(r.URL.RawQuery)
-				form.Add("sig", sig)
-				r.URL.RawQuery = form.Encode()
-				http.Redirect(w, r, r.URL.String(), http.StatusSeeOther)
-				return
-			}
-		}
-
 		next.ServeHTTP(w, r)
 	})
 }
@@ -376,18 +365,7 @@ func enforceSigning(next http.Handler) http.Handler {
 		if PatreonHost == "" {
 			PatreonHost = getBaseURL(r) + "/auth"
 		}
-		sig := r.FormValue("sig")
-
-		if r.FormValue("sig") == "" {
-			sig := getSignatureFromCookies(r)
-			if sig != "" {
-				form, _ := url.ParseQuery(r.URL.RawQuery)
-				form.Add("sig", sig)
-				r.URL.RawQuery = form.Encode()
-				http.Redirect(w, r, r.URL.String(), http.StatusSeeOther)
-				return
-			}
-		}
+		sig := getSignatureFromCookies(r)
 
 		pageVars := genPageNav("Error", sig)
 
@@ -545,7 +523,6 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) (string, string)
 
 	q := sourceURL.Query()
 	q.Del("code")
-	q.Set("sig", str)
 	sourceURL.RawQuery = q.Encode()
 	sourceURL.Path = ""
 

@@ -6,7 +6,7 @@ import (
 )
 
 func Explore(w http.ResponseWriter, r *http.Request) {
-	sig := r.FormValue("sig")
+	sig := getSignatureFromCookies(r)
 
 	pageVars := genPageNav("Explore", sig)
 

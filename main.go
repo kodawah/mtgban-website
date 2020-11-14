@@ -46,8 +46,7 @@ type GenericCard struct {
 }
 
 type PageVars struct {
-	Nav       []NavElem
-	Signature string
+	Nav []NavElem
 
 	PatreonId    string
 	PatreonURL   string
@@ -213,11 +212,12 @@ func genPageNav(activeTab, sig string) PageVars {
 	expires, _ := strconv.ParseInt(exp, 10, 64)
 	msg := ""
 	showPatreonLogin := false
-	if expires < time.Now().Unix() {
-		if sig != "" {
+	if sig != "" {
+		if expires < time.Now().Unix() {
 			msg = ErrMsgExpired
-			showPatreonLogin = true
 		}
+	} else {
+		showPatreonLogin = true
 	}
 
 	// These values need to be set for every rendered page
@@ -225,7 +225,6 @@ func genPageNav(activeTab, sig string) PageVars {
 	// could expire in any page, and the button url needs these parameters
 	pageVars := PageVars{
 		Title:        "BAN " + activeTab,
-		Signature:    sig,
 		ErrorMessage: msg,
 		LastUpdate:   LastUpdate.Format(time.RFC3339),
 
@@ -249,14 +248,8 @@ func genPageNav(activeTab, sig string) PageVars {
 		}
 	}
 
-	signature := ""
-	if sig != "" {
-		signature = "?sig=" + sig
-	}
-
 	mainNavIndex := 0
 	for i := range pageVars.Nav {
-		pageVars.Nav[i].Link += signature
 		// Ingore the starting emoji
 		if strings.HasSuffix(pageVars.Nav[i].Name, activeTab) {
 			mainNavIndex = i

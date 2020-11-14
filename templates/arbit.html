@@ -84,13 +84,13 @@
                 </p>
                 <p>
                     Show
-                    <a class="btn {{if $.FilterCond}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{not $.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{$.FilterQuantity}}">only NM/SP</a>
-                    <a class="btn {{if $.FilterFoil}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{not $.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{$.FilterQuantity}}">only non-Foil</a>
-                    <a class="btn {{if $.FilterComm}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{not $.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{$.FilterQuantity}}">only Rare/Mythic</a>
-                    <a class="btn {{if $.FilterNega}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{not $.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{$.FilterQuantity}}">only Negative</a>
-                    <a class="btn {{if $.FilterPenny}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{not $.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{$.FilterQuantity}}">only Bucks+</a>
-                    <a class="btn {{if $.FilterSpread}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{not $.FilterSpread}}&noqty={{$.FilterQuantity}}">only Yield+</a>
-                    <a class="btn {{if $.FilterQuantity}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{not $.FilterQuantity}}">only Quantity+</a>
+                    <a class="btn {{if $.FilterCond}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{not $.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{$.FilterQuantity}}">only NM/SP</a>
+                    <a class="btn {{if $.FilterFoil}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{not $.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{$.FilterQuantity}}">only non-Foil</a>
+                    <a class="btn {{if $.FilterComm}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{not $.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{$.FilterQuantity}}">only Rare/Mythic</a>
+                    <a class="btn {{if $.FilterNega}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{not $.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{$.FilterQuantity}}">only Negative</a>
+                    <a class="btn {{if $.FilterPenny}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{not $.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{$.FilterQuantity}}">only Bucks+</a>
+                    <a class="btn {{if $.FilterSpread}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{not $.FilterSpread}}&noqty={{$.FilterQuantity}}">only Yield+</a>
+                    <a class="btn {{if $.FilterQuantity}}success{{else}}normal{{end}}" href="arbit?source={{$.SellerShort}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{not $.FilterQuantity}}">only Quantity+</a>
                 </p>
             </div>
 
@@ -100,7 +100,7 @@
 
             <script type='text/javascript'>
                 function sortBy(sort, name) {
-                    window.location.href = "arbit?&source={{$.SellerShort}}&sig={{$.Signature}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&sort=" + sort + "#" + name;
+                    window.location.href = "arbit?&source={{$.SellerShort}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&sort=" + sort + "#" + name;
                 }
             </script>
             {{range .Arb}}
@@ -146,7 +146,7 @@
                     {{range .Arbit}}
                         <tr onmouseover="document.getElementById('hoverImage').src={{(index $.Metadata .CardId).ImageURL}};">
                             <td>
-                                <a href="{{(index $.Metadata .CardId).SearchURL}}&sig={{$.Signature}}">{{(index $.Metadata .CardId).Name}}</a>{{if (index $.Metadata .CardId).Reserved}} *{{end}}{{if (index $.Metadata .CardId).Stocks}} •{{end}}
+                                <a href="{{(index $.Metadata .CardId).SearchURL}}">{{(index $.Metadata .CardId).Name}}</a>{{if (index $.Metadata .CardId).Reserved}} *{{end}}{{if (index $.Metadata .CardId).Stocks}} •{{end}}
                             </td>
                             <td>
                                 <i class="ss {{(index $.Metadata .CardId).Keyrune}} ss-1x ss-fw"></i> {{(index $.Metadata .CardId).Edition}}
@@ -212,7 +212,7 @@
 
                             <a class="btn default" style="float: right;" href="#top">back to top</a>
                             {{if eq .Name "ABU Games"}}
-                                <a class="btn {{if $.UseCredit}}success{{else}}warning{{end}}" style="float: right;" href="arbit?source={{$.SellerShort}}&sig={{$.Signature}}&sort={{$.SortOption}}&credit={{not $.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}">{{if $.UseCredit}}Return to Cash Arbitrage{{else}}Check Credit Arbitrage{{end}}</a>
+                                <a class="btn {{if $.UseCredit}}success{{else}}warning{{end}}" style="float: right;" href="arbit?source={{$.SellerShort}}&sort={{$.SortOption}}&credit={{not $.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}">{{if $.UseCredit}}Return to Cash Arbitrage{{else}}Check Credit Arbitrage{{end}}</a>
                             {{end}}
                         </td>
                     </tr>

@@ -31,7 +31,7 @@ type Arbitrage struct {
 }
 
 func Arbit(w http.ResponseWriter, r *http.Request) {
-	sig := r.FormValue("sig")
+	sig := getSignatureFromCookies(r)
 
 	pageVars := genPageNav("Arbitrage", sig)
 

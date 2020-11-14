@@ -38,7 +38,7 @@ type SearchEntry struct {
 }
 
 func Search(w http.ResponseWriter, r *http.Request) {
-	sig := r.FormValue("sig")
+	sig := getSignatureFromCookies(r)
 
 	pageVars := genPageNav("Search", sig)
 

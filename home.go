@@ -8,22 +8,22 @@ import (
 
 //handler for / renders the home.html
 func Home(w http.ResponseWriter, r *http.Request) {
-	sig := r.FormValue("sig")
+	sig := getSignatureFromCookies(r)
 	errmsg := r.FormValue("errmsg")
-
-	pageVars := genPageNav("Home", sig)
+	message := ""
 
 	switch errmsg {
 	case "TokenNotFound":
-		pageVars.ErrorMessage = "There was a problem authenticating you with Patreon."
+		message = "There was a problem authenticating you with Patreon."
 	case "UserNotFound", "TierNotFound":
-		pageVars.ErrorMessage = ErrMsg
+		message = ErrMsg
 	case "logout":
 		domain := "mtgban.com"
 		if strings.Contains(getBaseURL(r), "localhost") {
 			domain = "localhost"
 		}
 
+		// Invalidate the current cookie
 		cookie := http.Cookie{
 			Name:    "MTGBAN",
 			Domain:  domain,
@@ -31,7 +31,13 @@ func Home(w http.ResponseWriter, r *http.Request) {
 			Expires: time.Now(),
 		}
 		http.SetCookie(w, &cookie)
+
+		// Delete signature
+		sig = ""
 	}
+
+	pageVars := genPageNav("Home", sig)
+	pageVars.ErrorMessage = message
 
 	render(w, "home.html", pageVars)
 }

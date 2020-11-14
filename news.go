@@ -475,7 +475,7 @@ var NewspaperPages = []NewspaperPage{
 }
 
 func Newspaper(w http.ResponseWriter, r *http.Request) {
-	sig := r.FormValue("sig")
+	sig := getSignatureFromCookies(r)
 
 	pageVars := genPageNav("Newspaper", sig)
 

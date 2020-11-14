@@ -39,12 +39,9 @@
                     {{if eq .SearchQuery "" }}
                         Search for a card
                     {{else}}
-                        Search for another card, or <a href="search?q={{.SearchQuery}}&b=true&sig={{.Signature}}">sort results by best price</a>
+                        Search for another card, or <a href="search?q={{.SearchQuery}}&b=true">sort results by best price</a>
                     {{end}}
                 </label>
-                {{if ne .Signature ""}}
-                    <input type="hidden" name="sig" value="{{.Signature}}">
-                {{end}}
                 <input id="searchbox" class="w3-input w3-border w3-round-small search-input" onFocus="this.setSelectionRange(0, this.value.length)" type="text" name="q" placeholder="Enter a card name" value="{{.SearchQuery}}" maxlength="200">
             </form>
         </div>
