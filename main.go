@@ -212,11 +212,11 @@ func genPageNav(activeTab, sig string) PageVars {
 	exp, _ := GetParamFromSig(sig, "Expires")
 	expires, _ := strconv.ParseInt(exp, 10, 64)
 	msg := ""
-	patreonLogin := false
+	showPatreonLogin := false
 	if expires < time.Now().Unix() {
 		if sig != "" {
 			msg = ErrMsgExpired
-			patreonLogin = true
+			showPatreonLogin = true
 		}
 	}
 
@@ -231,7 +231,7 @@ func genPageNav(activeTab, sig string) PageVars {
 
 		PatreonId:    PatreonClientId,
 		PatreonURL:   PatreonHost,
-		PatreonLogin: patreonLogin,
+		PatreonLogin: showPatreonLogin,
 	}
 
 	// Allocate a new navigation bar
