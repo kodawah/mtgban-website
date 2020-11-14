@@ -605,9 +605,25 @@ func loadScrapers(doSellers, doVendors bool) {
 	}
 
 	if doSellers {
+		log.Println("Sellers table")
+		for i := range newSellers {
+			if newSellers[i] == nil {
+				log.Println(i, "<nil>")
+				continue
+			}
+			log.Println(i, newSellers[i].Info().Name)
+		}
 		loadSellers(newSellers)
 	}
 	if doVendors {
+		log.Println("Vendors table")
+		for i := range newVendors {
+			if newVendors[i] == nil {
+				log.Println(i, "<nil>")
+				continue
+			}
+			log.Println(i, newVendors[i].Info().Name)
+		}
 		loadVendors(newVendors)
 	}
 
