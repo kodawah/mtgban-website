@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"path"
 	"sort"
 	"strings"
 
@@ -212,7 +213,12 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 					extraSpaces += " "
 				}
 
-				link := "https://" + DefaultHost + "/go/" + strings.ToLower(string(fieldsNames[i][0])) + "/" + entry.Shorthand + "/" + cardId
+				// Build url for our redirect
+				kind := strings.ToLower(string(fieldsNames[i][0]))
+				store := strings.Replace(entry.Shorthand, " ", "%20", -1)
+				link := "https://" + DefaultHost + "/" + path.Join("go", kind, store, cardId)
+
+				// Set the custom field
 				value := fmt.Sprintf("• **[`%s%s`](%s)** $%0.2f", entry.ScraperName, extraSpaces, link, entry.Price)
 				if entry.Ratio > 60 {
 					value += fmt.Sprintf(" 🔥")
