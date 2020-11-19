@@ -198,7 +198,7 @@ var NewspaperPages = []NewspaperPage{
 			Heading{
 				Title:   "Weekly % Change",
 				CanSort: true,
-				Field:   "Week_Ago_Sellers_Chg",
+				Field:   "Week_Ago_BL_Chg",
 				IsPerc:  true,
 			},
 		},
@@ -248,7 +248,7 @@ var NewspaperPages = []NewspaperPage{
 			Heading{
 				Title:   "Weekly % Change",
 				CanSort: true,
-				Field:   "Week_Ago_Sellers_Chg",
+				Field:   "Week_Ago_BL_Chg",
 				IsPerc:  true,
 			},
 		},
