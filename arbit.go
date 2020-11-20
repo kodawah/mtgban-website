@@ -177,9 +177,6 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 
 		v := url.Values{}
 		v.Set("source", newSeller.Info().Shorthand)
-		if sig != "" {
-			v.Set("sig", sig)
-		}
 		v.Set("credit", fmt.Sprint(useCredit))
 		v.Set("nocond", fmt.Sprint(nocond))
 		v.Set("nofoil", fmt.Sprint(nofoil))
