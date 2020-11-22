@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/kodabb/go-mtgban/mtgmatcher"
+	"github.com/kodabb/go-mtgban/mtgmatcher/mtgjson"
 )
 
 func fileExists(filename string) bool {
@@ -134,22 +135,24 @@ func uuid2card(cardId string, smallImg bool) GenericCard {
 
 	variant := ""
 	switch {
-	case co.Card.HasPromoType("prerelease") && strings.HasSuffix(co.Edition, "Promos"):
+	case co.HasPromoType(mtgjson.PromoTypePrerelease) && strings.HasSuffix(co.Edition, "Promos"):
 		variant = "Prerelease"
-	case co.Card.HasPromoType("promopack"):
+	case co.HasPromoType(mtgjson.PromoTypePromoPack):
 		variant = "Promo Pack"
-	case co.Card.HasPromoType("bundle"):
+	case co.HasPromoType(mtgjson.PromoTypeBundle):
 		variant = "Bundle Promo"
-	case co.Card.HasPromoType("boosterfun"):
+	case co.HasPromoType(mtgjson.PromoTypeBoosterfun):
 		switch {
-		case co.Card.HasFrameEffect("showcase"):
+		case co.HasFrameEffect(mtgjson.FrameEffectShowcase):
 			variant = "Showcase"
-		case co.Card.HasFrameEffect("extendedart"):
+		case co.HasFrameEffect(mtgjson.FrameEffectExtendedArt):
 			variant = "Extended Art"
-		case co.Card.HasPromoType("godzillaseries"):
+		case co.HasPromoType(mtgjson.PromoTypeGodzilla):
 			variant = "Godzilla"
-		case co.Card.BorderColor == "borderless":
+		case co.BorderColor == mtgjson.BorderColorBorderless:
 			variant = "Borderless"
+		case co.HasFrameEffect(mtgjson.FrameEffectFoilEtched):
+			variant = "Etched Foil"
 		}
 	}
 
