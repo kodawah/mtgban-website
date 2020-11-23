@@ -84,7 +84,6 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		render(w, "search.html", pageVars)
 		return
 	}
-	log.Println(query)
 
 	// Keep track of what was searched
 	pageVars.SearchQuery = query
@@ -232,7 +231,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			source = u.Path
 		}
 	}
-	Notify("search", fmt.Sprintf("[%s] from %s", query, source))
+	msg := fmt.Sprintf("[%s] from %s", query, source)
+	Notify("search", msg)
+	log.Println(msg)
 
 	render(w, "search.html", pageVars)
 }
