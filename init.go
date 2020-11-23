@@ -13,6 +13,7 @@ import (
 	"github.com/kodabb/go-mtgban/blueprint"
 	"github.com/kodabb/go-mtgban/cardkingdom"
 	"github.com/kodabb/go-mtgban/cardmarket"
+	"github.com/kodabb/go-mtgban/cardsphere"
 	"github.com/kodabb/go-mtgban/coolstuffinc"
 	"github.com/kodabb/go-mtgban/magiccorner"
 	"github.com/kodabb/go-mtgban/miniaturemarket"
@@ -530,6 +531,18 @@ var options = map[string]*scraperOption{
 			return scraper, nil
 		},
 		Keepers: []string{MKM_LOW, MKM_TREND},
+	},
+	"cardsphere": &scraperOption{
+		DevEnabled: true,
+		Init: func() (mtgban.Scraper, error) {
+			scraper, err := cardsphere.NewScraperFull(Config.Api["csphere_email"], Config.Api["csphere_password"])
+			if err != nil {
+				return nil, err
+			}
+			scraper.LogCallback = log.Printf
+			scraper.MaxConcurrency = 3
+			return scraper, nil
+		},
 	},
 }
 
