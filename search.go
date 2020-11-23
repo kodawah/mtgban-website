@@ -222,6 +222,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	if utm == "banbot" {
 		id := r.FormValue("utm_affiliate")
 		source = fmt.Sprintf("banbot (%s)", id)
+	} else if utm == "autocard" {
+		source = "autocard anywhere"
 	} else {
 		u, err := url.Parse(r.Referer())
 		if err != nil {
