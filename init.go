@@ -533,7 +533,6 @@ var options = map[string]*scraperOption{
 		Keepers: []string{MKM_LOW, MKM_TREND},
 	},
 	"cardsphere": &scraperOption{
-		DevEnabled: true,
 		Init: func() (mtgban.Scraper, error) {
 			scraper, err := cardsphere.NewScraperFull(Config.Api["csphere_email"], Config.Api["csphere_password"])
 			if err != nil {
