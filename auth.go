@@ -260,22 +260,7 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 	log.Println(userIds, tierTitle)
 	targetURL, sig := sign(tierTitle, r.URL, baseURL)
 
-	year, month, _ := time.Now().Date()
-	endOfThisMonth := time.Date(year, month+1, 1, 0, 0, 0, 0, time.Now().Location())
-	domain := "mtgban.com"
-	if strings.Contains(baseURL, "localhost") {
-		domain = "localhost"
-	}
-	cookie := http.Cookie{
-		Name:    "MTGBAN",
-		Domain:  domain,
-		Path:    "/",
-		Expires: endOfThisMonth,
-		Value:   sig,
-	}
-
-	// write the cookie to response
-	http.SetCookie(w, &cookie)
+	putSignatureInCookies(w, r, sig)
 
 	http.Redirect(w, r, targetURL, http.StatusFound)
 }
@@ -305,6 +290,26 @@ func getSignatureFromCookies(r *http.Request) string {
 	}
 
 	return sig
+}
+
+func putSignatureInCookies(w http.ResponseWriter, r *http.Request, sig string) {
+	baseURL := getBaseURL(r)
+
+	year, month, _ := time.Now().Date()
+	endOfThisMonth := time.Date(year, month+1, 1, 0, 0, 0, 0, time.Now().Location())
+	domain := "mtgban.com"
+	if strings.Contains(baseURL, "localhost") {
+		domain = "localhost"
+	}
+	cookie := http.Cookie{
+		Name:    "MTGBAN",
+		Domain:  domain,
+		Path:    "/",
+		Expires: endOfThisMonth,
+		Value:   sig,
+	}
+
+	http.SetCookie(w, &cookie)
 }
 
 // This function is mostly here only for initializing the host
