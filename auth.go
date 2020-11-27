@@ -280,6 +280,11 @@ func getSignatureFromCookies(r *http.Request) string {
 		}
 	}
 
+	querySig := r.FormValue("sig")
+	if sig == "" && querySig != "" {
+		sig = querySig
+	}
+
 	exp, err := GetParamFromSig(sig, "Expires")
 	if err != nil {
 		return ""
@@ -313,10 +318,16 @@ func putSignatureInCookies(w http.ResponseWriter, r *http.Request, sig string) {
 }
 
 // This function is mostly here only for initializing the host
+// and the signature from invite links
 func noSigning(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if PatreonHost == "" {
 			PatreonHost = getBaseURL(r) + "/auth"
+		}
+
+		querySig := r.FormValue("sig")
+		if querySig != "" {
+			putSignatureInCookies(w, r, querySig)
 		}
 
 		next.ServeHTTP(w, r)
@@ -371,6 +382,11 @@ func enforceSigning(next http.Handler) http.Handler {
 			PatreonHost = getBaseURL(r) + "/auth"
 		}
 		sig := getSignatureFromCookies(r)
+		querySig := r.FormValue("sig")
+		if querySig != "" {
+			sig = querySig
+			putSignatureInCookies(w, r, querySig)
+		}
 
 		pageVars := genPageNav("Error", sig)
 
