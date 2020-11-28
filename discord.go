@@ -270,6 +270,11 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	co, err := mtgmatcher.GetUUID(searchRes.CardId)
+	if err != nil {
+		return
+	}
+
 	// Convert search results into proper fields
 	var fields []*discordgo.MessageEmbedField
 	for _, field := range search2fields(searchRes) {
@@ -283,25 +288,20 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Prepare card data
 	card := uuid2card(searchRes.CardId, true)
 
-	// Retrieve the first 12 editions this card is printed in
-	printings := "several sets"
-	co, err := mtgmatcher.GetUUID(searchRes.CardId)
-	if err == nil {
-		printings = strings.Join(co.Printings, ", ")
-		if len(co.Printings) > MaxPrintings {
-			printings = strings.Join(co.Printings[:MaxPrintings], ", ") + " and more"
-		}
-		if searchRes.EditionSearched != "" && len(co.Variations) > 0 {
-			cn := []string{co.Number}
-			for _, varid := range co.Variations {
-				co, err := mtgmatcher.GetUUID(varid)
-				if err != nil {
-					continue
-				}
-				cn = append(cn, co.Number)
+	printings := strings.Join(co.Printings, ", ")
+	if len(co.Printings) > MaxPrintings {
+		printings = strings.Join(co.Printings[:MaxPrintings], ", ") + " and more"
+	}
+	if searchRes.EditionSearched != "" && len(co.Variations) > 0 {
+		cn := []string{co.Number}
+		for _, varid := range co.Variations {
+			co, err := mtgmatcher.GetUUID(varid)
+			if err != nil {
+				continue
 			}
-			printings = fmt.Sprintf("%s. Variants in %s are %s", printings, searchRes.EditionSearched, strings.Join(cn, ", "))
+			cn = append(cn, co.Number)
 		}
+		printings = fmt.Sprintf("%s. Variants in %s are %s", printings, searchRes.EditionSearched, strings.Join(cn, ", "))
 	}
 
 	link := "https://www.mtgban.com/search?q=" + url.QueryEscape(content) + "&utm_source=banbot&utm_affiliate=" + m.GuildID
