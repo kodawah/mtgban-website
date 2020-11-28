@@ -155,6 +155,78 @@ func parseMessage(content string) (*searchResult, error) {
 	}, nil
 }
 
+type embedField struct {
+	Name  string
+	Value string
+}
+
+func search2fields(searchRes *searchResult) (fields []embedField) {
+	// Add two embed fields, one for retail and one for buylist
+	fieldsNames := []string{"Retail", "Buylist"}
+	for i, results := range [][]SearchEntry{searchRes.ResultsSellers, searchRes.ResultsVendors} {
+		field := embedField{
+			Name: fieldsNames[i],
+		}
+
+		// Results look really bad after MaxCustomEntries, and too much info
+		// does not help, so sort by best price, trim, then sort back to original
+		if len(results) > MaxCustomEntries {
+			if i == 0 {
+				sort.Slice(results, func(i, j int) bool {
+					return results[i].Price < results[j].Price
+				})
+			} else if i == 1 {
+				sort.Slice(results, func(i, j int) bool {
+					return results[i].Price > results[j].Price
+				})
+			}
+			results = results[:MaxCustomEntries]
+			sort.Slice(results, func(i, j int) bool {
+				return results[i].ScraperName < results[j].ScraperName
+			})
+		}
+
+		// Alsign to the longest name by appending whitespaces
+		alignLength := longestName(results)
+		for _, entry := range results {
+			extraSpaces := ""
+			for i := len(entry.ScraperName); i < alignLength; i++ {
+				extraSpaces += " "
+			}
+
+			// Build url for our redirect
+			kind := strings.ToLower(string(fieldsNames[i][0]))
+			store := strings.Replace(entry.Shorthand, " ", "%20", -1)
+			link := "https://" + DefaultHost + "/" + path.Join("go", kind, store, searchRes.CardId)
+
+			// Set the custom field
+			value := fmt.Sprintf("• **[`%s%s`](%s)** $%0.2f", entry.ScraperName, extraSpaces, link, entry.Price)
+			if entry.Ratio > 60 {
+				value += fmt.Sprintf(" 🔥")
+			}
+			value += "\n"
+
+			// If we go past the maximum value for embed field values,
+			// make a new field for any spillover, as long as we are within
+			// the limits of the number of embeds allowed
+			if len(field.Value)+len(value) > MaxEmbedFieldsValueLength && len(fields) < MaxEmbedFieldsNumber {
+				fields = append(fields, field)
+				field = embedField{
+					Name: fieldsNames[i] + " (cont'd)",
+				}
+			}
+			field.Value += value
+		}
+		if len(results) == 0 {
+			field.Value = "N/A"
+		}
+
+		fields = append(fields, field)
+	}
+
+	return
+}
+
 // This function will be called (due to AddHandler above) every time a new
 // message is created on any channel that the authenticated bot has access to.
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -195,70 +267,14 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
-		// Add two embed filds, one for retail and one for buylist
-		fieldsNames := []string{"Retail", "Buylist"}
+		// Convert search results into proper fields
 		var fields []*discordgo.MessageEmbedField
-		for i, results := range [][]SearchEntry{searchRes.ResultsSellers, searchRes.ResultsVendors} {
-			field := &discordgo.MessageEmbedField{
-				Name:   fieldsNames[i],
+		for _, field := range search2fields(searchRes) {
+			fields = append(fields, &discordgo.MessageEmbedField{
+				Name:   field.Name,
+				Value:  field.Value,
 				Inline: true,
-			}
-
-			// Results look really bad after MaxCustomEntries, and too much info
-			// does not help, so sort by best price, trim, then sort back to original
-			if len(results) > MaxCustomEntries {
-				if i == 0 {
-					sort.Slice(results, func(i, j int) bool {
-						return results[i].Price < results[j].Price
-					})
-				} else if i == 1 {
-					sort.Slice(results, func(i, j int) bool {
-						return results[i].Price > results[j].Price
-					})
-				}
-				results = results[:MaxCustomEntries]
-				sort.Slice(results, func(i, j int) bool {
-					return results[i].ScraperName < results[j].ScraperName
-				})
-			}
-
-			// Alsign to the longest name by appending whitespaces
-			alignLength := longestName(results)
-			for _, entry := range results {
-				extraSpaces := ""
-				for i := len(entry.ScraperName); i < alignLength; i++ {
-					extraSpaces += " "
-				}
-
-				// Build url for our redirect
-				kind := strings.ToLower(string(fieldsNames[i][0]))
-				store := strings.Replace(entry.Shorthand, " ", "%20", -1)
-				link := "https://" + DefaultHost + "/" + path.Join("go", kind, store, searchRes.CardId)
-
-				// Set the custom field
-				value := fmt.Sprintf("• **[`%s%s`](%s)** $%0.2f", entry.ScraperName, extraSpaces, link, entry.Price)
-				if entry.Ratio > 60 {
-					value += fmt.Sprintf(" 🔥")
-				}
-				value += "\n"
-
-				// If we go past the maximum value for embed field values,
-				// make a new field for any spillover, as long as we are within
-				// the limits of the number of embeds allowed
-				if len(field.Value)+len(value) > MaxEmbedFieldsValueLength && len(fields) < MaxEmbedFieldsNumber {
-					fields = append(fields, field)
-					field = &discordgo.MessageEmbedField{
-						Name:   fieldsNames[i] + " (cont'd)",
-						Inline: true,
-					}
-				}
-				field.Value += value
-			}
-			if len(results) == 0 {
-				field.Value = "N/A"
-			}
-
-			fields = append(fields, field)
+			})
 		}
 
 		// Prepare card data
