@@ -1,14 +1,18 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/url"
 	"path"
 	"sort"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	cleanhttp "github.com/hashicorp/go-cleanhttp"
 
 	"github.com/kodabb/go-mtgban/mtgmatcher"
 )
@@ -227,6 +231,70 @@ func search2fields(searchRes *searchResult) (fields []embedField) {
 	return
 }
 
+type PriceEntry struct {
+	Title    string  `json:"title"`
+	Price    float64 `json:"price"`
+	Shipping float64 `json:"shipping"`
+}
+
+func grabLastSold(tcgId string, foil bool) ([]embedField, error) {
+	if tcgId == "" {
+		return nil, errors.New("empty tcgId")
+	}
+
+	resp, err := cleanhttp.DefaultClient().Get("http://localhost:8081/" + tcgId)
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var entries map[string][]PriceEntry
+	err = json.Unmarshal(data, &entries)
+	if err != nil {
+		return nil, err
+	}
+
+	var fields []embedField
+	var shipping []string
+	var hasValues bool
+	for i, entry := range entries["TCG Last Sold Listing"] {
+		if foil && !strings.Contains(entry.Title, "Foil") {
+			continue
+		}
+
+		value := "-"
+		if entry.Price != 0 {
+			hasValues = true
+			value = fmt.Sprintf("$%0.2f", entry.Price)
+			shipping = append(shipping, fmt.Sprintf("%0.2f", entry.Shipping))
+		}
+		fields = append(fields, embedField{
+			Name:  entry.Title,
+			Value: value,
+		})
+
+		if i == 4 || i == 9 {
+			fields = append(fields, embedField{
+				Name:  "Shipping",
+				Value: strings.Join(shipping, " "),
+			})
+			shipping = []string{}
+		}
+	}
+
+	// No prices received, this is not an error,
+	// but print a message warning the user
+	if !hasValues {
+		return nil, nil
+	}
+
+	return fields, nil
+}
+
 // This function will be called (due to AddHandler above) every time a new
 // message is created on any channel that the authenticated bot has access to.
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -251,12 +319,16 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Parse message, look for bot command
-	if !strings.HasPrefix(m.Content, "!") {
+	if !strings.HasPrefix(m.Content, "!") && !strings.HasPrefix(m.Content, "$") {
 		return
 	}
 
-	// Strip away bang character
+	allBls := strings.HasPrefix(m.Content, "!")
+	lastSold := strings.HasPrefix(m.Content, "$")
+
+	// Strip away beginning character
 	content := strings.TrimPrefix(m.Content, "!")
+	content = strings.TrimPrefix(content, "$")
 
 	// Search a single card match
 	searchRes, err := parseMessage(content)
@@ -277,7 +349,23 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Convert search results into proper fields
 	var fields []*discordgo.MessageEmbedField
-	for _, field := range search2fields(searchRes) {
+	var ogFields []embedField
+	if allBls {
+		ogFields = search2fields(searchRes)
+	} else if lastSold {
+		ogFields, err = grabLastSold(co.Identifiers["tcgplayerProductId"], co.Foil)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		if len(ogFields) == 0 {
+			s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+				Description: "No Last Sold Price available for \"" + content + "\" o͡͡͡╮༼ • ʖ̯ • ༽╭o͡͡͡",
+			})
+			return
+		}
+	}
+	for _, field := range ogFields {
 		fields = append(fields, &discordgo.MessageEmbedField{
 			Name:   field.Name,
 			Value:  field.Value,
@@ -308,6 +396,10 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Set title of the main message
 	title := "Prices for " + card.Name
+	if lastSold {
+		title = "TCG Last Sold prices for " + card.Name
+	}
+
 	// Add a tag for ease of debugging
 	if DevMode {
 		title = "[DEV] " + title
