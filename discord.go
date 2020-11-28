@@ -74,6 +74,87 @@ func guildCreate(s *discordgo.Session, gc *discordgo.GuildCreate) {
 	s.GuildLeave(gc.Guild.ID)
 }
 
+type searchResult struct {
+	Invalid         bool
+	CardId          string
+	ResultsSellers  []SearchEntry
+	ResultsVendors  []SearchEntry
+	EditionSearched string
+}
+
+func parseMessage(content string) (*searchResult, error) {
+	// Clean up query and only search for NM
+	query, options := parseSearchOptions(content)
+
+	// Set a custom search mode since we want to try and find as much as possible
+	if options["search_mode"] == "" {
+		options["search_mode"] = "any"
+	}
+
+	// Prevent useless invocations
+	if len(query) < 3 && query != "Ow" && query != "X" {
+		return &searchResult{Invalid: true}, nil
+	}
+
+	// Check if card exists
+	nameFound := false
+	sets := mtgmatcher.GetSets()
+	if options["edition"] != "" {
+		set, found := sets[options["edition"]]
+		if !found {
+			return nil, fmt.Errorf("No card found named \"%s\" in \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", query, options["edition"])
+		}
+		for _, card := range set.Cards {
+			if mtgmatcher.Contains(card.Name, query) {
+				nameFound = true
+				break
+			}
+		}
+		if !nameFound {
+			return nil, fmt.Errorf("No card found named \"%s\" in %s 乁| ･ิ ∧ ･ิ |ㄏ", query, set.Name)
+		}
+	}
+	if !nameFound {
+		for _, set := range sets {
+			for _, card := range set.Cards {
+				if mtgmatcher.Contains(card.Name, query) {
+					nameFound = true
+					break
+				}
+			}
+			if nameFound {
+				break
+			}
+		}
+	}
+	if !nameFound {
+		return nil, fmt.Errorf("No card found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", query)
+	}
+
+	// Search both sellers and vendors
+	cardId, resultsSellers, errS := searchSellersFirstResult(query, options)
+	cardIdV, resultsVendors, errV := searchVendorsFirstResult(query, options)
+	switch {
+	// Both errored, card is oos
+	case errS != nil && errV != nil:
+		return nil, errS
+	// Retail is oos, but buylist isn't, let's use it
+	case errS != nil:
+		cardId = cardIdV
+	// Buylist is not oos, but it returned a different card id,
+	// which means the original one is actually oos
+	case errV == nil && cardId != cardIdV:
+		resultsVendors = []SearchEntry{}
+	}
+
+	return &searchResult{
+		CardId:          cardId,
+		ResultsSellers:  resultsSellers,
+		ResultsVendors:  resultsVendors,
+		EditionSearched: options["edition"],
+	}, nil
+}
+
 // This function will be called (due to AddHandler above) every time a new
 // message is created on any channel that the authenticated bot has access to.
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -102,86 +183,22 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		// Strip away bang character
 		content := strings.TrimPrefix(m.Content, "!")
 
-		// Clean up query and only search for NM
-		query, options := parseSearchOptions(content)
-
-		// Set a custom search mode since we want to try and find as much as possible
-		if options["search_mode"] == "" {
-			options["search_mode"] = "any"
-		}
-
-		// Prevent useless invocations
-		if len(query) < 3 && query != "Ow" && query != "X" {
-			return
-		}
-
-		// Check if card exists
-		nameFound := false
-		sets := mtgmatcher.GetSets()
-		if options["edition"] != "" {
-			set, found := sets[options["edition"]]
-			if !found {
-				s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
-					Description: "No card found named \"" + query + "\" in \"" + options["edition"] + "\" 乁| ･ิ ∧ ･ิ |ㄏ",
-				})
-				return
-			}
-			for _, card := range set.Cards {
-				if mtgmatcher.Contains(card.Name, query) {
-					nameFound = true
-					break
-				}
-			}
-			if !nameFound {
-				s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
-					Description: "No card found named \"" + query + "\" in " + set.Name + " 乁| ･ิ ∧ ･ิ |ㄏ",
-				})
-				return
-			}
-		}
-		if !nameFound {
-			for _, set := range sets {
-				for _, card := range set.Cards {
-					if mtgmatcher.Contains(card.Name, query) {
-						nameFound = true
-						break
-					}
-				}
-				if nameFound {
-					break
-				}
-			}
-		}
-		if !nameFound {
+		// Search a single card match
+		searchRes, err := parseMessage(content)
+		if err != nil {
 			s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
-				Description: "No card found for \"" + query + "\" 乁| ･ิ ∧ ･ิ |ㄏ",
+				Description: err.Error(),
 			})
 			return
 		}
-
-		// Search both sellers and vendors
-		cardId, resultsSellers, errS := searchSellersFirstResult(query, options)
-		cardIdV, resultsVendors, errV := searchVendorsFirstResult(query, options)
-		switch {
-		// Both errored, card is oos
-		case errS != nil && errV != nil:
-			s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
-				Description: errS.Error(),
-			})
+		if searchRes.Invalid {
 			return
-		// Retail is oos, but buylist isn't, let's use it
-		case errS != nil:
-			cardId = cardIdV
-		// Buylist is not oos, but it returned a different card id,
-		// which means the original one is actually oos
-		case errV == nil && cardId != cardIdV:
-			resultsVendors = []SearchEntry{}
 		}
 
 		// Add two embed filds, one for retail and one for buylist
 		fieldsNames := []string{"Retail", "Buylist"}
 		var fields []*discordgo.MessageEmbedField
-		for i, results := range [][]SearchEntry{resultsSellers, resultsVendors} {
+		for i, results := range [][]SearchEntry{searchRes.ResultsSellers, searchRes.ResultsVendors} {
 			field := &discordgo.MessageEmbedField{
 				Name:   fieldsNames[i],
 				Inline: true,
@@ -216,7 +233,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				// Build url for our redirect
 				kind := strings.ToLower(string(fieldsNames[i][0]))
 				store := strings.Replace(entry.Shorthand, " ", "%20", -1)
-				link := "https://" + DefaultHost + "/" + path.Join("go", kind, store, cardId)
+				link := "https://" + DefaultHost + "/" + path.Join("go", kind, store, searchRes.CardId)
 
 				// Set the custom field
 				value := fmt.Sprintf("• **[`%s%s`](%s)** $%0.2f", entry.ScraperName, extraSpaces, link, entry.Price)
@@ -245,17 +262,17 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 		// Prepare card data
-		card := uuid2card(cardId, true)
+		card := uuid2card(searchRes.CardId, true)
 
 		// Retrieve the first 12 editions this card is printed in
 		printings := "several sets"
-		co, err := mtgmatcher.GetUUID(cardId)
+		co, err := mtgmatcher.GetUUID(searchRes.CardId)
 		if err == nil {
 			printings = strings.Join(co.Printings, ", ")
 			if len(co.Printings) > MaxPrintings {
 				printings = strings.Join(co.Printings[:MaxPrintings], ", ") + " and more"
 			}
-			if options["edition"] != "" && len(co.Variations) > 0 {
+			if searchRes.EditionSearched != "" && len(co.Variations) > 0 {
 				cn := []string{co.Number}
 				for _, varid := range co.Variations {
 					co, err := mtgmatcher.GetUUID(varid)
@@ -264,7 +281,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 					}
 					cn = append(cn, co.Number)
 				}
-				printings = fmt.Sprintf("%s. Variants in %s are %s", printings, options["edition"], strings.Join(cn, ", "))
+				printings = fmt.Sprintf("%s. Variants in %s are %s", printings, searchRes.EditionSearched, strings.Join(cn, ", "))
 			}
 		}
 
@@ -297,7 +314,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if card.Reserved {
 			embed.Footer.Text = "Part of the Reserved List\n"
 		}
-		_, stocks := Infos["STKS"][cardId]
+		_, stocks := Infos["STKS"][searchRes.CardId]
 		if stocks {
 			embed.Footer.Text += "On MTGStocks Interests page\n"
 		}
