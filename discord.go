@@ -268,19 +268,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 		}
 
-		var link string
-		// Rebuild the search query
-		searchQuery := card.Name
-		if options["edition"] != "" {
-			searchQuery += " s:" + options["edition"]
-		}
-		if options["number"] != "" {
-			searchQuery += " cn:" + options["number"]
-		}
-		if options["foil"] != "" {
-			searchQuery += " f:" + options["foil"]
-		}
-		link = "https://www.mtgban.com/search?q=" + url.QueryEscape(searchQuery) + "&utm_source=banbot&utm_affiliate=" + m.GuildID
+		link := "https://www.mtgban.com/search?q=" + url.QueryEscape(content) + "&utm_source=banbot&utm_affiliate=" + m.GuildID
 
 		// Set title of the main message
 		title := "Prices for " + card.Name
