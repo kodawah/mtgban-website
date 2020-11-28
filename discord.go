@@ -250,98 +250,100 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	// Avoid invocations
-	if strings.HasPrefix(m.Content, "!") {
-		// Strip away bang character
-		content := strings.TrimPrefix(m.Content, "!")
-
-		// Search a single card match
-		searchRes, err := parseMessage(content)
-		if err != nil {
-			s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
-				Description: err.Error(),
-			})
-			return
-		}
-		if searchRes.Invalid {
-			return
-		}
-
-		// Convert search results into proper fields
-		var fields []*discordgo.MessageEmbedField
-		for _, field := range search2fields(searchRes) {
-			fields = append(fields, &discordgo.MessageEmbedField{
-				Name:   field.Name,
-				Value:  field.Value,
-				Inline: true,
-			})
-		}
-
-		// Prepare card data
-		card := uuid2card(searchRes.CardId, true)
-
-		// Retrieve the first 12 editions this card is printed in
-		printings := "several sets"
-		co, err := mtgmatcher.GetUUID(searchRes.CardId)
-		if err == nil {
-			printings = strings.Join(co.Printings, ", ")
-			if len(co.Printings) > MaxPrintings {
-				printings = strings.Join(co.Printings[:MaxPrintings], ", ") + " and more"
-			}
-			if searchRes.EditionSearched != "" && len(co.Variations) > 0 {
-				cn := []string{co.Number}
-				for _, varid := range co.Variations {
-					co, err := mtgmatcher.GetUUID(varid)
-					if err != nil {
-						continue
-					}
-					cn = append(cn, co.Number)
-				}
-				printings = fmt.Sprintf("%s. Variants in %s are %s", printings, searchRes.EditionSearched, strings.Join(cn, ", "))
-			}
-		}
-
-		link := "https://www.mtgban.com/search?q=" + url.QueryEscape(content) + "&utm_source=banbot&utm_affiliate=" + m.GuildID
-
-		// Set title of the main message
-		title := "Prices for " + card.Name
-		// Add a tag for ease of debugging
-		if DevMode {
-			title = "[DEV] " + title
-		}
-		// Spark-ly
-		if card.Foil {
-			title += " ✨"
-		}
-
-		embed := discordgo.MessageEmbed{
-			Title:       title,
-			Color:       0xFF0000,
-			URL:         link,
-			Description: fmt.Sprintf("[%s] %s\nPrinted in %s", card.SetCode, card.Title, printings),
-			Fields:      fields,
-			Thumbnail: &discordgo.MessageEmbedThumbnail{
-				URL: card.ImageURL,
-			},
-			Footer: &discordgo.MessageEmbedFooter{},
-		}
-
-		// Some footer action, RL, stocks, powered by
-		if card.Reserved {
-			embed.Footer.Text = "Part of the Reserved List\n"
-		}
-		_, stocks := Infos["STKS"][searchRes.CardId]
-		if stocks {
-			embed.Footer.Text += "On MTGStocks Interests page\n"
-		}
-		// Show data source on non-ban servers
-		if len(Config.DiscordAllowList) > 0 && m.GuildID != Config.DiscordAllowList[0] {
-			embed.Footer.IconURL = poweredByFooter.IconURL
-			embed.Footer.Text += poweredByFooter.Text
-		}
-
-		s.ChannelMessageSendEmbed(m.ChannelID, &embed)
+	// Parse message, look for bot command
+	if !strings.HasPrefix(m.Content, "!") {
+		return
 	}
+
+	// Strip away bang character
+	content := strings.TrimPrefix(m.Content, "!")
+
+	// Search a single card match
+	searchRes, err := parseMessage(content)
+	if err != nil {
+		s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+			Description: err.Error(),
+		})
+		return
+	}
+	if searchRes.Invalid {
+		return
+	}
+
+	// Convert search results into proper fields
+	var fields []*discordgo.MessageEmbedField
+	for _, field := range search2fields(searchRes) {
+		fields = append(fields, &discordgo.MessageEmbedField{
+			Name:   field.Name,
+			Value:  field.Value,
+			Inline: true,
+		})
+	}
+
+	// Prepare card data
+	card := uuid2card(searchRes.CardId, true)
+
+	// Retrieve the first 12 editions this card is printed in
+	printings := "several sets"
+	co, err := mtgmatcher.GetUUID(searchRes.CardId)
+	if err == nil {
+		printings = strings.Join(co.Printings, ", ")
+		if len(co.Printings) > MaxPrintings {
+			printings = strings.Join(co.Printings[:MaxPrintings], ", ") + " and more"
+		}
+		if searchRes.EditionSearched != "" && len(co.Variations) > 0 {
+			cn := []string{co.Number}
+			for _, varid := range co.Variations {
+				co, err := mtgmatcher.GetUUID(varid)
+				if err != nil {
+					continue
+				}
+				cn = append(cn, co.Number)
+			}
+			printings = fmt.Sprintf("%s. Variants in %s are %s", printings, searchRes.EditionSearched, strings.Join(cn, ", "))
+		}
+	}
+
+	link := "https://www.mtgban.com/search?q=" + url.QueryEscape(content) + "&utm_source=banbot&utm_affiliate=" + m.GuildID
+
+	// Set title of the main message
+	title := "Prices for " + card.Name
+	// Add a tag for ease of debugging
+	if DevMode {
+		title = "[DEV] " + title
+	}
+	// Spark-ly
+	if card.Foil {
+		title += " ✨"
+	}
+
+	embed := discordgo.MessageEmbed{
+		Title:       title,
+		Color:       0xFF0000,
+		URL:         link,
+		Description: fmt.Sprintf("[%s] %s\nPrinted in %s", card.SetCode, card.Title, printings),
+		Fields:      fields,
+		Thumbnail: &discordgo.MessageEmbedThumbnail{
+			URL: card.ImageURL,
+		},
+		Footer: &discordgo.MessageEmbedFooter{},
+	}
+
+	// Some footer action, RL, stocks, powered by
+	if card.Reserved {
+		embed.Footer.Text = "Part of the Reserved List\n"
+	}
+	_, stocks := Infos["STKS"][searchRes.CardId]
+	if stocks {
+		embed.Footer.Text += "On MTGStocks Interests page\n"
+	}
+	// Show data source on non-ban servers
+	if len(Config.DiscordAllowList) > 0 && m.GuildID != Config.DiscordAllowList[0] {
+		embed.Footer.IconURL = poweredByFooter.IconURL
+		embed.Footer.Text += poweredByFooter.Text
+	}
+
+	s.ChannelMessageSendEmbed(m.ChannelID, &embed)
 }
 
 // Obtain the length of the scraper with the longest name
