@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"path"
 	"sort"
@@ -444,13 +443,7 @@ var options = map[string]*scraperOption{
 	"starcitygames": &scraperOption{
 		OnlyVendor: true,
 		Init: func() (mtgban.Scraper, error) {
-			resp, err := http.Get(Config.Api["scg_categories"])
-			if err != nil {
-				return nil, err
-			}
-			defer resp.Body.Close()
-
-			scraper, err := starcitygames.NewScraper(resp.Body)
+			scraper, err := starcitygames.NewScraper(Config.Api["scg_username"], Config.Api["scg_password"])
 			if err != nil {
 				return nil, err
 			}
