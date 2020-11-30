@@ -247,6 +247,12 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 				"Bard",
 				"Test Role":
 				tierTitle = foundTitle
+			case "PIONEER", "PIONEER (Early Adopters)":
+				tierTitle = "Squire"
+			case "MODERN", "MODERN (Early Adopters)":
+				tierTitle = "Merchant"
+			case "LEGACY", "LEGACY (Early Adopters)":
+				tierTitle = "Bard"
 			}
 		}
 	}
