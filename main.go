@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"path"
@@ -394,6 +395,9 @@ func main() {
 			log.Fatalln(err)
 		}
 	}
+
+	// Set seed in case we need to do random operations
+	rand.Seed(time.Now().UnixNano())
 
 	// serve everything in known folders as a file
 	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(&FileSystem{http.Dir("css")})))

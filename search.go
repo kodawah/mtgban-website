@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"sort"
@@ -295,6 +296,15 @@ func parseSearchOptions(query string) (string, map[string]string) {
 	} else if strings.HasSuffix(query, "*") {
 		query = strings.TrimSuffix(query, "*")
 		options["foil"] = "true"
+	}
+
+	if strings.TrimSpace(query) == "random" {
+		sets := mtgmatcher.GetSets()
+		for _, set := range sets {
+			index := rand.Intn(len(set.Cards))
+			query = set.Cards[index].UUID
+			break
+		}
 	}
 
 	// Support Scryfall bot syntax
