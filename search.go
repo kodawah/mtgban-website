@@ -258,7 +258,7 @@ func parseSearchOptions(query string) (string, map[string]string) {
 
 		switch {
 		case strings.HasPrefix(field, "s:"):
-			options["edition"] = strings.ToUpper(code)
+			options["edition"] = findEdition(code)
 		case strings.HasPrefix(field, "c:"):
 			options["condition"] = strings.ToUpper(code)
 		case strings.HasPrefix(field, "cn:"):
@@ -305,17 +305,7 @@ func parseSearchOptions(query string) (string, map[string]string) {
 		elements := strings.Split(query, "|")
 		query = elements[0]
 		if len(elements) > 1 {
-			code := strings.TrimSpace(elements[1])
-			set, err := mtgmatcher.GetSet(code)
-			if err == nil {
-				code = set.Code
-			} else {
-				set, err = mtgmatcher.GetSetByName(code)
-				if err == nil {
-					code = set.Code
-				}
-			}
-			options["edition"] = code
+			options["edition"] = findEdition(elements[1])
 		}
 		if len(elements) > 2 {
 			options["number"] = strings.TrimSpace(elements[2])
@@ -335,6 +325,27 @@ func parseSearchOptions(query string) (string, map[string]string) {
 	}
 
 	return query, options
+}
+
+func findEdition(code string) string {
+	var out []string
+
+	code = strings.TrimSpace(code)
+	for _, field := range strings.Split(code, ",") {
+		field = strings.TrimPrefix(field, "\"")
+		field = strings.TrimSuffix(field, "\"")
+
+		set, err := mtgmatcher.GetSet(field)
+		if err == nil {
+			out = append(out, set.Code)
+			continue
+		}
+		set, err = mtgmatcher.GetSetByName(field)
+		if err == nil {
+			out = append(out, set.Code)
+		}
+	}
+	return strings.Join(out, ",")
 }
 
 func searchSellers(query string, blocklist []string, options map[string]string) (foundSellers map[string]map[string][]SearchEntry, tooMany bool) {
