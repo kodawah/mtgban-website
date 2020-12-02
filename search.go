@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"net/http"
 	"net/url"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -37,6 +38,8 @@ type SearchEntry struct {
 	IndexCombined bool
 	Secondary     float64
 }
+
+var re = regexp.MustCompile(`(s|c|f|sm|cn|vndr):(("([^"]+)*"|[a-zA-Z0-9]*),?)+`)
 
 func Search(w http.ResponseWriter, r *http.Request) {
 	sig := getSignatureFromCookies(r)
@@ -246,45 +249,35 @@ func parseSearchOptions(query string) (string, map[string]string) {
 	options := map[string]string{}
 
 	// Iterate over the various possible filters
-	for _, tag := range []string{"s:", "c:", "f:", "sm:", "cn:", "vndr:"} {
-		if strings.Contains(query, tag) {
-			fields := strings.Fields(query)
-			for _, field := range fields {
-				if strings.HasPrefix(field, tag) {
-					query = strings.Replace(query, field, "", 1)
-					query = strings.TrimSpace(query)
+	fields := re.FindAllString(query, -1)
+	for _, field := range fields {
+		query = strings.Replace(query, field, "", 1)
 
-					code := strings.TrimPrefix(field, tag)
-					switch tag {
-					case "s:":
-						options["edition"] = strings.ToUpper(code)
-						break
-					case "c:":
-						options["condition"] = strings.ToUpper(code)
-						break
-					case "cn:":
-						options["number"] = code
-						break
-					case "f:":
-						options["foil"] = code
-						if options["foil"] == "yes" || options["foil"] == "y" {
-							options["foil"] = "true"
-						} else if options["foil"] == "no" || options["foil"] == "n" {
-							options["foil"] = "false"
-						}
-						break
-					case "sm:":
-						options["search_mode"] = strings.ToLower(code)
-						break
-					case "vndr:":
-						options["scraper"] = strings.ToUpper(code)
-						// Hack to support the various subseller names of tcg
-						if strings.Contains(options["scraper"], "TCG") {
-							options["scraper"] = strings.Replace(options["scraper"], "TCG", "TCG Player,TCGMkt", 1)
-						}
-						break
-					}
-				}
+		index := strings.Index(field, ":")
+		code := field[index+1:]
+
+		switch {
+		case strings.HasPrefix(field, "s:"):
+			options["edition"] = strings.ToUpper(code)
+		case strings.HasPrefix(field, "c:"):
+			options["condition"] = strings.ToUpper(code)
+		case strings.HasPrefix(field, "cn:"):
+			options["number"] = code
+		case strings.HasPrefix(field, "f:"):
+			options["foil"] = code
+			if options["foil"] == "yes" || options["foil"] == "y" {
+				options["foil"] = "true"
+			} else if options["foil"] == "no" || options["foil"] == "n" {
+				options["foil"] = "false"
+			}
+			break
+		case strings.HasPrefix(field, "sm:"):
+			options["search_mode"] = strings.ToLower(code)
+		case strings.HasPrefix(field, "vndr:"):
+			options["scraper"] = strings.ToUpper(code)
+			// Hack to support the various subseller names of tcg
+			if strings.Contains(options["scraper"], "TCG") {
+				options["scraper"] = strings.Replace(options["scraper"], "TCG", "TCG Player,TCGMkt", 1)
 			}
 		}
 	}
