@@ -222,6 +222,18 @@ func search2fields(searchRes *searchResult) (fields []embedField) {
 			if entry.Ratio > 60 {
 				value += fmt.Sprintf(" 🔥")
 			}
+			if i == 1 {
+				alarm := false
+				for _, subres := range searchRes.ResultsSellers {
+					if subres.Price < entry.Price {
+						alarm = true
+						break
+					}
+				}
+				if alarm {
+					value += fmt.Sprintf(" 🚨")
+				}
+			}
 			value += "\n"
 
 			// If we go past the maximum value for embed field values,
