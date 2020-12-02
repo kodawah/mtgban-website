@@ -255,6 +255,7 @@ func grabLastSold(tcgId string, foil bool) ([]embedField, error) {
 	var entries map[string][]PriceEntry
 	err = json.Unmarshal(data, &entries)
 	if err != nil {
+		log.Println(string(data))
 		return nil, err
 	}
 
@@ -289,6 +290,7 @@ func grabLastSold(tcgId string, foil bool) ([]embedField, error) {
 	// No prices received, this is not an error,
 	// but print a message warning the user
 	if !hasValues {
+		log.Println("No last sold prices available")
 		return nil, nil
 	}
 
@@ -434,8 +436,10 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		embed.Footer.IconURL = poweredByFooter.IconURL
 		embed.Footer.Text += poweredByFooter.Text
 	}
-
-	s.ChannelMessageSendEmbed(m.ChannelID, &embed)
+	_, err = s.ChannelMessageSendEmbed(m.ChannelID, &embed)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 // Obtain the length of the scraper with the longest name
