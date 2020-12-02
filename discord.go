@@ -84,6 +84,7 @@ type searchResult struct {
 	ResultsSellers  []SearchEntry
 	ResultsVendors  []SearchEntry
 	EditionSearched string
+	SearchQuery     string
 }
 
 func parseMessage(content string) (*searchResult, error) {
@@ -101,7 +102,7 @@ func parseMessage(content string) (*searchResult, error) {
 	}
 
 	// Check if card exists
-	nameFound := false
+	var nameFound string
 	sets := mtgmatcher.GetSets()
 	if options["edition"] != "" {
 		set, found := sets[options["edition"]]
@@ -110,28 +111,28 @@ func parseMessage(content string) (*searchResult, error) {
 		}
 		for _, card := range set.Cards {
 			if mtgmatcher.Contains(card.Name, query) {
-				nameFound = true
+				nameFound = card.Name
 				break
 			}
 		}
-		if !nameFound {
+		if nameFound == "" {
 			return nil, fmt.Errorf("No card found named \"%s\" in %s 乁| ･ิ ∧ ･ิ |ㄏ", query, set.Name)
 		}
 	}
-	if !nameFound {
+	if nameFound == "" {
 		for _, set := range sets {
 			for _, card := range set.Cards {
 				if mtgmatcher.Contains(card.Name, query) {
-					nameFound = true
+					nameFound = card.Name
 					break
 				}
 			}
-			if nameFound {
+			if nameFound != "" {
 				break
 			}
 		}
 	}
-	if !nameFound {
+	if nameFound == "" {
 		return nil, fmt.Errorf("No card found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", query)
 	}
 
@@ -151,11 +152,24 @@ func parseMessage(content string) (*searchResult, error) {
 		resultsVendors = []SearchEntry{}
 	}
 
+	// Rebuild the search query
+	searchQuery := nameFound
+	if options["edition"] != "" {
+		searchQuery += " s:" + options["edition"]
+	}
+	if options["number"] != "" {
+		searchQuery += " cn:" + options["number"]
+	}
+	if options["foil"] != "" {
+		searchQuery += " f:" + options["foil"]
+	}
+
 	return &searchResult{
 		CardId:          cardId,
 		ResultsSellers:  resultsSellers,
 		ResultsVendors:  resultsVendors,
 		EditionSearched: options["edition"],
+		SearchQuery:     searchQuery,
 	}, nil
 }
 
@@ -398,7 +412,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		printings = fmt.Sprintf("%s. Variants in %s are %s", printings, searchRes.EditionSearched, strings.Join(cn, ", "))
 	}
 
-	link := "https://www.mtgban.com/search?q=" + url.QueryEscape(content) + "&utm_source=banbot&utm_affiliate=" + m.GuildID
+	link := "https://www.mtgban.com/search?q=" + url.QueryEscape(searchRes.SearchQuery) + "&utm_source=banbot&utm_affiliate=" + m.GuildID
 
 	// Set title of the main message
 	title := "Prices for " + card.Name
