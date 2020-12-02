@@ -312,7 +312,17 @@ func parseSearchOptions(query string) (string, map[string]string) {
 		elements := strings.Split(query, "|")
 		query = elements[0]
 		if len(elements) > 1 {
-			options["edition"] = strings.TrimSpace(strings.ToUpper(elements[1]))
+			code := strings.TrimSpace(elements[1])
+			set, err := mtgmatcher.GetSet(code)
+			if err == nil {
+				code = set.Code
+			} else {
+				set, err = mtgmatcher.GetSetByName(code)
+				if err == nil {
+					code = set.Code
+				}
+			}
+			options["edition"] = code
 		}
 		if len(elements) > 2 {
 			options["number"] = strings.TrimSpace(elements[2])
