@@ -279,10 +279,14 @@ func grabLastSold(tcgId string, foil bool) ([]embedField, error) {
 		})
 
 		if i == 4 || i == 9 {
-			fields = append(fields, embedField{
+			field := embedField{
 				Name:  "Shipping",
 				Value: strings.Join(shipping, " "),
-			})
+			}
+			if field.Value == "" {
+				field.Value = "n/a"
+			}
+			fields = append(fields, field)
 			shipping = []string{}
 		}
 	}
