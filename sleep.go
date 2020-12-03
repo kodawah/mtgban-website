@@ -197,7 +197,9 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 		level := int(math.Floor(r*exp) + maxrange)
 
 		cc, _ := mtgmatcher.GetUUID(res.CardId)
-		log.Println(level, res.Level, cc)
+		if DevMode {
+			log.Println(level, res.Level, cc)
+		}
 
 		if level >= len(pageVars.Sleepers) {
 			break
