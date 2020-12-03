@@ -392,7 +392,7 @@ func main() {
 		if DevMode {
 			log.Println("No connection to Discord due to", err)
 		} else {
-			log.Fatalln(err)
+			log.Println("Error connecting to discord", err)
 		}
 	}
 
