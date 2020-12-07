@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/kodabb/go-mtgban/mtgmatcher"
@@ -96,7 +97,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	pageVars.Metadata = map[string]GenericCard{}
 
 	// SEARCH
-	foundSellers, foundVendors, tooMany := search(query, blocklist)
+	foundSellers, foundVendors, tooMany := searchParallel(query, blocklist)
 
 	// Display a message if there are too many entries
 	if tooMany {
@@ -594,15 +595,23 @@ func searchVendors(query string, blocklist []string, options map[string]string) 
 	return
 }
 
-func search(query string, blocklist []string) (map[string]map[string][]SearchEntry,
-	map[string][]SearchEntry,
-	bool) {
-
+func searchParallel(query string, blocklist []string) (foundSellers map[string]map[string][]SearchEntry, foundVendors map[string][]SearchEntry, tooMany bool) {
 	cleanQuery, options := parseSearchOptions(query)
 
-	foundSellers, manySellers := searchSellers(cleanQuery, blocklist, options)
-	foundVendors, manyVendors := searchVendors(cleanQuery, blocklist, options)
+	var manySellers, manyVendors bool
+	var wg sync.WaitGroup
+	wg.Add(2)
 
+	go func() {
+		foundSellers, manySellers = searchSellers(cleanQuery, blocklist, options)
+		wg.Done()
+	}()
+	go func() {
+		foundVendors, manyVendors = searchVendors(cleanQuery, blocklist, options)
+		wg.Done()
+	}()
+
+	wg.Wait()
 	return foundSellers, foundVendors, manySellers || manyVendors
 }
 
