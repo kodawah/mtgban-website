@@ -37,7 +37,7 @@
             <form class="search autocomplete" action="search" autocomplete="off" id="searchform">
                 <label style="clear: both; float: left;" for="searchbox">
                     {{if eq .SearchQuery "" }}
-                        Search for a card
+                        Search for a card, or <a href="search?q=random">surprise me</a>
                     {{else}}
                         Search for another card, or <a href="search?q={{.SearchQuery}}&b=true">sort results by best price</a>
                     {{end}}
