@@ -348,20 +348,25 @@ func findEdition(code string) string {
 	return strings.Join(out, ",")
 }
 
+func mode2func(mode string) (out func(string, string) bool) {
+	out = mtgmatcher.Equals
+	switch mode {
+	case "exact":
+		out = mtgmatcher.Equals
+	case "prefix":
+		out = mtgmatcher.HasPrefix
+	case "any":
+		out = mtgmatcher.Contains
+	}
+	return
+}
+
 func searchSellers(query string, blocklist []string, options map[string]string) (foundSellers map[string]map[string][]SearchEntry, tooMany bool) {
 	// Allocate memory
 	foundSellers = map[string]map[string][]SearchEntry{}
 
 	// Set which comparison function to use depending on the search syntax
-	cmpFunc := mtgmatcher.Equals
-	switch options["search_mode"] {
-	case "exact":
-		cmpFunc = mtgmatcher.Equals
-	case "prefix":
-		cmpFunc = mtgmatcher.HasPrefix
-	case "any":
-		cmpFunc = mtgmatcher.Contains
-	}
+	cmpFunc := mode2func(options["search_mode"])
 
 	// Search sellers
 	for i, seller := range Sellers {
@@ -495,15 +500,7 @@ func searchSellers(query string, blocklist []string, options map[string]string) 
 func searchVendors(query string, blocklist []string, options map[string]string) (foundVendors map[string][]SearchEntry, tooMany bool) {
 	foundVendors = map[string][]SearchEntry{}
 
-	cmpFunc := mtgmatcher.Equals
-	switch options["search_mode"] {
-	case "exact":
-		cmpFunc = mtgmatcher.Equals
-	case "prefix":
-		cmpFunc = mtgmatcher.HasPrefix
-	case "any":
-		cmpFunc = mtgmatcher.Contains
-	}
+	cmpFunc := mode2func(options["search_mode"])
 
 	for i, vendor := range Vendors {
 		if vendor == nil {
