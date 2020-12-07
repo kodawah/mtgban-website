@@ -10,6 +10,7 @@ import (
 	"path"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/bwmarrin/discordgo"
 	cleanhttp "github.com/hashicorp/go-cleanhttp"
@@ -137,8 +138,22 @@ func parseMessage(content string) (*searchResult, error) {
 	}
 
 	// Search both sellers and vendors
-	cardId, resultsSellers, errS := searchSellersFirstResult(query, options)
-	cardIdV, resultsVendors, errV := searchVendorsFirstResult(query, options)
+	var cardId, cardIdV string
+	var resultsSellers, resultsVendors []SearchEntry
+	var errS, errV error
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		cardId, resultsSellers, errS = searchSellersFirstResult(query, options)
+		wg.Done()
+	}()
+	go func() {
+		cardIdV, resultsVendors, errV = searchVendorsFirstResult(query, options)
+		wg.Done()
+	}()
+
+	wg.Wait()
 	switch {
 	// Both errored, card is oos
 	case errS != nil && errV != nil:
