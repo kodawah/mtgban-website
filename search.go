@@ -403,7 +403,7 @@ func searchSellers(query string, blocklist []string, options map[string]string) 
 			}
 
 			// Run the comparison function set above
-			if cmpFunc(co.Card.Name, query) {
+			if cmpFunc(co.Card.Name, query) || (co.Layout != "normal" && mtgmatcher.HasPrefix(co.Card.Name, query)) {
 				// Skip cards that are not of the desired set
 				if options["edition"] != "" {
 					filters := strings.Split(options["edition"], ",")
@@ -564,7 +564,7 @@ func searchVendors(query string, blocklist []string, options map[string]string) 
 				}
 			}
 
-			if cmpFunc(co.Card.Name, query) {
+			if cmpFunc(co.Card.Name, query) || (co.Layout != "normal" && mtgmatcher.HasPrefix(co.Card.Name, query)) {
 				_, found := foundVendors[cardId]
 				if !found {
 					if len(foundVendors) > MaxSearchResults {
