@@ -429,6 +429,7 @@ var options = map[string]*scraperOption{
 		Init: func() (mtgban.Scraper, error) {
 			scraper := miniaturemarket.NewScraper()
 			scraper.LogCallback = log.Printf
+			scraper.Affiliate = Config.Affiliate["MM"]
 			return scraper, nil
 		},
 	},
