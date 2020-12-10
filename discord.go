@@ -366,16 +366,16 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Parse message, look for bot command
-	if !strings.HasPrefix(m.Content, "!") && !strings.HasPrefix(m.Content, "$") {
+	if !strings.HasPrefix(m.Content, "!") && !strings.HasPrefix(m.Content, "$$") {
 		return
 	}
 
 	allBls := strings.HasPrefix(m.Content, "!")
-	lastSold := strings.HasPrefix(m.Content, "$")
+	lastSold := strings.HasPrefix(m.Content, "$$")
 
 	// Strip away beginning character
 	content := strings.TrimPrefix(m.Content, "!")
-	content = strings.TrimPrefix(content, "$")
+	content = strings.TrimPrefix(content, "$$")
 
 	// Search a single card match
 	searchRes, err := parseMessage(content)
