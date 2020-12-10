@@ -135,12 +135,18 @@ func uuid2card(cardId string, smallImg bool) GenericCard {
 
 	variant := ""
 	switch {
-	case co.HasPromoType(mtgjson.PromoTypePrerelease) && strings.HasSuffix(co.Edition, "Promos"):
+	case co.HasPromoType(mtgjson.PromoTypePrerelease):
 		variant = "Prerelease"
 	case co.HasPromoType(mtgjson.PromoTypePromoPack):
 		variant = "Promo Pack"
 	case co.HasPromoType(mtgjson.PromoTypeBundle):
-		variant = "Bundle Promo"
+		variant = "Bundle"
+	case co.HasPromoType(mtgjson.PromoTypeRelease):
+		variant = "Release"
+	case co.HasPromoType(mtgjson.PromoTypeGameDay):
+		variant = "Game Day"
+	case co.HasPromoType(mtgjson.PromoTypeBuyABox):
+		variant = "Buy-a-Box"
 	case co.HasPromoType(mtgjson.PromoTypeBoosterfun):
 		switch {
 		case co.HasFrameEffect(mtgjson.FrameEffectShowcase):
