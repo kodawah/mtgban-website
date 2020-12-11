@@ -29,6 +29,7 @@ type NavElem struct {
 	Link   string
 	Name   string
 	Short  string
+	Handle func(w http.ResponseWriter, r *http.Request)
 }
 
 type GenericCard struct {
@@ -123,32 +124,41 @@ var OrderNav = []string{
 	"Search", "Newspaper", "Explore", "Sleepers", "Arbit",
 }
 
-var ExtraNavs = map[string]NavElem{
-	"Search": NavElem{
-		Name:  "🔍 Search",
-		Short: "🔍",
-		Link:  "/search",
-	},
-	"Newspaper": NavElem{
-		Name:  "🗞️ Newspaper",
-		Short: "🗞️",
-		Link:  "/newspaper",
-	},
-	"Explore": NavElem{
-		Name:  "🚠 Explore",
-		Short: "🚠",
-		Link:  "/explore",
-	},
-	"Sleepers": NavElem{
-		Name:  "💤 Sleepers",
-		Short: "💤",
-		Link:  "/sleepers",
-	},
-	"Arbit": NavElem{
-		Name:  "📈 Arbitrage",
-		Short: "📈",
-		Link:  "/arbit",
-	},
+var ExtraNavs map[string]NavElem
+
+func init() {
+	ExtraNavs = map[string]NavElem{
+		"Search": NavElem{
+			Name:   "🔍 Search",
+			Short:  "🔍",
+			Link:   "/search",
+			Handle: Search,
+		},
+		"Newspaper": NavElem{
+			Name:   "🗞️ Newspaper",
+			Short:  "🗞️",
+			Link:   "/newspaper",
+			Handle: Newspaper,
+		},
+		"Explore": NavElem{
+			Name:   "🚠 Explore",
+			Short:  "🚠",
+			Link:   "/explore",
+			Handle: Explore,
+		},
+		"Sleepers": NavElem{
+			Name:   "💤 Sleepers",
+			Short:  "💤",
+			Link:   "/sleepers",
+			Handle: Sleepers,
+		},
+		"Arbit": NavElem{
+			Name:   "📈 Arbitrage",
+			Short:  "📈",
+			Link:   "/arbit",
+			Handle: Arbit,
+		},
+	}
 }
 
 var Config struct {
@@ -409,11 +419,11 @@ func main() {
 
 	// when navigating to /home it should serve the home page
 	http.Handle("/", noSigning(http.HandlerFunc(Home)))
-	http.Handle("/search", enforceSigning(http.HandlerFunc(Search)))
-	http.Handle("/newspaper", enforceSigning(http.HandlerFunc(Newspaper)))
-	http.Handle("/explore", enforceSigning(http.HandlerFunc(Explore)))
-	http.Handle("/sleepers", enforceSigning(http.HandlerFunc(Sleepers)))
-	http.Handle("/arbit", enforceSigning(http.HandlerFunc(Arbit)))
+
+	for _, nav := range ExtraNavs {
+		http.Handle(nav.Link, enforceSigning(http.HandlerFunc(nav.Handle)))
+	}
+
 	http.Handle("/api/mtgjson/ck.json", enforceAPISigning(http.HandlerFunc(API)))
 	http.HandleFunc("/favicon.ico", Favicon)
 	http.HandleFunc("/auth", Auth)
