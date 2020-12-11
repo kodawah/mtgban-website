@@ -144,6 +144,9 @@ func parseMessage(content string) (*searchResult, error) {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
+	// For Sellers, only consider NM entries
+	options["condition"] = "NM"
+
 	go func() {
 		cardId, resultsSellers, errS = searchSellersFirstResult(query, options)
 		wg.Done()
@@ -500,8 +503,6 @@ func longestName(results []SearchEntry) (out int) {
 
 // Retrieve cards from Sellers using the very first result
 func searchSellersFirstResult(query string, options map[string]string) (cardId string, results []SearchEntry, err error) {
-	options["condition"] = "NM"
-
 	// Search
 	foundSellers, _ := searchSellers(query, append(Config.SearchBlockList, "TCG Direct"), options)
 	if len(foundSellers) == 0 {
