@@ -481,6 +481,7 @@ var options = map[string]*scraperOption{
 		},
 	},
 	"tcg_market": &scraperOption{
+		DevEnabled: true,
 		Init: func() (mtgban.Scraper, error) {
 			scraper := tcgplayer.NewScraperMarket(Config.Api["tcg_public"], Config.Api["tcg_private"])
 			scraper.Affiliate = Config.Affiliate["TCG"]
@@ -491,6 +492,7 @@ var options = map[string]*scraperOption{
 		Keepers: []string{TCG_MAIN, TCG_DIRECT},
 	},
 	"tcg_index": &scraperOption{
+		DevEnabled: true,
 		Init: func() (mtgban.Scraper, error) {
 			scraper := tcgplayer.NewScraperIndex(Config.Api["tcg_public"], Config.Api["tcg_private"])
 			scraper.Affiliate = Config.Affiliate["TCG"]
