@@ -232,26 +232,40 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 }
 
 func loadTCG() {
-	log.Println("Reloading TCG Market")
+	log.Println("Reloading TCG")
 
 	scraper, err := options["tcg_market"].Init()
 	if err != nil {
 		log.Println(err)
 		return
 	}
-
 	tcgSellers, err := mtgban.Seller2Sellers(scraper.(mtgban.Market))
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	var tcgLow, tcgDirectLow mtgban.Seller
+	indexScraper, err := options["tcg_index"].Init()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	tcgIndexSellers, err := mtgban.Seller2Sellers(indexScraper.(mtgban.Market))
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	// Merge the various sellers in a single array
+	tcgSellers = append(tcgSellers, tcgIndexSellers...)
+
+	tcgNames := []string{TCG_MAIN, TCG_DIRECT, TCG_LOW, TCG_MARKET}
+	tcgMap := map[string]mtgban.Seller{}
+
 	for i := range tcgSellers {
-		if tcgSellers[i].Info().Shorthand == TCG_MAIN {
-			tcgLow = tcgSellers[i]
-		} else if tcgSellers[i].Info().Shorthand == TCG_DIRECT {
-			tcgDirectLow = tcgSellers[i]
+		for _, name := range tcgNames {
+			tcgMap[name] = tcgSellers[i]
+			break
 		}
 	}
 
@@ -259,12 +273,12 @@ func loadTCG() {
 		if Sellers[i] == nil {
 			continue
 		}
-		if Sellers[i].Info().Shorthand == TCG_MAIN {
-			Sellers[i] = tcgLow
-			log.Println(TCG_MAIN, "updated")
-		} else if Sellers[i].Info().Shorthand == TCG_DIRECT {
-			Sellers[i] = tcgDirectLow
-			log.Println(TCG_DIRECT, "updated")
+		for _, name := range tcgNames {
+			if Sellers[i].Info().Shorthand == name {
+				Sellers[i] = tcgMap[name]
+				log.Println(name, "updated")
+				break
+			}
 		}
 	}
 
@@ -276,12 +290,11 @@ func loadTCG() {
 				continue
 			}
 			Vendors[i] = scraper.(mtgban.Vendor)
-			log.Println("TCG Buylist updated")
+			log.Println(TCG_BUYLIST, "updated")
 		}
 	}
 
-	Notify("refresh", "tcgplayer refresh completed")
-
+	Notify("refresh", "TCG refresh completed")
 }
 
 func loadCK() {
