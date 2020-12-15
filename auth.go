@@ -500,16 +500,6 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) (string, string)
 	if v.Get("Search") == "true" {
 		if tierTitle == "Root" {
 			v.Set("SearchDisabled", "NONE")
-		} else if tierTitle == "Admin" {
-			var allowlistSellers []string
-			for _, sellerName := range Config.SearchBlockList {
-				if strings.Contains(sellerName, "MKM") {
-					continue
-				}
-				allowlistSellers = append(allowlistSellers, sellerName)
-			}
-
-			v.Set("SearchDisabled", strings.Join(allowlistSellers, ","))
 		} else {
 			v.Set("SearchDisabled", strings.Join(Config.SearchBlockList, ","))
 		}
