@@ -263,13 +263,16 @@ func loadTCG() {
 
 	for i := range tcgSellers {
 		for _, name := range tcgNames {
-			tcgMap[name] = tcgSellers[i]
-			break
+			if tcgSellers[i].Info().Shorthand == name {
+				tcgMap[name] = tcgSellers[i]
+				break
+			}
 		}
 	}
 
 	for i := range Sellers {
 		if Sellers[i] == nil {
+			log.Println("nil seller at position", i)
 			continue
 		}
 		for _, name := range tcgNames {
