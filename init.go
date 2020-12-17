@@ -217,10 +217,11 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 				fname := dirName + notdone[i] + "-latest.csv"
 				err = dumpInventoryToFile(seller, currentDir, fname)
 				if err != nil {
-					return err
+					log.Println(scraper.Info().Name, "errored with", err)
+				} else {
+					newbc.RegisterSeller(seller)
+					log.Println("Dumped", fname)
 				}
-				newbc.RegisterSeller(seller)
-				log.Println("Dumped", fname)
 				// Mark as done
 				notdone[i] = ""
 			}
