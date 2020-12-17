@@ -259,7 +259,7 @@ func loadTCG() {
 	// Merge the various sellers in a single array
 	tcgSellers = append(tcgSellers, tcgIndexSellers...)
 
-	tcgNames := []string{TCG_MAIN, TCG_DIRECT, TCG_LOW, TCG_MARKET}
+	tcgNames := append(options["tcg_market"].Keepers, options["tcg_index"].Keepers...)
 	tcgMap := map[string]mtgban.Seller{}
 
 	for i := range tcgSellers {
