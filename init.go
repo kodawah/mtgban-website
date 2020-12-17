@@ -300,6 +300,49 @@ func loadTCG() {
 	Notify("refresh", "TCG refresh completed")
 }
 
+func loadMKM() {
+	log.Println("Reloading MKM")
+
+	scraper, err := options["cardmarket"].Init()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	mkmSellers, err := mtgban.Seller2Sellers(scraper.(mtgban.Market))
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	mkmNames := options["cardmarket"].Keepers
+	mkmMap := map[string]mtgban.Seller{}
+
+	for i := range mkmSellers {
+		for _, name := range mkmNames {
+			if mkmSellers[i].Info().Shorthand == name {
+				mkmMap[name] = mkmSellers[i]
+				break
+			}
+		}
+	}
+
+	for i := range Sellers {
+		if Sellers[i] == nil {
+			log.Println("nil seller at position", i)
+			continue
+		}
+		for _, name := range mkmNames {
+			if Sellers[i].Info().Shorthand == name {
+				Sellers[i] = mkmMap[name]
+				log.Println(name, "updated")
+				break
+			}
+		}
+	}
+
+	Notify("refresh", "MKM refresh completed")
+}
+
 func loadCK() {
 	log.Println("Reloading CK")
 
