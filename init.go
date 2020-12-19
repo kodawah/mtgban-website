@@ -147,6 +147,8 @@ func dumpBuylistToFile(vendor mtgban.Vendor, currentDir, fname string) error {
 }
 
 func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scraper mtgban.Market, names []string) error {
+	log.Println("Untangling", scraper.Info().Shorthand, "to", names)
+
 	dirName := path.Clean(currentDir+"/..") + "/"
 
 	// Check if both sub seller files are present
