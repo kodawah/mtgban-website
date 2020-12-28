@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"math"
 	"net/http"
 	"net/url"
 	"sort"
@@ -12,7 +11,6 @@ import (
 	"time"
 
 	"github.com/kodabb/go-mtgban/mtgban"
-	"github.com/kodabb/go-mtgban/mtgmatcher"
 )
 
 const (
@@ -238,18 +236,31 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		maxSpread := MaxSpread
-
 		opts := &mtgban.ArbitOpts{
-			MinSpread: MinSpread,
+			MinSpread:     MinSpread,
+			MaxSpread:     MaxSpread,
+			MaxPriceRatio: MaxPriceRatio,
+			NoFoil:        nofoil,
 		}
 		if noposi {
 			opts.MinSpread = -30
 			opts.MinDiff = -100
-			maxSpread = MinSpread
+			opts.MaxSpread = MinSpread
 		}
 		if nolow {
 			opts.MinSpread = 100
+		}
+		if nocond {
+			opts.Conditions = []string{"MP", "HP", "PO"}
+		}
+		if nocomm {
+			opts.Rarities = []string{"uncommon", "common"}
+		}
+		if nopenny {
+			opts.MinPrice = 1
+		}
+		if noqty {
+			opts.MinQuantity = 1
 		}
 
 		if vendor.Info().Shorthand == "ABU" {
@@ -266,95 +277,8 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		if nocond {
-			tmp := arbit[:0]
-			for i := range arbit {
-				if arbit[i].InventoryEntry.Conditions == "NM" || arbit[i].InventoryEntry.Conditions == "SP" {
-					tmp = append(tmp, arbit[i])
-				}
-			}
-			arbit = tmp
-
-			if len(arbit) == 0 {
-				continue
-			}
-		}
-		if nofoil {
-			tmp := arbit[:0]
-			for i := range arbit {
-				co, err := mtgmatcher.GetUUID(arbit[i].CardId)
-				if err != nil {
-					continue
-				}
-				if !co.Foil {
-					tmp = append(tmp, arbit[i])
-				}
-			}
-			arbit = tmp
-
-			if len(arbit) == 0 {
-				continue
-			}
-		}
-		if nocomm {
-			tmp := arbit[:0]
-			for i := range arbit {
-				co, err := mtgmatcher.GetUUID(arbit[i].CardId)
-				if err != nil {
-					continue
-				}
-				if co.Card.Rarity == "rare" || co.Card.Rarity == "mythic" {
-					tmp = append(tmp, arbit[i])
-				}
-			}
-			arbit = tmp
-
-			if len(arbit) == 0 {
-				continue
-			}
-		}
-		if nopenny {
-			tmp := arbit[:0]
-			for i := range arbit {
-				if math.Abs(arbit[i].InventoryEntry.Price) > 1 && math.Abs(arbit[i].Difference) > 1 {
-					tmp = append(tmp, arbit[i])
-				}
-			}
-			arbit = tmp
-
-			if len(arbit) == 0 {
-				continue
-			}
-		}
-		if noqty {
-			tmp := arbit[:0]
-			for i := range arbit {
-				if arbit[i].InventoryEntry.Quantity > 1 {
-					tmp = append(tmp, arbit[i])
-				}
-			}
-			arbit = tmp
-
-			if len(arbit) == 0 {
-				continue
-			}
-		}
-
 		if len(arbit) > MaxArbitResults {
 			arbit = arbit[:MaxArbitResults]
-		}
-
-		// Filter out entries that are invalid
-		tmp := arbit[:0]
-		for i := range arbit {
-			if math.Abs(arbit[i].BuylistEntry.PriceRatio) < MaxPriceRatio && arbit[i].Spread < maxSpread {
-				tmp = append(tmp, arbit[i])
-			}
-		}
-		arbit = tmp
-
-		if len(arbit) == 0 {
-			continue
 		}
 
 		// Sort as requested
