@@ -141,7 +141,7 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 
 			// Filter out entries that are invalid
 			for i := range mismatch {
-				if mismatch[i].Inventory.Conditions == "NM" {
+				if mismatch[i].InventoryEntry.Conditions == "NM" {
 					tiers[mismatch[i].CardId]++
 				}
 			}
