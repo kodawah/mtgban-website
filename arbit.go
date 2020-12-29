@@ -20,6 +20,12 @@ const (
 	MinSpread       = 10.0
 	MaxSpreadGlobal = 1000
 	MinSpreadGlobal = 200.0
+
+	MinSpreadNegative = -30
+	MinDiffNegative   = -100
+
+	MinSpreadHighYield       = 100
+	MinSpreadHighYieldGlobal = 350
 )
 
 var Affiliates = []string{
@@ -333,14 +339,14 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 			opts.MaxSpread = MaxSpreadGlobal
 		}
 		if noposi {
-			opts.MinSpread = -30
-			opts.MinDiff = -100
+			opts.MinSpread = MinSpreadNegative
+			opts.MinDiff = MinDiffNegative
 			opts.MaxSpread = MinSpread
 		}
 		if nolow {
-			opts.MinSpread = 100
+			opts.MinSpread = MinSpreadHighYield
 			if pageVars.GlobalMode {
-				opts.MinSpread = 350
+				opts.MinSpread = MinSpreadHighYieldGlobal
 			}
 		}
 		if nocond {
