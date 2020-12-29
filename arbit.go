@@ -79,6 +79,10 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 		blocklistVendors = strings.Split(blocklistVendorsOpt, ",")
 	}
 
+	scraperCompare(w, r, pageVars, allowlistSellers, blocklistVendors)
+}
+
+func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, allowlistSellers []string, blocklistVendors []string) {
 	r.ParseForm()
 
 	var source mtgban.Seller
@@ -195,8 +199,6 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if source == nil {
-		pageVars.Title = "Arbitrage Opportunities"
-
 		render(w, "arbit.html", pageVars)
 		return
 	}
