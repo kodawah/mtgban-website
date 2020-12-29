@@ -226,15 +226,15 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	pageVars.Arb = []Arbitrage{}
 	pageVars.Metadata = map[string]GenericCard{}
 
-	for i, vendor := range Vendors {
-		if vendor == nil {
+	for i, scraper := range Vendors {
+		if scraper == nil {
 			log.Println("nil vendor at position", i)
 			continue
 		}
-		if vendor.Info().Name == source.Info().Name {
+		if scraper.Info().Name == source.Info().Name {
 			continue
 		}
-		if SliceStringHas(blocklistVendors, vendor.Info().Shorthand) {
+		if SliceStringHas(blocklistVendors, scraper.Info().Shorthand) {
 			continue
 		}
 
@@ -265,11 +265,11 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 			opts.MinQuantity = 1
 		}
 
-		if vendor.Info().Shorthand == "ABU" {
+		if scraper.Info().Shorthand == "ABU" {
 			opts.UseTrades = useCredit
 		}
 
-		arbit, err := mtgban.Arbit(opts, vendor, source)
+		arbit, err := mtgban.Arbit(opts, scraper, source)
 		if err != nil {
 			log.Println(err)
 			continue
@@ -312,18 +312,20 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		}
 		pageVars.SortOption = sorting
 
-		name := vendor.Info().Name
+		name := scraper.Info().Name
 		if name == "TCG Player Market" {
 			name = "TCG Player Trade-In"
 		}
 
-		pageVars.Arb = append(pageVars.Arb, Arbitrage{
+		entry := Arbitrage{
 			Name:       name,
-			LastUpdate: vendor.Info().BuylistTimestamp.Format(time.RFC3339),
+			LastUpdate: scraper.Info().BuylistTimestamp.Format(time.RFC3339),
 			Arbit:      arbit,
 			Len:        len(arbit),
-			HasCredit:  !vendor.Info().NoCredit,
-		})
+			HasCredit:  !scraper.Info().NoCredit,
+		}
+
+		pageVars.Arb = append(pageVars.Arb, entry)
 		for i := range arbit {
 			cardId := arbit[i].CardId
 			_, found := pageVars.Metadata[cardId]
