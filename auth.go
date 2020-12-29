@@ -471,6 +471,7 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) (string, string)
 		v.Set("Newspaper", "true")
 		v.Set("Sleepers", "true")
 		v.Set("Arbit", "true")
+		v.Set("Global", "true")
 	case "Root":
 		v.Set("Explore", "true")
 		fallthrough
@@ -479,6 +480,7 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) (string, string)
 		v.Set("Newspaper", "true")
 		v.Set("Sleepers", "true")
 		v.Set("Arbit", "true")
+		v.Set("Global", "true")
 	}
 	if v.Get("Arbit") == "true" {
 		if tierTitle == "Root" {

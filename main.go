@@ -84,6 +84,7 @@ type PageVars struct {
 	FilterSpread   bool
 	FilterQuantity bool
 	SortOption     string
+	GlobalMode     bool
 
 	Page         string
 	ToC          []NewspaperPage
@@ -121,7 +122,12 @@ var OptionalFields = []string{
 }
 
 var OrderNav = []string{
-	"Search", "Newspaper", "Explore", "Sleepers", "Arbit",
+	"Search",
+	"Newspaper",
+	"Explore",
+	"Sleepers",
+	"Global",
+	"Arbit",
 }
 
 var ExtraNavs map[string]NavElem
@@ -151,6 +157,12 @@ func init() {
 			Short:  "💤",
 			Link:   "/sleepers",
 			Handle: Sleepers,
+		},
+		"Global": NavElem{
+			Name:   "🌍 Global",
+			Short:  "🌍",
+			Link:   "/global",
+			Handle: Global,
 		},
 		"Arbit": NavElem{
 			Name:   "📈 Arbitrage",

@@ -33,15 +33,24 @@
     {{else if eq .SellerShort ""}}
         <h1>Welcome to {{.Title}}<a name="top">&nbsp;</a></h1>
         <div class="indent">
-            <p>Please use the top bar to choose the seller to buy from.</p>
+            {{if .GlobalMode}}
+                <p>Please use the top bar to choose the index to compare from.</p>
+            {{else}}
+                <p>Please use the top bar to choose the seller to buy from.</p>
+            {{end}}
             <h2>Instructions</h2>
             <ul class="indent">
                 <li>Data is refreshed periodically over the day.</li>
                 <li>There is a minimum spread and difference amount for a card to be included in the list.</li>
                 <li>Always check validity of prices before committing anything, it is possible that prices or quantities changed.</li>
                 <li>By default, arbitrage is computed on cash value, taking into account for condition whenever possible.</li>
-                <li>Note that buylist prices are always displayed NM to make them easier to find, but the actual spread and difference is computer according to the card conditions.</li>
-                <li>Each seller page will contain a list of vendors, with a brief summary at the top containing the number of arbitrage opportunities.</li>
+
+                {{if .GlobalMode}}
+                    <li>Each page will provide a list of cards that can be arbitraged from, according to the value reported from other markets.</li>
+                {{else}}
+                    <li>Note that buylist prices are always displayed NM to make them easier to find, but the actual spread and difference is computer according to the card conditions.</li>
+                    <li>Each seller page will contain a list of vendors, with a brief summary at the top containing the number of arbitrage opportunities.</li>
+                {{end}}
                 <li>In case of mistakes or incongruities, please notify the devs in the BAN Discord.</li>
                 <li>Should you find this content useful, consider clicking on one of the provided links to make a purchase on the website, and directly support BAN.</li>
             </ul>
@@ -69,7 +78,11 @@
             }
         </script>
 
-        <h1>Arbitrage from {{.SellerFull}}</h1>
+        {{if .GlobalMode}}
+            <h1>Market Imbalance in {{.SellerFull}}</h1>
+        {{else}}
+            <h1>Arbitrage from {{.SellerFull}}</h1>
+        {{end}}
         <div class="indent">
             <div class="indent" style="max-width: 85%;">
                 <p>
@@ -84,13 +97,19 @@
                 </p>
                 <p>
                     Show
-                    <a class="btn {{if $.FilterCond}}success{{else}}normal{{end}}" href="?source={{$.SellerShort}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{not $.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{$.FilterQuantity}}">only NM/SP</a>
+                    {{if not .GlobalMode}}
+                        <a class="btn {{if $.FilterCond}}success{{else}}normal{{end}}" href="?source={{$.SellerShort}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{not $.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{$.FilterQuantity}}">only NM/SP</a>
+                    {{end}}
                     <a class="btn {{if $.FilterFoil}}success{{else}}normal{{end}}" href="?source={{$.SellerShort}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{not $.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{$.FilterQuantity}}">only non-Foil</a>
                     <a class="btn {{if $.FilterComm}}success{{else}}normal{{end}}" href="?source={{$.SellerShort}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{not $.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{$.FilterQuantity}}">only Rare/Mythic</a>
-                    <a class="btn {{if $.FilterNega}}success{{else}}normal{{end}}" href="?source={{$.SellerShort}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{not $.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{$.FilterQuantity}}">only Negative</a>
+                    {{if not .GlobalMode}}
+                        <a class="btn {{if $.FilterNega}}success{{else}}normal{{end}}" href="?source={{$.SellerShort}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{not $.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{$.FilterQuantity}}">only Negative</a>
+                    {{end}}
                     <a class="btn {{if $.FilterPenny}}success{{else}}normal{{end}}" href="?source={{$.SellerShort}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{not $.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{$.FilterQuantity}}">only Bucks+</a>
                     <a class="btn {{if $.FilterSpread}}success{{else}}normal{{end}}" href="?source={{$.SellerShort}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{not $.FilterSpread}}&noqty={{$.FilterQuantity}}">only Yield+</a>
-                    <a class="btn {{if $.FilterQuantity}}success{{else}}normal{{end}}" href="?source={{$.SellerShort}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{not $.FilterQuantity}}">only Quantity+</a>
+                    {{if not .GlobalMode}}
+                        <a class="btn {{if $.FilterQuantity}}success{{else}}normal{{end}}" href="?source={{$.SellerShort}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{not $.FilterQuantity}}">only Quantity+</a>
+                    {{end}}
                 </p>
             </div>
 
@@ -116,17 +135,31 @@
                         <th class="stickyHeaderTiny">Edition</th>
                         <th class="stickyHeaderTiny"><center>#</center></th>
                         <th class="stickyHeaderTiny">F/NF</th>
-                        <th class="stickyHeaderTiny">Conditions</th>
+                        {{if not .Shortlist}}
+                            <th class="stickyHeaderTiny">Conditions</th>
+                        {{end}}
                         {{if not $.SellerNoAvailable}}
                             <th class="stickyHeaderTiny">
                                 <a href="javascript:sortBy('available', '{{.Name}}')">Available</a>
                             </th>
                         {{end}}
                         <th class="stickyHeaderTiny">
-                            <a href="javascript:sortBy('sell_price', '{{.Name}}')">Sell Price</a>
+                            <a href="javascript:sortBy('sell_price', '{{.Name}}')">
+                                {{if $.GlobalMode}}
+                                    {{$.SellerShort}}
+                                {{else}}
+                                    Sell Price
+                                {{end}}
+                            </a>
                         </th>
                         <th class="stickyHeaderTiny">
-                            <a href="javascript:sortBy('buy_price', '{{.Name}}')">Buy Price</a>
+                            <a href="javascript:sortBy('buy_price', '{{.Name}}')">
+                                {{if $.GlobalMode}}
+                                    {{.Name}}
+                                {{else}}
+                                    Buy Price
+                                {{end}}
+                            </a>
                         </th>
                         {{$save := .}}
                         {{if .HasCredit}}
@@ -140,7 +173,9 @@
                         <th class="stickyHeaderTiny">
                             <a href="javascript:sortBy('', '{{.Name}}')">Spread</a>
                         </th>
-                        <th class="stickyHeaderTiny">Price Ratio</th>
+                        {{if not .Shortlist}}
+                            <th class="stickyHeaderTiny">Price Ratio</th>
+                        {{end}}
                         <th class="stickyHeaderTiny"><center>Quicklinks</center></th>
                     </tr>
                     {{range .Arbit}}
@@ -157,9 +192,11 @@
                             <td>
                                 {{if (index $.Metadata .CardId).Foil}}FOIL{{end}}
                             </td>
-                            <td>
-                                <center>{{.InventoryEntry.Conditions}}</center>
-                            </td>
+                            {{if not $save.Shortlist}}
+                                <td>
+                                    <center>{{.InventoryEntry.Conditions}}</center>
+                                </td>
+                            {{end}}
                             {{if not $.SellerNoAvailable}}
                                 <td>
                                     <center>
@@ -174,7 +211,11 @@
                                 $ {{printf "%.2f" .InventoryEntry.Price}}
                             </td>
                             <td>
-                                $ {{printf "%.2f" .BuylistEntry.BuyPrice}}
+                                {{if eq .BuylistEntry.BuyPrice 0.0}}
+                                    $ {{printf "%.2f" .ReferenceEntry.Price}}
+                                {{else}}
+                                    $ {{printf "%.2f" .BuylistEntry.BuyPrice}}
+                                {{end}}
                             </td>
                             {{if $save.HasCredit}}
                                 <td>
@@ -187,11 +228,13 @@
                             <td>
                                 {{printf "%.2f" .Spread}} %
                             </td>
-                            <td>
-                                <center>
-                                {{printf "%.2f" .BuylistEntry.PriceRatio}} %
-                                </center>
-                            </td>
+                            {{if not $save.Shortlist}}
+                                <td>
+                                    <center>
+                                    {{printf "%.2f" .BuylistEntry.PriceRatio}} %
+                                    </center>
+                                </td>
+                            {{end}}
                             <td>
                                 <center>
                                     {{if ne .InventoryEntry.URL ""}}
@@ -199,6 +242,9 @@
                                     {{end}}
                                     {{if ne .BuylistEntry.URL ""}}
                                         <a class="btn normal" href="{{.BuylistEntry.URL}}" target="_blank" rel="nofollow">Sell</a>
+                                    {{end}}
+                                    {{if ne .ReferenceEntry.URL ""}}
+                                        <a class="btn normal" href="{{.ReferenceEntry.URL}}" target="_blank" rel="nofollow">Buy</a>
                                     {{end}}
                                 </center>
                             </td>

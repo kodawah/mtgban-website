@@ -18,6 +18,8 @@ const (
 	MaxPriceRatio   = 120.0
 	MaxSpread       = 650.0
 	MinSpread       = 10.0
+	MaxSpreadGlobal = 1000
+	MinSpreadGlobal = 200.0
 )
 
 type Arbitrage struct {
@@ -26,6 +28,7 @@ type Arbitrage struct {
 	Arbit      []mtgban.ArbitEntry
 	Len        int
 	HasCredit  bool
+	Shortlist  bool
 }
 
 func Arbit(w http.ResponseWriter, r *http.Request) {
@@ -78,6 +81,64 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	} else if blocklistVendorsOpt != "NONE" {
 		blocklistVendors = strings.Split(blocklistVendorsOpt, ",")
 	}
+
+	scraperCompare(w, r, pageVars, allowlistSellers, blocklistVendors)
+}
+
+func Global(w http.ResponseWriter, r *http.Request) {
+	sig := getSignatureFromCookies(r)
+
+	pageVars := genPageNav("Global", sig)
+
+	if !DatabaseLoaded {
+		pageVars.Title = "Great things are coming"
+		pageVars.ErrorMessage = "Website is starting, please try again in a few minutes"
+
+		render(w, "arbit.html", pageVars)
+		return
+	}
+
+	globalParam, _ := GetParamFromSig(sig, "Global")
+	canGlobal, _ := strconv.ParseBool(globalParam)
+	if SigCheck && !canGlobal {
+		pageVars.Title = "This feature is BANned"
+		pageVars.ErrorMessage = ErrMsgPlus
+		pageVars.ShowPromo = true
+
+		render(w, "arbit.html", pageVars)
+		return
+	}
+
+	// The "menu" section, the reference
+	var allowlistSellers []string
+	for i, seller := range Sellers {
+		if seller == nil {
+			log.Println("nil seller at position", i)
+			continue
+		}
+		if seller.Info().Shorthand != TCG_MARKET &&
+			seller.Info().Shorthand != MKM_TREND {
+			continue
+		}
+		allowlistSellers = append(allowlistSellers, seller.Info().Shorthand)
+	}
+
+	// The "Jump to" section, the probe
+	var blocklistVendors []string
+	for i, seller := range Sellers {
+		if seller == nil {
+			log.Println("nil seller at position", i)
+			continue
+		}
+		if seller.Info().Shorthand == TCG_MARKET ||
+			seller.Info().Shorthand == MKM_TREND {
+			continue
+		}
+		blocklistVendors = append(blocklistVendors, seller.Info().Shorthand)
+	}
+
+	// Inform the render this is Global
+	pageVars.GlobalMode = true
 
 	scraperCompare(w, r, pageVars, allowlistSellers, blocklistVendors)
 }
@@ -160,14 +221,21 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		if !SliceStringHas(allowlistSellers, newSeller.Info().Shorthand) {
 			continue
 		}
-		if newSeller.Info().MetadataOnly {
-			continue
+
+		var link string
+		if pageVars.GlobalMode {
+			link = "/global"
+		} else {
+			if newSeller.Info().MetadataOnly {
+				continue
+			}
+			link = "/arbit"
 		}
 
 		nav := NavElem{
 			Name:  newSeller.Info().Name,
 			Short: newSeller.Info().Shorthand,
-			Link:  "/arbit",
+			Link:  link,
 		}
 
 		if newSeller.Info().Name == TCG_MAIN {
@@ -223,11 +291,26 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	pageVars.Arb = []Arbitrage{}
 	pageVars.Metadata = map[string]GenericCard{}
 
-	for i, scraper := range Vendors {
-		if scraper == nil {
-			log.Println("nil vendor at position", i)
-			continue
+	var scrapers []mtgban.Scraper
+	if pageVars.GlobalMode {
+		for i, seller := range Sellers {
+			if seller == nil {
+				log.Println("nil seller at position", i)
+				continue
+			}
+			scrapers = append(scrapers, seller)
 		}
+	} else {
+		for i, vendor := range Vendors {
+			if vendor == nil {
+				log.Println("nil vendor at position", i)
+				continue
+			}
+			scrapers = append(scrapers, vendor)
+		}
+	}
+
+	for _, scraper := range scrapers {
 		if scraper.Info().Name == source.Info().Name {
 			continue
 		}
@@ -241,6 +324,10 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 			MaxPriceRatio: MaxPriceRatio,
 			NoFoil:        nofoil,
 		}
+		if pageVars.GlobalMode {
+			opts.MinSpread = MinSpreadGlobal
+			opts.MaxSpread = MaxSpreadGlobal
+		}
 		if noposi {
 			opts.MinSpread = -30
 			opts.MinDiff = -100
@@ -248,6 +335,9 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		}
 		if nolow {
 			opts.MinSpread = 100
+			if pageVars.GlobalMode {
+				opts.MinSpread = 350
+			}
 		}
 		if nocond {
 			opts.Conditions = []string{"MP", "HP", "PO"}
@@ -266,7 +356,13 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 			opts.UseTrades = useCredit
 		}
 
-		arbit, err := mtgban.Arbit(opts, scraper, source)
+		var arbit []mtgban.ArbitEntry
+		var err error
+		if pageVars.GlobalMode {
+			arbit, err = mtgban.Mismatch(opts, scraper.(mtgban.Seller), source)
+		} else {
+			arbit, err = mtgban.Arbit(opts, scraper.(mtgban.Vendor), source)
+		}
 		if err != nil {
 			log.Println(err)
 			continue
@@ -291,9 +387,15 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 				return arbit[i].InventoryEntry.Price > arbit[j].InventoryEntry.Price
 			})
 		case "buy_price":
-			sort.Slice(arbit, func(i, j int) bool {
-				return arbit[i].BuylistEntry.BuyPrice > arbit[j].BuylistEntry.BuyPrice
-			})
+			if pageVars.GlobalMode {
+				sort.Slice(arbit, func(i, j int) bool {
+					return arbit[i].ReferenceEntry.Price > arbit[j].ReferenceEntry.Price
+				})
+			} else {
+				sort.Slice(arbit, func(i, j int) bool {
+					return arbit[i].BuylistEntry.BuyPrice > arbit[j].BuylistEntry.BuyPrice
+				})
+			}
 		case "trade_price":
 			sort.Slice(arbit, func(i, j int) bool {
 				return arbit[i].BuylistEntry.TradePrice > arbit[j].BuylistEntry.TradePrice
@@ -321,6 +423,11 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 			Len:        len(arbit),
 			HasCredit:  !scraper.Info().NoCredit,
 		}
+		if pageVars.GlobalMode {
+			entry.HasCredit = false
+			entry.LastUpdate = scraper.Info().InventoryTimestamp.Format(time.RFC3339)
+			entry.Shortlist = true
+		}
 
 		pageVars.Arb = append(pageVars.Arb, entry)
 		for i := range arbit {
@@ -343,6 +450,9 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		pageVars.InfoMessage = "No arbitrage available!"
 	}
 	pageVars.Title = "Arbitrage from " + source.Info().Name
+	if pageVars.GlobalMode {
+		pageVars.Title = "Market Imbalance in " + source.Info().Name
+	}
 
 	render(w, "arbit.html", pageVars)
 }
