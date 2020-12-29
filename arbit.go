@@ -22,6 +22,13 @@ const (
 	MinSpreadGlobal = 200.0
 )
 
+var Affiliates = []string{
+	TCG_MAIN,
+	TCG_DIRECT,
+	"Card Kingdom",
+	"Miniature Market",
+}
+
 type Arbitrage struct {
 	Name       string
 	LastUpdate string
@@ -275,6 +282,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	pageVars.SellerFull = source.Info().Name
 	pageVars.SellerUpdate = source.Info().InventoryTimestamp.Format(time.RFC3339)
 	pageVars.SellerNoAvailable = source.Info().NoQuantityInventory
+	pageVars.SellerAffiliate = SliceStringHas(Affiliates, pageVars.SellerFull)
 	pageVars.UseCredit = useCredit
 	pageVars.FilterCond = nocond
 	pageVars.FilterFoil = nofoil
@@ -283,10 +291,6 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	pageVars.FilterPenny = nopenny
 	pageVars.FilterSpread = nolow
 	pageVars.FilterQuantity = noqty
-	switch pageVars.SellerFull {
-	case TCG_MAIN, TCG_DIRECT, "Card Kingdom":
-		pageVars.SellerAffiliate = true
-	}
 
 	pageVars.Arb = []Arbitrage{}
 	pageVars.Metadata = map[string]GenericCard{}
