@@ -206,6 +206,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	pageVars.SellerShort = source.Info().Shorthand
 	pageVars.SellerFull = source.Info().Name
 	pageVars.SellerUpdate = source.Info().InventoryTimestamp.Format(time.RFC3339)
+	pageVars.SellerNoAvailable = source.Info().NoQuantityInventory
 	pageVars.UseCredit = useCredit
 	pageVars.FilterCond = nocond
 	pageVars.FilterFoil = nofoil
@@ -217,10 +218,6 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	switch pageVars.SellerFull {
 	case TCG_MAIN, TCG_DIRECT, "Card Kingdom":
 		pageVars.SellerAffiliate = true
-	}
-	switch pageVars.SellerFull {
-	case TCG_MAIN, TCG_DIRECT:
-		pageVars.SellerNoAvailable = true
 	}
 
 	pageVars.Arb = []Arbitrage{}
