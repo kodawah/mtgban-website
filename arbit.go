@@ -21,6 +21,8 @@ const (
 	MaxSpreadGlobal = 1000
 	MinSpreadGlobal = 200.0
 
+	MaxResultsGlobal = 300
+
 	MinSpreadNegative = -30
 	MinDiffNegative   = -100
 
@@ -382,8 +384,12 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 			continue
 		}
 
-		if len(arbit) > MaxArbitResults {
-			arbit = arbit[:MaxArbitResults]
+		maxResults := MaxArbitResults
+		if pageVars.GlobalMode {
+			maxResults = MaxResultsGlobal
+		}
+		if len(arbit) > maxResults {
+			arbit = arbit[:maxResults]
 		}
 
 		// Sort as requested
