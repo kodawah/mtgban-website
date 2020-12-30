@@ -53,7 +53,8 @@ type Arbitrage struct {
 	Arbit      []mtgban.ArbitEntry
 	Len        int
 	HasCredit  bool
-	Shortlist  bool
+
+	HasConditions bool
 }
 
 func Arbit(w http.ResponseWriter, r *http.Request) {
@@ -459,7 +460,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		if pageVars.GlobalMode {
 			entry.HasCredit = false
 			entry.LastUpdate = scraper.Info().InventoryTimestamp.Format(time.RFC3339)
-			entry.Shortlist = true
+			entry.HasConditions = !scraper.Info().MetadataOnly
 		}
 
 		pageVars.Arb = append(pageVars.Arb, entry)

@@ -135,7 +135,7 @@
                         <th class="stickyHeaderTiny">Edition</th>
                         <th class="stickyHeaderTiny"><center>#</center></th>
                         <th class="stickyHeaderTiny">F/NF</th>
-                        {{if not .Shortlist}}
+                        {{if not .HasConditions}}
                             <th class="stickyHeaderTiny">Conditions</th>
                         {{end}}
                         {{if not $.SellerNoAvailable}}
@@ -173,7 +173,7 @@
                         <th class="stickyHeaderTiny">
                             <a href="javascript:sortBy('', '{{.Name}}')">Spread</a>
                         </th>
-                        {{if not .Shortlist}}
+                        {{if not $.GlobalMode}}
                             <th class="stickyHeaderTiny">Price Ratio</th>
                         {{end}}
                         <th class="stickyHeaderTiny"><center>Quicklinks</center></th>
@@ -192,7 +192,7 @@
                             <td>
                                 {{if (index $.Metadata .CardId).Foil}}FOIL{{end}}
                             </td>
-                            {{if not $save.Shortlist}}
+                            {{if not $save.HasConditions}}
                                 <td>
                                     <center>{{.InventoryEntry.Conditions}}</center>
                                 </td>
@@ -228,7 +228,7 @@
                             <td>
                                 {{printf "%.2f" .Spread}} %
                             </td>
-                            {{if not $save.Shortlist}}
+                            {{if not $.GlobalMode}}
                                 <td>
                                     <center>
                                     {{printf "%.2f" .BuylistEntry.PriceRatio}} %
