@@ -177,6 +177,10 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	var message string
 	var sorting string
 
+	if pageVars.GlobalMode {
+		nopenny = !nopenny
+	}
+
 	for k, v := range r.Form {
 		switch k {
 		case "source":
