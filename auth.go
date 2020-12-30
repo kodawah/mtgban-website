@@ -527,6 +527,13 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) (string, string)
 			v.Set("NewsEnabled", "1day")
 		}
 	}
+	if v.Get("Global") == "true" {
+		if tierTitle == "Merchant" {
+			v.Set("AnyEnabled", "false")
+		} else {
+			v.Set("AnyEnabled", "true")
+		}
+	}
 
 	bu, _ := url.Parse(baseURL)
 	sourceURL.Scheme = bu.Scheme

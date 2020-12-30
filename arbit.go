@@ -30,9 +30,12 @@ const (
 	MinSpreadHighYieldGlobal = 350
 )
 
-var Affiliates = []string{
+var Affiliates = append(NonMarketAffiliates,
 	TCG_MAIN,
 	TCG_DIRECT,
+)
+
+var NonMarketAffiliates = []string{
 	"Card Kingdom",
 	"Miniature Market",
 }
@@ -135,6 +138,9 @@ func Global(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	anyEnabledOpt, _ := GetParamFromSig(sig, "AnyEnabled")
+	anyEnabled, _ := strconv.ParseBool(anyEnabledOpt)
+
 	// The "menu" section, the reference
 	var allowlistSellers []string
 	for i, seller := range Sellers {
@@ -142,9 +148,17 @@ func Global(w http.ResponseWriter, r *http.Request) {
 			log.Println("nil seller at position", i)
 			continue
 		}
-		if seller.Info().Shorthand != TCG_MARKET &&
-			seller.Info().Shorthand != MKM_TREND {
-			continue
+		if anyEnabled {
+			if seller.Info().Shorthand != TCG_MARKET &&
+				seller.Info().Shorthand != MKM_TREND &&
+				!SliceStringHas(NonMarketAffiliates, seller.Info().Name) {
+				continue
+			}
+		} else {
+			if seller.Info().Shorthand != TCG_MARKET &&
+				seller.Info().Shorthand != MKM_TREND {
+				continue
+			}
 		}
 		allowlistSellers = append(allowlistSellers, seller.Info().Shorthand)
 	}
@@ -380,6 +394,13 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		}
 		if SliceStringHas(blocklistVendors, scraper.Info().Shorthand) {
 			continue
+		}
+
+		if pageVars.GlobalMode {
+			// Unless the source is an index, only compare within the same region
+			if !source.Info().MetadataOnly && source.Info().CountryFlag != scraper.Info().CountryFlag {
+				continue
+			}
 		}
 
 		if scraper.Info().Shorthand == "ABU" {

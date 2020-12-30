@@ -118,6 +118,7 @@ var OptionalFields = []string{
 	"ArbitDisabledVendors",
 	"ExpEnabled",
 	"NewsEnabled",
+	"AnyEnabled",
 	"API",
 }
 
