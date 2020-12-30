@@ -303,6 +303,40 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	pageVars.Arb = []Arbitrage{}
 	pageVars.Metadata = map[string]GenericCard{}
 
+	opts := &mtgban.ArbitOpts{
+		MinSpread:     MinSpread,
+		MaxSpread:     MaxSpread,
+		MaxPriceRatio: MaxPriceRatio,
+		NoFoil:        nofoil,
+	}
+	if pageVars.GlobalMode {
+		opts.MinSpread = MinSpreadGlobal
+		opts.MaxSpread = MaxSpreadGlobal
+	}
+	if noposi {
+		opts.MinSpread = MinSpreadNegative
+		opts.MinDiff = MinDiffNegative
+		opts.MaxSpread = MinSpread
+	}
+	if nolow {
+		opts.MinSpread = MinSpreadHighYield
+		if pageVars.GlobalMode {
+			opts.MinSpread = MinSpreadHighYieldGlobal
+		}
+	}
+	if nocond {
+		opts.Conditions = []string{"MP", "HP", "PO"}
+	}
+	if nocomm {
+		opts.Rarities = []string{"uncommon", "common"}
+	}
+	if nopenny {
+		opts.MinPrice = 1
+	}
+	if noqty {
+		opts.MinQuantity = 1
+	}
+
 	var scrapers []mtgban.Scraper
 	if pageVars.GlobalMode {
 		for i, seller := range Sellers {
@@ -328,40 +362,6 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		}
 		if SliceStringHas(blocklistVendors, scraper.Info().Shorthand) {
 			continue
-		}
-
-		opts := &mtgban.ArbitOpts{
-			MinSpread:     MinSpread,
-			MaxSpread:     MaxSpread,
-			MaxPriceRatio: MaxPriceRatio,
-			NoFoil:        nofoil,
-		}
-		if pageVars.GlobalMode {
-			opts.MinSpread = MinSpreadGlobal
-			opts.MaxSpread = MaxSpreadGlobal
-		}
-		if noposi {
-			opts.MinSpread = MinSpreadNegative
-			opts.MinDiff = MinDiffNegative
-			opts.MaxSpread = MinSpread
-		}
-		if nolow {
-			opts.MinSpread = MinSpreadHighYield
-			if pageVars.GlobalMode {
-				opts.MinSpread = MinSpreadHighYieldGlobal
-			}
-		}
-		if nocond {
-			opts.Conditions = []string{"MP", "HP", "PO"}
-		}
-		if nocomm {
-			opts.Rarities = []string{"uncommon", "common"}
-		}
-		if nopenny {
-			opts.MinPrice = 1
-		}
-		if noqty {
-			opts.MinQuantity = 1
 		}
 
 		if scraper.Info().Shorthand == "ABU" {
