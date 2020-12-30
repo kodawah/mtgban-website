@@ -37,6 +37,16 @@ var Affiliates = []string{
 	"Miniature Market",
 }
 
+var FilteredEditions = []string{
+	"Collectors’ Edition",
+	"Foreign Black Border",
+	"Foreign White Border",
+	"Intl. Collectors’ Edition",
+	"Limited Edition Alpha",
+	"Limited Edition Beta",
+	"Unlimited Edition",
+}
+
 type Arbitrage struct {
 	Name       string
 	LastUpdate string
@@ -335,6 +345,9 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	}
 	if noqty {
 		opts.MinQuantity = 1
+	}
+	if pageVars.GlobalMode {
+		opts.Editions = FilteredEditions
 	}
 
 	var scrapers []mtgban.Scraper
