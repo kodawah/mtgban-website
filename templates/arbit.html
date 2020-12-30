@@ -54,6 +54,10 @@
                 <li>In case of mistakes or incongruities, please notify the devs in the BAN Discord.</li>
                 <li>Should you find this content useful, consider clicking on one of the provided links to make a purchase on the website, and directly support BAN.</li>
             </ul>
+        {{if ne .InfoMessage ""}}
+            <br>
+            <h2><p>{{.InfoMessage}}</p></h2>
+        {{end}}
         </div>
     {{else}}
         <img id="hoverImage" src="" style="position:absolute; z-index: 3;"/>

@@ -21,7 +21,8 @@ const (
 	MaxSpreadGlobal = 1000
 	MinSpreadGlobal = 200.0
 
-	MaxResultsGlobal = 300
+	MaxResultsGlobal      = 300
+	MaxResultsGlobalLimit = 50
 
 	MinSpreadNegative = -30
 	MinDiffNegative   = -100
@@ -180,10 +181,10 @@ func Global(w http.ResponseWriter, r *http.Request) {
 	// Inform the render this is Global
 	pageVars.GlobalMode = true
 
-	scraperCompare(w, r, pageVars, allowlistSellers, blocklistVendors)
+	scraperCompare(w, r, pageVars, allowlistSellers, blocklistVendors, anyEnabled)
 }
 
-func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, allowlistSellers []string, blocklistVendors []string) {
+func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, allowlistSellers []string, blocklistVendors []string, flags ...bool) {
 	r.ParseForm()
 
 	var source mtgban.Seller
@@ -311,6 +312,10 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	}
 
 	if source == nil {
+		if len(flags) > 0 && !flags[0] {
+			pageVars.InfoMessage = "Increase your tier to discover more cards and more markets!"
+		}
+
 		render(w, "arbit.html", pageVars)
 		return
 	}
@@ -425,6 +430,9 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 
 		maxResults := MaxArbitResults
 		if pageVars.GlobalMode {
+			if len(flags) > 0 && !flags[0] {
+				maxResults = MaxResultsGlobalLimit
+			}
 			maxResults = MaxResultsGlobal
 		}
 		if len(arbit) > maxResults {
