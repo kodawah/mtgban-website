@@ -242,16 +242,12 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 		for _, userId := range userIds[1:] {
 			foundTitle, _ := getUserTier(tc, userId)
 			switch foundTitle {
-			case "Squire",
-				"Merchant",
-				"Bard",
-				"Test Role":
-				tierTitle = foundTitle
+			case "PIONEER", "PIONEER (Early Adopters)":
 			case "MODERN", "MODERN (Early Adopters)":
-				tierTitle = "Merchant"
+				tierTitle = "Modern"
 			case "LEGACY", "LEGACY (Early Adopters)":
-				tierTitle = "Bard"
-			case "COMMANDER":
+				tierTitle = "Legacy"
+			case "Test Role":
 				tierTitle = "Test Role"
 			}
 		}
@@ -457,13 +453,11 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) (string, string)
 	v := url.Values{}
 	// Enable option according to tier
 	switch tierTitle {
-	case "Squire":
-		v.Set("Search", "true")
-	case "Merchant":
+	case "Modern":
 		v.Set("Search", "true")
 		v.Set("Newspaper", "true")
 		v.Set("Global", "true")
-	case "Bard":
+	case "Legacy":
 		v.Set("Search", "true")
 		v.Set("Newspaper", "true")
 		v.Set("Sleepers", "true")
@@ -516,21 +510,21 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) (string, string)
 			v.Set("ExpEnabled", "FULL")
 		case "Test Role":
 			v.Set("ExpEnabled", "MOST")
-		case "Merchant":
+		case "Modern":
 			v.Set("ExpEnabled", "ENTRY")
-		case "Squire":
+		case "Pioneer":
 			v.Set("ExpEnabled", "DEMO")
 		}
 	}
 	if v.Get("Newspaper") == "true" {
-		if tierTitle == "Merchant" {
+		if tierTitle == "Modern" {
 			v.Set("NewsEnabled", "3day")
 		} else {
 			v.Set("NewsEnabled", "1day")
 		}
 	}
 	if v.Get("Global") == "true" {
-		if tierTitle == "Merchant" {
+		if tierTitle == "Modern" {
 			v.Set("AnyEnabled", "false")
 		} else {
 			v.Set("AnyEnabled", "true")
