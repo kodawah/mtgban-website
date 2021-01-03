@@ -192,8 +192,9 @@ func parseMessage(content string) (*searchResult, error) {
 }
 
 type embedField struct {
-	Name  string
-	Value string
+	Name   string
+	Value  string
+	Inline bool
 }
 
 func search2fields(searchRes *searchResult) (fields []embedField) {
@@ -203,6 +204,7 @@ func search2fields(searchRes *searchResult) (fields []embedField) {
 		field := embedField{
 			Name: fieldsNames[i],
 		}
+		field.Inline = true
 
 		// Results look really bad after MaxCustomEntries, and too much info
 		// does not help, so sort by best price, trim, then sort back to original
@@ -260,7 +262,8 @@ func search2fields(searchRes *searchResult) (fields []embedField) {
 			if len(field.Value)+len(value) > MaxEmbedFieldsValueLength && len(fields) < MaxEmbedFieldsNumber {
 				fields = append(fields, field)
 				field = embedField{
-					Name: fieldsNames[i] + " (cont'd)",
+					Name:   fieldsNames[i] + " (cont'd)",
+					Inline: true,
 				}
 			}
 			field.Value += value
@@ -318,14 +321,16 @@ func grabLastSold(tcgId string, foil bool) ([]embedField, error) {
 			shipping = append(shipping, fmt.Sprintf("%0.2f", entry.Shipping))
 		}
 		fields = append(fields, embedField{
-			Name:  entry.Title,
-			Value: value,
+			Name:   entry.Title,
+			Value:  value,
+			Inline: true,
 		})
 
 		if i == 4 || i == 9 {
 			field := embedField{
-				Name:  "Shipping",
-				Value: strings.Join(shipping, " "),
+				Name:   "Shipping",
+				Value:  strings.Join(shipping, " "),
+				Inline: true,
 			}
 			if field.Value == "" {
 				field.Value = "n/a"
@@ -419,7 +424,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		fields = append(fields, &discordgo.MessageEmbedField{
 			Name:   field.Name,
 			Value:  field.Value,
-			Inline: true,
+			Inline: field.Inline,
 		})
 	}
 
