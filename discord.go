@@ -82,6 +82,7 @@ func guildCreate(s *discordgo.Session, gc *discordgo.GuildCreate) {
 type searchResult struct {
 	Invalid         bool
 	CardId          string
+	ResultsIndex    []SearchEntry
 	ResultsSellers  []SearchEntry
 	ResultsVendors  []SearchEntry
 	EditionSearched string
@@ -137,10 +138,16 @@ func parseMessage(content string) (*searchResult, error) {
 		return nil, fmt.Errorf("No card found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", query)
 	}
 
+	// We can be quite sure that one of the index will contain the card requested,
+	// so we translate the result into a new query to feed to the other searches
+	cardId, resultsIndex, err := searchSellersFirstResult(query, options, "INDEX")
+	if err != nil {
+		return nil, fmt.Errorf("No card found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", query)
+	}
+	query, options = parseSearchOptions(cardId)
+
 	// Search both sellers and vendors
-	var cardId, cardIdV string
 	var resultsSellers, resultsVendors []SearchEntry
-	var errS, errV error
 	var wg sync.WaitGroup
 	wg.Add(2)
 
@@ -148,27 +155,15 @@ func parseMessage(content string) (*searchResult, error) {
 	options["condition"] = "NM"
 
 	go func() {
-		cardId, resultsSellers, errS = searchSellersFirstResult(query, options)
+		_, resultsSellers, _ = searchSellersFirstResult(query, options, "NM")
 		wg.Done()
 	}()
 	go func() {
-		cardIdV, resultsVendors, errV = searchVendorsFirstResult(query, options)
+		_, resultsVendors, _ = searchVendorsFirstResult(query, options)
 		wg.Done()
 	}()
 
 	wg.Wait()
-	switch {
-	// Both errored, card is oos
-	case errS != nil && errV != nil:
-		return nil, errS
-	// Retail is oos, but buylist isn't, let's use it
-	case errS != nil:
-		cardId = cardIdV
-	// Buylist is not oos, but it returned a different card id,
-	// which means the original one is actually oos
-	case errV == nil && cardId != cardIdV:
-		resultsVendors = []SearchEntry{}
-	}
 
 	// Rebuild the search query
 	searchQuery := nameFound
@@ -184,6 +179,7 @@ func parseMessage(content string) (*searchResult, error) {
 
 	return &searchResult{
 		CardId:          cardId,
+		ResultsIndex:    resultsIndex,
 		ResultsSellers:  resultsSellers,
 		ResultsVendors:  resultsVendors,
 		EditionSearched: options["edition"],
@@ -199,12 +195,18 @@ type embedField struct {
 
 func search2fields(searchRes *searchResult) (fields []embedField) {
 	// Add two embed fields, one for retail and one for buylist
-	fieldsNames := []string{"Retail", "Buylist"}
-	for i, results := range [][]SearchEntry{searchRes.ResultsSellers, searchRes.ResultsVendors} {
+	fieldsNames := []string{
+		"Index", "Retail", "Buylist",
+	}
+	for i, results := range [][]SearchEntry{
+		searchRes.ResultsIndex, searchRes.ResultsSellers, searchRes.ResultsVendors,
+	} {
 		field := embedField{
 			Name: fieldsNames[i],
 		}
-		field.Inline = true
+		if fieldsNames[i] != "Index" {
+			field.Inline = true
+		}
 
 		// Results look really bad after MaxCustomEntries, and too much info
 		// does not help, so sort by best price, trim, then sort back to original
@@ -242,7 +244,34 @@ func search2fields(searchRes *searchResult) (fields []embedField) {
 			if entry.Ratio > 60 {
 				value += fmt.Sprintf(" 🔥")
 			}
-			if fieldsNames[i] == "Buylist" {
+			if fieldsNames[i] == "Index" {
+				// Split the Value string so that we can edit each of them separately
+				subs := strings.Split(field.Value, "\n")
+				// Determine which index we're merging
+				tag := strings.Fields(entry.ScraperName)[0]
+				// Merge status, normally just add the price
+				merged := false
+				for j := range subs {
+					// Check what kind of replacement needs to be done
+					if strings.Contains(subs[j], tag) {
+						// Adjust the name
+						if tag == "TCG" {
+							subs[j] = strings.Replace(subs[j], "TCG Low", "TCG (Low/Market)", 1)
+						} else if tag == "MKM" {
+							subs[j] = strings.Replace(subs[j], "MKM Low", "MKM (Low/Trend) ", 1)
+						}
+						// Append the other price
+						subs[j] += fmt.Sprintf(" / $%0.2f", entry.Price)
+						merged = true
+					}
+				}
+				if merged {
+					// Rebuild the Value and move to the next item
+					field.Value = strings.Join(subs, "\n")
+					continue
+				}
+				value = fmt.Sprintf("• **[`%s`](%s)** $%0.2f", entry.ScraperName, link, entry.Price)
+			} else if fieldsNames[i] == "Buylist" {
 				alarm := false
 				for _, subres := range searchRes.ResultsSellers {
 					if subres.Price < entry.Price {
@@ -507,7 +536,7 @@ func longestName(results []SearchEntry) (out int) {
 }
 
 // Retrieve cards from Sellers using the very first result
-func searchSellersFirstResult(query string, options map[string]string) (cardId string, results []SearchEntry, err error) {
+func searchSellersFirstResult(query string, options map[string]string, filter string) (cardId string, results []SearchEntry, err error) {
 	// Search
 	foundSellers, _ := searchSellers(query, append(Config.SearchBlockList, "TCG Direct"), options)
 	if len(foundSellers) == 0 {
@@ -526,7 +555,7 @@ func searchSellersFirstResult(query string, options map[string]string) (cardId s
 	}
 
 	cardId = sortedKeysSeller[0]
-	results = foundSellers[cardId]["NM"]
+	results = foundSellers[cardId][filter]
 
 	if len(results) > 0 {
 		// Drop duplicates by looking at the last one as they are alredy sorted

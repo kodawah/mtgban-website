@@ -14,7 +14,7 @@ func Redirect(w http.ResponseWriter, r *http.Request) {
 		store := fields[1]
 		hash := fields[2]
 
-		if kind == "r" {
+		if kind == "r" || kind == "i" {
 			for _, seller := range Sellers {
 				if seller != nil && seller.Info().Shorthand == store {
 					inv, err := seller.Inventory()
