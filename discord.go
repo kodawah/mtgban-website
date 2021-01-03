@@ -207,11 +207,11 @@ func search2fields(searchRes *searchResult) (fields []embedField) {
 		// Results look really bad after MaxCustomEntries, and too much info
 		// does not help, so sort by best price, trim, then sort back to original
 		if len(results) > MaxCustomEntries {
-			if i == 0 {
+			if fieldsNames[i] == "Retail" {
 				sort.Slice(results, func(i, j int) bool {
 					return results[i].Price < results[j].Price
 				})
-			} else if i == 1 {
+			} else if fieldsNames[i] == "Buylist" {
 				sort.Slice(results, func(i, j int) bool {
 					return results[i].Price > results[j].Price
 				})
@@ -240,7 +240,7 @@ func search2fields(searchRes *searchResult) (fields []embedField) {
 			if entry.Ratio > 60 {
 				value += fmt.Sprintf(" 🔥")
 			}
-			if i == 1 {
+			if fieldsNames[i] == "Buylist" {
 				alarm := false
 				for _, subres := range searchRes.ResultsSellers {
 					if subres.Price < entry.Price {
