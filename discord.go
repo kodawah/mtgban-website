@@ -431,8 +431,6 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	// Convert search results into proper fields
-	var fields []*discordgo.MessageEmbedField
 	var ogFields []embedField
 	if allBls {
 		ogFields = search2fields(searchRes)
@@ -449,6 +447,18 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 	}
+
+	embed := prepareCard(searchRes, ogFields, m.GuildID, lastSold)
+
+	_, err = s.ChannelMessageSendEmbed(m.ChannelID, embed)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func prepareCard(searchRes *searchResult, ogFields []embedField, guildId string, lastSold bool) *discordgo.MessageEmbed {
+	// Convert search results into proper fields
+	var fields []*discordgo.MessageEmbedField
 	for _, field := range ogFields {
 		fields = append(fields, &discordgo.MessageEmbedField{
 			Name:   field.Name,
@@ -459,6 +469,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Prepare card data
 	card := uuid2card(searchRes.CardId, true)
+	co, _ := mtgmatcher.GetUUID(searchRes.CardId)
 
 	printings := strings.Join(co.Printings, ", ")
 	if len(co.Printings) > MaxPrintings {
@@ -476,7 +487,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		printings = fmt.Sprintf("%s. Variants in %s are %s", printings, searchRes.EditionSearched, strings.Join(cn, ", "))
 	}
 
-	link := "https://www.mtgban.com/search?q=" + url.QueryEscape(searchRes.SearchQuery) + "&utm_source=banbot&utm_affiliate=" + m.GuildID
+	link := "https://www.mtgban.com/search?q=" + url.QueryEscape(searchRes.SearchQuery) + "&utm_source=banbot&utm_affiliate=" + guildId
 
 	// Set title of the main message
 	title := "Prices for " + card.Name
@@ -514,14 +525,12 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		embed.Footer.Text += "On MTGStocks Interests page\n"
 	}
 	// Show data source on non-ban servers
-	if len(Config.DiscordAllowList) > 0 && m.GuildID != Config.DiscordAllowList[0] {
+	if len(Config.DiscordAllowList) > 0 && guildId != Config.DiscordAllowList[0] {
 		embed.Footer.IconURL = poweredByFooter.IconURL
 		embed.Footer.Text += poweredByFooter.Text
 	}
-	_, err = s.ChannelMessageSendEmbed(m.ChannelID, &embed)
-	if err != nil {
-		log.Println(err)
-	}
+
+	return &embed
 }
 
 // Obtain the length of the scraper with the longest name
