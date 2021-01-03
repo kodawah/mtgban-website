@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	cleanhttp "github.com/hashicorp/go-cleanhttp"
@@ -33,6 +34,9 @@ const (
 	// Discord API constants
 	MaxEmbedFieldsValueLength = 1024
 	MaxEmbedFieldsNumber      = 25
+
+	// Timeout before cancelling a last sold price request
+	LastSoldTimeout = 30
 )
 
 func setupDiscord() error {
@@ -432,27 +436,58 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	var ogFields []embedField
+	var channel chan *discordgo.MessageEmbed
+
 	if allBls {
 		ogFields = search2fields(searchRes)
 	} else if lastSold {
-		ogFields, err = grabLastSold(co.Identifiers["tcgplayerProductId"], co.Foil)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		if len(ogFields) == 0 {
-			s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
-				Description: "No Last Sold Price available for \"" + content + "\" o͡͡͡╮༼ • ʖ̯ • ༽╭o͡͡͡",
-			})
-			return
-		}
+		// Since grabLastSold is slow, spawn a goroutine and wait for the real
+		// results later, after posting a "please wait" message
+		go func() {
+			channel = make(chan *discordgo.MessageEmbed)
+			var errMsg string
+			ogFields, err = grabLastSold(co.Identifiers["tcgplayerProductId"], co.Foil)
+			if err != nil {
+				errMsg = "Internal bot error, please notify devs ┏༼ ◉ ╭╮ ◉༽┓"
+				log.Println("Bot error:", err, "from", content)
+			} else if len(ogFields) == 0 {
+				errMsg = "No Last Sold Price available for \"" + content + "\" o͡͡͡╮༼ • ʖ̯ • ༽╭o͡͡͡"
+			}
+			embed := prepareCard(searchRes, ogFields, m.GuildID, lastSold)
+			if errMsg != "" {
+				embed.Description += errMsg
+			}
+			channel <- embed
+		}()
 	}
 
 	embed := prepareCard(searchRes, ogFields, m.GuildID, lastSold)
+	if lastSold {
+		embed.Description += "Grabbing last sold prices, hang tight ᕕ( ՞ ᗜ ՞ )ᕗ"
+	}
 
-	_, err = s.ChannelMessageSendEmbed(m.ChannelID, embed)
+	out, err := s.ChannelMessageSendEmbed(m.ChannelID, embed)
 	if err != nil {
 		log.Println(err)
+		return
+	}
+	if lastSold {
+		var edit *discordgo.MessageEmbed
+
+		// Either get the result from the channel or time out
+		select {
+		case edit = <-channel:
+			break
+		case <-time.After(LastSoldTimeout * time.Second):
+			edit = prepareCard(searchRes, ogFields, m.GuildID, lastSold)
+			edit.Description += "Connection time out (-, – )…zzzZZZ"
+			break
+		}
+
+		_, err = s.ChannelMessageEditEmbed(m.ChannelID, out.ID, edit)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 }
 
