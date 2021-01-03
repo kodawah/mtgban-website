@@ -504,11 +504,13 @@ func prepareCard(searchRes *searchResult, ogFields []embedField, guildId string,
 		title += " ✨"
 	}
 
+	desc := fmt.Sprintf("[%s] %s\nPrinted in %s.\n\n", card.SetCode, card.Title, printings)
+
 	embed := discordgo.MessageEmbed{
 		Title:       title,
 		Color:       0xFF0000,
 		URL:         link,
-		Description: fmt.Sprintf("[%s] %s\nPrinted in %s", card.SetCode, card.Title, printings),
+		Description: desc,
 		Fields:      fields,
 		Thumbnail: &discordgo.MessageEmbedThumbnail{
 			URL: card.ImageURL,
