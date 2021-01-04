@@ -328,6 +328,9 @@ func parseSearchOptions(query string) (string, map[string]string) {
 	return query, options
 }
 
+// Return a comma-separated string of set codes, from a comma-separated
+// list of codes or edition names. If no match is found, the input code
+// segment is returned as-is.
 func findEdition(code string) string {
 	var out []string
 
@@ -344,7 +347,9 @@ func findEdition(code string) string {
 		set, err = mtgmatcher.GetSetByName(field)
 		if err == nil {
 			out = append(out, set.Code)
+			continue
 		}
+		out = append(out, field)
 	}
 	return strings.Join(out, ",")
 }
