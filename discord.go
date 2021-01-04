@@ -147,7 +147,7 @@ func parseMessage(content string) (*searchResult, error) {
 	// so we translate the result into a new query to feed to the other searches
 	cardId, resultsIndex, err := searchSellersFirstResult(query, options, "INDEX")
 	if err != nil {
-		return nil, fmt.Errorf("No card found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", query)
+		return nil, err
 	}
 	query, options = parseSearchOptions(cardId)
 
