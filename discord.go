@@ -111,9 +111,10 @@ func parseMessage(content string) (*searchResult, error) {
 	var nameFound string
 	sets := mtgmatcher.GetSets()
 	if options["edition"] != "" {
-		set, found := sets[options["edition"]]
+		code := strings.Split(options["edition"], ",")[0]
+		set, found := sets[code]
 		if !found {
-			return nil, fmt.Errorf("No card found named \"%s\" in \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", query, options["edition"])
+			return nil, fmt.Errorf("No edition found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", code)
 		}
 		for _, card := range set.Cards {
 			if mtgmatcher.Contains(card.Name, query) {
