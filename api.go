@@ -40,7 +40,7 @@ func API(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, card := range list.Data {
+	for _, card := range list {
 		theCard, err := cardkingdom.Preprocess(card)
 		if err != nil {
 			continue
