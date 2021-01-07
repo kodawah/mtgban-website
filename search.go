@@ -271,7 +271,6 @@ func parseSearchOptions(query string) (string, map[string]string) {
 			} else if options["foil"] == "no" || options["foil"] == "n" {
 				options["foil"] = "false"
 			}
-			break
 		case strings.HasPrefix(field, "sm:"):
 			options["search_mode"] = strings.ToLower(code)
 		case strings.HasPrefix(field, "vndr:"):

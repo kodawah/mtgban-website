@@ -218,7 +218,6 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 			}
 			if source == nil {
 				message = "Unknown " + v[0] + " seller (vendor only?)"
-				break
 			}
 
 		case "credit":

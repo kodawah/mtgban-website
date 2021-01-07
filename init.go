@@ -177,7 +177,7 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 		}
 	}
 
-	sellers := []mtgban.Seller{}
+	var sellers []mtgban.Seller
 	var err error
 
 	// Check if the main file is present and load it

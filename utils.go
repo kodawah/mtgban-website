@@ -223,6 +223,4 @@ func Notify(kind, message string) {
 		}
 		defer resp.Body.Close()
 	}()
-
-	return
 }

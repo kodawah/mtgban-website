@@ -247,7 +247,7 @@ func search2fields(searchRes *searchResult) (fields []embedField) {
 			// Set the custom field
 			value := fmt.Sprintf("• **[`%s%s`](%s)** $%0.2f", entry.ScraperName, extraSpaces, link, entry.Price)
 			if entry.Ratio > 60 {
-				value += fmt.Sprintf(" 🔥")
+				value += " 🔥"
 			}
 			if fieldsNames[i] == "Index" {
 				// Split the Value string so that we can edit each of them separately
@@ -285,7 +285,7 @@ func search2fields(searchRes *searchResult) (fields []embedField) {
 					}
 				}
 				if alarm {
-					value += fmt.Sprintf(" 🚨")
+					value += " 🚨"
 				}
 			}
 			value += "\n"
