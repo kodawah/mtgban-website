@@ -19,6 +19,7 @@ type Heading struct {
 	Field    string
 	IsDollar bool
 	IsPerc   bool
+	IsHidden bool
 }
 
 type NewspaperPage struct {
@@ -28,6 +29,7 @@ type NewspaperPage struct {
 	Query  string
 	Sort   string
 	Head   []Heading
+	Large  bool
 }
 
 var NewspaperPages = []NewspaperPage{
@@ -254,14 +256,13 @@ var NewspaperPages = []NewspaperPage{
 		},
 	},
 	NewspaperPage{
-		Title:  "Buylist Growth - 7 Day Forecast",
+		Title:  "Buylist Growth Forecast",
 		Desc:   "Forecasting Card Kingdom's Buylist Offers on Cards",
-		Option: "buylist_growth",
-		Query: `SELECT n.row_names, n.uuid, n.Todays_BL, n.Day_1, n.Day_3, n.Day_5, n.Day_7, n.RMSE_Pct_Volatility as Plus_Minus
-                FROM bl_growth_forecast n
-                LEFT JOIN mtgjson.cards c on c.uuid = n.uuid
-                WHERE c.rarity not like "%common%" and n.Todays_BL >= 1.5 and n.Todays_BL <= 1000`,
-		Sort: "n.Dollar_Pct_Chg DESC",
+		Option: "ensemble_forecast",
+		Query: `SELECT n.row_names, n.uuid, n.Recent_BL, n.Historical_plus_minus, n.Historical_Median, n.Historical_Max, n.Forecasted_BL, n.Forecast_plus_minus, n.Target_Date, n.Tier, n.Behavior, n.custom_sort
+                FROM ensemble_forecast n`,
+		Sort:  "n.custom_sort",
+		Large: true,
 		Head: []Heading{
 			Heading{
 				Title: "Card Name",
@@ -273,52 +274,68 @@ var NewspaperPages = []NewspaperPage{
 				Title: "#",
 			},
 			Heading{
-				Title:    "Today's Buylist",
+				Title:    "Most Recent BL",
 				CanSort:  true,
-				Field:    "Todays_BL",
+				Field:    "Recent_BL",
 				IsDollar: true,
 			},
 			Heading{
-				Title:    "Tomorrow",
+				Title:    "Historical +/-",
 				CanSort:  true,
-				Field:    "Day_1",
+				Field:    "Historical_plus_minus",
 				IsDollar: true,
 			},
 			Heading{
-				Title:    "In 3 Days",
+				Title:    "Historical Median",
 				CanSort:  true,
-				Field:    "Day_3",
+				Field:    "Historical_Median",
 				IsDollar: true,
 			},
 			Heading{
-				Title:    "In 5 Days",
+				Title:    "Historical Max",
 				CanSort:  true,
-				Field:    "Day_5",
+				Field:    "Historical_Max",
 				IsDollar: true,
 			},
 			Heading{
-				Title:    "Next Week Buylist",
+				Title:    "Forecasted BL",
 				CanSort:  true,
-				Field:    "Day_7",
+				Field:    "Forecasted_BL",
 				IsDollar: true,
 			},
 			Heading{
-				Title:   "+/-",
+				Title:    "Forecast +/-",
+				CanSort:  true,
+				Field:    "Forecast_plus_minus",
+				IsDollar: true,
+			},
+			Heading{
+				Title:   "Forecasted Date",
 				CanSort: true,
-				Field:   "Plus_Minus",
-				IsPerc:  true,
+				Field:   "Target_Date",
+			},
+			Heading{
+				Title:   "Tier",
+				CanSort: true,
+				Field:   "Tier",
+			},
+			Heading{
+				Title:   "Behavior",
+				CanSort: true,
+				Field:   "Behavior",
+			},
+			Heading{
+				IsHidden: true,
 			},
 		},
 	},
 	NewspaperPage{
-		Title:  "Buylist Forecast - Performance Review",
-		Desc:   "Comparing the Buylist forecasts from a week ago with current, to provide additional context of how well one might expect them to perform moving forward",
-		Option: "buylist_perf",
-		Query: `SELECT n.row_names, n.uuid, n.Weeks_Ago as WA, n.Weeks_Ago_Forecast as WA_Forecast, n.Plus_Minus_WA as "PM_WA", n.Today, n.Current_Fore as Forecast, n.Plus_Minus as "PM"
-                FROM bl_forecast_perform n
-                LEFT JOIN mtgjson.cards c on c.uuid = n.uuid
-                WHERE c.rarity not like "%common%"`,
-		Sort: "n.Diff DESC",
+		Title:  "Forecast Performance",
+		Desc:   "Reviewing historical forecasts made with the current day",
+		Option: "ensemble_performance",
+		Query: `SELECT n.row_names, n.uuid, n.original_bl, n.max_forecast_value, n.current_val, n.classification, n.accuracy_metric, n.custom_sort
+                FROM ensemble_performance n`,
+		Sort: "n.custom_sort",
 		Head: []Heading{
 			Heading{
 				Title: "Card Name",
@@ -330,40 +347,36 @@ var NewspaperPages = []NewspaperPage{
 				Title: "#",
 			},
 			Heading{
-				Title:    "Last Week Buylist",
+				Title:    "Original BL",
 				CanSort:  true,
-				Field:    "WA",
+				Field:    "original_bl",
 				IsDollar: true,
 			},
 			Heading{
-				Title:    "Last Week Forecast",
+				Title:    "Forecasted Value",
 				CanSort:  true,
-				Field:    "WA_Forecast",
+				Field:    "max_forecast_value",
 				IsDollar: true,
 			},
 			Heading{
-				Title:   "Last Week +/-",
+				Title:    "Current BL",
+				CanSort:  true,
+				Field:    "current_val",
+				IsDollar: true,
+			},
+			Heading{
+				Title:   "Classification",
 				CanSort: true,
-				Field:   "PM_WA",
+				Field:   "classification",
+			},
+			Heading{
+				Title:   "Accuracy",
+				CanSort: true,
+				Field:   "accuracy_metric",
 				IsPerc:  true,
 			},
 			Heading{
-				Title:    "Today's Buylist",
-				CanSort:  true,
-				Field:    "Today",
-				IsDollar: true,
-			},
-			Heading{
-				Title:    "Forecast",
-				CanSort:  true,
-				Field:    "Forecast",
-				IsDollar: true,
-			},
-			Heading{
-				Title:   "+/-",
-				CanSort: true,
-				Field:   "PM",
-				IsPerc:  true,
+				IsHidden: true,
 			},
 		},
 	},
@@ -541,6 +554,7 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 			pageVars.Title = newspage.Title
 			pageVars.InfoMessage = newspage.Desc
 			pageVars.Headings = newspage.Head
+			pageVars.LargeTable = newspage.Large
 
 			// Get the total number of rows for the query
 			qs := strings.Split(newspage.Query, "FROM")

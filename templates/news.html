@@ -35,7 +35,10 @@
             <h2>Table of contents</h2>
             <ol class="indent index">
                 {{range .ToC}}
-                <li><a href="newspaper?page={{.Option}}">{{.Title}}</a></li>
+                <li>
+                    {{if or (eq .Title "Buylist Growth Forecast") (eq .Title "Forecast Performance")}}<marquee width=35px><b>NEW</b></marquee>{{end}}
+                    <a href="newspaper?page={{.Option}}">{{.Title}}</a>
+                </li>
                 {{end}}
             </ol>
         </div>
@@ -110,20 +113,21 @@
             </script>
 
             <h1>{{.Title}}</h1>
-            <div class="indent" style="max-width: 1080px;">
-
+            <div class="indent" style="max-width: {{if $.LargeTable}}90%{{else}}1080px{{end}};">
                 <table onmouseout="document.getElementById('hoverImage').src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';" width=100%>
                     <tr>
                         {{range .Headings}}
-                            <th class="stickyHeaderShort">
-                                {{.Title}}
-                                {{if .CanSort}}
-                                <nobr>
-                                    <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=desc">▼</a>
-                                    <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=asc">▲</a>
-                                </nobr>
-                                {{end}}
-                            </th>
+                            {{if not .IsHidden}}
+                                <th class="stickyHeaderShort">
+                                    {{.Title}}
+                                    {{if .CanSort}}
+                                        <nobr>
+                                            <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=desc">▼</a>
+                                            <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=asc">▲</a>
+                                        </nobr>
+                                    {{end}}
+                                </th>
+                            {{end}}
                         {{end}}
                      </tr>
                     {{range $i, $card := .Cards}}
@@ -134,10 +138,10 @@
                                     <center>{{index $table 0}}</center>
                                 </td>
                             {{end}}
-                            <td>
+                            <td {{if $.LargeTable}}style="min-width: 15%;"{{end}}>
                                 <a href="search?q={{$card.Name}} s:{{$card.SetCode}} cn:{{$card.Number}}">{{$card.Name}}</a>{{if $card.Reserved}} *{{end}}{{if $card.Stocks}} •{{end}}
                             </td>
-                            <td>
+                            <td {{if $.LargeTable}}style="min-width: 15%;"{{end}}>
                                 <i class="ss {{$card.Keyrune}} ss-1x ss-fw"></i> {{$card.Edition}}
                             </td>
                             <td>
@@ -151,16 +155,19 @@
                                         </td>
                                     {{end}}
                                 {{else}}
-                                    <td>
-                                        <center>
-                                            {{if (index $.Headings (inc $i 3)).IsDollar}}${{end}}
-                                            {{if (index $.Headings (inc $i 3)).IsPerc}}
-                                                {{perc $row}} %
-                                            {{else}}
-                                                {{$row}}
-                                            {{end}}
-                                        </center>
-                                    </td>
+                                    {{$head := (index $.Headings (inc $i 3))}}
+                                    {{if not $head.IsHidden}}
+                                        <td>
+                                            <center>
+                                                {{if $head.IsDollar}}${{end}}
+                                                {{if $head.IsPerc}}
+                                                    {{perc $row}} %
+                                                {{else}}
+                                                    <nobr>{{$row}}</nobr>
+                                                {{end}}
+                                            </center>
+                                        </td>
+                                    {{end}}
                                 {{end}}
                             {{end}}
                         </tr>

@@ -98,6 +98,7 @@ type PageVars struct {
 	PrevIndex    int
 	NextIndex    int
 	SortDir      string
+	LargeTable   bool
 
 	Sleepers [7]SleeperEntry
 
