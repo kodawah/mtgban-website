@@ -73,6 +73,10 @@ func guildCreate(s *discordgo.Session, gc *discordgo.GuildCreate) {
 	if stringSliceContains(Config.DiscordAllowList, gc.Guild.ID) {
 		return
 	}
+	// Skip this check when running on dev
+	if DevMode {
+		return
+	}
 
 	// Otherwise we print a message, pick our stuff, and leave
 	s.ChannelMessageSendEmbed(gc.Guild.SystemChannelID, &discordgo.MessageEmbed{
