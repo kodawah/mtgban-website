@@ -40,7 +40,7 @@ type SearchEntry struct {
 	Secondary     float64
 }
 
-var re = regexp.MustCompile(`(s|c|f|sm|cn|vndr):(("([^"]+)*"|[a-zA-Z0-9]*),?)+`)
+var re = regexp.MustCompile(`(s|c|f|sm|cn|vndr):(("([^"]+)*"|[a-zA-Z0-9]*[\*★]?),?)+`)
 
 func Search(w http.ResponseWriter, r *http.Request) {
 	sig := getSignatureFromCookies(r)
