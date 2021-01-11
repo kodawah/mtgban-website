@@ -39,7 +39,7 @@
                     {{if eq .SearchQuery "" }}
                         Search for a card, or <a href="search?q=random">surprise me</a>
                     {{else}}
-                        Search for another card, or <a href="search?q={{.SearchQuery}}&b=true">sort results by best price</a>
+                        <a href="search?q={{.SearchQuery}} all:true">Show all versions</a>, or <a href="search?q={{.SearchQuery}}&b=true">sort results by best price</a>
                     {{end}}
                 </label>
                 <input id="searchbox" class="w3-input w3-border w3-round-small search-input" onFocus="this.setSelectionRange(0, this.value.length)" type="text" name="q" placeholder="Enter a card name" value="{{if ne .SearchQuery "random"}}{{.SearchQuery}}{{end}}" maxlength="200" autofocus>

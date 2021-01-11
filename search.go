@@ -40,7 +40,7 @@ type SearchEntry struct {
 	Secondary     float64
 }
 
-var re = regexp.MustCompile(`(s|c|f|sm|cn|vndr):(("([^"]+)*"|[a-zA-Z0-9]*[\*★]?),?)+`)
+var re = regexp.MustCompile(`(s|c|f|sm|cn|vndr|all):(("([^"]+)*"|[a-zA-Z0-9]*[\*★]?),?)+`)
 
 func Search(w http.ResponseWriter, r *http.Request) {
 	sig := getSignatureFromCookies(r)
@@ -249,6 +249,9 @@ func parseSearchOptions(query string) (string, map[string]string) {
 	// Filter out any element from the search syntax
 	options := map[string]string{}
 
+	// Optionally ignore all search options
+	ignore := false
+
 	// Iterate over the various possible filters
 	fields := re.FindAllString(query, -1)
 	for _, field := range fields {
@@ -279,6 +282,9 @@ func parseSearchOptions(query string) (string, map[string]string) {
 			if strings.Contains(options["scraper"], "TCG") {
 				options["scraper"] = strings.Replace(options["scraper"], "TCG", "TCG Player,TCGMkt", 1)
 			}
+			// Hack to show all versions of a card
+		case strings.HasPrefix(field, "all:"):
+			ignore, _ = strconv.ParseBool(code)
 		}
 	}
 
@@ -322,6 +328,11 @@ func parseSearchOptions(query string) (string, map[string]string) {
 			options["foil"] = fmt.Sprint(card.Foil)
 			options["search_mode"] = "exact"
 		}
+	}
+
+	// Hack to ignore all search options
+	if ignore {
+		return query, nil
 	}
 
 	return query, options
