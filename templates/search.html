@@ -128,7 +128,9 @@
                                             <i class="ss {{(index $.Metadata $cardId).Keyrune}} ss-2x ss-fw"></i>
                                         </td>
                                         <td>
-                                            <u>{{(index $.Metadata $cardId).Name}}</U>
+                                            <a href="{{(index $.Metadata $cardId).SearchURL}}">
+                                                {{(index $.Metadata $cardId).Name}}
+                                            </a>
                                             {{if ne (index $.Metadata $cardId).Variant ""}}
                                                 <i>({{(index $.Metadata $cardId).Variant}})</i>
                                             {{end}}
@@ -215,7 +217,9 @@
                                             <i class="ss {{(index $.Metadata $cardId).Keyrune}} ss-2x ss-fw"></i>
                                         </td>
                                         <td>
-                                            <u>{{(index $.Metadata $cardId).Name}}</u>
+                                            <a href="{{(index $.Metadata $cardId).SearchURL}}">
+                                                {{(index $.Metadata $cardId).Name}}
+                                            </a>
                                             {{if ne (index $.Metadata $cardId).Variant ""}}
                                                 <i>({{(index $.Metadata $cardId).Variant}})</i>
                                             {{end}}
