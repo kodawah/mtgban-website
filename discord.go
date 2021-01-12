@@ -413,6 +413,64 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Parse message, look for bot command
 	if !strings.HasPrefix(m.Content, "!") && !strings.HasPrefix(m.Content, "$$") {
+		// On the main server, check if the message contains potential links
+		if m.GuildID == Config.DiscordAllowList[0] &&
+			(strings.Contains(m.Content, "cardkingdom.com/mtg") ||
+				strings.Contains(m.Content, "shop.tcgplayer.com/")) {
+			// Iterate over each segment of the message and look for known links
+			fields := strings.Fields(m.Content)
+			for _, field := range fields {
+				if !strings.Contains(field, "cardkingdom.com/mtg") &&
+					!strings.Contains(field, "shop.tcgplayer.com/") {
+					continue
+				}
+				u, err := url.Parse(field)
+				if err != nil {
+					continue
+				}
+				// Check if there is not an affiliate already
+				v := u.Query()
+				if v.Get("partner") != "" {
+					continue
+				}
+
+				// Flags for later use
+				isCK := strings.Contains(field, "cardkingdom.com/mtg")
+				isTCG := strings.Contains(field, "shop.tcgplayer.com/")
+
+				// Add the MTGBAN affiliation
+				v.Set("partner", "MTGBAN")
+				v.Set("utm_source", "MTGBAN")
+				if isCK {
+					v.Set("utm_campaign", "MTGBAN")
+					v.Set("utm_medium", "affiliate")
+				} else if isTCG {
+					v.Set("utm_campaign", "affliate")
+					v.Set("utm_medium", "MTGBAN")
+				}
+				u.RawQuery = v.Encode()
+
+				// Extract a sensible link title
+				title := strings.Title(strings.Replace(path.Base(u.Path), "-", " ", -1))
+				if isCK {
+					title += " at Card Kingdom"
+				} else if isTCG {
+					if title == "Productsearch" {
+						title = "Your search"
+					}
+					title += " at TCGplayer"
+				}
+				// Spam time!
+				_, err = s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+					Title:       title,
+					URL:         u.String(),
+					Description: "Support **MTGBAN** by using this link",
+				})
+				if err != nil {
+					log.Println(err)
+				}
+			}
+		}
 		return
 	}
 
