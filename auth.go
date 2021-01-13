@@ -39,6 +39,7 @@ const (
 	ErrMsgPlus    = "Increase your pledge to gain access to this feature!"
 	ErrMsgDenied  = "Something went wrong while accessing this page"
 	ErrMsgExpired = "You've been logged out"
+	ErrMsgRestart = "Website is restarting, please try again in a few minutes"
 )
 
 func getUserToken(code, baseURL, ref string) (string, error) {

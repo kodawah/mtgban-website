@@ -68,7 +68,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 
 	if !DatabaseLoaded {
 		pageVars.Title = "Great things are coming"
-		pageVars.ErrorMessage = "Website is starting, please try again in a few minutes"
+		pageVars.ErrorMessage = ErrMsgRestart
 
 		render(w, "arbit.html", pageVars)
 		return
@@ -122,7 +122,7 @@ func Global(w http.ResponseWriter, r *http.Request) {
 
 	if !DatabaseLoaded {
 		pageVars.Title = "Great things are coming"
-		pageVars.ErrorMessage = "Website is starting, please try again in a few minutes"
+		pageVars.ErrorMessage = ErrMsgRestart
 
 		render(w, "arbit.html", pageVars)
 		return

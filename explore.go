@@ -12,7 +12,7 @@ func Explore(w http.ResponseWriter, r *http.Request) {
 
 	if !DatabaseLoaded {
 		pageVars.Title = "Great things are coming"
-		pageVars.ErrorMessage = "Website is starting, please try again in a few minutes"
+		pageVars.ErrorMessage = ErrMsgRestart
 
 		render(w, "explore.html", pageVars)
 		return
