@@ -438,15 +438,16 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				isCK := strings.Contains(field, "cardkingdom.com/mtg")
 				isTCG := strings.Contains(field, "shop.tcgplayer.com/")
 
-				// Add the MTGBAN affiliation
-				v.Set("partner", "MTGBAN")
-				v.Set("utm_source", "MTGBAN")
+				// Add the MTGBAN affiliation (same id for tcg and ck)
+				commonTag := Config.Affiliate["CK"]
+				v.Set("partner", commonTag)
+				v.Set("utm_source", commonTag)
 				if isCK {
-					v.Set("utm_campaign", "MTGBAN")
+					v.Set("utm_campaign", commonTag)
 					v.Set("utm_medium", "affiliate")
 				} else if isTCG {
 					v.Set("utm_campaign", "affliate")
-					v.Set("utm_medium", "MTGBAN")
+					v.Set("utm_medium", commonTag)
 				}
 				u.RawQuery = v.Encode()
 
