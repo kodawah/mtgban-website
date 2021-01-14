@@ -69,6 +69,9 @@ func setupDiscord() error {
 // This function will be called every time the bot is invited to a discord
 // server and tries to join it.
 func guildCreate(s *discordgo.Session, gc *discordgo.GuildCreate) {
+	// Set a "is playing" status
+	s.UpdateStatus(0, "http://mtgban.com")
+
 	// If guild is authorized, then we can proceed as normal
 	if stringSliceContains(Config.DiscordAllowList, gc.Guild.ID) {
 		return
