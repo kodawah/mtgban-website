@@ -36,7 +36,6 @@
             <ol class="indent index">
                 {{range .ToC}}
                 <li>
-                    {{if or (eq .Title "Buylist Growth Forecast") (eq .Title "Forecast Performance")}}<marquee width=35px><b>NEW</b></marquee>{{end}}
                     <a href="newspaper?page={{.Option}}">{{.Title}}</a>
                 </li>
                 {{end}}
