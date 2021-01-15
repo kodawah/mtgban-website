@@ -67,10 +67,14 @@ var NewspaperPages = []NewspaperPage{
 				Field:   "Ranking",
 			},
 			Heading{
-				Title: "Card Name",
+				Title:   "Card Name",
+				CanSort: true,
+				Field:   "Name",
 			},
 			Heading{
-				Title: "Edition",
+				Title:   "Edition",
+				CanSort: true,
+				Field:   "a.Set",
 			},
 			Heading{
 				Title: "#",
@@ -114,10 +118,14 @@ var NewspaperPages = []NewspaperPage{
 				IsHidden: true,
 			},
 			Heading{
-				Title: "Card Name",
+				Title:   "Card Name",
+				CanSort: true,
+				Field:   "Name",
 			},
 			Heading{
-				Title: "Edition",
+				Title:   "Edition",
+				CanSort: true,
+				Field:   "a.Set",
 			},
 			Heading{
 				Title: "#",
@@ -165,10 +173,14 @@ var NewspaperPages = []NewspaperPage{
 				IsHidden: true,
 			},
 			Heading{
-				Title: "Card Name",
+				Title:   "Card Name",
+				CanSort: true,
+				Field:   "Name",
 			},
 			Heading{
-				Title: "Edition",
+				Title:   "Edition",
+				CanSort: true,
+				Field:   "a.Set",
 			},
 			Heading{
 				Title: "#",
@@ -216,10 +228,14 @@ var NewspaperPages = []NewspaperPage{
 				IsHidden: true,
 			},
 			Heading{
-				Title: "Card Name",
+				Title:   "Card Name",
+				CanSort: true,
+				Field:   "Name",
 			},
 			Heading{
-				Title: "Edition",
+				Title:   "Edition",
+				CanSort: true,
+				Field:   "a.Set",
 			},
 			Heading{
 				Title: "#",
@@ -276,10 +292,14 @@ var NewspaperPages = []NewspaperPage{
 				IsHidden: true,
 			},
 			Heading{
-				Title: "Card Name",
+				Title:   "Card Name",
+				CanSort: true,
+				Field:   "Name",
 			},
 			Heading{
-				Title: "Edition",
+				Title:   "Edition",
+				CanSort: true,
+				Field:   "a.Set",
 			},
 			Heading{
 				Title: "#",
@@ -336,10 +356,14 @@ var NewspaperPages = []NewspaperPage{
 				IsHidden: true,
 			},
 			Heading{
-				Title: "Card Name",
+				Title:   "Card Name",
+				CanSort: true,
+				Field:   "Name",
 			},
 			Heading{
-				Title: "Edition",
+				Title:   "Edition",
+				CanSort: true,
+				Field:   "a.Set",
 			},
 			Heading{
 				Title: "#",
@@ -419,10 +443,14 @@ var NewspaperPages = []NewspaperPage{
 				IsHidden: true,
 			},
 			Heading{
-				Title: "Card Name",
+				Title:   "Card Name",
+				CanSort: true,
+				Field:   "Name",
 			},
 			Heading{
-				Title: "Edition",
+				Title:   "Edition",
+				CanSort: true,
+				Field:   "a.Set",
 			},
 			Heading{
 				Title: "#",
