@@ -23,23 +23,44 @@ type Heading struct {
 }
 
 type NewspaperPage struct {
-	Title  string
-	Desc   string
+	// Title of the page
+	Title string
+	// Short description of the current page
+	Desc string
+	// Name of the page used in the query parameter
 	Option string
-	Query  string
-	Sort   string
-	Head   []Heading
-	Large  bool
+	// The query run to obtain data
+	Query string
+	// Default orting option
+	Sort string
+	// The name of the columns and their properties
+	Head []Heading
+	// Whether this table has lots of fields that need wider display
+	Large bool
+	// How many elements are present before the card triplet
+	Offset int
 }
 
 var NewspaperPages = []NewspaperPage{
 	NewspaperPage{
 		Title:  "Top 25 Singles (3 Week Market Review)",
 		Desc:   "Rankings are weighted via prior 21, 15, and 7 days via Retail, Buylist, and several other criteria to arrive at an overall ranking",
+		Offset: 3,
 		Option: "review",
-		Query:  "SELECT * FROM top_25",
-		Sort:   "Ranking",
+		Query: `SELECT DISTINCT n.row_names, n.uuid,
+                       n.Ranking,
+                       a.Name, a.Set, a.Number,
+                       n.Retail, n.Buylist, n.Vendors
+                FROM top_25 n
+                LEFT JOIN mtgjson_portable a ON n.uuid = a.uuid`,
+		Sort: "Ranking",
 		Head: []Heading{
+			Heading{
+				IsHidden: true,
+			},
+			Heading{
+				IsHidden: true,
+			},
 			Heading{
 				Title:   "Ranking",
 				CanSort: true,
@@ -76,12 +97,22 @@ var NewspaperPages = []NewspaperPage{
 	NewspaperPage{
 		Title:  "Greatest Decrease in Vendor Listings",
 		Desc:   "Information Sourced from TCG: Stock decreases indicate that there is not enough supply to meet current demand across the reviewed time period (tl:dr - Seek these out)",
+		Offset: 2,
 		Option: "stock_dec",
-		Query: `SELECT n.row_names, n.uuid, n.Todays_Sellers, n.Week_Ago_Sellers, n.Month_Ago_Sellers, n.Week_Ago_Sellers_Chg
+		Query: `SELECT DISTINCT n.row_names, n.uuid,
+                       a.Name, a.Set, a.Number,
+                       n.Todays_Sellers, n.Week_Ago_Sellers, n.Month_Ago_Sellers, n.Week_Ago_Sellers_Chg
                 FROM vendor_levels n
+                LEFT JOIN mtgjson_portable a ON n.uuid = a.uuid
                 WHERE n.Week_Ago_Sellers_Chg is not NULL and n.Week_Ago_Sellers_Chg != 0`,
 		Sort: "n.Week_Ago_Sellers_Chg DESC",
 		Head: []Heading{
+			Heading{
+				IsHidden: true,
+			},
+			Heading{
+				IsHidden: true,
+			},
 			Heading{
 				Title: "Card Name",
 			},
@@ -117,12 +148,22 @@ var NewspaperPages = []NewspaperPage{
 	NewspaperPage{
 		Title:  "Greatest Increase in Vendor Listings",
 		Desc:   "Information Sourced from TCG: Stock Increases indicate that there is more than enough supply to meet current demand across the reviewed time period (tl:dr - Avoid These)",
+		Offset: 2,
 		Option: "stock_inc",
-		Query: `SELECT n.row_names, n.uuid, n.Todays_Sellers, n.Week_Ago_Sellers, n.Month_Ago_Sellers, n.Week_Ago_Sellers_Chg
+		Query: `SELECT DISTINCT n.row_names, n.uuid,
+                       a.Name, a.Set, a.Number,
+                       n.Todays_Sellers, n.Week_Ago_Sellers, n.Month_Ago_Sellers, n.Week_Ago_Sellers_Chg
                 FROM vendor_levels n
+                LEFT JOIN mtgjson_portable a ON n.uuid = a.uuid
                 WHERE n.Week_Ago_Sellers_Chg is not NULL and n.Week_Ago_Sellers_Chg != 0`,
 		Sort: "n.Week_Ago_Sellers_Chg ASC",
 		Head: []Heading{
+			Heading{
+				IsHidden: true,
+			},
+			Heading{
+				IsHidden: true,
+			},
 			Heading{
 				Title: "Card Name",
 			},
@@ -158,12 +199,22 @@ var NewspaperPages = []NewspaperPage{
 	NewspaperPage{
 		Title:  "Greatest Increase in Buylist Offer",
 		Desc:   "Information Sourced from CK: buylist increases indicate a higher sales rate (eg. higher demand). These may be fleeting, do not base a purchase solely off this metric unless dropshipping",
+		Offset: 2,
 		Option: "buylist_inc",
-		Query: `SELECT n.row_names, n.uuid, n.Todays_BL, n.Yesterday_BL, n.Week_Ago_BL, n.Month_Ago_BL, n.Week_Ago_BL_Chg
+		Query: `SELECT DISTINCT n.row_names, n.uuid,
+                       a.Name, a.Set, a.Number,
+                       n.Todays_BL, n.Yesterday_BL, n.Week_Ago_BL, n.Month_Ago_BL, n.Week_Ago_BL_Chg
                 FROM buylist_levels n
+                LEFT JOIN mtgjson_portable a ON n.uuid = a.uuid
                 WHERE n.Week_Ago_BL_Chg is not NULL and n.Week_Ago_BL_Chg != 0 and n.Yesterday_BL >= 1.25 and n.Todays_BL >= 1.25`,
 		Sort: "n.Week_Ago_BL_Chg DESC",
 		Head: []Heading{
+			Heading{
+				IsHidden: true,
+			},
+			Heading{
+				IsHidden: true,
+			},
 			Heading{
 				Title: "Card Name",
 			},
@@ -208,12 +259,22 @@ var NewspaperPages = []NewspaperPage{
 	NewspaperPage{
 		Title:  "Greatest Decrease in Buylist Offer",
 		Desc:   "Information Sourced from CK: Buylist Decreases indicate a declining sales rate (eg, Less demand). These may be fleeting, do not base a purchase solely off this metric unless dropshipping",
+		Offset: 2,
 		Option: "buylist_dec",
-		Query: `SELECT n.row_names, n.uuid, n.Todays_BL, n.Yesterday_BL, n.Week_Ago_BL, n.Month_Ago_BL, n.Week_Ago_BL_Chg
+		Query: `SELECT DISTINCT n.row_names, n.uuid,
+                       a.Name, a.Set, a.Number,
+                       n.Todays_BL, n.Yesterday_BL, n.Week_Ago_BL, n.Month_Ago_BL, n.Week_Ago_BL_Chg
                 FROM buylist_levels n
+                LEFT JOIN mtgjson_portable a ON n.uuid = a.uuid
                 WHERE n.Week_Ago_BL_Chg is not NULL and n.Week_Ago_BL_Chg != 0 and n.Yesterday_BL >= 1.25 and n.Todays_BL >= 1.25`,
 		Sort: "n.Week_Ago_BL_Chg ASC",
 		Head: []Heading{
+			Heading{
+				IsHidden: true,
+			},
+			Heading{
+				IsHidden: true,
+			},
 			Heading{
 				Title: "Card Name",
 			},
@@ -258,12 +319,22 @@ var NewspaperPages = []NewspaperPage{
 	NewspaperPage{
 		Title:  "Buylist Growth Forecast",
 		Desc:   "Forecasting Card Kingdom's Buylist Offers on Cards",
+		Offset: 2,
 		Option: "ensemble_forecast",
-		Query: `SELECT n.row_names, n.uuid, n.Recent_BL, n.Historical_plus_minus, n.Historical_Median, n.Historical_Max, n.Forecasted_BL, n.Forecast_plus_minus, n.Target_Date, n.Tier, n.Behavior, n.custom_sort
-                FROM ensemble_forecast n`,
+		Query: `SELECT DISTINCT n.row_names, n.uuid,
+                       a.Name, a.Set, a.Number,
+                       n.Recent_BL, n.Historical_plus_minus, n.Historical_Median, n.Historical_Max, n.Forecasted_BL, n.Forecast_plus_minus, n.Target_Date, n.Tier, n.Behavior, n.custom_sort
+                FROM ensemble_forecast n
+                LEFT JOIN mtgjson_portable a ON n.uuid = a.uuid`
 		Sort:  "n.custom_sort",
 		Large: true,
 		Head: []Heading{
+			Heading{
+				IsHidden: true,
+			},
+			Heading{
+				IsHidden: true,
+			},
 			Heading{
 				Title: "Card Name",
 			},
@@ -332,11 +403,21 @@ var NewspaperPages = []NewspaperPage{
 	NewspaperPage{
 		Title:  "Forecast Performance",
 		Desc:   "Reviewing historical forecasts made with the current day",
+		Offset: 2,
 		Option: "ensemble_performance",
-		Query: `SELECT n.row_names, n.uuid, n.original_bl, n.max_forecast_value, n.current_val, n.classification, n.accuracy_metric, n.custom_sort
-                FROM ensemble_performance n`,
+		Query: `SELECT DISTINCT n.row_names, n.uuid,
+                       a.Name, a.Set, a.Number,
+                       n.original_bl, n.max_forecast_value, n.current_val, n.classification, n.accuracy_metric, n.custom_sort
+                FROM ensemble_performance n
+                LEFT JOIN mtgjson_portable a ON n.uuid = a.uuid`
 		Sort: "n.custom_sort",
 		Head: []Heading{
+			Heading{
+				IsHidden: true,
+			},
+			Heading{
+				IsHidden: true,
+			},
 			Heading{
 				Title: "Card Name",
 			},
@@ -450,6 +531,7 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 			pageVars.InfoMessage = newspage.Desc
 			pageVars.Headings = newspage.Head
 			pageVars.LargeTable = newspage.Large
+			pageVars.OffsetCards = newspage.Offset
 
 			// Get the total number of rows for the query
 			qs := strings.Split(newspage.Query, "FROM")
@@ -460,7 +542,7 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 				render(w, "news.html", pageVars)
 				return
 			}
-			err := db.QueryRow("SELECT COUNT(*) FROM" + qs[1]).Scan(&pages)
+			err := db.QueryRow("SELECT COUNT(DISTINCT n.uuid) FROM" + qs[1]).Scan(&pages)
 			if err != nil {
 				log.Println("pages disabled", err)
 			}
@@ -558,15 +640,14 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		// Load card data
-		cardId := result[1]
-		pageVars.Cards = append(pageVars.Cards, uuid2card(cardId, true))
+		// Will iterate over card data in the template, since it's limited
+		// to the results actually available
+		pageVars.Cards = append(pageVars.Cards, uuid2card(result[1], true))
 
 		// Allocate a table row with as many fields as returned by the SELECT
-		// minus the two well-known fields
-		pageVars.Table[i] = make([]string, len(result)-2)
+		pageVars.Table[i] = make([]string, len(result))
 		for j := range pageVars.Table[i] {
-			pageVars.Table[i][j] = result[2+j]
+			pageVars.Table[i][j] = result[j]
 		}
 
 		// Next row!

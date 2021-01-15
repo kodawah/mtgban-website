@@ -127,33 +127,21 @@
                                 </th>
                             {{end}}
                         {{end}}
-                     </tr>
-                    {{range $i, $card := .Cards}}
-                        {{$table := (index $.Table $i)}}
+                    </tr>
+                    {{range $j, $card := .Cards}}
+                        {{$table := (index $.Table $j)}}
                         <tr onmouseover="document.getElementById('hoverImage').src={{$card.ImageURL}};">
-                            {{if eq (index $.Headings 0).Title "Ranking"}}
-                                <td>
-                                    <center>{{index $table 0}}</center>
-                                </td>
-                            {{end}}
-                            <td {{if $.LargeTable}}style="min-width: 15%;"{{end}}>
-                                <a href="search?q={{$card.Name}} s:{{$card.SetCode}} cn:{{$card.Number}}">{{$card.Name}}</a>{{if $card.Reserved}} *{{end}}{{if $card.Stocks}} •{{end}}
-                            </td>
-                            <td {{if $.LargeTable}}style="min-width: 15%;"{{end}}>
-                                <i class="ss {{$card.Keyrune}} ss-1x ss-fw"></i> {{$card.Edition}}
-                            </td>
-                            <td>
-                                {{$card.Number}}
-                            </td>
                             {{range $i, $row := $table}}
-                                {{if eq (index $.Headings 0).Title "Ranking"}}
-                                    {{if ne $i 0}}
-                                        <td>
-                                            <center>{{$row}}</center>
-                                        </td>
-                                    {{end}}
+                                {{if eq $i $.OffsetCards}}
+                                    <td {{if $.LargeTable}}style="min-width: 15%;"{{end}}>
+                                        <a href="search?q={{$card.Name}} s:{{$card.SetCode}} cn:{{$card.Number}}">{{$row}}</a>{{if $card.Reserved}} *{{end}}{{if $card.Stocks}} •{{end}}
+                                    </td>
+                                {{else if eq $i (inc $.OffsetCards 1)}}
+                                    <td {{if $.LargeTable}}style="min-width: 15%;"{{end}}>
+                                        <i class="ss {{$card.Keyrune}} ss-1x ss-fw"></i> {{$row}}
+                                    </td>
                                 {{else}}
-                                    {{$head := (index $.Headings (inc $i 3))}}
+                                    {{$head := (index $.Headings $i)}}
                                     {{if not $head.IsHidden}}
                                         <td>
                                             <center>

@@ -100,6 +100,7 @@ type PageVars struct {
 	NextIndex    int
 	SortDir      string
 	LargeTable   bool
+	OffsetCards  int
 
 	Sleepers [7]SleeperEntry
 
