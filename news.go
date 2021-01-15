@@ -163,7 +163,7 @@ var NewspaperPages = []NewspaperPage{
                        n.Todays_Sellers, n.Week_Ago_Sellers, n.Month_Ago_Sellers, n.Week_Ago_Sellers_Chg
                 FROM vendor_levels n
                 LEFT JOIN mtgjson_portable a ON n.uuid = a.uuid
-                WHERE n.Week_Ago_Sellers_Chg is not NULL and n.Week_Ago_Sellers_Chg != 0`,
+                WHERE n.Week_Ago_Sellers_Chg is not NULL and n.Week_Ago_Sellers_Chg != 0 AND a.rdate <= CURRENT_DATE()`,
 		Sort: "n.Week_Ago_Sellers_Chg ASC",
 		Head: []Heading{
 			Heading{
