@@ -408,9 +408,12 @@ func mode2func(mode string) (out func(string, string) bool) {
 func searchSellers(query string, blocklist []string, options map[string]string) (foundSellers map[string]map[string][]SearchEntry, tooMany bool) {
 	// Allocate memory
 	foundSellers = map[string]map[string][]SearchEntry{}
+	searchMode := options["search_mode"]
 
+	// Redo loop, in case there were no results with the exact mode
+redo:
 	// Set which comparison function to use depending on the search syntax
-	cmpFunc := mode2func(options["search_mode"])
+	cmpFunc := mode2func(searchMode)
 
 	// Search sellers
 	for i, seller := range Sellers {
@@ -447,7 +450,7 @@ func searchSellers(query string, blocklist []string, options map[string]string) 
 			}
 
 			// Run the comparison function set above
-			if cmpFunc(co.Card.Name, query) || (co.Layout != "normal" && mtgmatcher.HasPrefix(co.Card.Name, query)) {
+			if cmpFunc(co.Card.Name, query) {
 				// Skip cards that are not of the desired set
 				if options["edition"] != "" {
 					filters := strings.Split(options["edition"], ",")
@@ -538,13 +541,22 @@ func searchSellers(query string, blocklist []string, options map[string]string) 
 		}
 	}
 
+	// No results with exact? Let's try again with prefix
+	// Not any because it's too imprescise, also we catch results with odd layouts
+	if len(foundSellers) == 0 && (searchMode == "exact" || searchMode == "") {
+		searchMode = "prefix"
+		goto redo
+	}
+
 	return
 }
 
 func searchVendors(query string, blocklist []string, options map[string]string) (foundVendors map[string][]SearchEntry, tooMany bool) {
 	foundVendors = map[string][]SearchEntry{}
+	searchMode := options["search_mode"]
 
-	cmpFunc := mode2func(options["search_mode"])
+redo:
+	cmpFunc := mode2func(searchMode)
 
 	for i, vendor := range Vendors {
 		if vendor == nil {
@@ -608,7 +620,7 @@ func searchVendors(query string, blocklist []string, options map[string]string) 
 				}
 			}
 
-			if cmpFunc(co.Card.Name, query) || (co.Layout != "normal" && mtgmatcher.HasPrefix(co.Card.Name, query)) {
+			if cmpFunc(co.Card.Name, query) {
 				_, found := foundVendors[cardId]
 				if !found {
 					if len(foundVendors) > MaxSearchResults {
@@ -633,6 +645,11 @@ func searchVendors(query string, blocklist []string, options map[string]string) 
 				foundVendors[cardId] = append(foundVendors[cardId], res)
 			}
 		}
+	}
+
+	if len(foundVendors) == 0 && (searchMode == "exact" || searchMode == "") {
+		searchMode = "prefix"
+		goto redo
 	}
 
 	return
