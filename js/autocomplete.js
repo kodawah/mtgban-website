@@ -149,9 +149,16 @@ async function autocomplete(form, inp) {
         }
     }
 
-    /* Execute a function (make the suggestions disaeppear)
-     * when someone clicks in the document */
+    /* Callback when someone submits the form */
     document.addEventListener("click", function(e) {
+        /* Add an hidden field that will set the appropriate search mode */
+        c = document.createElement("input");
+        c.setAttribute("name", "searchmode");
+        c.setAttribute("type", "hidden");
+        c.setAttribute("value", "exact");
+        form.appendChild(c);
+
+        /* Make all the suggestions disaeppear */
         closeAllLists(e.target);
     });
 };
