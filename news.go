@@ -790,7 +790,11 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(pageVars.Cards) == 0 {
-		pageVars.InfoMessage = "Newspaper is on strike"
+		if filter == "" && rarity == "" {
+			pageVars.InfoMessage = "Newspaper is on strike (notify devs!)"
+		} else {
+			pageVars.InfoMessage = "No results for the current filter options"
+		}
 	}
 
 	render(w, "news.html", pageVars)
