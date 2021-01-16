@@ -114,13 +114,15 @@
                 <div style="float:left;">
                     <h1>{{.Title}}</h1>
                 </div>
-                <div style="float:left; padding:0px 0 0 200px; margin:auto">
+                <div style="float:left; padding:18px 0 0 200px; margin:auto">
                     <form action="newspaper" method="GET">
                         <input type="hidden" name="page" value="{{$.Page}}">
-                        <label for="filter">Filter by edition<br></label>
                         <select name="filter" onchange="this.form.submit()" class="select-css" style="width:300px">
+                            {{if eq "" $.FilterSet}}
+                                <option value="" disabled selected hidden>Filter by Edition</option>
+                            {{end}}
                             {{range .Editions}}
-                                <option value="{{.}}" {{if eq . $.FilterSet}}selected{{end}}>{{.}}</option>
+                                <option value="{{.}}" {{if and (not (eq . "")) (eq . $.FilterSet)}}selected{{end}}>{{.}}</option>
                             {{end}}
                         </select>
                     </form>
