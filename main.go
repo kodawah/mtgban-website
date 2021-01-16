@@ -103,6 +103,8 @@ type PageVars struct {
 	OffsetCards  int
 	FilterSet    string
 	Editions     []string
+	FilterRarity string
+	Rarities     []string
 
 	Sleepers [7]SleeperEntry
 

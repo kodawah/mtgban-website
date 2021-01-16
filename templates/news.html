@@ -125,6 +125,15 @@
                                 <option value="{{.}}" {{if and (not (eq . "")) (eq . $.FilterSet)}}selected{{end}}>{{.}}</option>
                             {{end}}
                         </select>
+
+                        <select name="rarity" onchange="this.form.submit()" class="select-css" style="width:52px">
+                            {{if eq "" $.FilterRarity}}
+                                <option value="" disabled selected hidden>🍀</option>
+                            {{end}}
+                            {{range .Rarities}}
+                                <option value="{{.}}" {{if and (not (eq . "")) (eq . $.FilterRarity)}}selected{{end}}>{{.}}</option>
+                            {{end}}
+                        </select>
                     </form>
                 </div>
             </div>

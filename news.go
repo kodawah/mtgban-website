@@ -57,7 +57,7 @@ var NewspaperPages = []NewspaperPage{
 		Option: "review",
 		Query: `SELECT DISTINCT n.row_names, n.uuid,
                        n.Ranking,
-                       a.Name, a.Set, a.Number,
+                       a.Name, a.Set, a.Number, a.Rarity,
                        n.Retail, n.Buylist, n.Vendors
                 FROM top_25 n
                 LEFT JOIN mtgjson_portable a ON n.uuid = a.uuid
@@ -91,6 +91,9 @@ var NewspaperPages = []NewspaperPage{
 				Field:           "a.Number",
 			},
 			Heading{
+				IsHidden: true,
+			},
+			Heading{
 				Title:    "Retail",
 				CanSort:  true,
 				Field:    "Retail",
@@ -115,7 +118,7 @@ var NewspaperPages = []NewspaperPage{
 		Offset: 2,
 		Option: "stock_dec",
 		Query: `SELECT DISTINCT n.row_names, n.uuid,
-                       a.Name, a.Set, a.Number,
+                       a.Name, a.Set, a.Number, a.Rarity,
                        n.Todays_Sellers, n.Week_Ago_Sellers, n.Month_Ago_Sellers, n.Week_Ago_Sellers_Chg
                 FROM vendor_levels n
                 LEFT JOIN mtgjson_portable a ON n.uuid = a.uuid
@@ -142,6 +145,9 @@ var NewspaperPages = []NewspaperPage{
 				Title:           "#",
 				ConditionalSort: true,
 				Field:           "a.Number",
+			},
+			Heading{
+				IsHidden: true,
 			},
 			Heading{
 				Title:   "Today's Sellers",
@@ -172,7 +178,7 @@ var NewspaperPages = []NewspaperPage{
 		Offset: 2,
 		Option: "stock_inc",
 		Query: `SELECT DISTINCT n.row_names, n.uuid,
-                       a.Name, a.Set, a.Number,
+                       a.Name, a.Set, a.Number, a.Rarity,
                        n.Todays_Sellers, n.Week_Ago_Sellers, n.Month_Ago_Sellers, n.Week_Ago_Sellers_Chg
                 FROM vendor_levels n
                 LEFT JOIN mtgjson_portable a ON n.uuid = a.uuid
@@ -199,6 +205,9 @@ var NewspaperPages = []NewspaperPage{
 				Title:           "#",
 				ConditionalSort: true,
 				Field:           "a.Number",
+			},
+			Heading{
+				IsHidden: true,
 			},
 			Heading{
 				Title:   "Today's Seller",
@@ -229,7 +238,7 @@ var NewspaperPages = []NewspaperPage{
 		Offset: 2,
 		Option: "buylist_inc",
 		Query: `SELECT DISTINCT n.row_names, n.uuid,
-                       a.Name, a.Set, a.Number,
+                       a.Name, a.Set, a.Number, a.Rarity,
                        n.Todays_BL, n.Yesterday_BL, n.Week_Ago_BL, n.Month_Ago_BL, n.Week_Ago_BL_Chg
                 FROM buylist_levels n
                 LEFT JOIN mtgjson_portable a ON n.uuid = a.uuid
@@ -256,6 +265,9 @@ var NewspaperPages = []NewspaperPage{
 				Title:           "#",
 				ConditionalSort: true,
 				Field:           "a.Number",
+			},
+			Heading{
+				IsHidden: true,
 			},
 			Heading{
 				Title:    "Today's Buylist",
@@ -295,7 +307,7 @@ var NewspaperPages = []NewspaperPage{
 		Offset: 2,
 		Option: "buylist_dec",
 		Query: `SELECT DISTINCT n.row_names, n.uuid,
-                       a.Name, a.Set, a.Number,
+                       a.Name, a.Set, a.Number, a.Rarity,
                        n.Todays_BL, n.Yesterday_BL, n.Week_Ago_BL, n.Month_Ago_BL, n.Week_Ago_BL_Chg
                 FROM buylist_levels n
                 LEFT JOIN mtgjson_portable a ON n.uuid = a.uuid
@@ -322,6 +334,9 @@ var NewspaperPages = []NewspaperPage{
 				Title:           "#",
 				ConditionalSort: true,
 				Field:           "a.Number",
+			},
+			Heading{
+				IsHidden: true,
 			},
 			Heading{
 				Title:    "Today's Buylist",
@@ -361,7 +376,7 @@ var NewspaperPages = []NewspaperPage{
 		Offset: 2,
 		Option: "ensemble_forecast",
 		Query: `SELECT DISTINCT n.row_names, n.uuid,
-                       a.Name, a.Set, a.Number,
+                       a.Name, a.Set, a.Number, a.Rarity,
                        n.Recent_BL, n.Historical_plus_minus, n.Historical_Median, n.Historical_Max, n.Forecasted_BL, n.Forecast_plus_minus, n.Target_Date, n.Tier, n.Behavior, n.custom_sort
                 FROM ensemble_forecast n
                 LEFT JOIN mtgjson_portable a ON n.uuid = a.uuid
@@ -389,6 +404,9 @@ var NewspaperPages = []NewspaperPage{
 				Title:           "#",
 				ConditionalSort: true,
 				Field:           "a.Number",
+			},
+			Heading{
+				IsHidden: true,
 			},
 			Heading{
 				Title:    "Most Recent BL",
@@ -452,7 +470,7 @@ var NewspaperPages = []NewspaperPage{
 		Offset: 2,
 		Option: "ensemble_performance",
 		Query: `SELECT DISTINCT n.row_names, n.uuid,
-                       a.Name, a.Set, a.Number,
+                       a.Name, a.Set, a.Number, a.Rarity,
                        n.original_bl, n.max_forecast_value, n.current_val, n.classification, n.accuracy_metric, n.custom_sort
                 FROM ensemble_performance n
                 LEFT JOIN mtgjson_portable a ON n.uuid = a.uuid
@@ -479,6 +497,9 @@ var NewspaperPages = []NewspaperPage{
 				Title:           "#",
 				ConditionalSort: true,
 				Field:           "a.Number",
+			},
+			Heading{
+				IsHidden: true,
 			},
 			Heading{
 				Title:    "Original BL",
@@ -562,6 +583,7 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	sort := r.FormValue("sort")
 	dir := r.FormValue("dir")
 	filter := r.FormValue("filter")
+	rarity := r.FormValue("rarity")
 	pageIndexStr := r.FormValue("index")
 	pageIndex, _ := strconv.Atoi(pageIndexStr)
 	var query, defSort string
@@ -578,6 +600,8 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	pageVars.SortOption = sort
 	pageVars.SortDir = dir
 	pageVars.FilterSet = filter
+	pageVars.FilterRarity = rarity
+	pageVars.Rarities = []string{"", "M", "R", "U", "C"}
 
 	for _, newspage := range NewspaperPages {
 		if newspage.Option == page {
@@ -604,6 +628,9 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 			// Add any extra filter that might affect number of results
 			if filter != "" {
 				subQuery += " AND a.Set = \"" + filter + "\""
+			}
+			if rarity != "" {
+				subQuery += " AND a.Rarity = \"" + rarity + "\""
 			}
 
 			// Sub Go!
@@ -656,6 +683,9 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	// Note that this requires every query to end with an applicable WHERE clause
 	if filter != "" {
 		query += " AND a.Set = \"" + filter + "\""
+	}
+	if rarity != "" {
+		query += " AND a.Rarity = \"" + rarity + "\""
 	}
 
 	// Set sorting options
