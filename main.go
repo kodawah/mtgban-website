@@ -101,6 +101,8 @@ type PageVars struct {
 	SortDir      string
 	LargeTable   bool
 	OffsetCards  int
+	FilterSet    string
+	Editions     []string
 
 	Sleepers [7]SleeperEntry
 

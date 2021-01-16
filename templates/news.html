@@ -120,8 +120,8 @@
                                     {{.Title}}
                                     {{if .CanSort}}
                                         <nobr>
-                                            <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=desc">▼</a>
-                                            <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=asc">▲</a>
+                                            <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=desc&filter={{$.FilterSet}}">▼</a>
+                                            <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=asc&filter={{$.FilterSet}}">▲</a>
                                         </nobr>
                                     {{end}}
                                 </th>
@@ -162,13 +162,13 @@
                         <td colspan="{{len .Headings}}">
                             <p style="text-align: center; vertical-align: middle;">
                             {{if ne .CurrentIndex 0}}
-                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index=">&lt;</a>
-                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index={{.PrevIndex}}">◀</a>
+                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index=&filter={{.FilterSet}}">&lt;</a>
+                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index={{.PrevIndex}}&filter={{.FilterSet}}">◀</a>
                             {{end}}
                             {{inc .CurrentIndex 1}} / {{inc .TotalIndex 1}}
                             {{if ne .CurrentIndex .TotalIndex}}
-                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index={{.NextIndex}}">▶</a>
-                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index={{.TotalIndex}}">&gt;</a>
+                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index={{.NextIndex}}&filter={{.FilterSet}}">▶</a>
+                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index={{.TotalIndex}}&filter={{.FilterSet}}">&gt;</a>
                             {{end}}
                             </p>
                         </td>

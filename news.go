@@ -52,7 +52,8 @@ var NewspaperPages = []NewspaperPage{
                        a.Name, a.Set, a.Number,
                        n.Retail, n.Buylist, n.Vendors
                 FROM top_25 n
-                LEFT JOIN mtgjson_portable a ON n.uuid = a.uuid`,
+                LEFT JOIN mtgjson_portable a ON n.uuid = a.uuid
+                WHERE n.uuid <> ""`,
 		Sort: "Ranking",
 		Head: []Heading{
 			Heading{
@@ -345,7 +346,8 @@ var NewspaperPages = []NewspaperPage{
                        a.Name, a.Set, a.Number,
                        n.Recent_BL, n.Historical_plus_minus, n.Historical_Median, n.Historical_Max, n.Forecasted_BL, n.Forecast_plus_minus, n.Target_Date, n.Tier, n.Behavior, n.custom_sort
                 FROM ensemble_forecast n
-                LEFT JOIN mtgjson_portable a ON n.uuid = a.uuid`
+                LEFT JOIN mtgjson_portable a ON n.uuid = a.uuid
+                WHERE n.uuid <> ""`,
 		Sort:  "n.custom_sort",
 		Large: true,
 		Head: []Heading{
@@ -433,7 +435,8 @@ var NewspaperPages = []NewspaperPage{
                        a.Name, a.Set, a.Number,
                        n.original_bl, n.max_forecast_value, n.current_val, n.classification, n.accuracy_metric, n.custom_sort
                 FROM ensemble_performance n
-                LEFT JOIN mtgjson_portable a ON n.uuid = a.uuid`
+                LEFT JOIN mtgjson_portable a ON n.uuid = a.uuid
+                WHERE n.uuid <> ""`,
 		Sort: "n.custom_sort",
 		Head: []Heading{
 			Heading{
@@ -536,6 +539,7 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	page := r.FormValue("page")
 	sort := r.FormValue("sort")
 	dir := r.FormValue("dir")
+	filter := r.FormValue("filter")
 	pageIndexStr := r.FormValue("index")
 	pageIndex, _ := strconv.Atoi(pageIndexStr)
 	var query, defSort string
@@ -551,6 +555,7 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 
 	pageVars.SortOption = sort
 	pageVars.SortDir = dir
+	pageVars.FilterSet = filter
 
 	for _, newspage := range NewspaperPages {
 		if newspage.Option == page {
@@ -570,7 +575,17 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 				render(w, "news.html", pageVars)
 				return
 			}
-			err := db.QueryRow("SELECT COUNT(DISTINCT n.uuid) FROM" + qs[1]).Scan(&pages)
+
+			// Set query to retrieve total number of matches
+			subQuery := "SELECT COUNT(DISTINCT n.uuid) FROM" + qs[1]
+
+			// Add any extra filter that might affect number of results
+			if filter != "" {
+				subQuery += " AND a.Set = '" + filter + "'"
+			}
+
+			// Sub Go!
+			err := db.QueryRow(subQuery).Scan(&pages)
 			if err != nil {
 				log.Println("pages disabled", err)
 			}
@@ -590,8 +605,35 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 
 			query = newspage.Query
 			defSort = newspage.Sort
+
+			// Repeat as above to retrieve the possible editions
+			subQuery = "SELECT DISTINCT a.Set FROM" + qs[1] + " ORDER BY a.Set ASC"
+			rows, err := db.Query(subQuery)
+			if err != nil {
+				log.Println("editions disabled", err)
+				break
+			}
+			// First element is always initialized
+			pageVars.Editions = []string{""}
+			// Iterate over subresults
+			for rows.Next() {
+				var tmp string
+				err := rows.Scan(&tmp)
+				if err != nil {
+					log.Println("editions missing", err)
+					break
+				}
+				pageVars.Editions = append(pageVars.Editions, tmp)
+			}
+
 			break
 		}
+	}
+
+	// Add any extra filter before sorting
+	// Note that this requires every query to end with an applicable WHERE clause
+	if filter != "" {
+		query += " AND a.Set = '" + filter + "'"
 	}
 
 	// Set sorting options
