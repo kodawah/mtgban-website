@@ -450,6 +450,3 @@ td.tiers {
 .select-css option {
     font-weight: normal;
 }
-.select-css option:nth-child(0) {
-    font-weight: italic;
-}

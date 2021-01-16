@@ -118,7 +118,7 @@
                     <form action="newspaper" method="GET">
                         <input type="hidden" name="page" value="{{$.Page}}">
                         <label for="filter">Filter by edition<br></label>
-                        <select name="filter" onchange="this.form.submit()" class="select-css" style=" width:300px">
+                        <select name="filter" onchange="this.form.submit()" class="select-css" style="width:300px">
                             {{range .Editions}}
                                 <option value="{{.}}" {{if eq . $.FilterSet}}selected{{end}}>{{.}}</option>
                             {{end}}
