@@ -14,12 +14,20 @@ const (
 )
 
 type Heading struct {
-	Title    string
-	CanSort  bool
-	Field    string
+	// The header string
+	Title string
+	// The field can be sorted
+	CanSort bool
+	// The name of the field to be sorted
+	Field string
+	// Need dolla sign prepended
 	IsDollar bool
-	IsPerc   bool
+	// This is a percentage
+	IsPerc bool
+	// Do not display this field in HTML
 	IsHidden bool
+	// This field can be sorted when filtered
+	ConditionalSort bool
 }
 
 type NewspaperPage struct {
@@ -78,7 +86,9 @@ var NewspaperPages = []NewspaperPage{
 				Field:   "a.Set",
 			},
 			Heading{
-				Title: "#",
+				Title:           "#",
+				ConditionalSort: true,
+				Field:           "a.Number",
 			},
 			Heading{
 				Title:    "Retail",
@@ -129,7 +139,9 @@ var NewspaperPages = []NewspaperPage{
 				Field:   "a.Set",
 			},
 			Heading{
-				Title: "#",
+				Title:           "#",
+				ConditionalSort: true,
+				Field:           "a.Number",
 			},
 			Heading{
 				Title:   "Today's Sellers",
@@ -184,7 +196,9 @@ var NewspaperPages = []NewspaperPage{
 				Field:   "a.Set",
 			},
 			Heading{
-				Title: "#",
+				Title:           "#",
+				ConditionalSort: true,
+				Field:           "a.Number",
 			},
 			Heading{
 				Title:   "Today's Seller",
@@ -239,7 +253,9 @@ var NewspaperPages = []NewspaperPage{
 				Field:   "a.Set",
 			},
 			Heading{
-				Title: "#",
+				Title:           "#",
+				ConditionalSort: true,
+				Field:           "a.Number",
 			},
 			Heading{
 				Title:    "Today's Buylist",
@@ -303,7 +319,9 @@ var NewspaperPages = []NewspaperPage{
 				Field:   "a.Set",
 			},
 			Heading{
-				Title: "#",
+				Title:           "#",
+				ConditionalSort: true,
+				Field:           "a.Number",
 			},
 			Heading{
 				Title:    "Today's Buylist",
@@ -368,7 +386,9 @@ var NewspaperPages = []NewspaperPage{
 				Field:   "a.Set",
 			},
 			Heading{
-				Title: "#",
+				Title:           "#",
+				ConditionalSort: true,
+				Field:           "a.Number",
 			},
 			Heading{
 				Title:    "Most Recent BL",
@@ -456,7 +476,9 @@ var NewspaperPages = []NewspaperPage{
 				Field:   "a.Set",
 			},
 			Heading{
-				Title: "#",
+				Title:           "#",
+				ConditionalSort: true,
+				Field:           "a.Number",
 			},
 			Heading{
 				Title:    "Original BL",
@@ -640,9 +662,12 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	if sort != "" {
 		// Make sure this field is allowed to be sorted
 		canSort := false
-		for _, head := range pageVars.Headings {
-			if head.Field == sort {
-				canSort = head.CanSort
+		for i := range pageVars.Headings {
+			if pageVars.Headings[i].Field == sort {
+				canSort = pageVars.Headings[i].CanSort
+				if pageVars.Headings[i].ConditionalSort && filter != "" {
+					canSort = true
+				}
 				break
 			}
 		}

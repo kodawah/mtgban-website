@@ -134,7 +134,7 @@
                             {{if not .IsHidden}}
                                 <th class="stickyHeaderShort">
                                     {{.Title}}
-                                    {{if .CanSort}}
+                                    {{if or .CanSort (and (not (eq $.FilterSet "")) .ConditionalSort)}}
                                         <nobr>
                                             <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=desc&filter={{$.FilterSet}}">▼</a>
                                             <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=asc&filter={{$.FilterSet}}">▲</a>
