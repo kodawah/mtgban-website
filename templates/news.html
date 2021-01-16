@@ -110,7 +110,23 @@
                 }
             </script>
 
-            <h1>{{.Title}}</h1>
+            <div style="clear:both;">
+                <div style="float:left;">
+                    <h1>{{.Title}}</h1>
+                </div>
+                <div style="float:left; padding:0px 0 0 200px; margin:auto">
+                    <form action="newspaper" method="GET">
+                        <input type="hidden" name="page" value="{{$.Page}}">
+                        <label for="filter">Filter by edition<br></label>
+                        <select name="filter" onchange="this.form.submit()" class="select-css" style=" width:300px">
+                            {{range .Editions}}
+                                <option value="{{.}}" {{if eq . $.FilterSet}}selected{{end}}>{{.}}</option>
+                            {{end}}
+                        </select>
+                    </form>
+                </div>
+            </div>
+
             <div class="indent" style="max-width: {{if $.LargeTable}}90%{{else}}1080px{{end}};">
                 <table onmouseout="document.getElementById('hoverImage').src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';" width=100%>
                     <tr>
