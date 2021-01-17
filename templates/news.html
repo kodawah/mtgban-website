@@ -147,8 +147,8 @@
                                     {{.Title}}
                                     {{if or .CanSort (and (not (eq $.FilterSet "")) .ConditionalSort)}}
                                         <nobr>
-                                            <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=desc&filter={{$.FilterSet}}">▼</a>
-                                            <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=asc&filter={{$.FilterSet}}">▲</a>
+                                            <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=desc&filter={{$.FilterSet}}&rarity={{$.FilterRarity}}">▼</a>
+                                            <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=asc&filter={{$.FilterSet}}&rarity={{$.FilterRarity}}">▲</a>
                                         </nobr>
                                     {{end}}
                                 </th>
