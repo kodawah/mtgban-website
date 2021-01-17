@@ -37,6 +37,9 @@ const (
 
 	// Timeout before cancelling a last sold price request
 	LastSoldTimeout = 30
+
+	// ID of the test channel on the main server
+	DevChannelID = "769323295526748160"
 )
 
 func setupDiscord() error {
@@ -419,6 +422,11 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Ignore too short messages
 	if len(m.Content) < 2 {
+		return
+	}
+
+	// Ingore messages not coming from the test channel when running in dev
+	if DevMode && m.ChannelID != DevChannelID {
 		return
 	}
 
