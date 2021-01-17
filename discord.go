@@ -109,6 +109,9 @@ func parseMessage(content string) (*searchResult, error) {
 		options["search_mode"] = "any"
 	}
 
+	// Stash interesting elements that may be overwritten later
+	parsedCondition := options["condition"]
+
 	// Prevent useless invocations
 	if len(query) < 3 && query != "Ow" && query != "X" {
 		return &searchResult{Invalid: true}, nil
@@ -157,6 +160,9 @@ func parseMessage(content string) (*searchResult, error) {
 		return nil, err
 	}
 	query, options = parseSearchOptions(cardId)
+
+	// Restore elements originally present in the first query
+	options["condition"] = parsedCondition
 
 	// Search both sellers and vendors
 	var resultsSellers, resultsVendors []SearchEntry
