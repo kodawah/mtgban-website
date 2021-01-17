@@ -782,7 +782,6 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	for _, c := range pageVars.Cards {
 		if c.Reserved {
 			pageVars.HasReserved = true
-			break
 		}
 		if c.Stocks {
 			pageVars.HasStocks = true
