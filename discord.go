@@ -679,11 +679,10 @@ func searchSellersFirstResult(query string, options map[string]string, index boo
 		results = foundSellers[cardId]["INDEX"]
 	} else {
 		founders := map[string]string{}
-		for cond, foundResults := range foundSellers[cardId] {
-			// Skip already processed or just bad conditions
-			if cond == "INDEX" || cond == "PO" {
-				continue
-			}
+		// Query results with the known (ordered) conditions
+		for _, cond := range []string{"NM", "SP", "MP", "HP"} {
+			foundResults := foundSellers[cardId][cond]
+
 			// Loop through the results, keep track of the precessed
 			// elements in the map (and skip lower condition ones)
 			for _, result := range foundResults {
