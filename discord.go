@@ -293,7 +293,8 @@ func search2fields(searchRes *searchResult) (fields []embedField) {
 					if strings.HasSuffix(subres.ScraperName, "P)") {
 						continue
 					}
-					if subres.Price < entry.Price {
+					// 90% of sell price is the minimum for arbit
+					if subres.Price*0.9 < entry.Price {
 						alarm = true
 						break
 					}
