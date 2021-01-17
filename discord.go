@@ -152,7 +152,7 @@ func parseMessage(content string) (*searchResult, error) {
 
 	// We can be quite sure that one of the index will contain the card requested,
 	// so we translate the result into a new query to feed to the other searches
-	cardId, resultsIndex, err := searchSellersFirstResult(query, options, "INDEX")
+	cardId, resultsIndex, err := searchSellersFirstResult(query, options, true)
 	if err != nil {
 		return nil, err
 	}
@@ -163,11 +163,8 @@ func parseMessage(content string) (*searchResult, error) {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
-	// For Sellers, only consider NM entries
-	options["condition"] = "NM"
-
 	go func() {
-		_, resultsSellers, _ = searchSellersFirstResult(query, options, "NM")
+		_, resultsSellers, _ = searchSellersFirstResult(query, options, false)
 		wg.Done()
 	}()
 	go func() {
@@ -286,6 +283,10 @@ func search2fields(searchRes *searchResult) (fields []embedField) {
 			} else if fieldsNames[i] == "Buylist" {
 				alarm := false
 				for _, subres := range searchRes.ResultsSellers {
+					// Skip non-NM results
+					if strings.HasSuffix(subres.ScraperName, "P)") {
+						continue
+					}
 					if subres.Price < entry.Price {
 						alarm = true
 						break
@@ -649,7 +650,7 @@ func longestName(results []SearchEntry) (out int) {
 }
 
 // Retrieve cards from Sellers using the very first result
-func searchSellersFirstResult(query string, options map[string]string, filter string) (cardId string, results []SearchEntry, err error) {
+func searchSellersFirstResult(query string, options map[string]string, index bool) (cardId string, results []SearchEntry, err error) {
 	// Search
 	foundSellers, _ := searchSellers(query, append(Config.SearchBlockList, "TCG Direct"), options)
 	if len(foundSellers) == 0 {
@@ -668,7 +669,31 @@ func searchSellersFirstResult(query string, options map[string]string, filter st
 	}
 
 	cardId = sortedKeysSeller[0]
-	results = foundSellers[cardId][filter]
+	if index {
+		results = foundSellers[cardId]["INDEX"]
+	} else {
+		founders := map[string]string{}
+		for cond, foundResults := range foundSellers[cardId] {
+			// Skip already processed or just bad conditions
+			if cond == "INDEX" || cond == "PO" {
+				continue
+			}
+			// Loop through the results, keep track of the precessed
+			// elements in the map (and skip lower condition ones)
+			for _, result := range foundResults {
+				_, found := founders[result.ScraperName]
+				if found {
+					continue
+				}
+				founders[result.ScraperName] = cond
+				// If not NM, add a small tag
+				if cond != "NM" {
+					result.ScraperName += " (" + cond + ")"
+				}
+				results = append(results, result)
+			}
+		}
+	}
 
 	if len(results) > 0 {
 		// Drop duplicates by looking at the last one as they are alredy sorted
