@@ -297,7 +297,7 @@ func search2fields(searchRes *searchResult) (fields []embedField) {
 						continue
 					}
 					// 90% of sell price is the minimum for arbit
-					if subres.Price*0.9 < entry.Price {
+					if subres.Price < entry.Price*0.9 {
 						alarm = true
 						break
 					}
