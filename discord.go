@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/url"
 	"path"
+	"regexp"
 	"sort"
 	"strings"
 	"sync"
@@ -24,6 +25,9 @@ var poweredByFooter = discordgo.MessageEmbedFooter{
 	Text:    "Powered by mtgban.com",
 }
 
+// Scryfall-compatible mode
+var squareBracketsRE = regexp.MustCompile(`\[\[.*?\]\]?`)
+
 const (
 	// Avoid making messages overly long
 	MaxPrintings = 12
@@ -38,8 +42,9 @@ const (
 	// Timeout before cancelling a last sold price request
 	LastSoldTimeout = 30
 
-	// ID of the test channel on the main server
-	DevChannelID = "769323295526748160"
+	// IDs of the channels on the main server
+	DevChannelID   = "769323295526748160"
+	RecapChannelID = "798588735259279453"
 )
 
 func setupDiscord() error {
@@ -432,10 +437,22 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Parse message, look for bot command
 	if !strings.HasPrefix(m.Content, "!") && !strings.HasPrefix(m.Content, "$$") {
-		// On the main server, check if the message contains potential links
-		if m.GuildID == Config.DiscordAllowList[0] &&
-			(strings.Contains(m.Content, "cardkingdom.com/mtg") ||
-				strings.Contains(m.Content, "shop.tcgplayer.com/")) {
+		// Early exit if not running on the main server
+		if m.GuildID != Config.DiscordAllowList[0] {
+			return
+		}
+
+		// Check if selected channels can replace scryfall searches
+		if (m.ChannelID == DevChannelID || m.ChannelID == RecapChannelID) &&
+			strings.Contains(m.Content, "[[") {
+			fields := squareBracketsRE.FindAllString(m.Content, -1)
+			for _, field := range fields {
+				m.Content = "!" + strings.TrimRight(strings.TrimLeft(field, "["), "]")
+				messageCreate(s, m)
+			}
+			// Check if the message contains potential links
+		} else if strings.Contains(m.Content, "cardkingdom.com/mtg") ||
+			strings.Contains(m.Content, "shop.tcgplayer.com/") {
 			// Iterate over each segment of the message and look for known links
 			fields := strings.Fields(m.Content)
 			for _, field := range fields {
