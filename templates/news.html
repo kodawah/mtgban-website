@@ -117,6 +117,9 @@
                 <div style="float:left; padding:18px 0 0 200px; margin:auto">
                     <form action="newspaper" method="GET">
                         <input type="hidden" name="page" value="{{$.Page}}">
+                        <input type="hidden" name="sort" value="{{$.SortOption}}">
+                        <input type="hidden" name="dir" value="{{$.SortDir}}">
+                        <input type="hidden" name="index" value="{{$.NextIndex}}">
                         <select name="filter" onchange="this.form.submit()" class="select-css" style="width:300px">
                             {{if eq "" $.FilterSet}}
                                 <option value="" disabled selected hidden>Filter by Edition</option>
@@ -189,13 +192,14 @@
                         <td colspan="{{len .Headings}}">
                             <p style="text-align: center; vertical-align: middle;">
                             {{if ne .CurrentIndex 0}}
-                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index=&filter={{.FilterSet}}">&lt;</a>
-                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index={{.PrevIndex}}&filter={{.FilterSet}}">◀</a>
+                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index=&filter={{.FilterSet}}&rarity={{$.FilterRarity}}
+                                    ">&lt;</a>
+                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index={{.PrevIndex}}&filter={{.FilterSet}}&rarity={{$.FilterRarity}}">◀</a>
                             {{end}}
                             {{inc .CurrentIndex 1}} / {{inc .TotalIndex 1}}
                             {{if ne .CurrentIndex .TotalIndex}}
-                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index={{.NextIndex}}&filter={{.FilterSet}}">▶</a>
-                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index={{.TotalIndex}}&filter={{.FilterSet}}">&gt;</a>
+                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index={{.NextIndex}}&filter={{.FilterSet}}&rarity={{$.FilterRarity}}">▶</a>
+                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index={{.TotalIndex}}&filter={{.FilterSet}}&rarity={{$.FilterRarity}}">&gt;</a>
                             {{end}}
                             </p>
                         </td>
