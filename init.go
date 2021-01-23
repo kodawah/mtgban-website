@@ -487,6 +487,7 @@ var options = map[string]*scraperOption{
 		},
 	},
 	"miniaturemarket": &scraperOption{
+		OnlySeller: true,
 		Init: func() (mtgban.Scraper, error) {
 			scraper := miniaturemarket.NewScraper()
 			scraper.LogCallback = log.Printf
