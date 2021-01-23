@@ -22,6 +22,7 @@ import (
 	"github.com/kodabb/go-mtgban/starcitygames"
 	"github.com/kodabb/go-mtgban/strikezone"
 	"github.com/kodabb/go-mtgban/tcgplayer"
+	"github.com/kodabb/go-mtgban/trollandtoad"
 
 	"github.com/kodabb/go-mtgban/mtgban"
 	"github.com/kodabb/go-mtgban/mtgmatcher"
@@ -518,6 +519,13 @@ var options = map[string]*scraperOption{
 		DevEnabled: true,
 		Init: func() (mtgban.Scraper, error) {
 			scraper := strikezone.NewScraper()
+			scraper.LogCallback = log.Printf
+			return scraper, nil
+		},
+	},
+	"trollandtoad": &scraperOption{
+		Init: func() (mtgban.Scraper, error) {
+			scraper := trollandtoad.NewScraper()
 			scraper.LogCallback = log.Printf
 			return scraper, nil
 		},
