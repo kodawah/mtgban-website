@@ -31,16 +31,6 @@ const (
 	MinSpreadHighYieldGlobal = 350
 )
 
-var Affiliates = append(NonMarketAffiliates,
-	TCG_MAIN,
-	TCG_DIRECT,
-)
-
-var NonMarketAffiliates = []string{
-	"Card Kingdom",
-	"Miniature Market",
-}
-
 var FilteredEditions = []string{
 	"Collectors’ Edition",
 	"Foreign Black Border",
@@ -152,7 +142,7 @@ func Global(w http.ResponseWriter, r *http.Request) {
 		if anyEnabled {
 			if seller.Info().Shorthand != TCG_MARKET &&
 				seller.Info().Shorthand != MKM_TREND &&
-				!SliceStringHas(NonMarketAffiliates, seller.Info().Name) {
+				!SliceStringHas(Config.GlobalAllowList, seller.Info().Shorthand) {
 				continue
 			}
 		} else {
@@ -323,7 +313,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	pageVars.SellerFull = source.Info().Name
 	pageVars.SellerUpdate = source.Info().InventoryTimestamp.Format(time.RFC3339)
 	pageVars.SellerNoAvailable = source.Info().NoQuantityInventory
-	pageVars.SellerAffiliate = SliceStringHas(Affiliates, pageVars.SellerFull)
+	pageVars.SellerAffiliate = SliceStringHas(Config.AffiliatesList, pageVars.SellerFull)
 	pageVars.UseCredit = useCredit
 	pageVars.FilterCond = nocond
 	pageVars.FilterFoil = nofoil

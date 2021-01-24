@@ -186,12 +186,14 @@ var Config struct {
 	DBAddress           string            `json:"db_address"`
 	DiscordHook         string            `json:"discord_hook"`
 	Affiliate           map[string]string `json:"affiliate"`
+	AffiliatesList      []string          `json:"affiliates_list"`
 	Api                 map[string]string `json:"api"`
 	DiscordToken        string            `json:"discord_token"`
 	DiscordAllowList    []string          `json:"discord_allowlist"`
 	ArbitDefaultSellers []string          `json:"arbit_default_sellers"`
 	ArbitBlockVendors   []string          `json:"arbit_block_vendors"`
 	SearchBlockList     []string          `json:"search_block_list"`
+	GlobalAllowList     []string          `json:"global_allow_list"`
 	Patreon             struct {
 		Secret map[string]string   `json:"secret"`
 		Ids    map[string][]string `json:"ids"`
