@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/kodabb/go-mtgban/abugames"
+	"github.com/kodabb/go-mtgban/amazon"
 	"github.com/kodabb/go-mtgban/blueprint"
 	"github.com/kodabb/go-mtgban/cardkingdom"
 	"github.com/kodabb/go-mtgban/cardmarket"
@@ -599,6 +600,14 @@ var options = map[string]*scraperOption{
 			}
 			scraper.LogCallback = log.Printf
 			scraper.MaxConcurrency = 3
+			return scraper, nil
+		},
+	},
+	"amazon": &scraperOption{
+		DevEnabled: true,
+		Init: func() (mtgban.Scraper, error) {
+			scraper := amazon.NewScraper(Config.Api["amz_token"])
+			scraper.LogCallback = log.Printf
 			return scraper, nil
 		},
 	},
