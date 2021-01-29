@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -223,4 +224,33 @@ func Notify(kind, message string) {
 		}
 		defer resp.Body.Close()
 	}()
+}
+
+// Read the query parameter, if present set a cookie that will be
+// used as default preference, otherwise retrieve the said cookie
+func readSetFlag(w http.ResponseWriter, r *http.Request, queryParam, cookieName string) bool {
+	val := r.FormValue(queryParam)
+	flag, err := strconv.ParseBool(val)
+	if err != nil {
+		for _, cookie := range r.Cookies() {
+			if cookie.Name == cookieName {
+				flag, _ = strconv.ParseBool(cookie.Value)
+				return flag
+			}
+		}
+		return false
+	}
+	domain := "mtgban.com"
+	if strings.Contains(getBaseURL(r), "localhost") {
+		domain = "localhost"
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:   cookieName,
+		Domain: domain,
+		Path:   "/",
+		// No expiration
+		Expires: time.Now().Add(10 * 365 * 24 * 60 * 60 * time.Second),
+		Value:   val,
+	})
+	return flag
 }

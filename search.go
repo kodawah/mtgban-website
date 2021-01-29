@@ -90,7 +90,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	// Keep track of what was searched
 	pageVars.SearchQuery = query
-	pageVars.SearchBest = handleBestSorting(w, r)
+	pageVars.SearchBest = readSetFlag(w, r, "b", "MTGBANSearchPref")
 	// Setup conditions keys, all etnries, and images
 	pageVars.CondKeys = []string{"INDEX", "NM", "SP", "MP", "HP", "PO"}
 	pageVars.Metadata = map[string]GenericCard{}
@@ -248,35 +248,6 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	log.Println(msg)
 
 	render(w, "search.html", pageVars)
-}
-
-// Read the 'b' query parameter, if present set a cookie that will be
-// used as default preference, otherwise retrieve the said cookie
-func handleBestSorting(w http.ResponseWriter, r *http.Request) bool {
-	val := r.FormValue("b")
-	sorting, err := strconv.ParseBool(val)
-	if err != nil {
-		for _, cookie := range r.Cookies() {
-			if cookie.Name == "MTGBANSearchPref" {
-				sorting, _ = strconv.ParseBool(cookie.Value)
-				return sorting
-			}
-		}
-		return false
-	}
-	domain := "mtgban.com"
-	if strings.Contains(getBaseURL(r), "localhost") {
-		domain = "localhost"
-	}
-	http.SetCookie(w, &http.Cookie{
-		Name:   "MTGBANSearchPref",
-		Domain: domain,
-		Path:   "/",
-		// No expiration
-		Expires: time.Now().Add(10 * 365 * 24 * 60 * 60 * time.Second),
-		Value:   val,
-	})
-	return sorting
 }
 
 func parseSearchOptions(query string) (string, map[string]string) {
