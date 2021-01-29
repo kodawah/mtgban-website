@@ -54,6 +54,10 @@
                     {{else}}
                         3-day newspaper.
                     {{end}}
+                    {{if .CanSwitchDay}}
+                        <br>As <b>Admin</b> you can check on the
+                        <a href="newspaper?force3day={{.IsOneDay}}">{{if .IsOneDay}}3-day{{else}}early edition{{end}} newspaper</a>.
+                    {{end}}
                 </p>
                 <h3>Instructions</h3>
                 <ul class="indent">

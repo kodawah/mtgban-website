@@ -512,9 +512,12 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) (string, string)
 		}
 	}
 	if v.Get("Newspaper") == "true" {
-		if tierTitle == "Modern" {
+		switch tierTitle {
+		case "Modern":
 			v.Set("NewsEnabled", "3day")
-		} else {
+		case "Root", "Admin":
+			v.Set("NewsEnabled", "0day")
+		default:
 			v.Set("NewsEnabled", "1day")
 		}
 	}

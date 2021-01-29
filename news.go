@@ -568,6 +568,15 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 		pageVars.IsOneDay = true
 	} else if enabled == "3day" {
 		db = Newspaper3dayDB
+	} else if enabled == "0day" {
+		force3day := readSetFlag(w, r, "force3day", "MTGBANNewpaperPref")
+		if force3day {
+			db = Newspaper3dayDB
+		} else {
+			db = Newspaper1dayDB
+			pageVars.IsOneDay = true
+		}
+		pageVars.CanSwitchDay = true
 	} else {
 		pageVars.Title = "This feature is BANned"
 		pageVars.ErrorMessage = ErrMsgDenied

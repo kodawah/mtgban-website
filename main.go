@@ -94,6 +94,7 @@ type PageVars struct {
 	Table        [][]string
 	HasReserved  bool
 	IsOneDay     bool
+	CanSwitchDay bool
 	TotalIndex   int
 	CurrentIndex int
 	PrevIndex    int
