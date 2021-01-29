@@ -123,7 +123,7 @@
                         <input type="hidden" name="page" value="{{$.Page}}">
                         <input type="hidden" name="sort" value="{{$.SortOption}}">
                         <input type="hidden" name="dir" value="{{$.SortDir}}">
-                        <input type="hidden" name="index" value="{{$.NextIndex}}">
+                        <input type="hidden" name="index" value="{{$.CurrentIndex}}">
                         <select name="filter" onchange="this.form.submit()" class="select-css" style="width:300px">
                             {{if eq "" $.FilterSet}}
                                 <option value="" disabled selected hidden>Filter by Edition</option>

@@ -653,6 +653,9 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 			pageVars.TotalIndex = pages
 			if pageIndex >= 0 && pageIndex <= pages {
 				pageVars.CurrentIndex = pageIndex
+			} else {
+				// Reset the index if we over or underflow
+				pageIndex = 0
 			}
 			if pageVars.CurrentIndex > 0 {
 				pageVars.PrevIndex = pageVars.CurrentIndex - 1
