@@ -14,6 +14,7 @@ import (
 	"github.com/kodabb/go-mtgban/cardkingdom"
 	"github.com/kodabb/go-mtgban/cardmarket"
 	"github.com/kodabb/go-mtgban/cardsphere"
+	"github.com/kodabb/go-mtgban/cardtrader"
 	"github.com/kodabb/go-mtgban/coolstuffinc"
 	"github.com/kodabb/go-mtgban/magiccorner"
 	"github.com/kodabb/go-mtgban/mtgstocks"
@@ -561,6 +562,14 @@ var options = map[string]*scraperOption{
 		DevEnabled: true,
 		Init: func() (mtgban.Scraper, error) {
 			scraper := amazon.NewScraper(Config.Api["amz_token"])
+			scraper.LogCallback = log.Printf
+			return scraper, nil
+		},
+	},
+	"cardtrader": &scraperOption{
+		DevEnabled: true,
+		Init: func() (mtgban.Scraper, error) {
+			scraper := cardtrader.NewScraperMarket(Config.Api["cardtrader"])
 			scraper.LogCallback = log.Printf
 			return scraper, nil
 		},
