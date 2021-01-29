@@ -16,7 +16,6 @@ import (
 	"github.com/kodabb/go-mtgban/cardsphere"
 	"github.com/kodabb/go-mtgban/coolstuffinc"
 	"github.com/kodabb/go-mtgban/magiccorner"
-	"github.com/kodabb/go-mtgban/miniaturemarket"
 	"github.com/kodabb/go-mtgban/mtgstocks"
 	"github.com/kodabb/go-mtgban/mythicmtg"
 	"github.com/kodabb/go-mtgban/ninetyfive"
@@ -419,42 +418,6 @@ func loadCSI() {
 	Notify("refresh", "coolstuffinc refresh completed")
 }
 
-func loadMM() {
-	log.Println("Reloading MM")
-
-	scraper, err := options["miniaturemarket"].Init()
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	for i := range Sellers {
-		if Sellers[i] != nil && Sellers[i].Info().Shorthand == "MM" {
-			_, err := scraper.(mtgban.Seller).Inventory()
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-			log.Println("MM Inventory updated")
-			Sellers[i] = scraper.(mtgban.Seller)
-		}
-	}
-
-	for i := range Vendors {
-		if Vendors[i] != nil && Vendors[i].Info().Shorthand == "MM" {
-			_, err := scraper.(mtgban.Vendor).Buylist()
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-			log.Println("MM Buylist updated")
-			Vendors[i] = scraper.(mtgban.Vendor)
-		}
-	}
-
-	Notify("refresh", "miniaturemarket refresh completed")
-}
-
 type scraperOption struct {
 	DevEnabled bool
 	OnlySeller bool
@@ -485,15 +448,6 @@ var options = map[string]*scraperOption{
 			scraper := coolstuffinc.NewScraper()
 			scraper.LogCallback = log.Printf
 			scraper.MaxConcurrency = 6
-			return scraper, nil
-		},
-	},
-	"miniaturemarket": &scraperOption{
-		OnlySeller: true,
-		Init: func() (mtgban.Scraper, error) {
-			scraper := miniaturemarket.NewScraper()
-			scraper.LogCallback = log.Printf
-			scraper.Affiliate = Config.Affiliate["MM"]
 			return scraper, nil
 		},
 	},
