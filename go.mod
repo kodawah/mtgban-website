@@ -13,7 +13,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.3.3 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.1
-	github.com/kodabb/go-mtgban v0.0.0-20210126195320-6fb54ee74bd4
+	github.com/kodabb/go-mtgban v0.0.0-20210129034525-52df63c0ab2b
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	gopkg.in/robfig/cron.v2 v2.0.0-20150107220207-be2e0b0deed5
 )
