@@ -23,7 +23,10 @@ import (
 
 var PatreonHost string
 
-const DefaultHost = "www.mtgban.com"
+const (
+	DefaultHost              = "www.mtgban.com"
+	DefaultSignatureDuration = 11 * 24 * time.Hour
+)
 
 const (
 	PatreonClientId = "VrjStFvhtp7HhF1xItHm83FMY7PK3nptpls1xVkYL5IDufXNVW4Xb-pHPXBIuWZ4"
@@ -448,8 +451,7 @@ func enforceSigning(next http.Handler) http.Handler {
 }
 
 func sign(tierTitle string, sourceURL *url.URL, baseURL string) (string, string) {
-	duration := 10 * 24 * time.Hour
-	expires := time.Now().Add(duration)
+	expires := time.Now().Add(DefaultSignatureDuration)
 
 	v := url.Values{}
 	// Enable option according to tier
