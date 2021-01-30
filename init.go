@@ -198,7 +198,27 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 
 		log.Println(scraper.Info().Name, "preloaded from file")
 	} else {
-		// Split subsellers (either from file or from web)
+		// Preload the market
+		_, err := scraper.Inventory()
+		if err != nil {
+			// If a fallback file exists, try loading that
+			if fileExists(fname) {
+				log.Println("Market preload failed with", err)
+				seller, err := loadInventoryFromFile(scraper.Info(), fname)
+				if err != nil {
+					return err
+				}
+				var ok bool
+				scraper, ok = seller.(mtgban.Market)
+				if !ok {
+					return fmt.Errorf("%s is not a Market", scraper.Info().Name)
+				}
+			} else {
+				return err
+			}
+		}
+
+		// Split subsellers
 		sellers, err = mtgban.Seller2Sellers(scraper)
 		if err != nil {
 			return err
@@ -606,6 +626,7 @@ func loadScrapers(doSellers, doVendors bool) {
 			if !opt.OnlyVendor {
 				err := untangleMarket(init, currentDir, newbc, scraper.(mtgban.Market), opt.Keepers)
 				if err != nil {
+					log.Println("failed to load", key)
 					log.Println(err)
 				}
 			}
