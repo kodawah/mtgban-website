@@ -112,11 +112,6 @@ func parseMessage(content string) (*searchResult, error) {
 	// Clean up query and only search for NM
 	query, options := parseSearchOptions(content)
 
-	// Set a custom search mode since we want to try and find as much as possible
-	if options["search_mode"] == "" {
-		options["search_mode"] = "any"
-	}
-
 	// Stash interesting elements that may be overwritten later
 	parsedCondition := options["condition"]
 

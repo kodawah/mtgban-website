@@ -321,8 +321,6 @@ func parseSearchOptions(query string) (string, map[string]string) {
 		if len(elements) > 2 {
 			options["number"] = strings.TrimSpace(elements[2])
 		}
-
-		options["search_mode"] = "any"
 	} else {
 		// Also support our own ID style
 		card, err := mtgmatcher.GetUUID(strings.TrimSpace(query))
