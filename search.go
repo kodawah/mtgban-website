@@ -433,6 +433,12 @@ redo:
 						continue
 					}
 				}
+				if options["not_edition"] != "" {
+					filters := strings.Split(options["not_edition"], ",")
+					if SliceStringHas(filters, co.Card.SetCode) {
+						continue
+					}
+				}
 				// Skip cards that are not of the desired collector number
 				if options["number"] != "" {
 					filters := strings.Split(options["number"], ",")
@@ -575,6 +581,12 @@ redo:
 			if options["edition"] != "" {
 				filters := strings.Split(options["edition"], ",")
 				if !SliceStringHas(filters, co.Card.SetCode) {
+					continue
+				}
+			}
+			if options["not_edition"] != "" {
+				filters := strings.Split(options["not_edition"], ",")
+				if SliceStringHas(filters, co.Card.SetCode) {
 					continue
 				}
 			}

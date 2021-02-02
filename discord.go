@@ -108,9 +108,32 @@ type searchResult struct {
 	SearchQuery     string
 }
 
+var filteredEditions = []string{
+	"PTC",
+	"WC00",
+	"WC01",
+	"WC02",
+	"WC03",
+	"WC04",
+	"WC97",
+	"WC98",
+	"WC99",
+}
+
 func parseMessage(content string) (*searchResult, error) {
 	// Clean up query and only search for NM
 	query, options := parseSearchOptions(content)
+
+	// Filter out any undersirable sets, unless explicitly requested
+	filterGoldOut := true
+	if options["edition"] != "" {
+		if SliceStringHas(filteredEditions, options["edition"]) {
+			filterGoldOut = false
+		}
+	}
+	if filterGoldOut {
+		options["not_edition"] = strings.Join(filteredEditions, ",")
+	}
 
 	// Stash interesting elements that may be overwritten later
 	parsedCondition := options["condition"]
