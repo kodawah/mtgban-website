@@ -470,12 +470,14 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 			// Check if the message contains potential links
 		} else if strings.Contains(m.Content, "cardkingdom.com/mtg") ||
-			strings.Contains(m.Content, "shop.tcgplayer.com/") {
+			strings.Contains(m.Content, "shop.tcgplayer.com/") ||
+			strings.Contains(m.Content, "amazon.com/") {
 			// Iterate over each segment of the message and look for known links
 			fields := strings.Fields(m.Content)
 			for _, field := range fields {
 				if !strings.Contains(field, "cardkingdom.com/mtg") &&
-					!strings.Contains(field, "shop.tcgplayer.com/") {
+					!strings.Contains(field, "shop.tcgplayer.com/") &&
+					!strings.Contains(field, "amazon.com/") {
 					continue
 				}
 				u, err := url.Parse(field)
@@ -484,24 +486,29 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				}
 				// Check if there is not an affiliate already
 				v := u.Query()
-				if v.Get("partner") != "" {
+				if v.Get("partner") != "" || v.Get("tag") != "" {
 					continue
 				}
 
 				// Flags for later use
 				isCK := strings.Contains(field, "cardkingdom.com/mtg")
 				isTCG := strings.Contains(field, "shop.tcgplayer.com/")
+				isAMZ := strings.Contains(field, "amazon.com/")
 
-				// Add the MTGBAN affiliation (same id for tcg and ck)
-				commonTag := Config.Affiliate["CK"]
-				v.Set("partner", commonTag)
-				v.Set("utm_source", commonTag)
-				if isCK {
-					v.Set("utm_campaign", commonTag)
-					v.Set("utm_medium", "affiliate")
-				} else if isTCG {
-					v.Set("utm_campaign", "affliate")
-					v.Set("utm_medium", commonTag)
+				// Add the MTGBAN affiliation
+				if isAMZ {
+					v.Set("tag", Config.Affiliate["AMZ"])
+				} else {
+					commonTag := Config.Affiliate["CK"]
+					v.Set("partner", commonTag)
+					v.Set("utm_source", commonTag)
+					if isCK {
+						v.Set("utm_campaign", commonTag)
+						v.Set("utm_medium", "affiliate")
+					} else if isTCG {
+						v.Set("utm_campaign", "affliate")
+						v.Set("utm_medium", commonTag)
+					}
 				}
 				u.RawQuery = v.Encode()
 
@@ -514,6 +521,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 						title = "Your search"
 					}
 					title += " at TCGplayer"
+				} else if isAMZ {
+					title = "Your search at Amazon"
 				}
 				// Spam time!
 				_, err = s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
