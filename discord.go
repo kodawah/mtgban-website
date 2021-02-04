@@ -45,6 +45,7 @@ const (
 	// IDs of the channels on the main server
 	DevChannelID   = "769323295526748160"
 	RecapChannelID = "798588735259279453"
+	ChatChannelID  = "736007847560609794"
 )
 
 func setupDiscord() error {
@@ -461,7 +462,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 
 		// Check if selected channels can replace scryfall searches
-		if (m.ChannelID == DevChannelID || m.ChannelID == RecapChannelID) &&
+		if (m.ChannelID == DevChannelID || m.ChannelID == RecapChannelID || m.ChannelID == ChatChannelID) &&
 			strings.Contains(m.Content, "[[") {
 			fields := squareBracketsRE.FindAllString(m.Content, -1)
 			for _, field := range fields {
