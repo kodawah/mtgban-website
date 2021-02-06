@@ -262,7 +262,7 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 func loadTCG() {
 	log.Println("Reloading TCG")
 
-	scraper, err := options["tcg_market"].Init()
+	scraper, err := ScraperOptions["tcg_market"].Init()
 	if err != nil {
 		log.Println(err)
 		return
@@ -273,7 +273,7 @@ func loadTCG() {
 		return
 	}
 
-	indexScraper, err := options["tcg_index"].Init()
+	indexScraper, err := ScraperOptions["tcg_index"].Init()
 	if err != nil {
 		log.Println(err)
 		return
@@ -287,7 +287,7 @@ func loadTCG() {
 	// Merge the various sellers in a single array
 	tcgSellers = append(tcgSellers, tcgIndexSellers...)
 
-	tcgNames := append(options["tcg_market"].Keepers, options["tcg_index"].Keepers...)
+	tcgNames := append(ScraperOptions["tcg_market"].Keepers, ScraperOptions["tcg_index"].Keepers...)
 	tcgMap := map[string]mtgban.Seller{}
 
 	for i := range tcgSellers {
@@ -331,7 +331,7 @@ func loadTCG() {
 func loadMKM() {
 	log.Println("Reloading MKM")
 
-	scraper, err := options["cardmarket"].Init()
+	scraper, err := ScraperOptions["cardmarket"].Init()
 	if err != nil {
 		log.Println(err)
 		return
@@ -342,7 +342,7 @@ func loadMKM() {
 		return
 	}
 
-	mkmNames := options["cardmarket"].Keepers
+	mkmNames := ScraperOptions["cardmarket"].Keepers
 	mkmMap := map[string]mtgban.Seller{}
 
 	for i := range mkmSellers {
@@ -374,7 +374,7 @@ func loadMKM() {
 func loadCK() {
 	log.Println("Reloading CK")
 
-	scraper, err := options["cardkingdom"].Init()
+	scraper, err := ScraperOptions["cardkingdom"].Init()
 	if err != nil {
 		log.Println(err)
 		return
@@ -410,7 +410,7 @@ func loadCK() {
 func loadCSI() {
 	log.Println("Reloading CSI")
 
-	scraper, err := options["coolstuffinc"].Init()
+	scraper, err := ScraperOptions["coolstuffinc"].Init()
 	if err != nil {
 		log.Println(err)
 		return
@@ -449,9 +449,10 @@ type scraperOption struct {
 	OnlyVendor bool
 	Init       func() (mtgban.Scraper, error)
 	Keepers    []string
+	KeepersBL  string
 }
 
-var options = map[string]*scraperOption{
+var ScraperOptions = map[string]*scraperOption{
 	"abugames": &scraperOption{
 		Init: func() (mtgban.Scraper, error) {
 			scraper := abugames.NewScraper()
@@ -519,7 +520,8 @@ var options = map[string]*scraperOption{
 			scraper.MaxConcurrency = 5
 			return scraper, nil
 		},
-		Keepers: []string{TCG_MAIN, TCG_DIRECT},
+		Keepers:   []string{TCG_MAIN, TCG_DIRECT},
+		KeepersBL: TCG_BUYLIST,
 	},
 	"tcg_index": &scraperOption{
 		DevEnabled: true,
@@ -616,7 +618,7 @@ func loadScrapers(doSellers, doVendors bool) {
 
 	newbc := mtgban.NewClient()
 
-	for key, opt := range options {
+	for key, opt := range ScraperOptions {
 		if DevMode && !opt.DevEnabled {
 			continue
 		}
