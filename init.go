@@ -149,7 +149,8 @@ func dumpBuylistToFile(vendor mtgban.Vendor, currentDir, fname string) error {
 	return os.Symlink(outName, fname)
 }
 
-func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scraper mtgban.Market, names []string) error {
+func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scraper mtgban.Market, key string) error {
+	names := ScraperOptions[key].Keepers
 	log.Println("Untangling", scraper.Info().Shorthand, "to", names)
 
 	dirName := path.Clean(currentDir+"/..") + "/"
@@ -257,190 +258,6 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 	}
 
 	return nil
-}
-
-func loadTCG() {
-	log.Println("Reloading TCG")
-
-	scraper, err := ScraperOptions["tcg_market"].Init()
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	tcgSellers, err := mtgban.Seller2Sellers(scraper.(mtgban.Market))
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	indexScraper, err := ScraperOptions["tcg_index"].Init()
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	tcgIndexSellers, err := mtgban.Seller2Sellers(indexScraper.(mtgban.Market))
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	// Merge the various sellers in a single array
-	tcgSellers = append(tcgSellers, tcgIndexSellers...)
-
-	tcgNames := append(ScraperOptions["tcg_market"].Keepers, ScraperOptions["tcg_index"].Keepers...)
-	tcgMap := map[string]mtgban.Seller{}
-
-	for i := range tcgSellers {
-		for _, name := range tcgNames {
-			if tcgSellers[i].Info().Shorthand == name {
-				tcgMap[name] = tcgSellers[i]
-				break
-			}
-		}
-	}
-
-	for i := range Sellers {
-		if Sellers[i] == nil {
-			log.Println("nil seller at position", i)
-			continue
-		}
-		for _, name := range tcgNames {
-			if Sellers[i].Info().Shorthand == name {
-				Sellers[i] = tcgMap[name]
-				log.Println(name, "updated")
-				break
-			}
-		}
-	}
-
-	for i := range Vendors {
-		if Vendors[i] != nil && Vendors[i].Info().Shorthand == TCG_BUYLIST {
-			_, err := scraper.(mtgban.Vendor).Buylist()
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-			Vendors[i] = scraper.(mtgban.Vendor)
-			log.Println(TCG_BUYLIST, "updated")
-		}
-	}
-
-	Notify("refresh", "TCG refresh completed")
-}
-
-func loadMKM() {
-	log.Println("Reloading MKM")
-
-	scraper, err := ScraperOptions["cardmarket"].Init()
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	mkmSellers, err := mtgban.Seller2Sellers(scraper.(mtgban.Market))
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	mkmNames := ScraperOptions["cardmarket"].Keepers
-	mkmMap := map[string]mtgban.Seller{}
-
-	for i := range mkmSellers {
-		for _, name := range mkmNames {
-			if mkmSellers[i].Info().Shorthand == name {
-				mkmMap[name] = mkmSellers[i]
-				break
-			}
-		}
-	}
-
-	for i := range Sellers {
-		if Sellers[i] == nil {
-			log.Println("nil seller at position", i)
-			continue
-		}
-		for _, name := range mkmNames {
-			if Sellers[i].Info().Shorthand == name {
-				Sellers[i] = mkmMap[name]
-				log.Println(name, "updated")
-				break
-			}
-		}
-	}
-
-	Notify("refresh", "MKM refresh completed")
-}
-
-func loadCK() {
-	log.Println("Reloading CK")
-
-	scraper, err := ScraperOptions["cardkingdom"].Init()
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	for i := range Sellers {
-		if Sellers[i] != nil && Sellers[i].Info().Shorthand == "CK" {
-			_, err := scraper.(mtgban.Seller).Inventory()
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-			log.Println("CK Inventory updated")
-			Sellers[i] = scraper.(mtgban.Seller)
-		}
-	}
-
-	for i := range Vendors {
-		if Vendors[i] != nil && Vendors[i].Info().Shorthand == "CK" {
-			_, err := scraper.(mtgban.Vendor).Buylist()
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-			log.Println("CK Buylist updated")
-			Vendors[i] = scraper.(mtgban.Vendor)
-		}
-	}
-
-	Notify("refresh", "cardkingdom refresh completed")
-}
-
-func loadCSI() {
-	log.Println("Reloading CSI")
-
-	scraper, err := ScraperOptions["coolstuffinc"].Init()
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	for i := range Sellers {
-		if Sellers[i] != nil && Sellers[i].Info().Shorthand == "CSI" {
-			_, err := scraper.(mtgban.Seller).Inventory()
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-			log.Println("CSI Inventory updated")
-			Sellers[i] = scraper.(mtgban.Seller)
-		}
-	}
-
-	for i := range Vendors {
-		if Vendors[i] != nil && Vendors[i].Info().Shorthand == "CSI" {
-			_, err := scraper.(mtgban.Vendor).Buylist()
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-			log.Println("CSI Buylist updated")
-			Vendors[i] = scraper.(mtgban.Vendor)
-		}
-	}
-
-	Notify("refresh", "coolstuffinc refresh completed")
 }
 
 type scraperOption struct {
@@ -630,7 +447,7 @@ func loadScrapers(doSellers, doVendors bool) {
 
 		if len(opt.Keepers) != 0 {
 			if !opt.OnlyVendor {
-				err := untangleMarket(init, currentDir, newbc, scraper.(mtgban.Market), opt.Keepers)
+				err := untangleMarket(init, currentDir, newbc, scraper.(mtgban.Market), key)
 				if err != nil {
 					log.Println("failed to load", key)
 					log.Println(err)

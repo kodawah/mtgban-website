@@ -429,13 +429,13 @@ func main() {
 			loadScrapers(true, true)
 		})
 		// refresh CK at every 6th hour, 10 minutes past the hour
-		c.AddFunc("10 */6 * * *", loadCK)
+		c.AddFunc("10 */6 * * *", reloadCK)
 		// refresh TCG at every 6th hour, 15 minutes past the hour
-		c.AddFunc("15 */6 * * *", loadTCG)
+		c.AddFunc("15 */6 * * *", reloadTCG)
 		// refresh MKM every day at 0:00
-		c.AddFunc("0 0 * * *", loadMKM)
+		c.AddFunc("0 0 * * *", reloadMKM)
 		// refresh CSI every day at 2:10
-		c.AddFunc("10 2 * * *", loadCSI)
+		c.AddFunc("10 2 * * *", reloadCSI)
 		// refresh at 12 every day
 		c.AddFunc("0 12 * * *", func() {
 			log.Println("Reloading MTGJSONv5")
