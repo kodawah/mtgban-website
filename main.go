@@ -23,15 +23,6 @@ import (
 	"github.com/kodabb/go-mtgban/mtgban"
 )
 
-type NavElem struct {
-	Active bool
-	Class  string
-	Link   string
-	Name   string
-	Short  string
-	Handle func(w http.ResponseWriter, r *http.Request)
-}
-
 type GenericCard struct {
 	Name      string
 	Edition   string
@@ -112,14 +103,36 @@ type PageVars struct {
 	HasStocks bool
 }
 
+type NavElem struct {
+	// Whether or not this the current active tab
+	Active bool
+
+	// For subtabs, define which is the current active sub-tab
+	Class string
+
+	// Endpoint of this page
+	Link string
+
+	// Name of this page
+	Name string
+
+	// Icon or seller shorthand
+	Short string
+
+	// Response handler
+	Handle func(w http.ResponseWriter, r *http.Request)
+}
+
 var DefaultNav = []NavElem{
 	NavElem{
-		Name:  "🏡 Home",
+		Name:  "Home",
 		Short: "🏡",
 		Link:  "/",
 	},
 }
 
+// List of keys that may be present or not, and when present they are
+// guaranteed not to be user-editable)
 var OptionalFields = []string{
 	"SearchDisabled",
 	"ArbitEnabled",
@@ -130,6 +143,8 @@ var OptionalFields = []string{
 	"API",
 }
 
+// The key matches the query parameter of the permissions defined in sign()
+// These enable/disable the relevant pages
 var OrderNav = []string{
 	"Search",
 	"Newspaper",
@@ -144,37 +159,37 @@ var ExtraNavs map[string]NavElem
 func init() {
 	ExtraNavs = map[string]NavElem{
 		"Search": NavElem{
-			Name:   "🔍 Search",
+			Name:   "Search",
 			Short:  "🔍",
 			Link:   "/search",
 			Handle: Search,
 		},
 		"Newspaper": NavElem{
-			Name:   "🗞️ Newspaper",
+			Name:   "Newspaper",
 			Short:  "🗞️",
 			Link:   "/newspaper",
 			Handle: Newspaper,
 		},
 		"Explore": NavElem{
-			Name:   "🚠 Explore",
+			Name:   "Explore",
 			Short:  "🚠",
 			Link:   "/explore",
 			Handle: Explore,
 		},
 		"Sleepers": NavElem{
-			Name:   "💤 Sleepers",
+			Name:   "Sleepers",
 			Short:  "💤",
 			Link:   "/sleepers",
 			Handle: Sleepers,
 		},
 		"Global": NavElem{
-			Name:   "🌍 Global",
+			Name:   "Global",
 			Short:  "🌍",
 			Link:   "/global",
 			Handle: Global,
 		},
 		"Arbit": NavElem{
-			Name:   "📈 Arbitrage",
+			Name:   "Arbitrage",
 			Short:  "📈",
 			Link:   "/arbit",
 			Handle: Arbit,
@@ -287,9 +302,9 @@ func genPageNav(activeTab, sig string) PageVars {
 
 	mainNavIndex := 0
 	for i := range pageVars.Nav {
-		// Ingore the starting emoji
-		if strings.HasSuffix(pageVars.Nav[i].Name, activeTab) {
+		if pageVars.Nav[i].Name == activeTab {
 			mainNavIndex = i
+			break
 		}
 	}
 	pageVars.Nav[mainNavIndex].Active = true

@@ -15,7 +15,7 @@
         {{range .Nav}}
             <li>
                 <a {{if .Active}}class="{{.Class}}"{{end}} href="{{.Link}}">
-                    <span class="full-text">{{.Name}}</span>
+                    <span class="full-text">{{.Short}} {{.Name}}</span>
                     <span class="short-text">{{.Short}}</span>
                 </a>
             </li>
