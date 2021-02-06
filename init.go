@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -199,8 +200,8 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 		log.Println(scraper.Info().Name, "preloaded from file")
 	} else {
 		// Preload the market
-		_, err := scraper.Inventory()
-		if err != nil {
+		inv, err := scraper.Inventory()
+		if err != nil || len(inv) == 0 {
 			// If a fallback file exists, try loading that
 			if fileExists(fname) {
 				log.Println("Market preload failed with", err)
@@ -214,6 +215,9 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 					return fmt.Errorf("%s is not a Market", scraper.Info().Name)
 				}
 			} else {
+				if len(inv) == 0 {
+					err = errors.New("empty inventory")
+				}
 				return err
 			}
 		}
@@ -727,9 +731,13 @@ func loadSellers(newSellers []mtgban.Seller) {
 			log.Println("Loading from scraper")
 
 			// Load inventory
-			_, err := newSellers[i].Inventory()
+			inv, err := newSellers[i].Inventory()
 			if err != nil {
-				log.Println(err)
+				log.Println(newSellers[i].Info().Name, "error", err)
+				continue
+			}
+			if len(inv) == 0 {
+				log.Println(newSellers[i].Info().Name, "empty inventory")
 				continue
 			}
 
@@ -771,10 +779,14 @@ func loadVendors(newVendors []mtgban.Vendor) {
 		} else {
 			log.Println("Loading from scraper")
 
-			// Load inventory
-			_, err := newVendors[i].Buylist()
+			// Load buylist
+			bl, err := newVendors[i].Buylist()
 			if err != nil {
-				log.Println(err)
+				log.Println(newVendors[i].Info().Name, "error", err)
+				continue
+			}
+			if len(bl) == 0 {
+				log.Println(newVendors[i].Info().Name, "empty buylist")
 				continue
 			}
 
