@@ -428,22 +428,56 @@ func enforceSigning(next http.Handler) http.Handler {
 			}
 		}
 
-		sig = v.Get("Signature")
+		expectedSig := v.Get("Signature")
 		exp := v.Get("Expires")
 
 		data := fmt.Sprintf("%s%s%s%s", r.Method, exp, getBaseURL(r), q.Encode())
 		valid := signHMACSHA1Base64([]byte(os.Getenv("BAN_SECRET")), []byte(data))
 		expires, err := strconv.ParseInt(exp, 10, 64)
-		if SigCheck && (err != nil || valid != sig || expires < time.Now().Unix()) {
+		if SigCheck && (err != nil || valid != expectedSig || expires < time.Now().Unix()) {
 			pageVars.Title = "Unauthorized"
 			pageVars.ErrorMessage = ErrMsg
-			if valid == sig && expires < time.Now().Unix() {
+			if valid == expectedSig && expires < time.Now().Unix() {
 				pageVars.ErrorMessage = ErrMsgExpired
 				pageVars.PatreonLogin = true
 			}
 
 			render(w, "home.html", pageVars)
 			return
+		}
+
+		if !DatabaseLoaded {
+			page := "home.html"
+			for _, navName := range OrderNav {
+				nav := ExtraNavs[navName]
+				if r.URL.Path == nav.Link {
+					pageVars = genPageNav(nav.Name, sig)
+					page = nav.Page
+				}
+			}
+			pageVars.Title = "Great things are coming"
+			pageVars.ErrorMessage = ErrMsgRestart
+
+			render(w, page, pageVars)
+			return
+		}
+
+		for _, navName := range OrderNav {
+			nav := ExtraNavs[navName]
+			if r.URL.Path == nav.Link {
+				param, _ := GetParamFromSig(sig, navName)
+				canDo, _ := strconv.ParseBool(param)
+				if SigCheck && !canDo {
+					pageVars = genPageNav(nav.Name, sig)
+					pageVars.Title = "This feature is BANned"
+					pageVars.ErrorMessage = ErrMsgPlus
+					pageVars.ShowPromo = true
+
+					render(w, nav.Page, pageVars)
+					return
+				}
+				break
+			}
 		}
 
 		gziphandler.GzipHandler(next).ServeHTTP(w, r)

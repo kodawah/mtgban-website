@@ -56,25 +56,6 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 
 	pageVars := genPageNav("Arbitrage", sig)
 
-	if !DatabaseLoaded {
-		pageVars.Title = "Great things are coming"
-		pageVars.ErrorMessage = ErrMsgRestart
-
-		render(w, "arbit.html", pageVars)
-		return
-	}
-
-	arbitParam, _ := GetParamFromSig(sig, "Arbit")
-	canSearch, _ := strconv.ParseBool(arbitParam)
-	if SigCheck && !canSearch {
-		pageVars.Title = "This feature is BANned"
-		pageVars.ErrorMessage = ErrMsgPlus
-		pageVars.ShowPromo = true
-
-		render(w, "arbit.html", pageVars)
-		return
-	}
-
 	var allowlistSellers []string
 	allowlistSellersOpt, _ := GetParamFromSig(sig, "ArbitEnabled")
 	if allowlistSellersOpt == "" && !SigCheck {
@@ -109,25 +90,6 @@ func Global(w http.ResponseWriter, r *http.Request) {
 	sig := getSignatureFromCookies(r)
 
 	pageVars := genPageNav("Global", sig)
-
-	if !DatabaseLoaded {
-		pageVars.Title = "Great things are coming"
-		pageVars.ErrorMessage = ErrMsgRestart
-
-		render(w, "arbit.html", pageVars)
-		return
-	}
-
-	globalParam, _ := GetParamFromSig(sig, "Global")
-	canGlobal, _ := strconv.ParseBool(globalParam)
-	if SigCheck && !canGlobal {
-		pageVars.Title = "This feature is BANned"
-		pageVars.ErrorMessage = ErrMsgPlus
-		pageVars.ShowPromo = true
-
-		render(w, "arbit.html", pageVars)
-		return
-	}
 
 	anyEnabledOpt, _ := GetParamFromSig(sig, "AnyEnabled")
 	anyEnabled, _ := strconv.ParseBool(anyEnabledOpt)

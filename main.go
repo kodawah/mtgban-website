@@ -121,6 +121,9 @@ type NavElem struct {
 
 	// Response handler
 	Handle func(w http.ResponseWriter, r *http.Request)
+
+	// Which page to render
+	Page string
 }
 
 var DefaultNav = []NavElem{
@@ -128,6 +131,7 @@ var DefaultNav = []NavElem{
 		Name:  "Home",
 		Short: "🏡",
 		Link:  "/",
+		Page:  "home.html",
 	},
 }
 
@@ -163,36 +167,42 @@ func init() {
 			Short:  "🔍",
 			Link:   "/search",
 			Handle: Search,
+			Page:   "search.html",
 		},
 		"Newspaper": NavElem{
 			Name:   "Newspaper",
 			Short:  "🗞️",
 			Link:   "/newspaper",
 			Handle: Newspaper,
+			Page:   "news.html",
 		},
 		"Explore": NavElem{
 			Name:   "Explore",
 			Short:  "🚠",
 			Link:   "/explore",
 			Handle: Explore,
+			Page:   "explore.html",
 		},
 		"Sleepers": NavElem{
 			Name:   "Sleepers",
 			Short:  "💤",
 			Link:   "/sleepers",
 			Handle: Sleepers,
+			Page:   "sleep.html",
 		},
 		"Global": NavElem{
 			Name:   "Global",
 			Short:  "🌍",
 			Link:   "/global",
 			Handle: Global,
+			Page:   "arbit.html",
 		},
 		"Arbit": NavElem{
 			Name:   "Arbitrage",
 			Short:  "📈",
 			Link:   "/arbit",
 			Handle: Arbit,
+			Page:   "arbit.html",
 		},
 	}
 }

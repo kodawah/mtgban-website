@@ -5,7 +5,6 @@ import (
 	"math"
 	"net/http"
 	"sort"
-	"strconv"
 	"strings"
 
 	"github.com/kodabb/go-mtgban/mtgban"
@@ -38,25 +37,6 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 	sig := getSignatureFromCookies(r)
 
 	pageVars := genPageNav("Sleepers", sig)
-
-	if !DatabaseLoaded {
-		pageVars.Title = "Great things are coming"
-		pageVars.ErrorMessage = ErrMsgRestart
-
-		render(w, "sleep.html", pageVars)
-		return
-	}
-
-	arbitParam, _ := GetParamFromSig(sig, "Sleepers")
-	canSearch, _ := strconv.ParseBool(arbitParam)
-	if SigCheck && !canSearch {
-		pageVars.Title = "This feature is BANned"
-		pageVars.ErrorMessage = ErrMsgPlus
-		pageVars.ShowPromo = true
-
-		render(w, "sleep.html", pageVars)
-		return
-	}
 
 	var blocklist []string
 	blocklistOpt, _ := GetParamFromSig(sig, "SearchDisabled")

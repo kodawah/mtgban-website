@@ -47,25 +47,6 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	pageVars := genPageNav("Search", sig)
 
-	if !DatabaseLoaded {
-		pageVars.Title = "Great things are coming"
-		pageVars.ErrorMessage = ErrMsgRestart
-
-		render(w, "search.html", pageVars)
-		return
-	}
-
-	searchParam, _ := GetParamFromSig(sig, "Search")
-	canSearch, _ := strconv.ParseBool(searchParam)
-	if SigCheck && !canSearch {
-		pageVars.Title = "This feature is BANned"
-		pageVars.ErrorMessage = ErrMsgPlus
-		pageVars.ShowPromo = true
-
-		render(w, "search.html", pageVars)
-		return
-	}
-
 	var blocklist []string
 	blocklistOpt, _ := GetParamFromSig(sig, "SearchDisabled")
 	if blocklistOpt == "DEFAULT" || blocklistOpt == "" {

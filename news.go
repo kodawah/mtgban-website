@@ -542,25 +542,6 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 
 	pageVars := genPageNav("Newspaper", sig)
 
-	if !DatabaseLoaded {
-		pageVars.Title = "Great things are coming"
-		pageVars.ErrorMessage = ErrMsgRestart
-
-		render(w, "news.html", pageVars)
-		return
-	}
-
-	arbitParam, _ := GetParamFromSig(sig, "Newspaper")
-	canSearch, _ := strconv.ParseBool(arbitParam)
-	if SigCheck && !canSearch {
-		pageVars.Title = "This feature is BANned"
-		pageVars.ErrorMessage = ErrMsgPlus
-		pageVars.ShowPromo = true
-
-		render(w, "news.html", pageVars)
-		return
-	}
-
 	var db *sql.DB
 	enabled, _ := GetParamFromSig(sig, "NewsEnabled")
 	if enabled == "1day" {

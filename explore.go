@@ -2,32 +2,12 @@ package main
 
 import (
 	"net/http"
-	"strconv"
 )
 
 func Explore(w http.ResponseWriter, r *http.Request) {
 	sig := getSignatureFromCookies(r)
 
 	pageVars := genPageNav("Explore", sig)
-
-	if !DatabaseLoaded {
-		pageVars.Title = "Great things are coming"
-		pageVars.ErrorMessage = ErrMsgRestart
-
-		render(w, "explore.html", pageVars)
-		return
-	}
-
-	exploreParam, _ := GetParamFromSig(sig, "Explore")
-	canExplore, _ := strconv.ParseBool(exploreParam)
-	if SigCheck && !canExplore {
-		pageVars.Title = "This feature is BANned"
-		pageVars.ErrorMessage = ErrMsgPlus
-		pageVars.ShowPromo = true
-
-		render(w, "explore.html", pageVars)
-		return
-	}
 
 	site := r.FormValue("site")
 	q := r.FormValue("q")
