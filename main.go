@@ -101,6 +101,9 @@ type PageVars struct {
 	Sleepers [7]SleeperEntry
 
 	HasStocks bool
+
+	Headers    []string
+	OtherTable [][]string
 }
 
 type NavElem struct {
@@ -156,6 +159,7 @@ var OrderNav = []string{
 	"Sleepers",
 	"Global",
 	"Arbit",
+	"Admin",
 }
 
 var ExtraNavs map[string]NavElem
@@ -203,6 +207,13 @@ func init() {
 			Link:   "/arbit",
 			Handle: Arbit,
 			Page:   "arbit.html",
+		},
+		"Admin": NavElem{
+			Name:   "Admin",
+			Short:  "❌",
+			Link:   "/admin",
+			Handle: Admin,
+			Page:   "admin.html",
 		},
 	}
 }

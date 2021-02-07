@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Rosario:400' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../css/main.css">
+    <title>BAN Admin - {{.Title}}</title>
+</head>
+<body>
+
+<nav>
+    <ul>
+        <li><a href="https://www.patreon.com/ban_community"><img src="img/misc/patreon.png" width=48></a></li>
+        <li><a href="https://discord.gg/hcXpMZB"><img src="img/misc/discord.png" width=48></a></li>
+        {{range .Nav}}
+            <li>
+                <a {{if .Active}}class="{{.Class}}"{{end}} href="{{.Link}}">
+                    <span>{{.Short}} {{.Name}}</span>
+                </a>
+            </li>
+        {{end}}
+        <li>Last data refresh: {{.LastUpdate}}</li>
+    </ul>
+</nav>
+
+<div class="mainbody">
+    {{if ne .ErrorMessage ""}}
+        <h1>{{.ErrorMessage}}</h1>
+    {{else}}
+        <h1>Welcome to BAN Admin</h1>
+
+        <div class="indent">
+            <h2>{{.InfoMessage}}</h2>
+        </div>
+        <br>
+        <div class="indent">
+            <table style="float: left;">
+                <tr>
+                    {{range $.Headers}}
+                        <th class="wrap stickyHeader">
+                            {{.}}
+                        </th>
+                    {{end}}
+                </tr>
+                {{range $i, $row := $.Table}}
+                    <tr>
+                        {{range $j, $cell := $row}}
+                            <td>
+                                {{if eq $j 0}}
+                                    <a href="?refresh={{index $row 1}}" onclick="return confirm('Are you sure you want to refresh {{$cell}}?')">{{$cell}}</a>
+                                {{else}}
+                                    {{$cell}}
+                                {{end}}
+                            </td>
+                        {{end}}
+                    </tr>
+                {{end}}
+            </table>
+        </div>
+
+        <div class="indent">
+            <table style="float: left;">
+                <tr>
+                    {{range $.Headers}}
+                        <th class="wrap stickyHeader">
+                            {{.}}
+                        </th>
+                    {{end}}
+                </tr>
+                {{range $i, $row := $.OtherTable}}
+                    <tr>
+                        {{range $j, $cell := $row}}
+                            <td>
+                                {{if eq $j 0}}
+                                    <a href="?refresh={{index $row 1}}" onclick="return confirm('Are you sure you want to refresh {{$cell}}?')">{{$cell}}</a>
+                                {{else}}
+                                    {{$cell}}
+                                {{end}}
+                            </td>
+                        {{end}}
+                    </tr>
+                {{end}}
+            </table>
+        </div>
+        <br>
+        <div style="clear:both;"></div>
+        <br>
+        <div class="indent">
+            <ul class="indent">
+                <li><a href="?reboot=mtgstocks" onclick="return confirm('Are you sure you want to refresh mtgstocks?')">📉 Reload MTGStocks</a></li>
+                <li><a href="?reboot=mtgjson" onclick="return confirm('Are you sure you want to reload mtgjson?')">🔄 Reload MTGJSON</a></li>
+                <li><a href="?reboot=server" onclick="return confirm('Are you sure you want to restart the server?')">⚠️ Restart the server</a></li>
+            </ul>
+        </div>
+    {{end}}
+</div>
+</body>
+</html>

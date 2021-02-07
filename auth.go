@@ -514,6 +514,7 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) (string, string)
 		v.Set("Sleepers", "true")
 		v.Set("Arbit", "true")
 		v.Set("Global", "true")
+		v.Set("Admin", "true")
 	}
 	if v.Get("Arbit") == "true" {
 		if tierTitle == "Root" {
