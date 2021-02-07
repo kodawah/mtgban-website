@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"sort"
+	"sync"
 	"time"
 
 	"github.com/kodabb/go-mtgban/abugames"
@@ -155,6 +156,9 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 
 	dirName := path.Clean(currentDir+"/..") + "/"
 
+	for _, name := range names {
+		ScraperMap[name] = key
+	}
 	// Check if both sub seller files are present
 	if init {
 		ok := true
@@ -201,7 +205,11 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 		log.Println(scraper.Info().Name, "preloaded from file")
 	} else {
 		// Preload the market
+		ScraperOptions[key].Mutex.Lock()
+		ScraperOptions[key].Busy = true
 		inv, err := scraper.Inventory()
+		ScraperOptions[key].Busy = false
+		ScraperOptions[key].Mutex.Unlock()
 		if err != nil || len(inv) == 0 {
 			// If a fallback file exists, try loading that
 			if fileExists(fname) {
@@ -261,6 +269,8 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 }
 
 type scraperOption struct {
+	Busy       bool
+	Mutex      sync.Mutex
 	DevEnabled bool
 	OnlySeller bool
 	OnlyVendor bool
@@ -419,6 +429,9 @@ var ScraperOptions = map[string]*scraperOption{
 	},
 }
 
+// Associate Scraper shorthands to ScraperOptions keys
+var ScraperMap map[string]string
+
 func loadScrapers(doSellers, doVendors bool) {
 	init := !DatabaseLoaded
 	if init {
@@ -434,6 +447,12 @@ func loadScrapers(doSellers, doVendors bool) {
 	mkDirIfNotExisting(currentDir)
 
 	newbc := mtgban.NewClient()
+
+	// Keep track of the names used in the options table, so that we can
+	// reference the mutex more freely
+	if ScraperMap == nil {
+		ScraperMap = map[string]string{}
+	}
 
 	for key, opt := range ScraperOptions {
 		if DevMode && !opt.DevEnabled {
@@ -463,7 +482,10 @@ func loadScrapers(doSellers, doVendors bool) {
 		} else {
 			newbc.Register(scraper)
 		}
+		ScraperMap[scraper.Info().Shorthand] = key
 	}
+
+	log.Println(ScraperMap)
 
 	// Sort the sellers/vendors arrays by name
 	//
@@ -550,7 +572,11 @@ func loadSellers(newSellers []mtgban.Seller) {
 			log.Println("Loading from scraper")
 
 			// Load inventory
+			ScraperOptions[ScraperMap[newSellers[i].Info().Shorthand]].Mutex.Lock()
+			ScraperOptions[ScraperMap[newSellers[i].Info().Shorthand]].Busy = true
 			inv, err := newSellers[i].Inventory()
+			ScraperOptions[ScraperMap[newSellers[i].Info().Shorthand]].Busy = false
+			ScraperOptions[ScraperMap[newSellers[i].Info().Shorthand]].Mutex.Unlock()
 			if err != nil {
 				log.Println(newSellers[i].Info().Name, "error", err)
 				continue
@@ -599,7 +625,11 @@ func loadVendors(newVendors []mtgban.Vendor) {
 			log.Println("Loading from scraper")
 
 			// Load buylist
+			ScraperOptions[ScraperMap[newVendors[i].Info().Shorthand]].Mutex.Lock()
+			ScraperOptions[ScraperMap[newVendors[i].Info().Shorthand]].Busy = true
 			bl, err := newVendors[i].Buylist()
+			ScraperOptions[ScraperMap[newVendors[i].Info().Shorthand]].Busy = false
+			ScraperOptions[ScraperMap[newVendors[i].Info().Shorthand]].Mutex.Unlock()
 			if err != nil {
 				log.Println(newVendors[i].Info().Name, "error", err)
 				continue

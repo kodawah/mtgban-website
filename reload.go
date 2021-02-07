@@ -17,6 +17,13 @@ func reloadCSI() {
 func reloadSingle(name string) {
 	log.Println("Reloading", name)
 
+	ScraperOptions[name].Mutex.Lock()
+	ScraperOptions[name].Busy = true
+	defer func() {
+		ScraperOptions[name].Busy = false
+		ScraperOptions[name].Mutex.Unlock()
+	}()
+
 	scraper, err := ScraperOptions[name].Init()
 	if err != nil {
 		log.Println(err)
@@ -47,6 +54,13 @@ func reloadMKM() {
 
 func reloadMarket(name string) {
 	log.Println("Reloading", name)
+
+	ScraperOptions[name].Mutex.Lock()
+	ScraperOptions[name].Busy = true
+	defer func() {
+		ScraperOptions[name].Busy = false
+		ScraperOptions[name].Mutex.Unlock()
+	}()
 
 	scraper, err := ScraperOptions[name].Init()
 	if err != nil {
