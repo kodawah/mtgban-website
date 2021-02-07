@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
@@ -419,18 +418,6 @@ func main() {
 		// Nothing else to do if hacking around
 		if DevMode {
 			return
-		}
-
-		// If today's cache is missing, schedule a refresh right away
-		files, err := ioutil.ReadDir(fmt.Sprintf("cache_inv/%03d", time.Now().YearDay()))
-		if err != nil || len(files) < len(Sellers) {
-			log.Println("Loaded inventory data too old, refreshing in the background")
-			loadScrapers(true, false)
-		}
-		files, err = ioutil.ReadDir(fmt.Sprintf("cache_bl/%03d", time.Now().YearDay()))
-		if err != nil || len(files) < len(Vendors) {
-			log.Println("Loaded buylist data too old, refreshing in the background")
-			loadScrapers(false, true)
 		}
 
 		// Set up new refreshes as needed
