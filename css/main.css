@@ -65,6 +65,10 @@ tr:nth-child(odd) {
     background-color: #f8f8f8;
 }
 
+tr:hover {
+    background-color: #e0f0ff;
+}
+
 th.wrap {
     white-space;
     text-overflow: ellipsis;
@@ -103,8 +107,9 @@ p {
     display: inline-block;
 }
 
-/* On mouse-over */
-.btn:hover {background: #eee;}
+.btn:hover {
+    text-decoration: underline;
+}
 
 .success {color: green;}
 .normal {color: #559eff;}
