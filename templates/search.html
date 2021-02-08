@@ -123,35 +123,36 @@
                         <th colspan="4" class="stickyCategory"><h2 align=center>Sellers</h2></th>
                     </tr>
                     {{range $cardId := .SellerKeys}}
+                        {{$card := (index $.Metadata $cardId)}}
                         {{$condsEntry := (index $.FoundSellers $cardId)}}
                         {{if eq $firstImg ""}}
-                            {{$firstImg = (index $.Metadata $cardId).ImageURL}}
+                            {{$firstImg = $card.ImageURL}}
                         {{end}}
-                        <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $cardId).ImageURL}};" title="{{(index $.Metadata $cardId).Title}}">
+                        <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}};" title="{{$card.Title}}">
                             <th colspan="4" class="wrap stickyHeader" style="text-align: left; vertical-align: middle;">
                                 <table style="margin:0 0">
                                     <tr style="background-color:rgba(0, 0, 0, 0);">
                                         <td rowspan=2>
-                                            <i class="ss {{(index $.Metadata $cardId).Keyrune}} ss-2x ss-fw"></i>
+                                            <i class="ss {{$card.Keyrune}} ss-2x ss-fw"></i>
                                         </td>
                                         <td>
-                                            <a href="{{(index $.Metadata $cardId).SearchURL}}">
-                                                {{(index $.Metadata $cardId).Name}}
+                                            <a href="{{$card.SearchURL}}">
+                                                {{$card.Name}}
                                             </a>
-                                            {{if ne (index $.Metadata $cardId).Variant ""}}
-                                                <i>({{(index $.Metadata $cardId).Variant}})</i>
+                                            {{if ne $card.Variant ""}}
+                                                <i>({{$card.Variant}})</i>
                                             {{end}}
-                                            {{if (index $.Metadata $cardId).Reserved}}
+                                            {{if $card.Reserved}}
                                                 *
                                             {{end}}
-                                            {{if (index $.Metadata $cardId).Stocks}}
+                                            {{if $card.Stocks}}
                                                 •
                                             {{end}}
                                         </td>
                                     </tr>
                                     <tr style="background-color:rgba(0, 0, 0, 0); margin-bottom: 0px;">
                                         <td>
-                                            <h6>{{(index $.Metadata $cardId).Title}}</h6>
+                                            <h6>{{$card.Title}}</h6>
                                         </td>
                                     </tr>
                                 </table>
@@ -161,13 +162,13 @@
                             {{$entries := (index $condsEntry $conditions)}}
                             {{if ne $conditions "INDEX"}}
                                 {{if $entries}}
-                                    <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $cardId).ImageURL}};">
+                                    <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}};">
                                         <td colspan="4"><i>Conditions: {{$conditions}}</i></th>
                                     </tr>
                                 {{end}}
                             {{end}}
                             {{range $entries}}
-                                <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $cardId).ImageURL}};">
+                                <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}};">
                                     <td>
                                         <a class="btn normal" href="{{.URL}}" target="_blank" rel="nofollow">
                                             {{.ScraperName}}
@@ -215,39 +216,40 @@
                         <th colspan="4" class="stickyCategory"><h2 align=center>Buyers</h2></th>
                     </tr>
                     {{range $cardId := .VendorKeys}}
+                        {{$card := (index $.Metadata $cardId)}}
                         {{$entries := (index $.FoundVendors $cardId)}}
-                        <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $cardId).ImageURL}};" title="{{(index $.Metadata $cardId).Title}}">
+                        <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}};" title="{{$card.Title}}">
                             <th colspan="4" class="wrap stickyHeader" style="text-align: left; vertical-align: middle;">
                                 <table style="margin:0 0">
                                     <tr style="background-color:rgba(0, 0, 0, 0);">
                                         <td rowspan=2>
-                                            <i class="ss {{(index $.Metadata $cardId).Keyrune}} ss-2x ss-fw"></i>
+                                            <i class="ss {{$card.Keyrune}} ss-2x ss-fw"></i>
                                         </td>
                                         <td>
-                                            <a href="{{(index $.Metadata $cardId).SearchURL}}">
-                                                {{(index $.Metadata $cardId).Name}}
+                                            <a href="{{$card.SearchURL}}">
+                                                {{$card.Name}}
                                             </a>
-                                            {{if ne (index $.Metadata $cardId).Variant ""}}
-                                                <i>({{(index $.Metadata $cardId).Variant}})</i>
+                                            {{if ne $card.Variant ""}}
+                                                <i>({{$card.Variant}})</i>
                                             {{end}}
-                                            {{if (index $.Metadata $cardId).Reserved}}
+                                            {{if $card.Reserved}}
                                                 *
                                             {{end}}
-                                            {{if (index $.Metadata $cardId).Stocks}}
+                                            {{if $card.Stocks}}
                                                 •
                                             {{end}}
                                         </td>
                                     </tr>
                                     <tr style="background-color:rgba(0, 0, 0, 0);">
                                         <td>
-                                            <h6>{{(index $.Metadata $cardId).Title}}</h6>
+                                            <h6>{{$card.Title}}</h6>
                                         </td>
                                     </tr>
                                 </table>
                             </th>
                         </tr>
                         {{range $entries}}
-                            <tr onmouseover="document.getElementById('cardImage').src={{(index $.Metadata $cardId).ImageURL}};">
+                            <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}};">
                                 <td>
                                     <a class="btn normal" href="{{.URL}}" target="_blank" rel="nofollow">
                                         {{.ScraperName}} {{.Country}}
