@@ -104,6 +104,11 @@
                         </td>
                     </tr>
                     <tr>
+                        <td>
+                            <div id="printings" style="text-align: center; max-width:354px; display: block;"></div>
+                        </td>
+                    </tr>
+                    <tr>
                         <td style="background-color: #f8f8f8;">
                             {{if .HasReserved}}
                                 <h4>* = Part of the <a href="https://mtg.gamepedia.com/Reserved_List">Reserved List</a></h4>
@@ -118,6 +123,7 @@
 
             <div class="indent sticky">
                 {{$firstImg := ""}}
+                {{$firstPrint := ""}}
                 <table class="searchResults">
                     <tr>
                         <th colspan="4" class="stickyCategory"><h2 align=center>Sellers</h2></th>
@@ -127,8 +133,10 @@
                         {{$condsEntry := (index $.FoundSellers $cardId)}}
                         {{if eq $firstImg ""}}
                             {{$firstImg = $card.ImageURL}}
+                            {{$firstPrint = $card.Printings}}
                         {{end}}
-                        <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}};" title="{{$card.Title}}">
+
+                        <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};" title="{{$card.Title}}">
                             <th colspan="4" class="wrap stickyHeader" style="text-align: left; vertical-align: middle;">
                                 <table style="margin:0 0">
                                     <tr style="background-color:rgba(0, 0, 0, 0);">
@@ -162,13 +170,13 @@
                             {{$entries := (index $condsEntry $conditions)}}
                             {{if ne $conditions "INDEX"}}
                                 {{if $entries}}
-                                    <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}};">
+                                    <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};">
                                         <td colspan="4"><i>Conditions: {{$conditions}}</i></th>
                                     </tr>
                                 {{end}}
                             {{end}}
                             {{range $entries}}
-                                <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}};">
+                                <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};">
                                     <td>
                                         <a class="btn normal" href="{{.URL}}" target="_blank" rel="nofollow">
                                             {{.ScraperName}}
@@ -218,7 +226,7 @@
                     {{range $cardId := .VendorKeys}}
                         {{$card := (index $.Metadata $cardId)}}
                         {{$entries := (index $.FoundVendors $cardId)}}
-                        <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}};" title="{{$card.Title}}">
+                        <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};" title="{{$card.Title}}">
                             <th colspan="4" class="wrap stickyHeader" style="text-align: left; vertical-align: middle;">
                                 <table style="margin:0 0">
                                     <tr style="background-color:rgba(0, 0, 0, 0);">
@@ -249,7 +257,7 @@
                             </th>
                         </tr>
                         {{range $entries}}
-                            <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}};">
+                            <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};">
                                 <td>
                                     <a class="btn normal" href="{{.URL}}" target="_blank" rel="nofollow">
                                         {{.ScraperName}} {{.Country}}
@@ -279,7 +287,8 @@
                     {{$firstImg = "https://c1.scryfall.com/file/scryfall-card-backs/large/0a/0aeebaf5-8c7d-4636-9e82-8c27447861f7.jpg"}}
                 {{end}}
                 <script type="text/javascript">
-                    document.getElementById('cardImage').src = "{{$firstImg}}";
+                    document.getElementById('cardImage').src = {{$firstImg}};
+                    document.getElementById('printings').innerHTML = {{$firstPrint}};
                 </script>
             </div>
         {{end}}

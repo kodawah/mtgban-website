@@ -126,7 +126,9 @@ func insertNavBar(page string, nav []NavElem, extra []NavElem) []NavElem {
 	return append(nav, tail...)
 }
 
-func uuid2card(cardId string, smallImg bool) GenericCard {
+const MaxRuneSymbols = 18
+
+func uuid2card(cardId string, flags ...bool) GenericCard {
 	co, err := mtgmatcher.GetUUID(cardId)
 	if err != nil {
 		return GenericCard{}
@@ -172,6 +174,24 @@ func uuid2card(cardId string, smallImg bool) GenericCard {
 
 	query := fmt.Sprintf("%s s:%s cn:%s f:%t", co.Name, co.SetCode, co.Number, co.Foil)
 
+	smallImg := false
+	if len(flags) > 0 {
+		smallImg = flags[0]
+	}
+	printings := ""
+	if len(flags) > 1 && flags[1] {
+		// Hack to generate HTML in the template
+		for i, print := range co.Printings {
+			set := mtgmatcher.GetSets()[print]
+			keyruneCode := strings.ToLower(set.KeyruneCode)
+			printings += fmt.Sprintf("<a class='pagination' title='%s' href='/search?q=%s'><i class='ss ss-%s ss-2x'></i> </a>", set.Name, url.QueryEscape(co.Name+" s:"+print), keyruneCode)
+			if i == MaxRuneSymbols && len(co.Printings) > MaxRuneSymbols {
+				printings += "<br>and many more (too many to list)..."
+				break
+			}
+		}
+	}
+
 	return GenericCard{
 		Name:      co.Card.Name,
 		Edition:   co.Edition,
@@ -185,6 +205,7 @@ func uuid2card(cardId string, smallImg bool) GenericCard {
 		Reserved:  co.Card.IsReserved,
 		SearchURL: fmt.Sprintf("/search?q=%s", url.QueryEscape(query)),
 		Stocks:    stocks,
+		Printings: printings,
 	}
 }
 

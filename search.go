@@ -105,7 +105,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	for cardId := range foundSellers {
 		_, found := pageVars.Metadata[cardId]
 		if !found {
-			pageVars.Metadata[cardId] = uuid2card(cardId, false)
+			pageVars.Metadata[cardId] = uuid2card(cardId, false, true)
 		}
 		if pageVars.Metadata[cardId].Reserved {
 			pageVars.HasReserved = true
@@ -118,7 +118,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	for cardId := range foundVendors {
 		_, found := pageVars.Metadata[cardId]
 		if !found {
-			pageVars.Metadata[cardId] = uuid2card(cardId, false)
+			pageVars.Metadata[cardId] = uuid2card(cardId, false, true)
 		}
 		if pageVars.Metadata[cardId].Reserved {
 			pageVars.HasReserved = true

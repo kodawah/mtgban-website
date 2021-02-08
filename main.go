@@ -35,6 +35,7 @@ type GenericCard struct {
 	Title     string
 	SearchURL string
 	Stocks    bool
+	Printings string
 }
 
 type PageVars struct {
