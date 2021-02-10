@@ -576,7 +576,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			var errMsg string
 			ogFields, err = grabLastSold(co.Identifiers["tcgplayerProductId"], co.Foil)
 			if err != nil {
-				errMsg = "Internal bot error, please notify devs ┏༼ ◉ ╭╮ ◉༽┓"
+				errMsg = "Internal bot error ┏༼ ◉ ╭╮ ◉༽┓"
 				log.Println("Bot error:", err, "from", content)
 			} else if len(ogFields) == 0 {
 				errMsg = "No Last Sold Price available for \"" + content + "\" o͡͡͡╮༼ • ʖ̯ • ༽╭o͡͡͡"
