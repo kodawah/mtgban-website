@@ -19,6 +19,7 @@ import (
 	"github.com/kodabb/go-mtgban/cardtrader"
 	"github.com/kodabb/go-mtgban/coolstuffinc"
 	"github.com/kodabb/go-mtgban/magiccorner"
+	"github.com/kodabb/go-mtgban/mtgseattle"
 	"github.com/kodabb/go-mtgban/mtgstocks"
 	"github.com/kodabb/go-mtgban/mythicmtg"
 	"github.com/kodabb/go-mtgban/ninetyfive"
@@ -423,6 +424,13 @@ var ScraperOptions = map[string]*scraperOption{
 		DevEnabled: true,
 		Init: func() (mtgban.Scraper, error) {
 			scraper := cardtrader.NewScraperMarket(Config.Api["cardtrader"])
+			scraper.LogCallback = log.Printf
+			return scraper, nil
+		},
+	},
+	"mtgseattle": &scraperOption{
+		Init: func() (mtgban.Scraper, error) {
+			scraper := mtgseattle.NewScraper()
 			scraper.LogCallback = log.Printf
 			return scraper, nil
 		},
