@@ -124,7 +124,7 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 
 		scraperOptions := ScraperOptions[ScraperMap[Sellers[i].Info().Shorthand]]
 
-		lastUpdate := Sellers[i].Info().InventoryTimestamp.Format(time.RFC822)
+		lastUpdate := Sellers[i].Info().InventoryTimestamp.Format(time.Stamp)
 
 		inv, _ := Sellers[i].Inventory()
 
@@ -157,7 +157,7 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 
 		scraperOptions := ScraperOptions[ScraperMap[Vendors[i].Info().Shorthand]]
 
-		lastUpdate := Vendors[i].Info().BuylistTimestamp.Format(time.RFC822)
+		lastUpdate := Vendors[i].Info().BuylistTimestamp.Format(time.Stamp)
 
 		bl, _ := Vendors[i].Buylist()
 
