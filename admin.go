@@ -57,22 +57,19 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	reboot := r.FormValue("reboot")
+	doReboot := false
+	var v url.Values
 	switch reboot {
 	case "mtgstocks":
-		v := url.Values{
-			"msg": {"Refreshing MTGStocks in the background..."},
-		}
-		r.URL.RawQuery = v.Encode()
-
+		v = url.Values{}
+		v.Set("msg", "Refreshing MTGStocks in the background...")
+		doReboot = true
 		go loadInfos()
-		http.Redirect(w, r, r.URL.String(), http.StatusFound)
-		return
 
 	case "mtgjson":
-		v := url.Values{
-			"msg": {"Reloading MTGJSON in the background..."},
-		}
-		r.URL.RawQuery = v.Encode()
+		v = url.Values{}
+		v.Set("msg", "Reloading MTGJSON in the background...")
+		doReboot = true
 
 		go func() {
 			log.Println("Retrieving the latest version of mtgjson")
@@ -91,14 +88,11 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 			}
 			log.Println("New mtgjson is ready")
 		}()
-		http.Redirect(w, r, r.URL.String(), http.StatusFound)
-		return
 
 	case "server":
-		v := url.Values{
-			"msg": {"Restarting the server..."},
-		}
-		r.URL.RawQuery = v.Encode()
+		v = url.Values{}
+		v.Set("msg", "Restarting the server...")
+		doReboot = true
 
 		// Let the system restart the server
 		go func() {
@@ -106,6 +100,9 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 			log.Println("Admin requested server restart")
 			os.Exit(0)
 		}()
+	}
+	if doReboot {
+		r.URL.RawQuery = v.Encode()
 		http.Redirect(w, r, r.URL.String(), http.StatusFound)
 		return
 	}
