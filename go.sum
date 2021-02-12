@@ -64,8 +64,8 @@ github.com/hashicorp/go-retryablehttp v0.6.6/go.mod h1:vAew36LZh98gCBJNLH42IQ1ER
 github.com/jawher/mow.cli v1.1.0/go.mod h1:aNaQlc7ozF3vw6IJ2dHjp2ZFiA4ozMIYY6PyuRJwlUg=
 github.com/kennygrant/sanitize v1.2.4 h1:gN25/otpP5vAsO2djbMhF/LQX6R7+O1TB4yv8NzpJ3o=
 github.com/kennygrant/sanitize v1.2.4/go.mod h1:LGsjYYtgxbetdg5owWB2mpgUL6e2nfw2eObZ0u0qvak=
-github.com/kodabb/go-mtgban v0.0.0-20210210165156-e56a91c98953 h1:1Xi8+NdGz5S3a0R8jzRqMo99BHu2RNMPbymlbZftZ8Y=
-github.com/kodabb/go-mtgban v0.0.0-20210210165156-e56a91c98953/go.mod h1:KlMgGyagoh7XxkbjV6pM41DnEmk6SurTQYSH/EJHi/4=
+github.com/kodabb/go-mtgban v0.0.0-20210212020025-684b468bae6a h1:RqVPF8OYdKGtXXnB6s9ou6pYo+1Az1XT38RA0DtkY1Y=
+github.com/kodabb/go-mtgban v0.0.0-20210212020025-684b468bae6a/go.mod h1:KlMgGyagoh7XxkbjV6pM41DnEmk6SurTQYSH/EJHi/4=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
 github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=
