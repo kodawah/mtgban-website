@@ -89,6 +89,26 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 			log.Println("New mtgjson is ready")
 		}()
 
+	case "scrapers":
+		v = url.Values{}
+		v.Set("msg", "Reloading scrapers in the background...")
+		doReboot = true
+
+		skip := false
+		for key, opt := range ScraperOptions {
+			if opt.Busy {
+				v.Set("msg", "Cannot reload everything while "+key+" is refreshing")
+				skip = true
+				break
+			}
+		}
+
+		if !skip {
+			go func() {
+				loadScrapers(true, true)
+			}()
+		}
+
 	case "server":
 		v = url.Values{}
 		v.Set("msg", "Restarting the server...")
