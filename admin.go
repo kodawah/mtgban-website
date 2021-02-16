@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"path"
 	"strings"
 	"time"
@@ -95,6 +97,22 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 			}
 			log.Println("New mtgjson is ready")
 		}()
+
+	case "build":
+		v = url.Values{}
+		doReboot = true
+
+		cmd := exec.Command("go", "build")
+		var out bytes.Buffer
+		cmd.Stderr = &out
+		err := cmd.Run()
+		if err != nil {
+			log.Println(err)
+		}
+		v.Set("msg", out.String())
+		if out.Len() == 0 {
+			v.Set("msg", "Build successful")
+		}
 
 	case "code":
 		v = url.Values{}
