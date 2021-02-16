@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path"
+	"strings"
 	"time"
 
 	cleanhttp "github.com/hashicorp/go-cleanhttp"
@@ -91,6 +93,13 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 			}
 			log.Println("New mtgjson is ready")
 		}()
+
+	case "cache":
+		v = url.Values{}
+		v.Set("msg", "Deleting old cache...")
+		doReboot = true
+
+		go deleteOldCache()
 
 	case "scrapers":
 		v = url.Values{}
@@ -201,10 +210,60 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 
 	pageVars.Uptime = uptime()
 	pageVars.DiskStatus = disk()
-	pageVars.MemoryStatus = memory()
+	pageVars.MemoryStatus = mem()
 	pageVars.CurrentTime = time.Now()
 
 	render(w, "admin.html", pageVars)
+}
+
+func deleteOldCache() {
+	log.Println("Wiping cache")
+	for _, directory := range []string{"cache_inv/", "cache_bl"} {
+		// Open the directory and read all its files.
+		dirRead, err := os.Open(directory)
+		if err != nil {
+			continue
+		}
+		defer dirRead.Close()
+
+		dirFiles, err := dirRead.Readdir(0)
+		if err != nil {
+			continue
+		}
+
+		for _, subdir := range dirFiles {
+			// Skip most recent entries
+			dayTag := fmt.Sprintf("%03d", time.Now().YearDay())[:2]
+			if strings.HasPrefix(subdir.Name(), dayTag) {
+				continue
+			}
+
+			// Read and list subdirectories
+			subPath := path.Join(directory, subdir.Name())
+			subDirRead, err := os.Open(subPath)
+			if err != nil {
+				continue
+			}
+			defer subDirRead.Close()
+
+			subDirFiles, err := subDirRead.Readdir(0)
+			if err != nil {
+				continue
+			}
+
+			// Loop over the directory's files and remove them
+			for _, files := range subDirFiles {
+				fullPath := path.Join(directory, subdir.Name(), files.Name())
+				log.Println("Deleting", fullPath)
+				os.Remove(fullPath)
+			}
+
+			// Remove containing directory
+			log.Println("Deleting", subPath)
+			os.Remove(subPath)
+		}
+	}
+	log.Println("Cache is wiped")
 }
 
 // Custom time.Duration format to print days as well
