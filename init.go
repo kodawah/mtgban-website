@@ -306,7 +306,6 @@ var ScraperOptions = map[string]*scraperOption{
 		},
 	},
 	"ninetyfive": &scraperOption{
-		DevEnabled: true,
 		Init: func() (mtgban.Scraper, error) {
 			scraper := ninetyfive.NewScraper()
 			scraper.LogCallback = log.Printf
