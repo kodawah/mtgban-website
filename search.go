@@ -76,12 +76,6 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	pageVars.CondKeys = []string{"INDEX", "NM", "SP", "MP", "HP", "PO"}
 	pageVars.Metadata = map[string]GenericCard{}
 
-	// Force the search mode if mandated by the query
-	mode := r.FormValue("searchmode")
-	if mode != "" {
-		query += " sm:" + mode
-	}
-
 	// SEARCH
 	foundSellers, foundVendors, tooMany := searchParallel(query, blocklist)
 
