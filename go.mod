@@ -14,6 +14,8 @@ require (
 	github.com/golang/protobuf v1.3.3 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2
 	github.com/kodabb/go-mtgban v0.0.0-20210212020025-684b468bae6a
+	github.com/mackerelio/go-osstat v0.1.0
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
+	golang.org/x/sys v0.0.0-20200323222414-85ca7c5b95cd
 	gopkg.in/robfig/cron.v2 v2.0.0-20150107220207-be2e0b0deed5
 )

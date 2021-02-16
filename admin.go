@@ -10,6 +10,9 @@ import (
 
 	cleanhttp "github.com/hashicorp/go-cleanhttp"
 	"github.com/kodabb/go-mtgban/mtgmatcher"
+
+	"github.com/mackerelio/go-osstat/memory"
+	"golang.org/x/sys/unix"
 )
 
 const (
@@ -196,5 +199,43 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 		pageVars.OtherTable = append(pageVars.OtherTable, row)
 	}
 
+	pageVars.Uptime = uptime()
+	pageVars.DiskStatus = disk()
+	pageVars.MemoryStatus = memory()
+	pageVars.CurrentTime = time.Now()
+
 	render(w, "admin.html", pageVars)
+}
+
+// Custom time.Duration format to print days as well
+func uptime() string {
+	since := time.Now().Sub(startTime)
+	days := int(since.Hours() / 24)
+	hours := int(since.Hours()) % 24
+	minutes := int(since.Minutes()) % 60
+	seconds := int(since.Seconds()) % 60
+	return fmt.Sprintf("%d days, %02d:%02d:%02d", days, hours, minutes, seconds)
+}
+
+func disk() string {
+	wd, err := os.Getwd()
+	if err != nil {
+		return "N/A"
+	}
+	var stat unix.Statfs_t
+	unix.Statfs(wd, &stat)
+
+	total := stat.Blocks * uint64(stat.Bsize)
+	avail := stat.Bavail * uint64(stat.Bsize)
+	used := total - avail
+
+	return fmt.Sprintf("%.2f%% of %.2fGB", float64(used)/float64(total)*100, float64(total)/1024/1024/1024)
+}
+
+func mem() string {
+	memData, err := memory.Get()
+	if err != nil {
+		return "N/A"
+	}
+	return fmt.Sprintf("%.2f%% of %.2fGB", float64(memData.Used)/float64(memData.Total)*100, float64(memData.Total)/1024/1024/1024)
 }

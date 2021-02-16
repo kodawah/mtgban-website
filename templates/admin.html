@@ -84,7 +84,7 @@
         <br>
         <div style="clear:both;"></div>
         <br>
-        <div class="indent">
+        <div class="indent" style="float: left;">
             <ul class="indent">
                 <li><a href="?reboot=mtgstocks" onclick="return confirm('Are you sure you want to refresh mtgstocks?')">📉 Reload MTGStocks</a></li>
                 <li><a href="?reboot=mtgjson" onclick="return confirm('Are you sure you want to reload mtgjson?')">🔄 Reload MTGJSON</a></li>
@@ -92,6 +92,19 @@
                 <li><a href="?reboot=server" onclick="return confirm('Are you sure you want to restart the server?')">⚠️ Restart the server</a></li>
             </ul>
         </div>
+
+        <div class="indent" style="float: left;">
+            <ul class="indent">
+                <li>Server uptime: {{.Uptime}}</li>
+                <li>Disk status: {{.DiskStatus}}</li>
+                <li>Memory status: {{.MemoryStatus}}</li>
+                <li>Current time: {{.CurrentTime}}</li>
+            </ul>
+        </div>
+
+        <div style="clear:both;"></div>
+        <br>
+        <br>
     {{end}}
 </div>
 </body>

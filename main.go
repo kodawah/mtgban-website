@@ -102,8 +102,12 @@ type PageVars struct {
 
 	HasStocks bool
 
-	Headers    []string
-	OtherTable [][]string
+	Headers      []string
+	OtherTable   [][]string
+	CurrentTime  time.Time
+	Uptime       string
+	DiskStatus   string
+	MemoryStatus string
 }
 
 type NavElem struct {
@@ -128,6 +132,8 @@ type NavElem struct {
 	// Which page to render
 	Page string
 }
+
+var startTime = time.Now()
 
 var DefaultNav = []NavElem{
 	NavElem{
