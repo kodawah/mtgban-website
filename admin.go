@@ -13,6 +13,8 @@ import (
 	cleanhttp "github.com/hashicorp/go-cleanhttp"
 	"github.com/kodabb/go-mtgban/mtgmatcher"
 
+	git "github.com/go-git/go-git/v5"
+	githttp "github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/mackerelio/go-osstat/memory"
 	"golang.org/x/sys/unix"
 )
@@ -93,6 +95,16 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 			}
 			log.Println("New mtgjson is ready")
 		}()
+
+	case "code":
+		v = url.Values{}
+		doReboot = true
+
+		msg, err := pullCode()
+		if err != nil {
+			msg = "Error: " + err.Error()
+		}
+		v.Set("msg", msg)
 
 	case "cache":
 		v = url.Values{}
@@ -214,6 +226,40 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 	pageVars.CurrentTime = time.Now()
 
 	render(w, "admin.html", pageVars)
+}
+
+func pullCode() (string, error) {
+	r, err := git.PlainOpen(".")
+	if err != nil {
+		return "", err
+	}
+
+	// Get the working directory for the repository
+	w, err := r.Worktree()
+	if err != nil {
+		return "", err
+	}
+
+	// Pull the latest changes from the origin remote and merge into the current branch
+	err = w.Pull(&git.PullOptions{
+		RemoteName: "origin",
+		Auth: &githttp.BasicAuth{
+			Username: "xxx", // Anything but empty string
+			Password: Config.Api["github_access_token"],
+		},
+		Progress: os.Stdout,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	// Print the latest commit that was just pulled
+	ref, err := r.Head()
+	if err != nil {
+		return "", err
+	}
+
+	return ref.Hash().String(), nil
 }
 
 func deleteOldCache() {
