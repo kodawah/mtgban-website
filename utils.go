@@ -126,7 +126,13 @@ func insertNavBar(page string, nav []NavElem, extra []NavElem) []NavElem {
 	return append(nav, tail...)
 }
 
-const MaxRuneSymbols = 18
+const (
+	// 9 per line for default size, otherwise 19-21 depending on size
+	MaxBeforeShrink = 18
+
+	// After this amount just stop adding symbols
+	MaxRuneSymbols = 58
+)
 
 func uuid2card(cardId string, flags ...bool) GenericCard {
 	co, err := mtgmatcher.GetUUID(cardId)
@@ -189,6 +195,10 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 				printings += "<br>and many more (too many to list)..."
 				break
 			}
+		}
+		// Shrink icons to fit more of them
+		if len(co.Printings) > MaxBeforeShrink {
+			printings = strings.Replace(printings, "ss-2x", "ss-1x", -1)
 		}
 	}
 
