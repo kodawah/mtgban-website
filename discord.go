@@ -656,6 +656,11 @@ func prepareCard(searchRes *searchResult, ogFields []embedField, guildId string,
 	title := "Prices for " + card.Name
 	if lastSold {
 		title = "TCG Last Sold prices for " + card.Name
+		link = "https://shop.tcgplayer.com/product/productsearch?id=" + co.Identifiers["tcgplayerProductId"]
+		affiliate := Config.Affiliate["TCG"]
+		if affiliate != "" {
+			link += fmt.Sprintf("&utm_campaign=affiliate&utm_medium=%s&utm_source=%s&partner=%s", affiliate, affiliate, affiliate)
+		}
 	}
 
 	// Add a tag for ease of debugging
