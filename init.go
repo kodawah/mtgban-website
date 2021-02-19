@@ -23,6 +23,7 @@ import (
 	"github.com/kodabb/go-mtgban/mtgstocks"
 	"github.com/kodabb/go-mtgban/mythicmtg"
 	"github.com/kodabb/go-mtgban/ninetyfive"
+	"github.com/kodabb/go-mtgban/purplemana"
 	"github.com/kodabb/go-mtgban/starcitygames"
 	"github.com/kodabb/go-mtgban/strikezone"
 	"github.com/kodabb/go-mtgban/tcgplayer"
@@ -430,6 +431,16 @@ var ScraperOptions = map[string]*scraperOption{
 	"mtgseattle": &scraperOption{
 		Init: func() (mtgban.Scraper, error) {
 			scraper := mtgseattle.NewScraper()
+			scraper.LogCallback = log.Printf
+			return scraper, nil
+		},
+	},
+	"purplemana": &scraperOption{
+		Init: func() (mtgban.Scraper, error) {
+			scraper, err := purplemana.NewScraper(Config.Api["service_account_file"])
+			if err != nil {
+				return nil, err
+			}
 			scraper.LogCallback = log.Printf
 			return scraper, nil
 		},
