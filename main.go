@@ -153,6 +153,7 @@ var OptionalFields = []string{
 	"ExpEnabled",
 	"NewsEnabled",
 	"AnyEnabled",
+	"AnyExperimentsEnabled",
 	"API",
 }
 

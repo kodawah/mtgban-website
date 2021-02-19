@@ -557,9 +557,13 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) (string, string)
 		}
 	}
 	if v.Get("Global") == "true" {
-		if tierTitle == "Modern" {
+		switch tierTitle {
+		case "Modern":
 			v.Set("AnyEnabled", "false")
-		} else {
+		case "Root":
+			v.Set("AnyExperimentsEnabled", "true")
+			v.Set("AnyEnabled", "true")
+		default:
 			v.Set("AnyEnabled", "true")
 		}
 	}

@@ -94,6 +94,9 @@ func Global(w http.ResponseWriter, r *http.Request) {
 	anyEnabledOpt, _ := GetParamFromSig(sig, "AnyEnabled")
 	anyEnabled, _ := strconv.ParseBool(anyEnabledOpt)
 
+	anyExperimentOpt, _ := GetParamFromSig(sig, "AnyExperimentsEnabled")
+	anyExperiment, _ := strconv.ParseBool(anyExperimentOpt)
+
 	// The "menu" section, the reference
 	var allowlistSellers []string
 	for i, seller := range Sellers {
@@ -102,18 +105,21 @@ func Global(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		if anyEnabled {
-			if seller.Info().Shorthand != TCG_MARKET &&
-				seller.Info().Shorthand != MKM_TREND &&
-				!SliceStringHas(Config.GlobalAllowList, seller.Info().Shorthand) {
-				continue
+			if seller.Info().Shorthand == TCG_MARKET ||
+				seller.Info().Shorthand == MKM_TREND ||
+				SliceStringHas(Config.GlobalAllowList, seller.Info().Shorthand) {
+				if !anyExperiment && SliceStringHas(Config.SearchBlockList, seller.Info().Shorthand) {
+					continue
+				}
+				allowlistSellers = append(allowlistSellers, seller.Info().Shorthand)
 			}
 		} else {
 			if seller.Info().Shorthand != TCG_MARKET &&
 				seller.Info().Shorthand != MKM_TREND {
 				continue
 			}
+			allowlistSellers = append(allowlistSellers, seller.Info().Shorthand)
 		}
-		allowlistSellers = append(allowlistSellers, seller.Info().Shorthand)
 	}
 
 	// The "Jump to" section, the probe
