@@ -358,13 +358,6 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 			continue
 		}
 
-		if pageVars.GlobalMode {
-			// Unless the source is an index, only compare within the same region
-			if !source.Info().MetadataOnly && source.Info().CountryFlag != scraper.Info().CountryFlag {
-				continue
-			}
-		}
-
 		if scraper.Info().Shorthand == "ABU" {
 			opts.UseTrades = useCredit
 		}
