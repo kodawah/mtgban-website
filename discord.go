@@ -472,7 +472,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			// Check if the message contains potential links
 		} else if strings.Contains(m.Content, "cardkingdom.com/mtg") ||
 			(strings.Contains(m.Content, "shop.tcgplayer.com/") && !strings.Contains(m.Content, "shop.tcgplayer.com/sellerfeedback")) ||
-			strings.Contains(m.Content, "amazon.com/") {
+			(strings.Contains(m.Content, "amazon.com/") && !strings.Contains(m.Content, "images-amazon.com/images")) {
 			// Iterate over each segment of the message and look for known links
 			fields := strings.Fields(m.Content)
 			for _, field := range fields {
