@@ -67,6 +67,9 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 				log.Println("nil seller at position", i)
 				continue
 			}
+			if SliceStringHas(Config.ArbitBlockSellers, seller.Info().Shorthand) {
+				continue
+			}
 			allowlistSellers = append(allowlistSellers, seller.Info().Shorthand)
 		}
 	} else if allowlistSellersOpt == "DEFAULT" || allowlistSellersOpt == "" {
