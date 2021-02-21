@@ -46,6 +46,8 @@ const (
 	// from MKMIndex
 	MKM_LOW   = "MKM Low"
 	MKM_TREND = "MKM Trend"
+
+	SkipRefreshCooldown = 2 * time.Hour
 )
 
 func loadDatastore() error {
@@ -184,6 +186,16 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 				log.Println("Spoofed", name)
 			}
 			return nil
+		}
+	} else {
+		// Check if recent data already exists
+		for _, seller := range Sellers {
+			for _, name := range names {
+				if seller.Info().Shorthand == name && time.Now().Sub(seller.Info().InventoryTimestamp) < SkipRefreshCooldown {
+					log.Println("Skipping", scraper.Info().Name, "because too recent")
+					return nil
+				}
+			}
 		}
 	}
 
@@ -587,6 +599,10 @@ func loadSellers(newSellers []mtgban.Seller) {
 
 			log.Println("Loaded from file")
 		} else {
+			if time.Now().Sub(Sellers[i].Info().InventoryTimestamp) < SkipRefreshCooldown {
+				log.Println("Skipping because too recent")
+				continue
+			}
 			log.Println("Loading from scraper")
 
 			// Load inventory
@@ -640,6 +656,10 @@ func loadVendors(newVendors []mtgban.Vendor) {
 
 			log.Println("Loaded from file")
 		} else {
+			if time.Now().Sub(Vendors[i].Info().BuylistTimestamp) < SkipRefreshCooldown {
+				log.Println("Skipping because too recent")
+				continue
+			}
 			log.Println("Loading from scraper")
 
 			// Load buylist
