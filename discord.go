@@ -716,8 +716,18 @@ func longestName(results []SearchEntry) (out int) {
 
 // Retrieve cards from Sellers using the very first result
 func searchSellersFirstResult(query string, options map[string]string, index bool) (cardId string, results []SearchEntry, err error) {
+	// Skip any store based outside of the US
+	skipped := append(Config.SearchBlockList, "TCG Direct")
+	if !index {
+		for _, seller := range Sellers {
+			if seller.Info().CountryFlag != "" {
+				skipped = append(skipped, seller.Info().Shorthand)
+			}
+		}
+	}
+
 	// Search
-	foundSellers, _ := searchSellers(query, append(Config.SearchBlockList, "TCG Direct"), options)
+	foundSellers, _ := searchSellers(query, skipped, options)
 	if len(foundSellers) == 0 {
 		err = errors.New("Out of stock everywhere ┻━┻ ヘ╰( •̀ε•́ ╰)")
 		return
@@ -774,7 +784,15 @@ func searchSellersFirstResult(query string, options map[string]string, index boo
 
 // Retrieve cards from Vendors using the very first result
 func searchVendorsFirstResult(query string, options map[string]string) (cardId string, results []SearchEntry, err error) {
-	foundVendors, _ := searchVendors(query, Config.SearchBlockList, options)
+	// Skip any store based outside of the US
+	skipped := Config.SearchBlockList
+	for _, vendor := range Vendors {
+		if vendor.Info().CountryFlag != "" {
+			skipped = append(skipped, vendor.Info().Shorthand)
+		}
+	}
+
+	foundVendors, _ := searchVendors(query, skipped, options)
 	if len(foundVendors) == 0 {
 		err = errors.New("Nobody is buying that card ┻━┻ ヘ╰( •̀ε•́ ╰)")
 		return
