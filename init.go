@@ -314,7 +314,7 @@ var ScraperOptions = map[string]*scraperOption{
 		Init: func() (mtgban.Scraper, error) {
 			scraper := coolstuffinc.NewScraper()
 			scraper.LogCallback = log.Printf
-			scraper.MaxConcurrency = 6
+			scraper.MaxConcurrency = 4
 			return scraper, nil
 		},
 	},
