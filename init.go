@@ -580,6 +580,11 @@ func loadScrapers(doSellers, doVendors bool) {
 
 	go loadInfos()
 
+	// Load prices for API users
+	if !DevMode {
+		go prepareCKAPI()
+	}
+
 	LastUpdate = time.Now()
 
 	log.Println("Scrapers loaded")

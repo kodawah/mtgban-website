@@ -2,10 +2,10 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/kodabb/go-mtgban/cardkingdom"
 	"github.com/kodabb/go-mtgban/mtgmatcher"
@@ -21,24 +21,20 @@ type ck2id struct {
 	Foil   *meta `json:"foil,omitempty"`
 }
 
-func API(w http.ResponseWriter, r *http.Request) {
-	sig := r.FormValue("sig")
+var CKAPIMutex sync.RWMutex
+var CKAPIOutput map[string]*ck2id
 
-	param, _ := GetParamFromSig(sig, "API")
-	canAPI := strings.Contains(param, "CK")
-	if SigCheck && !canAPI {
-		http.Error(w, fmt.Sprintf("Invalid signature: %s", param), http.StatusUnauthorized)
-		return
+func prepareCKAPI() error {
+	log.Println("Updating CK prices for API users")
+	Notify("api", "CK refresh started")
+
+	list, err := cardkingdom.NewCKClient().GetPriceList()
+	if err != nil {
+		log.Println(err)
+		return err
 	}
 
 	output := map[string]*ck2id{}
-
-	ckclient := cardkingdom.NewCKClient()
-	list, err := ckclient.GetPriceList()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 
 	for _, card := range list {
 		theCard, err := cardkingdom.Preprocess(card)
@@ -84,11 +80,38 @@ func API(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Header().Add("Content-Type", "application/json")
-	enc := json.NewEncoder(w)
-	err = enc.Encode(output)
+	CKAPIMutex.Lock()
+	CKAPIOutput = output
+	CKAPIMutex.Unlock()
+
+	log.Println("New CK API output ready")
+	Notify("api", "CK refresh completed")
+
+	return nil
+}
+
+func API(w http.ResponseWriter, r *http.Request) {
+	sig := r.FormValue("sig")
+
+	param, _ := GetParamFromSig(sig, "API")
+	canAPI := strings.Contains(param, "CK")
+	if SigCheck && !canAPI {
+		w.Write([]byte(`{"error": "invalid signature"}`))
+		return
+	}
+
+	CKAPIMutex.RLock()
+	defer CKAPIMutex.RUnlock()
+	if CKAPIOutput == nil {
+		log.Println("CK API called when list was empty")
+		w.Write([]byte(`{"error": "empty list"}`))
+		return
+	}
+
+	err := json.NewEncoder(w).Encode(CKAPIOutput)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println(err)
+		w.Write([]byte(`{"error": "` + err.Error() + `"}`))
 		return
 	}
 }
