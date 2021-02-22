@@ -97,7 +97,15 @@ func scryfallImageURL(cardId string, small bool) string {
 		version = "small"
 	}
 
-	return fmt.Sprintf("https://api.scryfall.com/cards/%s/%s?format=image&version=%s", strings.ToLower(co.SetCode), co.Card.Number, version)
+	// Support BAN's custom sets
+	number := co.Card.Number
+	code := strings.ToLower(co.SetCode)
+	if strings.HasSuffix(code, "ita") {
+		code = strings.TrimSuffix(code, "ita")
+		number += "/it"
+	}
+
+	return fmt.Sprintf("https://api.scryfall.com/cards/%s/%s?format=image&version=%s", code, number, version)
 }
 
 func editionTitle(cardId string) string {
