@@ -343,14 +343,14 @@ func noSigning(next http.Handler) http.Handler {
 func enforceAPISigning(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		sig := r.FormValue("sig")
-		if sig == "" {
+		if SigCheck && sig == "" {
 			log.Println("API error, empty signature")
 			http.NotFound(w, r)
 			return
 		}
 
 		raw, err := base64.StdEncoding.DecodeString(sig)
-		if err != nil {
+		if SigCheck && err != nil {
 			log.Println("API error, no sig", err)
 			http.NotFound(w, r)
 			return
@@ -372,7 +372,7 @@ func enforceAPISigning(next http.Handler) http.Handler {
 		data := fmt.Sprintf("%s%s%s%s", r.Method, exp, getBaseURL(r), q.Encode())
 		valid := signHMACSHA1Base64([]byte(os.Getenv("BAN_SECRET")), []byte(data))
 		expires, err := strconv.ParseInt(exp, 10, 64)
-		if err != nil || valid != sig || expires < time.Now().Unix() {
+		if SigCheck && (err != nil || valid != sig || expires < time.Now().Unix()) {
 			log.Println("API error, invalid")
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
