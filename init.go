@@ -18,6 +18,7 @@ import (
 	"github.com/kodabb/go-mtgban/cardsphere"
 	"github.com/kodabb/go-mtgban/cardtrader"
 	"github.com/kodabb/go-mtgban/coolstuffinc"
+	"github.com/kodabb/go-mtgban/hareruya"
 	"github.com/kodabb/go-mtgban/magiccorner"
 	"github.com/kodabb/go-mtgban/mtgseattle"
 	"github.com/kodabb/go-mtgban/mtgstocks"
@@ -450,6 +451,17 @@ var ScraperOptions = map[string]*scraperOption{
 	"purplemana": &scraperOption{
 		Init: func() (mtgban.Scraper, error) {
 			scraper, err := purplemana.NewScraper(Config.Api["service_account_file"])
+			if err != nil {
+				return nil, err
+			}
+			scraper.LogCallback = log.Printf
+			return scraper, nil
+		},
+	},
+	"hareruya": &scraperOption{
+		OnlyVendor: true,
+		Init: func() (mtgban.Scraper, error) {
+			scraper, err := hareruya.NewScraper()
 			if err != nil {
 				return nil, err
 			}
