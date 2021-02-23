@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -18,7 +19,7 @@ import (
 
 func fileExists(filename string) bool {
 	fi, err := os.Lstat(filename)
-	if os.IsNotExist(err) {
+	if errors.Is(err, os.ErrNotExist) {
 		return false
 	}
 	if fi.Mode()&os.ModeSymlink == os.ModeSymlink {
@@ -27,7 +28,7 @@ func fileExists(filename string) bool {
 			return false
 		}
 		fi, err = os.Stat(link)
-		if os.IsNotExist(err) {
+		if errors.Is(err, os.ErrNotExist) {
 			return false
 		}
 		return !fi.IsDir()
@@ -37,7 +38,7 @@ func fileExists(filename string) bool {
 
 func fileDate(filename string) time.Time {
 	fi, err := os.Lstat(filename)
-	if os.IsNotExist(err) {
+	if errors.Is(err, os.ErrNotExist) {
 		return time.Now()
 	}
 	return fi.ModTime()
@@ -45,7 +46,7 @@ func fileDate(filename string) time.Time {
 
 func mkDirIfNotExisting(dirName string) error {
 	_, err := os.Stat(dirName)
-	if os.IsNotExist(err) {
+	if errors.Is(err, os.ErrNotExist) {
 		err = os.MkdirAll(dirName, 0700)
 	}
 	return err
