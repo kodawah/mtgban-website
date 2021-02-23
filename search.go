@@ -215,10 +215,15 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 			source = "n/a"
 		} else {
-			source = u.Path
+			if strings.Contains(u.Host, "mtgban") {
+				source = u.Path
+			} else {
+				source = u.String()
+			}
 		}
 	}
-	msg := fmt.Sprintf("[%s] from %s", query, source)
+	user := GetParamFromSig(sig, "UserEmail")
+	msg := fmt.Sprintf("[%s] from %s by %s", query, source, user)
 	Notify("search", msg)
 	log.Println(msg)
 
