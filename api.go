@@ -93,7 +93,7 @@ func prepareCKAPI() error {
 func API(w http.ResponseWriter, r *http.Request) {
 	sig := r.FormValue("sig")
 
-	param, _ := GetParamFromSig(sig, "API")
+	param := GetParamFromSig(sig, "API")
 	canAPI := strings.Contains(param, "CK")
 	if SigCheck && !canAPI {
 		w.Write([]byte(`{"error": "invalid signature"}`))

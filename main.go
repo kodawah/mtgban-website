@@ -292,7 +292,7 @@ func (fs *FileSystem) Open(path string) (http.File, error) {
 }
 
 func genPageNav(activeTab, sig string) PageVars {
-	exp, _ := GetParamFromSig(sig, "Expires")
+	exp := GetParamFromSig(sig, "Expires")
 	expires, _ := strconv.ParseInt(exp, 10, 64)
 	msg := ""
 	showPatreonLogin := false
@@ -324,7 +324,7 @@ func genPageNav(activeTab, sig string) PageVars {
 	// Enable buttons according to the enabled features
 	if expires > time.Now().Unix() || (DevMode && !SigCheck) {
 		for _, feat := range OrderNav {
-			param, _ := GetParamFromSig(sig, feat)
+			param := GetParamFromSig(sig, feat)
 			allowed, _ := strconv.ParseBool(param)
 			if allowed || DevMode {
 				pageVars.Nav = append(pageVars.Nav, ExtraNavs[feat])

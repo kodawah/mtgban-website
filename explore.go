@@ -20,7 +20,7 @@ func Explore(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO separate by types
-	enabled, _ := GetParamFromSig(sig, "ExpEnabled")
+	enabled := GetParamFromSig(sig, "ExpEnabled")
 	switch enabled {
 	case "ALL":
 	case "FULL":

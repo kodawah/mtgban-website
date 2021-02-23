@@ -39,7 +39,7 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 	pageVars := genPageNav("Sleepers", sig)
 
 	var blocklist []string
-	blocklistOpt, _ := GetParamFromSig(sig, "SearchDisabled")
+	blocklistOpt := GetParamFromSig(sig, "SearchDisabled")
 	if blocklistOpt == "DEFAULT" || blocklistOpt == "" {
 		blocklist = Config.SearchBlockList
 	} else if blocklistOpt != "NONE" {

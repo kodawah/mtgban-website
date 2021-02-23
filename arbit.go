@@ -57,7 +57,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	pageVars := genPageNav("Arbitrage", sig)
 
 	var allowlistSellers []string
-	allowlistSellersOpt, _ := GetParamFromSig(sig, "ArbitEnabled")
+	allowlistSellersOpt := GetParamFromSig(sig, "ArbitEnabled")
 	if allowlistSellersOpt == "" && !SigCheck {
 		allowlistSellersOpt = "ALL"
 	}
@@ -79,7 +79,7 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var blocklistVendors []string
-	blocklistVendorsOpt, _ := GetParamFromSig(sig, "ArbitDisabledVendors")
+	blocklistVendorsOpt := GetParamFromSig(sig, "ArbitDisabledVendors")
 	if blocklistVendorsOpt == "DEFAULT" || blocklistVendorsOpt == "" {
 		blocklistVendors = Config.ArbitBlockVendors
 	} else if blocklistVendorsOpt != "NONE" {
@@ -94,10 +94,10 @@ func Global(w http.ResponseWriter, r *http.Request) {
 
 	pageVars := genPageNav("Global", sig)
 
-	anyEnabledOpt, _ := GetParamFromSig(sig, "AnyEnabled")
+	anyEnabledOpt := GetParamFromSig(sig, "AnyEnabled")
 	anyEnabled, _ := strconv.ParseBool(anyEnabledOpt)
 
-	anyExperimentOpt, _ := GetParamFromSig(sig, "AnyExperimentsEnabled")
+	anyExperimentOpt := GetParamFromSig(sig, "AnyExperimentsEnabled")
 	anyExperiment, _ := strconv.ParseBool(anyExperimentOpt)
 
 	// The "menu" section, the reference

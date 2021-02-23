@@ -543,7 +543,7 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	pageVars := genPageNav("Newspaper", sig)
 
 	var db *sql.DB
-	enabled, _ := GetParamFromSig(sig, "NewsEnabled")
+	enabled := GetParamFromSig(sig, "NewsEnabled")
 	if enabled == "1day" {
 		db = Newspaper1dayDB
 		pageVars.IsOneDay = true

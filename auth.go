@@ -307,8 +307,8 @@ func getSignatureFromCookies(r *http.Request) string {
 		sig = querySig
 	}
 
-	exp, err := GetParamFromSig(sig, "Expires")
-	if err != nil {
+	exp := GetParamFromSig(sig, "Expires")
+	if exp == "" {
 		return ""
 	}
 	expires, err := strconv.ParseInt(exp, 10, 64)
@@ -483,7 +483,7 @@ func enforceSigning(next http.Handler) http.Handler {
 		for _, navName := range OrderNav {
 			nav := ExtraNavs[navName]
 			if r.URL.Path == nav.Link {
-				param, _ := GetParamFromSig(sig, navName)
+				param := GetParamFromSig(sig, navName)
 				canDo, _ := strconv.ParseBool(param)
 				if SigCheck && !canDo {
 					pageVars = genPageNav(nav.Name, sig)
@@ -611,14 +611,14 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 	return sourceURL.String(), str
 }
 
-func GetParamFromSig(sig, param string) (string, error) {
+func GetParamFromSig(sig, param string) string {
 	raw, err := base64.StdEncoding.DecodeString(sig)
 	if err != nil {
-		return "", err
+		return ""
 	}
 	v, err := url.ParseQuery(string(raw))
 	if err != nil {
-		return "", err
+		return ""
 	}
-	return v.Get(param), nil
+	return v.Get(param)
 }
