@@ -81,8 +81,15 @@ func getUserToken(code, baseURL, ref string) (string, error) {
 	return userTokens.AccessToken, nil
 }
 
+type PatreonUserData struct {
+	UserIds   []string
+	FullName  string
+	Email     string
+	TierTitle string
+}
+
 // Retrieve a user id for each membership of the current user
-func getUserIds(tc *http.Client) ([]string, error) {
+func getUserIds(tc *http.Client) (*PatreonUserData, error) {
 	resp, err := tc.Get(PatreonIdentityURL)
 	if err != nil {
 		return nil, err
@@ -100,6 +107,10 @@ func getUserIds(tc *http.Client) ([]string, error) {
 			CodeName string `json:"code_name"`
 		} `json:"errors"`
 		Data struct {
+			Attributes struct {
+				Email    string `json:"email"`
+				FullName string `json:"full_name"`
+			} `json:"attributes"`
 			Relationships struct {
 				Memberships struct {
 					Data []struct {
@@ -129,7 +140,11 @@ func getUserIds(tc *http.Client) ([]string, error) {
 		}
 	}
 
-	return userIds, nil
+	return &PatreonUserData{
+		UserIds:  userIds,
+		FullName: userData.Data.Attributes.FullName,
+		Email:    userData.Data.Attributes.Email,
+	}, nil
 }
 
 func getUserTier(tc *http.Client, userId string) (string, error) {
@@ -228,7 +243,7 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
 	tc := oauth2.NewClient(r.Context(), ts)
 
-	userIds, err := getUserIds(tc)
+	userData, err := getUserIds(tc)
 	if err != nil {
 		log.Println("getUserId", err.Error())
 		http.Redirect(w, r, baseURL+"?errmsg=UserNotFound", http.StatusFound)
@@ -237,13 +252,13 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 
 	tierTitle := ""
 	for _, tier := range []string{"root", "admin"} {
-		if stringSliceContains(Config.Patreon.Ids[tier], userIds[0]) {
+		if stringSliceContains(Config.Patreon.Ids[tier], userData.UserIds[0]) {
 			tierTitle = strings.Title(tier)
 		}
 	}
 
 	if tierTitle == "" {
-		for _, userId := range userIds[1:] {
+		for _, userId := range userData.UserIds[1:] {
 			foundTitle, _ := getUserTier(tc, userId)
 			switch foundTitle {
 			case "PIONEER", "PIONEER (Early Adopters)":
@@ -263,8 +278,9 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(userIds, tierTitle)
-	targetURL, sig := sign(tierTitle, r.URL, baseURL)
+	userData.TierTitle = tierTitle
+	log.Println(userData)
+	targetURL, sig := sign(userData, r.URL, baseURL)
 
 	putSignatureInCookies(w, r, sig)
 
@@ -486,8 +502,9 @@ func enforceSigning(next http.Handler) http.Handler {
 	})
 }
 
-func sign(tierTitle string, sourceURL *url.URL, baseURL string) (string, string) {
+func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string, string) {
 	expires := time.Now().Add(DefaultSignatureDuration)
+	tierTitle := userData.TierTitle
 
 	v := url.Values{}
 	// Enable option according to tier
@@ -569,6 +586,10 @@ func sign(tierTitle string, sourceURL *url.URL, baseURL string) (string, string)
 			v.Set("AnyEnabled", "true")
 		}
 	}
+
+	v.Set("UserName", userData.FullName)
+	v.Set("UserEmail", userData.Email)
+	v.Set("UserTier", userData.TierTitle)
 
 	bu, _ := url.Parse(baseURL)
 	sourceURL.Scheme = bu.Scheme

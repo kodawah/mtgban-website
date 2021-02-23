@@ -147,6 +147,9 @@ var DefaultNav = []NavElem{
 // List of keys that may be present or not, and when present they are
 // guaranteed not to be user-editable)
 var OptionalFields = []string{
+	"UserName",
+	"UserEmail",
+	"UserTier",
 	"SearchDisabled",
 	"ArbitEnabled",
 	"ArbitDisabledVendors",
