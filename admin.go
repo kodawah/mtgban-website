@@ -294,6 +294,8 @@ func pullCode() (string, error) {
 }
 
 func deleteOldCache() {
+	var size int64
+
 	log.Println("Wiping cache")
 	for _, directory := range []string{"cache_inv/", "cache_bl"} {
 		// Open the directory and read all its files.
@@ -330,6 +332,7 @@ func deleteOldCache() {
 
 			// Loop over the directory's files and remove them
 			for _, files := range subDirFiles {
+				size += files.Size()
 				fullPath := path.Join(directory, subdir.Name(), files.Name())
 				log.Println("Deleting", fullPath)
 				os.Remove(fullPath)
@@ -340,7 +343,7 @@ func deleteOldCache() {
 			os.Remove(subPath)
 		}
 	}
-	log.Println("Cache is wiped")
+	log.Printf("Cache is wiped, %dkb freed", size/1024)
 }
 
 // Custom time.Duration format to print days as well
