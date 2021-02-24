@@ -23,6 +23,7 @@ import (
 
 const (
 	mtgjsonURL = "https://mtgjson.com/api/v5/AllPrintings.json"
+	GoFullPath = "/usr/local/go/bin/go"
 )
 
 func Admin(w http.ResponseWriter, r *http.Request) {
@@ -102,7 +103,7 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 		v = url.Values{}
 		doReboot = true
 
-		cmd := exec.Command("go", "build")
+		cmd := exec.Command(GoFullPath, "build")
 		var out bytes.Buffer
 		cmd.Stderr = &out
 		err := cmd.Run()
