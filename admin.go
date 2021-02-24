@@ -186,7 +186,7 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pageVars.Headers = []string{
-		"Name", "Short", "Last Update", "Entries", "Status",
+		"Name", "Id", "Last Update", "Entries", "Status",
 	}
 	for i := range Sellers {
 		if Sellers[i] == nil {
