@@ -99,21 +99,39 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 			log.Println("New mtgjson is ready")
 		}()
 
+	case "update":
+		v = url.Values{}
+		v.Set("msg", "Deploying...")
+		doReboot = true
+
+		go func() {
+			log.Println("Pulling new code")
+			_, err := pullCode()
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			log.Println("Building new code")
+			_, err = build()
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			log.Println("Restarting")
+			os.Exit(0)
+		}()
+
 	case "build":
 		v = url.Values{}
 		doReboot = true
 
-		cmd := exec.Command(GoFullPath, "build")
-		var out bytes.Buffer
-		cmd.Stderr = &out
-		err := cmd.Run()
+		out, err := build()
 		if err != nil {
 			log.Println(err)
 		}
-		v.Set("msg", out.String())
-		if out.Len() == 0 {
-			v.Set("msg", "Build successful")
-		}
+		v.Set("msg", out)
 
 	case "code":
 		v = url.Values{}
@@ -292,6 +310,20 @@ func pullCode() (string, error) {
 	}
 
 	return ref.Hash().String(), nil
+}
+
+func build() (string, error) {
+	cmd := exec.Command(GoFullPath, "build")
+	var out bytes.Buffer
+	cmd.Stderr = &out
+	err := cmd.Run()
+	if err != nil {
+		return "", nil
+	}
+	if out.Len() == 0 {
+		return "Build successful", nil
+	}
+	return out.String(), nil
 }
 
 func deleteOldCache() {

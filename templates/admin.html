@@ -88,8 +88,10 @@
             <ul class="indent">
                 <li><a href="?reboot=mtgstocks" onclick="return confirm('Are you sure you want to refresh mtgstocks?')">📉 Reload MTGStocks</a></li>
                 <li><a href="?reboot=mtgjson" onclick="return confirm('Are you sure you want to reload mtgjson?')">🔄 Reload MTGJSON</a></li>
-                <li><a href="?reboot=build" onclick="return confirm('Are you sure you want to build the code')">🏗️ Build the code</a></li>
-                <li><a href="?reboot=code" onclick="return confirm('Are you sure you want to pull new code')">⬇️ Pull new code</a></li>
+                <li>🏗️ <a href="?reboot=update" onclick="return confirm('Are you sure you want to do a deploy?')">Deploy</a>
+                   (<a href="?reboot=build" onclick="return confirm('Are you sure you want to build the code?')">Build</a> +
+                    <a href="?reboot=code" onclick="return confirm('Are you sure you want to pull new code?')">Pull</a> +
+                    <a href="?reboot=server" onclick="return confirm('Are you sure you want to restart the server?')">Restart</a>)
                 <li><a href="?reboot=cache" onclick="return confirm('Are you sure you want to wipe old cache?')">🗑️ Wipe old cache</a></li>
                 <li><a href="?reboot=scrapers" onclick="return confirm('Are you sure you want to reload all the scrapers?')">🔃 Reload all the scrapers</a></li>
                 <li><a href="?reboot=server" onclick="return confirm('Are you sure you want to restart the server?')">⚠️ Restart the server</a></li>
