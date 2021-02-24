@@ -116,13 +116,10 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 
 	case "code":
 		v = url.Values{}
+		v.Set("msg", "Pulling from master...")
 		doReboot = true
 
-		msg, err := pullCode()
-		if err != nil {
-			msg = "Error: " + err.Error()
-		}
-		v.Set("msg", msg)
+		go pullCode()
 
 	case "cache":
 		v = url.Values{}
