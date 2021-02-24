@@ -313,9 +313,8 @@ var ScraperOptions = map[string]*scraperOption{
 	},
 	"coolstuffinc": &scraperOption{
 		Init: func() (mtgban.Scraper, error) {
-			scraper := coolstuffinc.NewScraper()
+			scraper := coolstuffinc.NewScraperOfficial(Config.Api["csi_token"])
 			scraper.LogCallback = log.Printf
-			scraper.MaxConcurrency = 4
 			return scraper, nil
 		},
 	},
