@@ -360,12 +360,16 @@ type PriceEntry struct {
 	Shipping float64 `json:"shipping"`
 }
 
-func grabLastSold(tcgId string, foil bool) ([]embedField, error) {
+func grabLastSold(tcgId string, foil bool, lang string) ([]embedField, error) {
 	if tcgId == "" {
 		return nil, errors.New("empty tcgId")
 	}
 
-	resp, err := cleanhttp.DefaultClient().Get("http://localhost:8081/" + tcgId)
+	link := "http://localhost:8081/" + tcgId
+	if lang != "" {
+		link += "?lang=" + lang
+	}
+	resp, err := cleanhttp.DefaultClient().Get(link)
 	if err != nil {
 		return nil, err
 	}
@@ -387,6 +391,10 @@ func grabLastSold(tcgId string, foil bool) ([]embedField, error) {
 	var hasValues bool
 	for i, entry := range entries["TCG Last Sold Listing"] {
 		if foil && !strings.Contains(entry.Title, "Foil") {
+			continue
+		}
+
+		if lang != "" && !strings.HasSuffix(entry.Title, lang) {
 			continue
 		}
 
@@ -574,7 +582,14 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		go func() {
 			channel = make(chan *discordgo.MessageEmbed)
 			var errMsg string
-			ogFields, err = grabLastSold(co.Identifiers["tcgplayerProductId"], co.Foil)
+			// Set a language for these sets, as there are multiples under the
+			// same identifier
+			lang := ""
+			switch co.SetCode {
+			case "FBB", "LEGITA", "DRKITA":
+				lang = "Italian"
+			}
+			ogFields, err = grabLastSold(co.Identifiers["tcgplayerProductId"], co.Foil, lang)
 			if err != nil {
 				errMsg = "Internal bot error ┏༼ ◉ ╭╮ ◉༽┓"
 				log.Println("Bot error:", err, "from", content)
