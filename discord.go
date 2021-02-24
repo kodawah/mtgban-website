@@ -479,14 +479,12 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 			// Check if the message contains potential links
 		} else if strings.Contains(m.Content, "cardkingdom.com/mtg") ||
-			(strings.Contains(m.Content, "shop.tcgplayer.com/") && !strings.Contains(m.Content, "shop.tcgplayer.com/sellerfeedback")) ||
-			(strings.Contains(m.Content, "amazon.com/") && !strings.Contains(m.Content, "images-amazon.com/images")) {
+			(strings.Contains(m.Content, "shop.tcgplayer.com/") && !strings.Contains(m.Content, "shop.tcgplayer.com/sellerfeedback")) {
 			// Iterate over each segment of the message and look for known links
 			fields := strings.Fields(m.Content)
 			for _, field := range fields {
 				if !strings.Contains(field, "cardkingdom.com/mtg") &&
-					!strings.Contains(field, "shop.tcgplayer.com/") &&
-					!strings.Contains(field, "amazon.com/") {
+					!strings.Contains(field, "shop.tcgplayer.com/") {
 					continue
 				}
 				u, err := url.Parse(field)
@@ -502,12 +500,9 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				// Flags for later use
 				isCK := strings.Contains(field, "cardkingdom.com/mtg")
 				isTCG := strings.Contains(field, "shop.tcgplayer.com/")
-				isAMZ := strings.Contains(field, "amazon.com/")
 
 				// Add the MTGBAN affiliation
-				if isAMZ {
-					v.Set("tag", Config.Affiliate["AMZ"])
-				} else {
+				if true {
 					commonTag := Config.Affiliate["CK"]
 					v.Set("partner", commonTag)
 					v.Set("utm_source", commonTag)
@@ -530,8 +525,6 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 						title = "Your search"
 					}
 					title += " at TCGplayer"
-				} else if isAMZ {
-					title = "Your search at Amazon"
 				}
 				// Spam time!
 				_, err = s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
