@@ -241,9 +241,25 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 	pageVars.Uptime = uptime()
 	pageVars.DiskStatus = disk()
 	pageVars.MemoryStatus = mem()
+	pageVars.LatestHash, _ = latestHash()
 	pageVars.CurrentTime = time.Now()
 
 	render(w, "admin.html", pageVars)
+}
+
+func latestHash() (string, error) {
+	r, err := git.PlainOpen(".")
+	if err != nil {
+		return "", err
+	}
+
+	// Print the latest commit
+	ref, err := r.Head()
+	if err != nil {
+		return "", err
+	}
+
+	return ref.Hash().String(), nil
 }
 
 func pullCode() (string, error) {

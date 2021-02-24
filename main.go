@@ -108,6 +108,7 @@ type PageVars struct {
 	Uptime       string
 	DiskStatus   string
 	MemoryStatus string
+	LatestHash   string
 }
 
 type NavElem struct {
