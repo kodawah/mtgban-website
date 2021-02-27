@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/kodabb/go-mtgban/cardkingdom"
 	"github.com/kodabb/go-mtgban/mtgmatcher"
@@ -114,4 +115,113 @@ func API(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"error": "` + err.Error() + `"}`))
 		return
 	}
+}
+
+type Price struct {
+	Retail  float64 `json:"retail,omitempty"`
+	Buylist float64 `json:"buylist,omitempty"`
+}
+
+type PriceAPIOutput struct {
+	Error string `json:"error,omitempty"`
+	Meta  struct {
+		Date    time.Time
+		Version string
+	} `json:"meta"`
+	Identifiers map[string]string `json:"identifiers,omitempty"`
+	Data        map[string]*Price `json:"data,omitempty"`
+}
+
+func GenericAPI(w http.ResponseWriter, r *http.Request) {
+	sig := r.FormValue("sig")
+	out := PriceAPIOutput{}
+	out.Meta.Date = time.Now()
+	out.Meta.Version = "0.0"
+
+	path := strings.TrimPrefix(r.URL.Path, "/api/mtg/")
+	fields := strings.Split(path, "/")
+
+	if len(fields) != 2 {
+		out.Error = "Not found"
+		json.NewEncoder(w).Encode(&out)
+		return
+	}
+
+	allowedList := GetParamFromSig(sig, "API")
+	req := fields[0]
+	stores := strings.Split(req, ",")
+	params := strings.Split(allowedList, ",")
+
+	// If there is a single unauthorized store, fail the request
+	for _, store := range stores {
+		if SigCheck && !SliceStringHas(params, store) && allowedList != "*" {
+			out.Error = "Forbidden"
+			json.NewEncoder(w).Encode(&out)
+			return
+		}
+	}
+
+	uuid := strings.TrimSuffix(fields[1], ".json")
+	co, err := mtgmatcher.GetUUID(uuid)
+	if err != nil {
+		// Try again, assuming it was a scryfall id
+		uuid = mtgmatcher.Scryfall2UUID(uuid)
+		co, err = mtgmatcher.GetUUID(uuid)
+		if err != nil {
+			out.Error = "Not found"
+			json.NewEncoder(w).Encode(&out)
+			return
+		}
+	}
+
+	out.Data = map[string]*Price{}
+	out.Identifiers = map[string]string{}
+
+	out.Identifiers["tcgplayer"] = co.Identifiers["tcgplayerProductId"]
+	out.Identifiers["cardmarket"] = co.Identifiers["mcmId"]
+	out.Identifiers["scryfall"] = co.Identifiers["scryfallId"]
+	out.Identifiers["mtgjson"] = uuid
+
+	for _, seller := range Sellers {
+		if seller == nil {
+			continue
+		}
+		if SliceStringHas(stores, seller.Info().Shorthand) || req == "*" {
+			inv, err := seller.Inventory()
+			if err != nil {
+				break
+			}
+			entries := inv[uuid]
+			for _, entry := range entries {
+				if entry.Conditions == "NM" {
+					if out.Data[seller.Info().Shorthand] == nil {
+						out.Data[seller.Info().Shorthand] = &Price{}
+					}
+					out.Data[seller.Info().Shorthand].Retail = entry.Price
+					break
+				}
+			}
+		}
+	}
+	for _, vendor := range Vendors {
+		if vendor == nil {
+			continue
+		}
+		if SliceStringHas(stores, vendor.Info().Shorthand) || req == "*" {
+			bl, err := vendor.Buylist()
+			if err != nil {
+				break
+			}
+			entries := bl[uuid]
+			for _, entry := range entries {
+				if out.Data[vendor.Info().Shorthand] == nil {
+					out.Data[vendor.Info().Shorthand] = &Price{}
+				}
+				out.Data[vendor.Info().Shorthand].Buylist = entry.BuyPrice
+				break
+			}
+		}
+	}
+
+	json.NewEncoder(w).Encode(&out)
 }

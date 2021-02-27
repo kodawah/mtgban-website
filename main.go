@@ -485,6 +485,7 @@ func main() {
 		http.Handle(nav.Link, enforceSigning(http.HandlerFunc(nav.Handle)))
 	}
 
+	http.Handle("/api/mtg/", enforceAPISigning(http.HandlerFunc(GenericAPI)))
 	http.Handle("/api/mtgjson/ck.json", enforceAPISigning(http.HandlerFunc(API)))
 	http.HandleFunc("/favicon.ico", Favicon)
 	http.HandleFunc("/auth", Auth)
