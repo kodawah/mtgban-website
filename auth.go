@@ -266,7 +266,7 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 				tierTitle = "Modern"
 			case "LEGACY", "LEGACY (Early Adopters)":
 				tierTitle = "Legacy"
-			case "Test Role":
+			case "Test Role", "Mod's":
 				tierTitle = "Test Role"
 			}
 		}
