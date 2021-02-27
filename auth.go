@@ -257,6 +257,11 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	invite, found := Config.Patreon.Emails[userData.Email]
+	if found {
+		tierTitle = invite
+	}
+
 	if tierTitle == "" {
 		for _, userId := range userData.UserIds[1:] {
 			foundTitle, _ := getUserTier(tc, userId)

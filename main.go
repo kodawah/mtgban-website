@@ -246,6 +246,7 @@ var Config struct {
 	Patreon             struct {
 		Secret map[string]string   `json:"secret"`
 		Ids    map[string][]string `json:"ids"`
+		Emails map[string]string   `json:"emails"`
 	} `json:"patreon"`
 }
 
