@@ -110,6 +110,7 @@ type searchResult struct {
 }
 
 var filteredEditions = []string{
+	"FBB",
 	"PTC",
 	"WC00",
 	"WC01",
