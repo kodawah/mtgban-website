@@ -113,11 +113,12 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 			}
 
 			log.Println("Building new code")
-			_, err = build()
+			out, err := build()
 			if err != nil {
 				log.Println(err)
 				return
 			}
+			log.Println(out)
 
 			log.Println("Restarting")
 			os.Exit(0)
