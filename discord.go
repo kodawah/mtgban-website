@@ -111,6 +111,9 @@ type searchResult struct {
 
 var filteredEditions = []string{
 	"FBB",
+	"LEGITA",
+	"DRKITA",
+	"RIN",
 	"PTC",
 	"WC00",
 	"WC01",
