@@ -75,7 +75,7 @@ func keyruneForCardSet(cardId string) string {
 	keyrune := set.KeyruneCode
 
 	rarity := co.Card.Rarity
-	if co.Card.SetCode == "TSB" {
+	if rarity == "special" {
 		rarity = "timeshifted"
 	}
 	out := fmt.Sprintf("ss-%s ss-%s", strings.ToLower(keyrune), rarity)

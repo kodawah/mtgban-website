@@ -591,7 +591,7 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	pageVars.SortDir = dir
 	pageVars.FilterSet = filter
 	pageVars.FilterRarity = rarity
-	pageVars.Rarities = []string{"", "M", "R", "U", "C"}
+	pageVars.Rarities = []string{"", "M", "R", "U", "C", "S"}
 
 	for _, newspage := range NewspaperPages {
 		if newspage.Option == page {
