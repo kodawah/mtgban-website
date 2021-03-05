@@ -143,7 +143,7 @@ func getUserIds(tc *http.Client) (*PatreonUserData, error) {
 	return &PatreonUserData{
 		UserIds:  userIds,
 		FullName: userData.Data.Attributes.FullName,
-		Email:    userData.Data.Attributes.Email,
+		Email:    strings.ToLower(userData.Data.Attributes.Email),
 	}, nil
 }
 
