@@ -282,9 +282,18 @@ func parseSearchOptions(query string) (string, map[string]string) {
 		options["foil"] = "true"
 	}
 
-	if strings.TrimSpace(query) == "random" {
+	if strings.HasPrefix(query, "random") {
+		edition := ""
+		elements := strings.Split(query, "|")
+		if len(elements) > 1 {
+			edition = findEdition(elements[1])
+		}
+
 		sets := mtgmatcher.GetSets()
 		for _, set := range sets {
+			if edition != "" && !SliceStringHas(strings.Split(edition, ","), set.Code) {
+				continue
+			}
 			index := rand.Intn(len(set.Cards))
 			query = set.Cards[index].UUID
 			break
