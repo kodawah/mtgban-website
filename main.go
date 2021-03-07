@@ -60,9 +60,9 @@ type PageVars struct {
 	FoundVendors map[string][]SearchEntry
 	Metadata     map[string]GenericCard
 
-	SellerShort       string
-	SellerAffiliate   bool
-	SellerNoAvailable bool
+	ScraperShort    string
+	HasAffiliate    bool
+	QtyNotAvailable bool
 
 	Arb            []Arbitrage
 	UseCredit      bool
