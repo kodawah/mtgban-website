@@ -61,7 +61,6 @@ type PageVars struct {
 	Metadata     map[string]GenericCard
 
 	SellerShort       string
-	SellerUpdate      string
 	SellerAffiliate   bool
 	SellerNoAvailable bool
 
