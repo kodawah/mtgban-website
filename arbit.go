@@ -281,10 +281,9 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	}
 
 	pageVars.SellerShort = source.Info().Shorthand
-	pageVars.SellerFull = source.Info().Name
 	pageVars.SellerUpdate = source.Info().InventoryTimestamp.Format(time.RFC3339)
 	pageVars.SellerNoAvailable = source.Info().NoQuantityInventory
-	pageVars.SellerAffiliate = SliceStringHas(Config.AffiliatesList, pageVars.SellerFull)
+	pageVars.SellerAffiliate = SliceStringHas(Config.AffiliatesList, source.Info().Name)
 	pageVars.UseCredit = useCredit
 	pageVars.FilterCond = nocond
 	pageVars.FilterFoil = nofoil
