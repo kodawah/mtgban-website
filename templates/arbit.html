@@ -35,6 +35,8 @@
         <div class="indent">
             {{if .GlobalMode}}
                 <p>Please use the top bar to choose the index to compare from.</p>
+            {{else if .ReverseMode}}
+                <p>Please use the top bar to choose the vendor to sell to.</p>
             {{else}}
                 <p>Please use the top bar to choose the seller to buy from.</p>
             {{end}}
@@ -49,7 +51,7 @@
                     <li>Each page will provide a list of cards that can be arbitraged from, according to the value reported from other markets.</li>
                 {{else}}
                     <li>Note that buylist prices are always displayed NM to make them easier to find, but the actual spread and difference is computer according to the card conditions.</li>
-                    <li>Each seller page will contain a list of vendors, with a brief summary at the top containing the number of arbitrage opportunities.</li>
+                    <li>Each {{if .ReverseMode}}vendor{{else}}seller{{end}} page will contain a list of {{if .ReverseMode}}sellers{{else}}vendors{{end}}, with a brief summary at the top containing the number of arbitrage opportunities.</li>
                 {{end}}
                 <li>In case of mistakes or incongruities, please notify the devs in the BAN Discord.</li>
                 <li>Should you find this content useful, consider clicking on one of the provided links to make a purchase on the website, and directly support BAN.</li>

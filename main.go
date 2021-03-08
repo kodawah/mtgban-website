@@ -75,6 +75,7 @@ type PageVars struct {
 	FilterQuantity bool
 	SortOption     string
 	GlobalMode     bool
+	ReverseMode    bool
 
 	Page         string
 	ToC          []NewspaperPage
@@ -168,6 +169,7 @@ var OrderNav = []string{
 	"Sleepers",
 	"Global",
 	"Arbit",
+	"Reverse",
 	"Admin",
 }
 
@@ -215,6 +217,13 @@ func init() {
 			Short:  "📈",
 			Link:   "/arbit",
 			Handle: Arbit,
+			Page:   "arbit.html",
+		},
+		"Reverse": NavElem{
+			Name:   "Reverse",
+			Short:  "📉",
+			Link:   "/reverse",
+			Handle: Reverse,
 			Page:   "arbit.html",
 		},
 		"Admin": NavElem{

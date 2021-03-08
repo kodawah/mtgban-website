@@ -52,9 +52,21 @@ type Arbitrage struct {
 }
 
 func Arbit(w http.ResponseWriter, r *http.Request) {
+	arbit(w, r, false)
+}
+
+func Reverse(w http.ResponseWriter, r *http.Request) {
+	arbit(w, r, true)
+}
+
+func arbit(w http.ResponseWriter, r *http.Request, reverse bool) {
 	sig := getSignatureFromCookies(r)
 
-	pageVars := genPageNav("Arbitrage", sig)
+	pageName := "Arbitrage"
+	if reverse {
+		pageName = "Reverse"
+	}
+	pageVars := genPageNav(pageName, sig)
 
 	var allowlistSellers []string
 	allowlistSellersOpt := GetParamFromSig(sig, "ArbitEnabled")
@@ -85,6 +97,8 @@ func Arbit(w http.ResponseWriter, r *http.Request) {
 	} else if blocklistVendorsOpt != "NONE" {
 		blocklistVendors = strings.Split(blocklistVendorsOpt, ",")
 	}
+
+	pageVars.ReverseMode = reverse
 
 	scraperCompare(w, r, pageVars, allowlistSellers, blocklistVendors)
 }
@@ -148,7 +162,7 @@ func Global(w http.ResponseWriter, r *http.Request) {
 func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, allowlistSellers []string, blocklistVendors []string, flags ...bool) {
 	r.ParseForm()
 
-	var source mtgban.Seller
+	var source mtgban.Scraper
 	var useCredit bool
 	var nocond, nofoil, nocomm, noposi, nopenny, nolow, noqty bool
 	var message string
@@ -161,24 +175,44 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	for k, v := range r.Form {
 		switch k {
 		case "source":
-			if !SliceStringHas(allowlistSellers, v[0]) {
-				log.Println("Unauthorized attempt with", v[0])
-				message = "Unknown " + v[0] + " seller"
-				break
-			}
-
-			for i, seller := range Sellers {
-				if seller == nil {
-					log.Println("nil seller at position", i)
-					continue
-				}
-				if seller.Info().Shorthand == v[0] {
-					source = seller
+			// Source can be a Seller or Vendor depending on operation mode
+			if pageVars.ReverseMode {
+				if SliceStringHas(blocklistVendors, v[0]) {
+					log.Println("Unauthorized attempt with", v[0])
+					message = "Unknown " + v[0] + " seller"
 					break
+				}
+
+				for i, vendor := range Vendors {
+					if vendor == nil {
+						log.Println("nil vendor at position", i)
+						continue
+					}
+					if vendor.Info().Shorthand == v[0] {
+						source = vendor
+						break
+					}
+				}
+			} else {
+				if !SliceStringHas(allowlistSellers, v[0]) {
+					log.Println("Unauthorized attempt with", v[0])
+					message = "Unknown " + v[0] + " seller"
+					break
+				}
+
+				for i, seller := range Sellers {
+					if seller == nil {
+						log.Println("nil seller at position", i)
+						continue
+					}
+					if seller.Info().Shorthand == v[0] {
+						source = seller
+						break
+					}
 				}
 			}
 			if source == nil {
-				message = "Unknown " + v[0] + " seller (vendor only?)"
+				message = "Unknown " + v[0] + " source"
 			}
 
 		case "credit":
@@ -218,40 +252,54 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		return
 	}
 
-	for i, newSeller := range Sellers {
-		if newSeller == nil {
-			log.Println("nil seller at position", i)
-			continue
+	// Set up menu bar, by selecting which scrapers should be selectable as source
+	var menuScrapers []mtgban.Scraper
+	if pageVars.ReverseMode {
+		for _, vendor := range Vendors {
+			if vendor == nil || SliceStringHas(blocklistVendors, vendor.Info().Shorthand) {
+				continue
+			}
+			menuScrapers = append(menuScrapers, vendor)
 		}
-		if !SliceStringHas(allowlistSellers, newSeller.Info().Shorthand) {
-			continue
+	} else {
+		for _, seller := range Sellers {
+			if seller == nil || !SliceStringHas(allowlistSellers, seller.Info().Shorthand) {
+				continue
+			}
+			menuScrapers = append(menuScrapers, seller)
 		}
+	}
 
+	// Populate the menu bar with the pool selected above
+	for _, scraper := range menuScrapers {
 		var link string
 		if pageVars.GlobalMode {
 			link = "/global"
 		} else {
-			if newSeller.Info().MetadataOnly {
+			if scraper.Info().MetadataOnly {
 				continue
 			}
 			link = "/arbit"
+			if pageVars.ReverseMode {
+				link = "/reverse"
+			}
 		}
 
 		nav := NavElem{
-			Name:  newSeller.Info().Name,
-			Short: newSeller.Info().Shorthand,
+			Name:  scraper.Info().Name,
+			Short: scraper.Info().Shorthand,
 			Link:  link,
 		}
 
-		if newSeller.Info().Name == TCG_MAIN {
+		if scraper.Info().Name == TCG_MAIN {
 			nav.Short = "TCG"
 		}
-		if newSeller.Info().Name == TCG_DIRECT {
+		if scraper.Info().Name == TCG_DIRECT {
 			nav.Short = "Direct"
 		}
 
 		v := url.Values{}
-		v.Set("source", newSeller.Info().Shorthand)
+		v.Set("source", scraper.Info().Shorthand)
 		v.Set("credit", fmt.Sprint(useCredit))
 		v.Set("nocond", fmt.Sprint(nocond))
 		v.Set("nofoil", fmt.Sprint(nofoil))
@@ -264,7 +312,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 
 		nav.Link += "?" + v.Encode()
 
-		if source != nil && source.Info().Name == newSeller.Info().Name {
+		if source != nil && source.Info().Name == scraper.Info().Name {
 			nav.Active = true
 			nav.Class = "selected"
 		}
@@ -332,8 +380,9 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		opts.Editions = FilteredEditions
 	}
 
+	// The pool of scrapers that source will be compared against
 	var scrapers []mtgban.Scraper
-	if pageVars.GlobalMode {
+	if pageVars.GlobalMode || pageVars.ReverseMode {
 		for i, seller := range Sellers {
 			if seller == nil {
 				log.Println("nil seller at position", i)
@@ -355,8 +404,14 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		if scraper.Info().Name == source.Info().Name {
 			continue
 		}
-		if SliceStringHas(blocklistVendors, scraper.Info().Shorthand) {
-			continue
+		if pageVars.ReverseMode {
+			if scraper.Info().MetadataOnly {
+				continue
+			}
+		} else {
+			if SliceStringHas(blocklistVendors, scraper.Info().Shorthand) {
+				continue
+			}
 		}
 
 		if scraper.Info().Shorthand == "ABU" {
@@ -366,9 +421,11 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		var arbit []mtgban.ArbitEntry
 		var err error
 		if pageVars.GlobalMode {
-			arbit, err = mtgban.Mismatch(opts, scraper.(mtgban.Seller), source)
+			arbit, err = mtgban.Mismatch(opts, scraper.(mtgban.Seller), source.(mtgban.Seller))
+		} else if pageVars.ReverseMode {
+			arbit, err = mtgban.Arbit(opts, source.(mtgban.Vendor), scraper.(mtgban.Seller))
 		} else {
-			arbit, err = mtgban.Arbit(opts, scraper.(mtgban.Vendor), source)
+			arbit, err = mtgban.Arbit(opts, scraper.(mtgban.Vendor), source.(mtgban.Seller))
 		}
 		if err != nil {
 			log.Println(err)
@@ -463,9 +520,17 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	if len(pageVars.Arb) == 0 {
 		pageVars.InfoMessage = "No arbitrage available!"
 	}
-	pageVars.Title = "Arbitrage from " + source.Info().Name
+
 	if pageVars.GlobalMode {
 		pageVars.Title = "Market Imbalance in " + source.Info().Name
+	} else {
+		pageVars.Title = "Arbitrage"
+		if pageVars.ReverseMode {
+			pageVars.Title += " towards "
+		} else {
+			pageVars.Title += " from "
+		}
+		pageVars.Title += source.Info().Name
 	}
 
 	render(w, "arbit.html", pageVars)

@@ -538,6 +538,7 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 		v.Set("Sleepers", "true")
 		v.Set("Arbit", "true")
 		v.Set("Global", "true")
+		v.Set("Reverse", "true")
 		v.Set("Admin", "true")
 	}
 	if v.Get("Arbit") == "true" {
