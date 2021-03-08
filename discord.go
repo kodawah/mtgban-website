@@ -114,6 +114,8 @@ var filteredEditions = []string{
 	"LEGITA",
 	"DRKITA",
 	"RIN",
+	"4BB",
+	"CHRJPN",
 	"PTC",
 	"WC00",
 	"WC01",
@@ -585,6 +587,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			switch co.SetCode {
 			case "FBB", "LEGITA", "DRKITA":
 				lang = "Italian"
+			case "4BB", "CHRJPN":
+				lang = "Japanese"
 			}
 			ogFields, err = grabLastSold(co.Identifiers["tcgplayerProductId"], co.Foil, lang)
 			if err != nil {
