@@ -366,9 +366,17 @@ type PriceEntry struct {
 	Shipping float64 `json:"shipping"`
 }
 
-func grabLastSold(tcgId string, foil bool, lang string) ([]embedField, error) {
+func grabLastSold(cardId string, lang string) ([]embedField, error) {
+	// Retrieve information about the card
+	co, err := mtgmatcher.GetUUID(cardId)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get the id for TCGPlayer, if missing exit quietly
+	tcgId := co.Identifiers["tcgplayerProductId"]
 	if tcgId == "" {
-		return nil, errors.New("empty tcgId")
+		return nil, nil
 	}
 
 	link := "http://localhost:8081/" + tcgId
@@ -396,10 +404,12 @@ func grabLastSold(tcgId string, foil bool, lang string) ([]embedField, error) {
 	var shipping []string
 	var hasValues bool
 	for i, entry := range entries["TCG Last Sold Listing"] {
-		if foil && !strings.Contains(entry.Title, "Foil") {
+		// If the card requested is the foil version, skip any non-foil entry
+		if co.Foil && !strings.Contains(entry.Title, "Foil") {
 			continue
 		}
 
+		// If language is requested, skip any language non matching it
 		if lang != "" && !strings.HasSuffix(entry.Title, lang) {
 			continue
 		}
@@ -426,7 +436,8 @@ func grabLastSold(tcgId string, foil bool, lang string) ([]embedField, error) {
 				field.Value = "n/a"
 			}
 			fields = append(fields, field)
-			shipping = []string{}
+			// Reset the shipping slice
+			shipping = shipping[0:]
 		}
 	}
 
@@ -590,7 +601,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			case "4BB", "CHRJPN":
 				lang = "Japanese"
 			}
-			ogFields, err = grabLastSold(co.Identifiers["tcgplayerProductId"], co.Foil, lang)
+			ogFields, err = grabLastSold(searchRes.CardId, lang)
 			if err != nil {
 				errMsg = "Internal bot error ┏༼ ◉ ╭╮ ◉༽┓"
 				log.Println("Bot error:", err, "from", content)
