@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -400,6 +401,7 @@ func grabLastSold(cardId string, lang string) ([]embedField, error) {
 		return nil, err
 	}
 
+	toExpire := map[string]string{}
 	var fields []embedField
 	var shipping []string
 	var hasValues bool
@@ -419,6 +421,31 @@ func grabLastSold(cardId string, lang string) ([]embedField, error) {
 			hasValues = true
 			value = fmt.Sprintf("$%0.2f", entry.Price)
 			shipping = append(shipping, fmt.Sprintf("%0.2f", entry.Shipping))
+
+			// Stash the same values in redis
+			// Standardize the conditions field (formatted as "Near Mint Foil - Japanese)"
+			// using BAN's two letter format
+			title := strings.TrimSuffix(strings.Split(entry.Title, " - ")[0], " Foil")
+			condition := map[string]string{
+				"Near Mint":         "NM",
+				"Lightly Played":    "SP",
+				"Moderately Played": "MP",
+				"Heavily Played":    "HP",
+				"Damaged":           "PO",
+			}[title]
+			// This makes sure that the id is always correct, even when foil differs
+			id, err := mtgmatcher.Match(&mtgmatcher.Card{
+				Id:   cardId,
+				Foil: strings.Contains(entry.Title, "Foil"),
+			})
+			if err == nil {
+				err = LastSoldDB.HSet(context.Background(), id, condition, entry.Price).Err()
+				if err != nil {
+					log.Println(err)
+				}
+				// Track ids so that we can set their expiration later
+				toExpire[id] = ""
+			}
 		}
 		fields = append(fields, embedField{
 			Name:   entry.Title,
@@ -438,6 +465,14 @@ func grabLastSold(cardId string, lang string) ([]embedField, error) {
 			fields = append(fields, field)
 			// Reset the shipping slice
 			shipping = shipping[0:]
+		}
+	}
+
+	// Drop the redis key after 24h
+	for id := range toExpire {
+		err = LastSoldDB.Expire(context.Background(), id, 24*time.Hour).Err()
+		if err != nil {
+			log.Println(err)
 		}
 	}
 

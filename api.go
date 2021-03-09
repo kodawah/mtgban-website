@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -130,6 +132,8 @@ type PriceAPIOutput struct {
 	} `json:"meta"`
 	Identifiers map[string]string `json:"identifiers,omitempty"`
 	Data        map[string]*Price `json:"data,omitempty"`
+
+	LastSold map[string]map[string]float64 `json:"last_sold,omitempty"`
 }
 
 func GenericAPI(w http.ResponseWriter, r *http.Request) {
@@ -151,6 +155,63 @@ func GenericAPI(w http.ResponseWriter, r *http.Request) {
 	req := fields[0]
 	stores := strings.Split(req, ",")
 	params := strings.Split(allowedList, ",")
+	uuid := strings.TrimSuffix(fields[1], ".json")
+
+	if req == "tcgLastSold" {
+		if SigCheck && !SliceStringHas(params, "tcgLastSold") {
+			out.Error = "Forbidden"
+			json.NewEncoder(w).Encode(&out)
+			return
+		}
+
+		out.LastSold = map[string]map[string]float64{}
+
+		// Grab all the cached keys when none is provided
+		if uuid == "" {
+			var cursor uint64
+			for {
+				var keys []string
+				var err error
+				keys, cursor, err = LastSoldDB.Scan(context.Background(), cursor, "*", 10).Result()
+				if err != nil {
+					out.Error = err.Error()
+					break
+				}
+
+				for _, cardId := range keys {
+					results, err := LastSoldDB.HGetAll(context.Background(), cardId).Result()
+					if err != nil {
+						continue
+					}
+					if len(results) == 0 {
+						continue
+					}
+					out.LastSold[cardId] = map[string]float64{}
+					for cond, priceStr := range results {
+						price, _ := strconv.ParseFloat(priceStr, 64)
+						out.LastSold[cardId][cond] = price
+					}
+				}
+
+				if cursor == 0 {
+					break
+				}
+			}
+		} else {
+			results, err := LastSoldDB.HGetAll(context.Background(), uuid).Result()
+			if err != nil {
+				out.Error = err.Error()
+			} else if len(results) != 0 {
+				out.LastSold[uuid] = map[string]float64{}
+				for cond, priceStr := range results {
+					price, _ := strconv.ParseFloat(priceStr, 64)
+					out.LastSold[uuid][cond] = price
+				}
+			}
+		}
+		json.NewEncoder(w).Encode(&out)
+		return
+	}
 
 	// If there is a single unauthorized store, fail the request
 	for _, store := range stores {
@@ -161,7 +222,6 @@ func GenericAPI(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	uuid := strings.TrimSuffix(fields[1], ".json")
 	co, err := mtgmatcher.GetUUID(uuid)
 	if err != nil {
 		// Try again, assuming it was a scryfall id

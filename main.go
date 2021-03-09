@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -16,6 +17,7 @@ import (
 
 	"database/sql"
 
+	redis "github.com/go-redis/redis/v8"
 	_ "github.com/go-sql-driver/mysql"
 	cron "gopkg.in/robfig/cron.v2"
 
@@ -108,6 +110,7 @@ type PageVars struct {
 	DiskStatus   string
 	MemoryStatus string
 	LatestHash   string
+	CacheSize    int
 }
 
 type NavElem struct {
@@ -269,6 +272,11 @@ var Newspaper3dayDB *sql.DB
 var Newspaper1dayDB *sql.DB
 var ExploreDB *sql.DB
 
+var LastSoldDB = redis.NewClient(&redis.Options{
+	Addr: "localhost:6379",
+	DB:   0,
+})
+
 func Favicon(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "img/misc/favicon.ico")
 }
@@ -418,6 +426,15 @@ func main() {
 	if err != nil {
 		if DevMode {
 			log.Println("No connection available to /sites DB due to", err)
+		} else {
+			log.Fatalln(err)
+		}
+	}
+
+	err = LastSoldDB.Ping(context.Background()).Err()
+	if err != nil {
+		if DevMode {
+			log.Println("Could not ping redis server due to err:", err)
 		} else {
 			log.Fatalln(err)
 		}
