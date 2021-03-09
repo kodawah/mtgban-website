@@ -125,8 +125,8 @@ type Price struct {
 type PriceAPIOutput struct {
 	Error string `json:"error,omitempty"`
 	Meta  struct {
-		Date    time.Time
-		Version string
+		Date    time.Time `json:"date"`
+		Version string    `json:"version"`
 	} `json:"meta"`
 	Identifiers map[string]string `json:"identifiers,omitempty"`
 	Data        map[string]*Price `json:"data,omitempty"`
