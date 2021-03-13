@@ -13,6 +13,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-cleanhttp"
+
 	"github.com/kodabb/go-mtgban/mtgmatcher"
 	"github.com/kodabb/go-mtgban/mtgmatcher/mtgjson"
 )
@@ -257,7 +259,7 @@ func Notify(kind, message string) {
 			return
 		}
 
-		resp, err := http.Post(Config.DiscordHook, "application/json", bytes.NewReader(reqBody))
+		resp, err := cleanhttp.DefaultClient().Post(Config.DiscordHook, "application/json", bytes.NewReader(reqBody))
 		if err != nil {
 			log.Println(err)
 			return
