@@ -13,7 +13,7 @@ require (
 	github.com/go-redis/redis/v8 v8.7.1
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/hashicorp/go-cleanhttp v0.5.2
-	github.com/kodabb/go-mtgban v0.0.0-20210307213336-24ff1ef9e281
+	github.com/kodabb/go-mtgban v0.0.0-20210313133522-9b82904195d1
 	github.com/mackerelio/go-osstat v0.1.0
 	golang.org/x/oauth2 v0.0.0-20210218202405-ba52d332ba99
 	golang.org/x/sys v0.0.0-20210112080510-489259a85091

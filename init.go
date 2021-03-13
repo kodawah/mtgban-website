@@ -449,10 +449,7 @@ var ScraperOptions = map[string]*scraperOption{
 	},
 	"purplemana": &scraperOption{
 		Init: func() (mtgban.Scraper, error) {
-			scraper, err := purplemana.NewScraper(Config.Api["service_account_file"])
-			if err != nil {
-				return nil, err
-			}
+			scraper := purplemana.NewScraper()
 			scraper.LogCallback = log.Printf
 			return scraper, nil
 		},
