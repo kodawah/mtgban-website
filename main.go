@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"html/template"
@@ -262,6 +263,7 @@ var Config struct {
 
 var DevMode bool
 var SigCheck bool
+var LogDir string
 var LastUpdate time.Time
 var DatabaseLoaded bool
 var Sellers []mtgban.Seller
@@ -415,15 +417,25 @@ func main() {
 	config := flag.String("cfg", "config.json", "Load configuration file")
 	devMode := flag.Bool("dev", false, "Enable developer mode")
 	sigCheck := flag.Bool("sig", false, "Enable signature verification")
+	logdir := flag.String("log", "logs", "Directory for scrapers logs")
 	flag.Parse()
 	DevMode = *devMode
 	SigCheck = true
 	if DevMode {
 		SigCheck = *sigCheck
 	}
+	LogDir = *logdir
 
 	// load necessary environmental variables
 	err := loadVars(*config)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = os.Stat(LogDir)
+	if errors.Is(err, os.ErrNotExist) {
+		err = os.MkdirAll(LogDir, 0700)
+	}
 	if err != nil {
 		log.Fatalln(err)
 	}

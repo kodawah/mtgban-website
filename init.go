@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/leemcloughlin/logfile"
 
 	"github.com/kodabb/go-mtgban/abugames"
 	"github.com/kodabb/go-mtgban/amazon"
@@ -324,7 +325,7 @@ type scraperOption struct {
 	OnlyVendor bool
 
 	// The initialization function used to allocate and initialize needed resources
-	Init func() (mtgban.Scraper, error)
+	Init func(logger *log.Logger) (mtgban.Scraper, error)
 
 	// For Market scrapers, list the sub-sellers that should be preserved
 	Keepers []string
@@ -343,21 +344,24 @@ type scraperOption struct {
 
 	// For Market scrapers, the array of redis DBs where each
 	MarketRDBs map[string]*redis.Client
+
+	// Log where scrapers... log
+	Logger *log.Logger
 }
 
 var ScraperOptions = map[string]*scraperOption{
 	"abugames": &scraperOption{
-		Init: func() (mtgban.Scraper, error) {
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper := abugames.NewScraper()
-			scraper.LogCallback = log.Printf
+			scraper.LogCallback = logger.Printf
 			return scraper, nil
 		},
 	},
 	"cardkingdom": &scraperOption{
 		DevEnabled: true,
-		Init: func() (mtgban.Scraper, error) {
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper := cardkingdom.NewScraper()
-			scraper.LogCallback = log.Printf
+			scraper.LogCallback = logger.Printf
 			scraper.Partner = Config.Affiliate["CK"]
 			return scraper, nil
 		},
@@ -368,51 +372,51 @@ var ScraperOptions = map[string]*scraperOption{
 		StashBuylist: true,
 	},
 	"coolstuffinc": &scraperOption{
-		Init: func() (mtgban.Scraper, error) {
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper := coolstuffinc.NewScraperOfficial(Config.Api["csi_token"])
-			scraper.LogCallback = log.Printf
+			scraper.LogCallback = logger.Printf
 			return scraper, nil
 		},
 	},
 	"ninetyfive": &scraperOption{
-		Init: func() (mtgban.Scraper, error) {
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper, _ := ninetyfive.NewScraper(false)
-			scraper.LogCallback = log.Printf
+			scraper.LogCallback = logger.Printf
 			return scraper, nil
 		},
 	},
 	"starcitygames": &scraperOption{
 		OnlyVendor: true,
-		Init: func() (mtgban.Scraper, error) {
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper, err := starcitygames.NewScraper(Config.Api["scg_username"], Config.Api["scg_password"])
 			if err != nil {
 				return nil, err
 			}
-			scraper.LogCallback = log.Printf
+			scraper.LogCallback = logger.Printf
 			return scraper, nil
 		},
 	},
 	"strikezone": &scraperOption{
 		DevEnabled: true,
-		Init: func() (mtgban.Scraper, error) {
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper := strikezone.NewScraper()
-			scraper.LogCallback = log.Printf
+			scraper.LogCallback = logger.Printf
 			return scraper, nil
 		},
 	},
 	"trollandtoad": &scraperOption{
-		Init: func() (mtgban.Scraper, error) {
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper := trollandtoad.NewScraper()
-			scraper.LogCallback = log.Printf
+			scraper.LogCallback = logger.Printf
 			return scraper, nil
 		},
 	},
 	"tcg_market": &scraperOption{
 		DevEnabled: true,
-		Init: func() (mtgban.Scraper, error) {
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper := tcgplayer.NewScraperMarket(Config.Api["tcg_public"], Config.Api["tcg_private"])
 			scraper.Affiliate = Config.Affiliate["TCG"]
-			scraper.LogCallback = log.Printf
+			scraper.LogCallback = logger.Printf
 			scraper.MaxConcurrency = 5
 			return scraper, nil
 		},
@@ -421,10 +425,10 @@ var ScraperOptions = map[string]*scraperOption{
 	},
 	"tcg_index": &scraperOption{
 		DevEnabled: true,
-		Init: func() (mtgban.Scraper, error) {
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper := tcgplayer.NewScraperIndex(Config.Api["tcg_public"], Config.Api["tcg_private"])
 			scraper.Affiliate = Config.Affiliate["TCG"]
-			scraper.LogCallback = log.Printf
+			scraper.LogCallback = logger.Printf
 			scraper.MaxConcurrency = 4
 			return scraper, nil
 		},
@@ -443,92 +447,92 @@ var ScraperOptions = map[string]*scraperOption{
 	},
 	"magiccorner": &scraperOption{
 		OnlySeller: true,
-		Init: func() (mtgban.Scraper, error) {
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper, err := magiccorner.NewScraper()
 			if err != nil {
 				return nil, err
 			}
-			scraper.LogCallback = log.Printf
+			scraper.LogCallback = logger.Printf
 			return scraper, nil
 		},
 	},
 	"blueprint": &scraperOption{
 		DevEnabled: true,
-		Init: func() (mtgban.Scraper, error) {
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper := blueprint.NewScraper()
-			scraper.LogCallback = log.Printf
+			scraper.LogCallback = logger.Printf
 			return scraper, nil
 		},
 	},
 	"mythicmtg": &scraperOption{
-		Init: func() (mtgban.Scraper, error) {
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper := mythicmtg.NewScraper()
-			scraper.LogCallback = log.Printf
+			scraper.LogCallback = logger.Printf
 			return scraper, nil
 		},
 	},
 	"cardmarket": &scraperOption{
 		DevEnabled: true,
-		Init: func() (mtgban.Scraper, error) {
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper, err := cardmarket.NewScraperIndex(Config.Api["mkm_app_token"], Config.Api["mkm_app_secret"])
 			if err != nil {
 				return nil, err
 			}
 			scraper.Affiliate = Config.Affiliate["MKM"]
-			scraper.LogCallback = log.Printf
+			scraper.LogCallback = logger.Printf
 			return scraper, nil
 		},
 		Keepers: []string{MKM_LOW, MKM_TREND},
 	},
 	"cardsphere": &scraperOption{
-		Init: func() (mtgban.Scraper, error) {
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper, err := cardsphere.NewScraperFull(Config.Api["csphere_email"], Config.Api["csphere_password"])
 			if err != nil {
 				return nil, err
 			}
-			scraper.LogCallback = log.Printf
+			scraper.LogCallback = logger.Printf
 			scraper.MaxConcurrency = 3
 			return scraper, nil
 		},
 	},
 	"amazon": &scraperOption{
 		DevEnabled: true,
-		Init: func() (mtgban.Scraper, error) {
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper := amazon.NewScraper(Config.Api["amz_token"])
-			scraper.LogCallback = log.Printf
+			scraper.LogCallback = logger.Printf
 			return scraper, nil
 		},
 	},
 	"cardtrader": &scraperOption{
 		DevEnabled: true,
-		Init: func() (mtgban.Scraper, error) {
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper := cardtrader.NewScraperMarket(Config.Api["cardtrader"])
-			scraper.LogCallback = log.Printf
+			scraper.LogCallback = logger.Printf
 			return scraper, nil
 		},
 	},
 	"mtgseattle": &scraperOption{
-		Init: func() (mtgban.Scraper, error) {
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper := mtgseattle.NewScraper()
-			scraper.LogCallback = log.Printf
+			scraper.LogCallback = logger.Printf
 			return scraper, nil
 		},
 	},
 	"purplemana": &scraperOption{
-		Init: func() (mtgban.Scraper, error) {
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper := purplemana.NewScraper()
-			scraper.LogCallback = log.Printf
+			scraper.LogCallback = logger.Printf
 			return scraper, nil
 		},
 	},
 	"hareruya": &scraperOption{
 		OnlyVendor: true,
-		Init: func() (mtgban.Scraper, error) {
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper, err := hareruya.NewScraper()
 			if err != nil {
 				return nil, err
 			}
-			scraper.LogCallback = log.Printf
+			scraper.LogCallback = logger.Printf
 			return scraper, nil
 		},
 	},
@@ -563,7 +567,24 @@ func loadScrapers(doSellers, doVendors bool) {
 		if DevMode && !opt.DevEnabled {
 			continue
 		}
-		scraper, err := opt.Init()
+
+		// Create the destination logfile if not existing
+		if opt.Logger == nil {
+			logFile, err := logfile.New(&logfile.LogFile{
+				FileName:    path.Join(LogDir, key+".log"),
+				MaxSize:     500 * 1024,       // 500K duh!
+				Flags:       logfile.FileOnly, // Default append
+				OldVersions: 2,
+			})
+			if err != nil {
+				log.Println("Failed to create logFile for %s: %s", key, err)
+				opt.Logger = log.New(os.Stderr, "", 0)
+				continue
+			}
+			opt.Logger = log.New(logFile, "", 0)
+		}
+
+		scraper, err := opt.Init(opt.Logger)
 		if err != nil {
 			log.Println("error initializing", key, err)
 			continue

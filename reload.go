@@ -24,7 +24,7 @@ func reloadSingle(name string) {
 		ScraperOptions[name].Mutex.Unlock()
 	}()
 
-	scraper, err := ScraperOptions[name].Init()
+	scraper, err := ScraperOptions[name].Init(ScraperOptions[name].Logger)
 	if err != nil {
 		log.Println(err)
 		return
@@ -62,7 +62,7 @@ func reloadMarket(name string) {
 		ScraperOptions[name].Mutex.Unlock()
 	}()
 
-	scraper, err := ScraperOptions[name].Init()
+	scraper, err := ScraperOptions[name].Init(ScraperOptions[name].Logger)
 	if err != nil {
 		log.Println(err)
 		return
