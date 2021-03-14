@@ -284,14 +284,29 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 }
 
 type scraperOption struct {
-	Busy       bool
-	Mutex      sync.Mutex
+	// Scraper is busy, and there are active network requests
+	Busy bool
+
+	// The mutex to programmatically make a scraper busy
+	Mutex sync.Mutex
+
+	// Load data for this scraper in dev mode too
 	DevEnabled bool
+
+	// Disable any Vendor functionality associated with this scraper
 	OnlySeller bool
+
+	// Disable any Seller functionality associated with this scraper
 	OnlyVendor bool
-	Init       func() (mtgban.Scraper, error)
-	Keepers    []string
-	KeepersBL  string
+
+	// The initialization function used to allocate and initialize needed resources
+	Init func() (mtgban.Scraper, error)
+
+	// For Market scrapers, list the sub-sellers that should be preserved
+	Keepers []string
+
+	// For Market scrapers, list the buylists that should be preserved
+	KeepersBL string
 }
 
 var ScraperOptions = map[string]*scraperOption{
