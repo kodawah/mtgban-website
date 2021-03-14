@@ -464,7 +464,7 @@ func grabLastSold(cardId string, lang string) ([]embedField, error) {
 			}
 			fields = append(fields, field)
 			// Reset the shipping slice
-			shipping = shipping[0:]
+			shipping = shipping[:0]
 		}
 	}
 
