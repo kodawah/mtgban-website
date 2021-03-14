@@ -389,6 +389,28 @@ func loadVars(cfg string) error {
 	return nil
 }
 
+func openDBs() (err error) {
+	Newspaper3dayDB, err = sql.Open("mysql", Config.DBAddress+"/three_day_newspaper")
+	if err != nil {
+		return err
+	}
+	Newspaper1dayDB, err = sql.Open("mysql", Config.DBAddress+"/newspaper")
+	if err != nil {
+		return err
+	}
+	ExploreDB, err = sql.Open("mysql", Config.DBAddress+"/sites")
+	if err != nil {
+		return err
+	}
+
+	err = LastSoldDB.Ping(context.Background()).Err()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func main() {
 	config := flag.String("cfg", "config.json", "Load configuration file")
 	devMode := flag.Bool("dev", false, "Enable developer mode")
@@ -406,35 +428,10 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	Newspaper3dayDB, err = sql.Open("mysql", Config.DBAddress+"/three_day_newspaper")
+	err = openDBs()
 	if err != nil {
 		if DevMode {
-			log.Println("No connection available to /three_day_newspaper DB due to", err)
-		} else {
-			log.Fatalln(err)
-		}
-	}
-	Newspaper1dayDB, err = sql.Open("mysql", Config.DBAddress+"/newspaper")
-	if err != nil {
-		if DevMode {
-			log.Println("No connection available to /newspaper DB due to", err)
-		} else {
-			log.Fatalln(err)
-		}
-	}
-	ExploreDB, err = sql.Open("mysql", Config.DBAddress+"/sites")
-	if err != nil {
-		if DevMode {
-			log.Println("No connection available to /sites DB due to", err)
-		} else {
-			log.Fatalln(err)
-		}
-	}
-
-	err = LastSoldDB.Ping(context.Background()).Err()
-	if err != nil {
-		if DevMode {
-			log.Println("Could not ping redis server due to err:", err)
+			log.Println("Error opening databases:", err)
 		} else {
 			log.Fatalln(err)
 		}
