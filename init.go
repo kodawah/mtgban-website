@@ -633,12 +633,14 @@ func loadSellers(newSellers []mtgban.Seller) {
 			}
 			log.Println("Loading from scraper")
 
+			opts := ScraperOptions[ScraperMap[newSellers[i].Info().Shorthand]]
+
 			// Load inventory
-			ScraperOptions[ScraperMap[newSellers[i].Info().Shorthand]].Mutex.Lock()
-			ScraperOptions[ScraperMap[newSellers[i].Info().Shorthand]].Busy = true
+			opts.Mutex.Lock()
+			opts.Busy = true
 			inv, err := newSellers[i].Inventory()
-			ScraperOptions[ScraperMap[newSellers[i].Info().Shorthand]].Busy = false
-			ScraperOptions[ScraperMap[newSellers[i].Info().Shorthand]].Mutex.Unlock()
+			opts.Busy = false
+			opts.Mutex.Unlock()
 			if err != nil {
 				log.Println(newSellers[i].Info().Name, "error", err)
 				continue
@@ -690,12 +692,14 @@ func loadVendors(newVendors []mtgban.Vendor) {
 			}
 			log.Println("Loading from scraper")
 
+			opts := ScraperOptions[ScraperMap[newVendors[i].Info().Shorthand]]
+
 			// Load buylist
-			ScraperOptions[ScraperMap[newVendors[i].Info().Shorthand]].Mutex.Lock()
-			ScraperOptions[ScraperMap[newVendors[i].Info().Shorthand]].Busy = true
+			opts.Mutex.Lock()
+			opts.Busy = true
 			bl, err := newVendors[i].Buylist()
-			ScraperOptions[ScraperMap[newVendors[i].Info().Shorthand]].Busy = false
-			ScraperOptions[ScraperMap[newVendors[i].Info().Shorthand]].Mutex.Unlock()
+			opts.Busy = false
+			opts.Mutex.Unlock()
 			if err != nil {
 				log.Println(newVendors[i].Info().Name, "error", err)
 				continue
