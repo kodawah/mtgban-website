@@ -489,6 +489,10 @@ func main() {
 				log.Println(err)
 			}
 		})
+
+		// Every seven days in a month, clean up the csv cache
+		c.AddFunc("0 0 */7 * *", deleteOldCache)
+
 		c.Start()
 	}()
 
