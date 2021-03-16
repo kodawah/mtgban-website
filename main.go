@@ -20,6 +20,7 @@ import (
 
 	redis "github.com/go-redis/redis/v8"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/leemcloughlin/logfile"
 	cron "gopkg.in/robfig/cron.v2"
 
 	"github.com/kodabb/go-mtgban/mtgban"
@@ -177,6 +178,10 @@ var OrderNav = []string{
 	"Admin",
 }
 
+// The Loggers where each page may log to
+var LogPages map[string]*log.Logger
+
+// All the page properties
 var ExtraNavs map[string]NavElem
 
 func init() {
@@ -439,6 +444,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	LogPages = map[string]*log.Logger{}
 
 	err = openDBs()
 	if err != nil {
@@ -519,7 +525,22 @@ func main() {
 	// when navigating to /home it should serve the home page
 	http.Handle("/", noSigning(http.HandlerFunc(Home)))
 
-	for _, nav := range ExtraNavs {
+	for key, nav := range ExtraNavs {
+		// Set up logging
+		logFile, err := logfile.New(&logfile.LogFile{
+			FileName:    path.Join(LogDir, key+".log"),
+			MaxSize:     500 * 1024,
+			Flags:       logfile.FileOnly,
+			OldVersions: 2,
+		})
+		if err != nil {
+			log.Println("Failed to create logFile for %s: %s", key, err)
+			LogPages[key] = log.New(os.Stderr, "", 0)
+		} else {
+			LogPages[key] = log.New(logFile, "", 0)
+		}
+
+		// Set up the handler
 		http.Handle(nav.Link, enforceSigning(http.HandlerFunc(nav.Handle)))
 	}
 

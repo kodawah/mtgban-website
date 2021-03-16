@@ -225,7 +225,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	user := GetParamFromSig(sig, "UserEmail")
 	msg := fmt.Sprintf("[%s] from %s by %s", query, source, user)
 	Notify("search", msg)
-	log.Println(msg)
+	LogPages["Search"].Println(msg)
 
 	render(w, "search.html", pageVars)
 }

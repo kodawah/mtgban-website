@@ -123,7 +123,7 @@ func getUserIds(tc *http.Client) (*PatreonUserData, error) {
 		} `json:"data"`
 	}
 
-	log.Println(string(data))
+	LogPages["Admin"].Println(string(data))
 	err = json.Unmarshal(data, &userData)
 	if err != nil {
 		return nil, err
@@ -184,7 +184,7 @@ func getUserTier(tc *http.Client, userId string) (string, error) {
 	}
 	tierId := ""
 	tierTitle := ""
-	log.Println(string(data))
+	LogPages["Admin"].Println(string(data))
 	err = json.Unmarshal(data, &membershipData)
 	if err != nil {
 		return "", err
@@ -235,7 +235,7 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 
 	token, err := getUserToken(code, baseURL, r.FormValue("state"))
 	if err != nil {
-		log.Println("getUserToken", err.Error())
+		LogPages["Admin"].Println("getUserToken", err.Error())
 		http.Redirect(w, r, baseURL+"?errmsg=TokenNotFound", http.StatusFound)
 		return
 	}
@@ -245,7 +245,7 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 
 	userData, err := getUserIds(tc)
 	if err != nil {
-		log.Println("getUserId", err.Error())
+		LogPages["Admin"].Println("getUserId", err.Error())
 		http.Redirect(w, r, baseURL+"?errmsg=UserNotFound", http.StatusFound)
 		return
 	}
@@ -278,13 +278,13 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if tierTitle == "" {
-		log.Println("getUserTier returned an empty tier")
+		LogPages["Admin"].Println("getUserTier returned an empty tier")
 		http.Redirect(w, r, baseURL+"?errmsg=TierNotFound", http.StatusFound)
 		return
 	}
 
 	userData.TierTitle = tierTitle
-	log.Println(userData)
+	LogPages["Admin"].Println(userData)
 	targetURL, sig := sign(userData, r.URL, baseURL)
 
 	putSignatureInCookies(w, r, sig)
