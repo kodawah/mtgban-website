@@ -67,6 +67,18 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+
+	logs := r.FormValue("logs")
+	if logs != "" {
+		key, found := ScraperMap[logs]
+		if !found {
+			pageVars.InfoMessage = key + " not found"
+		}
+		log.Println(path.Join(LogDir, key+".log"))
+		http.ServeFile(w, r, path.Join(LogDir, key+".log"))
+		return
+	}
+
 	reboot := r.FormValue("reboot")
 	doReboot := false
 	var v url.Values
@@ -188,7 +200,7 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pageVars.Headers = []string{
-		"Name", "Id", "Last Update", "Entries", "Status",
+		"Name", "Id+Logs", "Last Update", "Entries", "Status",
 	}
 	for i := range Sellers {
 		if Sellers[i] == nil {

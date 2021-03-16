@@ -47,6 +47,8 @@
                             <td>
                                 {{if eq $j 0}}
                                     <a href="?refresh={{index $row 1}}" onclick="return confirm('Are you sure you want to refresh {{$cell}}?')">{{$cell}}</a>
+                                {{else if eq $j 1}}
+                                    <a href="?logs={{$cell}}" target="_blank">{{$cell}}</a>
                                 {{else}}
                                     {{$cell}}
                                 {{end}}
@@ -72,6 +74,8 @@
                             <td>
                                 {{if eq $j 0}}
                                     <a href="?refresh={{index $row 1}}" onclick="return confirm('Are you sure you want to refresh {{$cell}}?')">{{$cell}}</a>
+                                {{else if eq $j 1}}
+                                    <a href="?logs={{$cell}}" target="_blank">{{$cell}}</a>
                                 {{else}}
                                     {{$cell}}
                                 {{end}}
