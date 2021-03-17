@@ -168,92 +168,104 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 	for _, name := range names {
 		ScraperMap[name] = key
 	}
-	// Check if both sub seller files are present
+	var needsLoading bool
+
+	// Try reading from the two sub seller files (the main file is not dumped)
 	if init {
+		// Both files need to be present
 		ok := true
 		for _, name := range names {
-			if !fileExists(dirName + name + "-latest.csv") {
+			subfname := dirName + name + "-latest.csv"
+			if !fileExists(subfname) {
 				ok = false
 				break
 			}
 		}
 
 		if ok {
-			log.Println("Found Market subvendor files")
-
 			for _, name := range names {
+				subfname := dirName + name + "-latest.csv"
+
+				// Override data from the main market scraper
 				info := scraper.Info()
 				info.Name = name
 				info.Shorthand = name
-				// Empty inventory, since the real loading will happen later
-				seller := mtgban.NewSellerFromInventory(nil, info)
+
+				seller, err := loadInventoryFromFile(info, subfname)
+				if err != nil {
+					return err
+				}
+
+				// Register so that it will be added to the main Sellers array
 				newbc.Register(seller)
-				log.Println("Spoofed", name)
+
+				log.Println("Loaded from file")
 			}
+
+			log.Println("-- OK")
 			return nil
 		}
+
+		// If one of the seller files is missing we need to load from scraper
+		needsLoading = true
 	} else {
 		// Check if recent data already exists
 		for _, seller := range Sellers {
-			for _, name := range names {
-				if seller != nil && seller.Info().Shorthand == name && time.Now().Sub(seller.Info().InventoryTimestamp) < SkipRefreshCooldown {
-					log.Println("Skipping", scraper.Info().Name, "because too recent")
-					return nil
-				}
+			// In case there are any nil members just load everything
+			if seller == nil {
+				needsLoading = true
+				continue
+			}
+
+			// Load if all the sellers inventory timestamps are past the cooldown
+			if stringSliceContains(names, seller.Info().Name) && time.Now().Sub(seller.Info().InventoryTimestamp) < SkipRefreshCooldown {
+				log.Println("Trying to skip", seller.Info().Name, "because too recent")
+			} else {
+				needsLoading = true
 			}
 		}
 	}
 
-	var sellers []mtgban.Seller
-	var err error
+	if needsLoading {
+		log.Println("Loading from Market scraper")
 
-	// Check if the main file is present and load it
-	fname := dirName + scraper.Info().Name + "-latest.csv"
-	if init && fileExists(fname) {
-		log.Println("Found", scraper.Info().Name, "main file")
-
-		seller, err := loadInventoryFromFile(scraper.Info(), fname)
-		if err != nil {
-			return err
-		}
-		sellers, err = mtgban.Seller2Sellers(seller.(mtgban.Market))
-		if err != nil {
-			return err
-		}
-
-		log.Println(scraper.Info().Name, "preloaded from file")
-	} else {
 		// Preload the market
 		ScraperOptions[key].Mutex.Lock()
 		ScraperOptions[key].Busy = true
 		inv, err := scraper.Inventory()
 		ScraperOptions[key].Busy = false
 		ScraperOptions[key].Mutex.Unlock()
-		if err != nil || len(inv) == 0 {
-			// If a fallback file exists, try loading that
-			if fileExists(fname) {
-				log.Println("Market preload failed with", err)
-				seller, err := loadInventoryFromFile(scraper.Info(), fname)
-				if err != nil {
-					return err
-				}
-				var ok bool
-				scraper, ok = seller.(mtgban.Market)
-				if !ok {
-					return fmt.Errorf("%s is not a Market", scraper.Info().Name)
-				}
-			} else {
-				if len(inv) == 0 {
-					err = errors.New("empty inventory")
-				}
-				return err
-			}
+		if err != nil {
+			return err
+		}
+		if len(inv) == 0 {
+			return errors.New("empty inventory")
 		}
 
 		// Split subsellers
-		sellers, err = mtgban.Seller2Sellers(scraper)
+		sellers, err := mtgban.Seller2Sellers(scraper)
 		if err != nil {
 			return err
+		}
+
+		// Dump files for the requested sellers
+		for _, seller := range sellers {
+			if stringSliceContains(names, seller.Info().Shorthand) {
+				// In case something went wrong earlier
+				if init {
+					newbc.Register(seller)
+				}
+
+				fname := dirName + seller.Info().Name + "-latest.csv"
+
+				err = dumpInventoryToFile(seller, currentDir, fname)
+				if err != nil {
+					log.Println(err)
+					continue
+				}
+
+				log.Println(seller.Info().Name, "saved to file")
+			}
 		}
 
 		// Stash to redis if requested
@@ -274,33 +286,6 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 					}
 				}
 				log.Println("Took", time.Now().Sub(start))
-			}
-		}
-
-		// Dump main file
-		err = dumpInventoryToFile(scraper, currentDir, fname)
-		if err != nil {
-			return err
-		}
-		log.Println("Dumped main file for", scraper.Info().Name, "to", fname)
-	}
-
-	// Save and register sellers that were requested earlier
-	notdone := make([]string, len(names))
-	copy(notdone, names)
-	for _, seller := range sellers {
-		for i := range notdone {
-			if seller.Info().Name == notdone[i] {
-				fname := dirName + notdone[i] + "-latest.csv"
-				err = dumpInventoryToFile(seller, currentDir, fname)
-				if err != nil {
-					log.Println(scraper.Info().Name, "errored with", err)
-				} else {
-					newbc.RegisterSeller(seller)
-					log.Println("Dumped", fname)
-				}
-				// Mark as done
-				notdone[i] = ""
 			}
 		}
 	}
