@@ -255,7 +255,6 @@ var Config struct {
 	DiscordToken        string            `json:"discord_token"`
 	DiscordAllowList    []string          `json:"discord_allowlist"`
 	ArbitDefaultSellers []string          `json:"arbit_default_sellers"`
-	ArbitBlockSellers   []string          `json:"arbit_block_sellers"`
 	ArbitBlockVendors   []string          `json:"arbit_block_vendors"`
 	SearchBlockList     []string          `json:"search_block_list"`
 	GlobalAllowList     []string          `json:"global_allow_list"`

@@ -76,16 +76,10 @@ func arbit(w http.ResponseWriter, r *http.Request, reverse bool) {
 
 	var allowlistSellers []string
 	allowlistSellersOpt := GetParamFromSig(sig, "ArbitEnabled")
-	if allowlistSellersOpt == "" && !SigCheck {
-		allowlistSellersOpt = "ALL"
-	}
+
 	if allowlistSellersOpt == "ALL" {
-		for i, seller := range Sellers {
+		for _, seller := range Sellers {
 			if seller == nil {
-				log.Println("nil seller at position", i)
-				continue
-			}
-			if SliceStringHas(Config.ArbitBlockSellers, seller.Info().Shorthand) {
 				continue
 			}
 			allowlistSellers = append(allowlistSellers, seller.Info().Shorthand)
