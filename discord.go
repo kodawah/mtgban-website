@@ -83,7 +83,7 @@ func guildCreate(s *discordgo.Session, gc *discordgo.GuildCreate) {
 	s.UpdateStatus(0, "http://mtgban.com")
 
 	// If guild is authorized, then we can proceed as normal
-	if stringSliceContains(Config.DiscordAllowList, gc.Guild.ID) {
+	if SliceStringHas(Config.DiscordAllowList, gc.Guild.ID) {
 		return
 	}
 	// Skip this check when running on dev
@@ -495,7 +495,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Ignore messages coming from unauthorized discords
-	if !stringSliceContains(Config.DiscordAllowList, m.GuildID) {
+	if !SliceStringHas(Config.DiscordAllowList, m.GuildID) {
 		return
 	}
 
