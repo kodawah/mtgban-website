@@ -579,8 +579,15 @@ func loadScrapers(doSellers, doVendors bool) {
 			if !opt.OnlyVendor {
 				err := untangleMarket(init, currentDir, newbc, scraper.(mtgban.Market), key)
 				if err != nil {
-					log.Println("failed to load", key)
-					log.Println(err)
+					log.Println("failed to load", key, err)
+					// Use the old data instead of skipping it
+					if !init {
+						for _, seller := range Sellers {
+							if seller != nil && stringSliceContains(ScraperOptions[key].Keepers, seller.Info().Shorthand) {
+								newbc.RegisterSeller(seller)
+							}
+						}
+					}
 				}
 			}
 			if !opt.OnlySeller {
