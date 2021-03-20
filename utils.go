@@ -106,6 +106,9 @@ func scryfallImageURL(cardId string, small bool) string {
 	if strings.HasSuffix(code, "ita") {
 		code = strings.TrimSuffix(code, "ita")
 		number += "/it"
+	} else if strings.HasSuffix(code, "jpn") {
+		code = strings.TrimSuffix(code, "jpn")
+		number += "/ja"
 	}
 
 	return fmt.Sprintf("https://api.scryfall.com/cards/%s/%s?format=image&version=%s", code, number, version)
