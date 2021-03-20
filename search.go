@@ -40,7 +40,7 @@ type SearchEntry struct {
 	Secondary     float64
 }
 
-var re = regexp.MustCompile(`(s|c|f|sm|cn|vndr|all):(("([^"]+)*"|[a-zA-Z0-9]*[\*★]?),?)+`)
+var re = regexp.MustCompile(`(s|c|f|sm|cn|vndr|r|all):(("([^"]+)*"|[a-zA-Z0-9]*[\*★]?),?)+`)
 
 func Search(w http.ResponseWriter, r *http.Request) {
 	sig := getSignatureFromCookies(r)
@@ -252,6 +252,8 @@ func parseSearchOptions(query string) (string, map[string]string) {
 			options["condition"] = strings.ToUpper(code)
 		case strings.HasPrefix(field, "cn:"):
 			options["number"] = code
+		case strings.HasPrefix(field, "r:"):
+			options["rarity"] = strings.ToLower(code)
 		case strings.HasPrefix(field, "f:"):
 			options["foil"] = code
 			if options["foil"] == "yes" || options["foil"] == "y" {
@@ -432,6 +434,19 @@ redo:
 				if options["number"] != "" {
 					filters := strings.Split(options["number"], ",")
 					if !SliceStringHas(filters, co.Card.Number) {
+						continue
+					}
+				}
+				// Skip cards that are not of the desired rarities
+				if options["rarity"] != "" {
+					var skip bool
+					filters := strings.Split(options["rarity"], ",")
+					for _, rarity := range filters {
+						if rarity != co.Card.Rarity && !strings.HasPrefix(co.Card.Rarity, rarity) {
+							skip = true
+						}
+					}
+					if skip {
 						continue
 					}
 				}
