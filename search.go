@@ -77,7 +77,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	pageVars.Metadata = map[string]GenericCard{}
 
 	// SEARCH
-	foundSellers, foundVendors, tooMany := searchParallel(query, blocklist)
+	cleanQuery, options := parseSearchOptions(query)
+	foundSellers, foundVendors, tooMany := searchParallel(cleanQuery, options, blocklist)
 
 	// Display a message if there are too many entries
 	if tooMany {
@@ -374,12 +375,8 @@ func mode2func(mode string) (out func(string, string) bool) {
 func searchSellers(query string, blocklist []string, options map[string]string) (foundSellers map[string]map[string][]SearchEntry, tooMany bool) {
 	// Allocate memory
 	foundSellers = map[string]map[string][]SearchEntry{}
-	searchMode := options["search_mode"]
-
-	// Redo loop, in case there were no results with the exact mode
-redo:
 	// Set which comparison function to use depending on the search syntax
-	cmpFunc := mode2func(searchMode)
+	cmpFunc := mode2func(options["search_mode"])
 
 	// Search sellers
 	for i, seller := range Sellers {
@@ -526,22 +523,12 @@ redo:
 		}
 	}
 
-	// No results with exact? Let's try again with prefix
-	// Not any because it's too imprescise, also we catch results with odd layouts
-	if len(foundSellers) == 0 && (searchMode == "exact" || searchMode == "") {
-		searchMode = "prefix"
-		goto redo
-	}
-
 	return
 }
 
 func searchVendors(query string, blocklist []string, options map[string]string) (foundVendors map[string][]SearchEntry, tooMany bool) {
 	foundVendors = map[string][]SearchEntry{}
-	searchMode := options["search_mode"]
-
-redo:
-	cmpFunc := mode2func(searchMode)
+	cmpFunc := mode2func(options["search_mode"])
 
 	for i, vendor := range Vendors {
 		if vendor == nil {
@@ -638,31 +625,33 @@ redo:
 		}
 	}
 
-	if len(foundVendors) == 0 && (searchMode == "exact" || searchMode == "") {
-		searchMode = "prefix"
-		goto redo
-	}
-
 	return
 }
 
-func searchParallel(query string, blocklist []string) (foundSellers map[string]map[string][]SearchEntry, foundVendors map[string][]SearchEntry, tooMany bool) {
-	cleanQuery, options := parseSearchOptions(query)
-
+func searchParallel(query string, options map[string]string, blocklist []string) (foundSellers map[string]map[string][]SearchEntry, foundVendors map[string][]SearchEntry, tooMany bool) {
 	var manySellers, manyVendors bool
 	var wg sync.WaitGroup
 	wg.Add(2)
 
 	go func() {
-		foundSellers, manySellers = searchSellers(cleanQuery, blocklist, options)
+		foundSellers, manySellers = searchSellers(query, blocklist, options)
 		wg.Done()
 	}()
 	go func() {
-		foundVendors, manyVendors = searchVendors(cleanQuery, blocklist, options)
+		foundVendors, manyVendors = searchVendors(query, blocklist, options)
 		wg.Done()
 	}()
 
 	wg.Wait()
+
+	// No results with exact? Let's try again with prefix
+	// Not any because it's too imprescise, also we catch results with odd layouts
+	if len(foundSellers) == 0 && len(foundVendors) == 0 &&
+		(options["search_mode"] == "exact" || options["search_mode"] == "") {
+		options["search_mode"] = "prefix"
+		return searchParallel(query, options, blocklist)
+	}
+
 	return foundSellers, foundVendors, manySellers || manyVendors
 }
 
