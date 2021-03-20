@@ -260,9 +260,8 @@ var Config struct {
 	SearchBlockList     []string          `json:"search_block_list"`
 	GlobalAllowList     []string          `json:"global_allow_list"`
 	Patreon             struct {
-		Secret map[string]string   `json:"secret"`
-		Ids    map[string][]string `json:"ids"`
-		Emails map[string]string   `json:"emails"`
+		Secret map[string]string `json:"secret"`
+		Emails map[string]string `json:"emails"`
 	} `json:"patreon"`
 }
 
