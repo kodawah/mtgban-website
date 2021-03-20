@@ -372,11 +372,68 @@ func mode2func(mode string) (out func(string, string) bool) {
 	return
 }
 
+func shouldSkipCard(query, cardId string, options map[string]string) bool {
+	co, err := mtgmatcher.GetUUID(cardId)
+	if err != nil {
+		return true
+	}
+
+	// Skip cards that are not of the desired set
+	if options["edition"] != "" {
+		filters := strings.Split(options["edition"], ",")
+		if !SliceStringHas(filters, co.SetCode) {
+			return true
+		}
+	}
+	if options["not_edition"] != "" {
+		filters := strings.Split(options["not_edition"], ",")
+		if SliceStringHas(filters, co.SetCode) {
+			return true
+		}
+	}
+
+	// Skip cards that are not of the desired collector number
+	if options["number"] != "" {
+		filters := strings.Split(options["number"], ",")
+		if !SliceStringHas(filters, co.Number) {
+			return true
+		}
+	}
+
+	// Skip cards that are not of the desired rarities
+	if options["rarity"] != "" {
+		filters := strings.Split(options["rarity"], ",")
+		for _, rarity := range filters {
+			if rarity != co.Rarity && !strings.HasPrefix(co.Rarity, rarity) {
+				return true
+			}
+		}
+	}
+
+	// Skip cards that are not as desired foil
+	if options["foil"] != "" {
+		foilStatus, err := strconv.ParseBool(options["foil"])
+		if err == nil {
+			if foilStatus && !co.Foil {
+				return true
+			} else if !foilStatus && co.Foil {
+				return true
+			}
+		}
+	}
+
+	// Run the comparison function to use depending on the search syntax
+	cmpFunc := mode2func(options["search_mode"])
+	if !cmpFunc(co.Name, query) {
+		return true
+	}
+
+	return false
+}
+
 func searchSellers(query string, blocklist []string, options map[string]string) (foundSellers map[string]map[string][]SearchEntry, tooMany bool) {
 	// Allocate memory
 	foundSellers = map[string]map[string][]SearchEntry{}
-	// Set which comparison function to use depending on the search syntax
-	cmpFunc := mode2func(options["search_mode"])
 
 	// Search sellers
 	for i, seller := range Sellers {
@@ -407,118 +464,69 @@ func searchSellers(query string, blocklist []string, options map[string]string) 
 
 		// Loop through cards
 		for cardId, entries := range inventory {
-			co, err := mtgmatcher.GetUUID(cardId)
-			if err != nil {
+			if shouldSkipCard(query, cardId, options) {
 				continue
 			}
 
-			// Run the comparison function set above
-			if cmpFunc(co.Card.Name, query) {
-				// Skip cards that are not of the desired set
-				if options["edition"] != "" {
-					filters := strings.Split(options["edition"], ",")
-					if !SliceStringHas(filters, co.Card.SetCode) {
+			// Loop thorugh available conditions
+			for _, entry := range entries {
+				// Skip cards that have not the desired condition
+				if options["condition"] != "" {
+					filters := strings.Split(options["condition"], ",")
+					if !SliceStringHas(filters, entry.Conditions) {
 						continue
 					}
 				}
-				if options["not_edition"] != "" {
-					filters := strings.Split(options["not_edition"], ",")
-					if SliceStringHas(filters, co.Card.SetCode) {
-						continue
-					}
-				}
-				// Skip cards that are not of the desired collector number
-				if options["number"] != "" {
-					filters := strings.Split(options["number"], ",")
-					if !SliceStringHas(filters, co.Card.Number) {
-						continue
-					}
-				}
-				// Skip cards that are not of the desired rarities
-				if options["rarity"] != "" {
-					var skip bool
-					filters := strings.Split(options["rarity"], ",")
-					for _, rarity := range filters {
-						if rarity != co.Card.Rarity && !strings.HasPrefix(co.Card.Rarity, rarity) {
-							skip = true
-						}
-					}
-					if skip {
-						continue
-					}
-				}
-				// Skip cards that are not as desired foil
-				if options["foil"] != "" {
-					foilStatus, err := strconv.ParseBool(options["foil"])
-					if err == nil {
-						if foilStatus && !co.Foil {
-							continue
-						} else if !foilStatus && co.Foil {
-							continue
-						}
-					}
+
+				// No price no dice
+				if entry.Price == 0 {
+					continue
 				}
 
-				// Loop thorugh available conditions
-				for _, entry := range entries {
-					// Skip cards that have not the desired condition
-					if options["condition"] != "" {
-						filters := strings.Split(options["condition"], ",")
-						if !SliceStringHas(filters, entry.Conditions) {
-							continue
-						}
-					}
-
-					// No price no dice
-					if entry.Price == 0 {
+				// Check if card already has any entry
+				_, found := foundSellers[cardId]
+				if !found {
+					// Skip when you have too many results
+					if len(foundSellers) > MaxSearchResults {
+						tooMany = true
 						continue
 					}
-
-					// Check if card already has any entry
-					_, found := foundSellers[cardId]
-					if !found {
-						// Skip when you have too many results
-						if len(foundSellers) > MaxSearchResults {
-							tooMany = true
-							continue
-						}
-						foundSellers[cardId] = map[string][]SearchEntry{}
-					}
-
-					// Set conditions - handle the special TCG one that appears
-					// at the top of the results
-					conditions := entry.Conditions
-					if seller.Info().MetadataOnly {
-						conditions = "INDEX"
-					}
-
-					// Only add Poor prices if there are no NM entries
-					if conditions == "PO" && len(foundSellers[cardId]["NM"]) != 0 {
-						continue
-					}
-
-					// Check if the current entry has any condition
-					_, found = foundSellers[cardId][conditions]
-					if !found {
-						foundSellers[cardId][conditions] = []SearchEntry{}
-					}
-
-					name := seller.Info().Name
-					// Prepare all the deets
-					res := SearchEntry{
-						ScraperName: name,
-						Shorthand:   seller.Info().Shorthand,
-						Price:       entry.Price,
-						Quantity:    entry.Quantity,
-						URL:         entry.URL,
-						NoQuantity:  seller.Info().NoQuantityInventory || seller.Info().MetadataOnly,
-						ShowDirect:  seller.Info().Name == TCG_DIRECT,
-						Country:     seller.Info().CountryFlag,
-					}
-
-					// Touchdown
-					foundSellers[cardId][conditions] = append(foundSellers[cardId][conditions], res)
+					foundSellers[cardId] = map[string][]SearchEntry{}
 				}
+
+				// Set conditions - handle the special TCG one that appears
+				// at the top of the results
+				conditions := entry.Conditions
+				if seller.Info().MetadataOnly {
+					conditions = "INDEX"
+				}
+
+				// Only add Poor prices if there are no NM entries
+				if conditions == "PO" && len(foundSellers[cardId]["NM"]) != 0 {
+					continue
+				}
+
+				// Check if the current entry has any condition
+				_, found = foundSellers[cardId][conditions]
+				if !found {
+					foundSellers[cardId][conditions] = []SearchEntry{}
+				}
+
+				name := seller.Info().Name
+				// Prepare all the deets
+				res := SearchEntry{
+					ScraperName: name,
+					Shorthand:   seller.Info().Shorthand,
+					Price:       entry.Price,
+					Quantity:    entry.Quantity,
+					URL:         entry.URL,
+					NoQuantity:  seller.Info().NoQuantityInventory || seller.Info().MetadataOnly,
+					ShowDirect:  seller.Info().Name == TCG_DIRECT,
+					Country:     seller.Info().CountryFlag,
+				}
+
+				// Touchdown
+				foundSellers[cardId][conditions] = append(foundSellers[cardId][conditions], res)
 			}
 		}
 	}
@@ -528,7 +536,6 @@ func searchSellers(query string, blocklist []string, options map[string]string) 
 
 func searchVendors(query string, blocklist []string, options map[string]string) (foundVendors map[string][]SearchEntry, tooMany bool) {
 	foundVendors = map[string][]SearchEntry{}
-	cmpFunc := mode2func(options["search_mode"])
 
 	for i, vendor := range Vendors {
 		if vendor == nil {
@@ -553,8 +560,7 @@ func searchVendors(query string, blocklist []string, options map[string]string) 
 			continue
 		}
 		for cardId, blEntries := range buylist {
-			co, err := mtgmatcher.GetUUID(cardId)
-			if err != nil {
+			if shouldSkipCard(query, cardId, options) {
 				continue
 			}
 
@@ -569,59 +575,28 @@ func searchVendors(query string, blocklist []string, options map[string]string) 
 			}
 			entry := blEntries[nmIndex]
 
-			if options["edition"] != "" {
-				filters := strings.Split(options["edition"], ",")
-				if !SliceStringHas(filters, co.Card.SetCode) {
+			_, found := foundVendors[cardId]
+			if !found {
+				if len(foundVendors) > MaxSearchResults {
+					tooMany = true
 					continue
 				}
+				foundVendors[cardId] = []SearchEntry{}
 			}
-			if options["not_edition"] != "" {
-				filters := strings.Split(options["not_edition"], ",")
-				if SliceStringHas(filters, co.Card.SetCode) {
-					continue
-				}
+			name := vendor.Info().Name
+			if name == "TCG Player Market" {
+				name = "TCG Trade-In"
 			}
-			if options["number"] != "" {
-				filters := strings.Split(options["number"], ",")
-				if !SliceStringHas(filters, co.Card.Number) {
-					continue
-				}
+			res := SearchEntry{
+				ScraperName: name,
+				Shorthand:   vendor.Info().Shorthand,
+				Price:       entry.BuyPrice,
+				Ratio:       entry.PriceRatio,
+				Quantity:    entry.Quantity,
+				URL:         entry.URL,
+				Country:     vendor.Info().CountryFlag,
 			}
-			if options["foil"] != "" {
-				foilStatus, err := strconv.ParseBool(options["foil"])
-				if err == nil {
-					if foilStatus && !co.Foil {
-						continue
-					} else if !foilStatus && co.Foil {
-						continue
-					}
-				}
-			}
-
-			if cmpFunc(co.Card.Name, query) {
-				_, found := foundVendors[cardId]
-				if !found {
-					if len(foundVendors) > MaxSearchResults {
-						tooMany = true
-						continue
-					}
-					foundVendors[cardId] = []SearchEntry{}
-				}
-				name := vendor.Info().Name
-				if name == "TCG Player Market" {
-					name = "TCG Trade-In"
-				}
-				res := SearchEntry{
-					ScraperName: name,
-					Shorthand:   vendor.Info().Shorthand,
-					Price:       entry.BuyPrice,
-					Ratio:       entry.PriceRatio,
-					Quantity:    entry.Quantity,
-					URL:         entry.URL,
-					Country:     vendor.Info().CountryFlag,
-				}
-				foundVendors[cardId] = append(foundVendors[cardId], res)
-			}
+			foundVendors[cardId] = append(foundVendors[cardId], res)
 		}
 	}
 
