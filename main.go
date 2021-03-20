@@ -535,9 +535,9 @@ func main() {
 		})
 		if err != nil {
 			log.Println("Failed to create logFile for %s: %s", key, err)
-			LogPages[key] = log.New(os.Stderr, "", 0)
+			LogPages[key] = log.New(os.Stderr, "", log.LstdFlags)
 		} else {
-			LogPages[key] = log.New(logFile, "", 0)
+			LogPages[key] = log.New(logFile, "", log.LstdFlags)
 		}
 
 		// Set up the handler

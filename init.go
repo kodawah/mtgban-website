@@ -563,10 +563,10 @@ func loadScrapers(doSellers, doVendors bool) {
 			})
 			if err != nil {
 				log.Println("Failed to create logFile for %s: %s", key, err)
-				opt.Logger = log.New(os.Stderr, "", 0)
+				opt.Logger = log.New(os.Stderr, "", log.LstdFlags)
 				continue
 			}
-			opt.Logger = log.New(logFile, "", 0)
+			opt.Logger = log.New(logFile, "", log.LstdFlags)
 		}
 
 		scraper, err := opt.Init(opt.Logger)
