@@ -39,6 +39,12 @@ var FilteredEditions = []string{
 	"Limited Edition Alpha",
 	"Limited Edition Beta",
 	"Unlimited Edition",
+	"Legends Italian",
+	"The Dark Italian",
+	"Rinascimento",
+	"Chronicles Japanese",
+	"Foreign Black Border",
+	"Fourth Edition Black Border",
 }
 
 type Arbitrage struct {
