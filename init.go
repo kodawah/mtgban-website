@@ -264,7 +264,7 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 					continue
 				}
 
-				log.Println(seller.Info().Name, "saved to file")
+				ScraperOptions[key].Logger.Println(seller.Info().Name, "saved to file")
 			}
 		}
 
@@ -288,6 +288,8 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 				log.Println("Took", time.Now().Sub(start))
 			}
 		}
+
+		log.Println("-- OK")
 	}
 
 	return nil
@@ -724,7 +726,7 @@ func loadSellers(newSellers []mtgban.Seller) {
 				continue
 			}
 
-			log.Println("Saved to file")
+			opts.Logger.Println("Saved to file")
 		}
 		log.Println("-- OK")
 	}
@@ -796,7 +798,7 @@ func loadVendors(newVendors []mtgban.Vendor) {
 				continue
 			}
 
-			log.Println("Saved to file")
+			opts.Logger.Println("Saved to file")
 		}
 		log.Println("-- OK")
 	}
