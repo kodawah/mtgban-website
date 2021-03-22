@@ -367,7 +367,46 @@ type PriceEntry struct {
 	Shipping float64 `json:"shipping"`
 }
 
+func cacheGrabLastSold(cardId string, foil bool) (fields []embedField) {
+	sortedConditions := []string{"NM", "SP", "MP", "HP", "PO", "SH"}
+	condition := map[string]string{
+		"NM": "Near Mint",
+		"SP": "Lightly Played",
+		"MP": "Moderately Played",
+		"HP": "Heavily Played",
+		"PO": "Damaged",
+		"SH": "Shipping",
+	}
+
+	results := LastSoldDB.HGetAll(context.Background(), cardId).Val()
+
+	for _, cond := range sortedConditions {
+		// Try to mimic the original title - the language information is lost
+		title := condition[cond]
+		if foil && cond != "SH" {
+			title += " Foil"
+		}
+		// Mimic how shipping appears too
+		value := results[cond]
+		if value == "" {
+			value = "-"
+			if cond == "SH" {
+				value = "n/a"
+			}
+		}
+		fields = append(fields, embedField{
+			Name:   title,
+			Value:  value,
+			Inline: true,
+		})
+	}
+
+	return
+}
+
 func grabLastSold(cardId string, lang string) ([]embedField, error) {
+	var fields []embedField
+
 	// Retrieve information about the card
 	co, err := mtgmatcher.GetUUID(cardId)
 	if err != nil {
@@ -378,6 +417,36 @@ func grabLastSold(cardId string, lang string) ([]embedField, error) {
 	tcgId := co.Identifiers["tcgplayerProductId"]
 	if tcgId == "" {
 		return nil, nil
+	}
+
+	// If the key exists, retrieve *when* the key will expires and subtract
+	// 24h to get the time when it was created and inserted in redis
+	var insertTime time.Time
+	exists := LastSoldDB.Exists(context.Background(), cardId).Val() == 1
+	if exists {
+		ttl := LastSoldDB.TTL(context.Background(), cardId).Val()
+		insertTime = time.Now().Add(ttl).Add(-24 * time.Hour)
+	}
+
+	// If it exists and it's two hour fresh, just use the cached version
+	if exists && time.Now().Before(insertTime.Add(2*time.Hour)) {
+		fields = cacheGrabLastSold(cardId, co.Foil)
+
+		// If non-foil is requested, check if there is data for foils too
+		// No need to check for expiration, as they are added at the same time
+		if !co.Foil {
+			foilId, err := mtgmatcher.Match(&mtgmatcher.Card{
+				Id:   cardId,
+				Foil: true,
+			})
+			if err == nil && cardId != foilId {
+				fields = append(fields, cacheGrabLastSold(foilId, true)...)
+			}
+		}
+
+		// Note that we don't update the expiration time because no new
+		// information was retrieved
+		return fields, nil
 	}
 
 	link := "http://localhost:8081/" + tcgId
@@ -401,7 +470,6 @@ func grabLastSold(cardId string, lang string) ([]embedField, error) {
 		return nil, err
 	}
 
-	var fields []embedField
 	var shipping []string
 	var hasValues bool
 	for i, entry := range entries["TCG Last Sold Listing"] {
