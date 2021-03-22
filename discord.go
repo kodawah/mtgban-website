@@ -401,7 +401,6 @@ func grabLastSold(cardId string, lang string) ([]embedField, error) {
 		return nil, err
 	}
 
-	toExpire := map[string]string{}
 	var fields []embedField
 	var shipping []string
 	var hasValues bool
@@ -421,31 +420,6 @@ func grabLastSold(cardId string, lang string) ([]embedField, error) {
 			hasValues = true
 			value = fmt.Sprintf("$%0.2f", entry.Price)
 			shipping = append(shipping, fmt.Sprintf("%0.2f", entry.Shipping))
-
-			// Stash the same values in redis
-			// Standardize the conditions field (formatted as "Near Mint Foil - Japanese)"
-			// using BAN's two letter format
-			title := strings.TrimSuffix(strings.Split(entry.Title, " - ")[0], " Foil")
-			condition := map[string]string{
-				"Near Mint":         "NM",
-				"Lightly Played":    "SP",
-				"Moderately Played": "MP",
-				"Heavily Played":    "HP",
-				"Damaged":           "PO",
-			}[title]
-			// This makes sure that the id is always correct, even when foil differs
-			id, err := mtgmatcher.Match(&mtgmatcher.Card{
-				Id:   cardId,
-				Foil: strings.Contains(entry.Title, "Foil"),
-			})
-			if err == nil {
-				err = LastSoldDB.HSet(context.Background(), id, condition, entry.Price).Err()
-				if err != nil {
-					log.Println(err)
-				}
-				// Track ids so that we can set their expiration later
-				toExpire[id] = ""
-			}
 		}
 		fields = append(fields, embedField{
 			Name:   entry.Title,
@@ -468,20 +442,53 @@ func grabLastSold(cardId string, lang string) ([]embedField, error) {
 		}
 	}
 
-	// Drop the redis key after 24h
-	for id := range toExpire {
-		err = LastSoldDB.Expire(context.Background(), id, 24*time.Hour).Err()
-		if err != nil {
-			log.Println(err)
-		}
-	}
-
 	// No prices received, this is not an error,
 	// but print a message warning the user
 	if !hasValues {
 		log.Println("No last sold prices available")
 		return nil, nil
 	}
+
+	go func() {
+		toExpire := map[string]string{}
+
+		// Stash the same values in redis
+		for i, field := range fields {
+			// Standardize the conditions field (formatted as "Near Mint Foil - Japanese)"
+			// using BAN's two letter format
+			title := strings.TrimSuffix(strings.Split(field.Name, " - ")[0], " Foil")
+			condition := map[string]string{
+				"Near Mint":         "NM",
+				"Lightly Played":    "SP",
+				"Moderately Played": "MP",
+				"Heavily Played":    "HP",
+				"Damaged":           "PO",
+				"Shipping":          "SH",
+			}[title]
+			// This makes sure that the id is always correct, even when foil differs
+			id, err := mtgmatcher.Match(&mtgmatcher.Card{
+				Id: cardId,
+				// Need to check both for Foil in title and for the very last (foil) shipping
+				Foil: strings.Contains(field.Name, "Foil") || i == len(fields)-1,
+			})
+			if err == nil {
+				err = LastSoldDB.HSet(context.Background(), id, condition, field.Value).Err()
+				if err != nil {
+					log.Println(err)
+				}
+				// Track ids so that we can set their expiration later
+				toExpire[id] = ""
+			}
+
+			// Drop the redis key after 24h
+			for id := range toExpire {
+				err = LastSoldDB.Expire(context.Background(), id, 24*time.Hour).Err()
+				if err != nil {
+					log.Println(err)
+				}
+			}
+		}
+	}()
 
 	return fields, nil
 }
