@@ -251,10 +251,8 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 		// Dump files for the requested sellers
 		for _, seller := range sellers {
 			if SliceStringHas(names, seller.Info().Shorthand) {
-				// In case something went wrong earlier
-				if init {
-					newbc.Register(seller)
-				}
+				// Add selected seller to the future global seller map
+				newbc.Register(seller)
 
 				fname := dirName + seller.Info().Name + "-latest.csv"
 
@@ -694,6 +692,12 @@ func loadSellers(newSellers []mtgban.Seller) {
 
 			log.Println("Loaded from file")
 		} else {
+			_, ok := newSellers[i].(mtgban.Scraper).(mtgban.Market)
+			if ok {
+				log.Println("Already loaded during untangling")
+				continue
+			}
+
 			if Sellers[i] != nil && time.Now().Sub(Sellers[i].Info().InventoryTimestamp) < SkipRefreshCooldown {
 				log.Println("Skipping because too recent")
 				continue
