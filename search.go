@@ -297,6 +297,9 @@ func parseSearchOptions(query string) (string, map[string]string) {
 			if edition != "" && !SliceStringHas(strings.Split(edition, ","), set.Code) {
 				continue
 			}
+			if len(set.Cards) == 0 {
+				continue
+			}
 			index := rand.Intn(len(set.Cards))
 			query = set.Cards[index].UUID
 			break
