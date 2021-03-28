@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -151,47 +150,26 @@ func parseMessage(content string) (*searchResult, error) {
 		return &searchResult{Invalid: true}, nil
 	}
 
-	// Check if card exists
-	var nameFound string
-	sets := mtgmatcher.GetSets()
-	if options["edition"] != "" {
-		code := strings.Split(options["edition"], ",")[0]
-		set, found := sets[code]
-		if !found {
-			return nil, fmt.Errorf("No edition found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", code)
-		}
-		for _, card := range set.Cards {
-			if mtgmatcher.Contains(card.Name, query) {
-				nameFound = card.Name
-				break
-			}
-		}
-		if nameFound == "" {
-			return nil, fmt.Errorf("No card found named \"%s\" in %s 乁| ･ิ ∧ ･ิ |ㄏ", query, set.Name)
-		}
-	}
-	if nameFound == "" {
-		for _, set := range sets {
-			for _, card := range set.Cards {
-				if mtgmatcher.Contains(card.Name, query) {
-					nameFound = card.Name
-					break
-				}
-			}
-			if nameFound != "" {
-				break
-			}
-		}
-	}
-	if nameFound == "" {
-		return nil, fmt.Errorf("No card found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", query)
-	}
-
 	// We can be quite sure that one of the index will contain the card requested,
 	// so we translate the result into a new query to feed to the other searches
-	cardId, resultsIndex, err := searchSellersFirstResult(query, options, true)
-	if err != nil {
-		return nil, err
+	resultsIndex, cardId := searchSellersFirstResult(query, options, true)
+	if len(resultsIndex) == 0 {
+		// Use a more relaxed search mode if nothing was found (similar to what is
+		// done in main search
+		options["search_mode"] = "prefix"
+		resultsIndex, cardId = searchSellersFirstResult(query, options, true)
+		if len(resultsIndex) == 0 {
+			// Not found again, let's provide a meaningful error
+			if options["edition"] != "" {
+				code := strings.Split(options["edition"], ",")[0]
+				set, err := mtgmatcher.GetSet(code)
+				if err != nil {
+					return nil, fmt.Errorf("No edition found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", code)
+				}
+				return nil, fmt.Errorf("No card found named \"%s\" in %s 乁| ･ิ ∧ ･ิ |ㄏ", query, set.Name)
+			}
+			return nil, fmt.Errorf("No card found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", query)
+		}
 	}
 	query, options = parseSearchOptions(cardId)
 
@@ -204,18 +182,23 @@ func parseMessage(content string) (*searchResult, error) {
 	wg.Add(2)
 
 	go func() {
-		_, resultsSellers, _ = searchSellersFirstResult(query, options, false)
+		resultsSellers, _ = searchSellersFirstResult(query, options, false)
 		wg.Done()
 	}()
 	go func() {
-		_, resultsVendors, _ = searchVendorsFirstResult(query, options)
+		resultsVendors = searchVendorsFirstResult(query, options)
 		wg.Done()
 	}()
 
 	wg.Wait()
 
+	co, err := mtgmatcher.GetUUID(cardId)
+	if err != nil {
+		return nil, fmt.Errorf("Internal bot error ┏༼ ◉ ╭╮ ◉༽┓")
+	}
+
 	// Rebuild the search query
-	searchQuery := nameFound
+	searchQuery := co.Name
 	if options["edition"] != "" {
 		searchQuery += " s:" + options["edition"]
 	}
@@ -852,7 +835,7 @@ func longestName(results []SearchEntry) (out int) {
 }
 
 // Retrieve cards from Sellers using the very first result
-func searchSellersFirstResult(query string, options map[string]string, index bool) (cardId string, results []SearchEntry, err error) {
+func searchSellersFirstResult(query string, options map[string]string, index bool) (results []SearchEntry, cardId string) {
 	// Skip any store based outside of the US
 	skipped := append(Config.SearchBlockList, "TCG Direct")
 	if !index {
@@ -866,7 +849,6 @@ func searchSellersFirstResult(query string, options map[string]string, index boo
 	// Search
 	foundSellers, _ := searchSellers(query, skipped, options)
 	if len(foundSellers) == 0 {
-		err = errors.New("Out of stock everywhere ┻━┻ ヘ╰( •̀ε•́ ╰)")
 		return
 	}
 
@@ -920,7 +902,7 @@ func searchSellersFirstResult(query string, options map[string]string, index boo
 }
 
 // Retrieve cards from Vendors using the very first result
-func searchVendorsFirstResult(query string, options map[string]string) (cardId string, results []SearchEntry, err error) {
+func searchVendorsFirstResult(query string, options map[string]string) (results []SearchEntry) {
 	// Skip any store based outside of the US
 	skipped := Config.SearchBlockList
 	for _, vendor := range Vendors {
@@ -931,7 +913,6 @@ func searchVendorsFirstResult(query string, options map[string]string) (cardId s
 
 	foundVendors, _ := searchVendors(query, skipped, options)
 	if len(foundVendors) == 0 {
-		err = errors.New("Nobody is buying that card ┻━┻ ヘ╰( •̀ε•́ ╰)")
 		return
 	}
 
@@ -945,7 +926,6 @@ func searchVendorsFirstResult(query string, options map[string]string) (cardId s
 		})
 	}
 
-	cardId = sortedKeysVendor[0]
-	results = foundVendors[cardId]
+	results = foundVendors[sortedKeysVendor[0]]
 	return
 }
