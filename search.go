@@ -504,8 +504,8 @@ func searchSellers(query string, blocklist []string, options map[string]string) 
 					conditions = "INDEX"
 				}
 
-				// Only add Poor prices if there are no NM entries
-				if conditions == "PO" && len(foundSellers[cardId]["NM"]) != 0 {
+				// Only add Poor prices if there are no NM and SP entries
+				if conditions == "PO" && len(foundSellers[cardId]["NM"]) != 0 && len(foundSellers[cardId]["SP"]) != 0 {
 					continue
 				}
 
