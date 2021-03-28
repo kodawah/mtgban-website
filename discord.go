@@ -142,9 +142,6 @@ func parseMessage(content string) (*searchResult, error) {
 		options["not_edition"] = strings.Join(filteredEditions, ",")
 	}
 
-	// Stash interesting elements that may be overwritten later
-	parsedCondition := options["condition"]
-
 	// Prevent useless invocations
 	if len(query) < 3 && query != "Ow" && query != "X" {
 		return &searchResult{Invalid: true}, nil
@@ -171,51 +168,11 @@ func parseMessage(content string) (*searchResult, error) {
 			return nil, fmt.Errorf("No card found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", query)
 		}
 	}
-	query, options = parseSearchOptions(cardId)
-
-	// Restore elements originally present in the first query
-	options["condition"] = parsedCondition
-
-	// Search both sellers and vendors
-	var resultsSellers, resultsVendors []SearchEntry
-	var wg sync.WaitGroup
-	wg.Add(2)
-
-	go func() {
-		resultsSellers, _ = searchSellersFirstResult(query, options, false)
-		wg.Done()
-	}()
-	go func() {
-		resultsVendors = searchVendorsFirstResult(query, options)
-		wg.Done()
-	}()
-
-	wg.Wait()
-
-	co, err := mtgmatcher.GetUUID(cardId)
-	if err != nil {
-		return nil, fmt.Errorf("Internal bot error ┏༼ ◉ ╭╮ ◉༽┓")
-	}
-
-	// Rebuild the search query
-	searchQuery := co.Name
-	if options["edition"] != "" {
-		searchQuery += " s:" + options["edition"]
-	}
-	if options["number"] != "" {
-		searchQuery += " cn:" + options["number"]
-	}
-	if options["foil"] != "" {
-		searchQuery += " f:" + options["foil"]
-	}
 
 	return &searchResult{
 		CardId:          cardId,
 		ResultsIndex:    resultsIndex,
-		ResultsSellers:  resultsSellers,
-		ResultsVendors:  resultsVendors,
 		EditionSearched: options["edition"],
-		SearchQuery:     searchQuery,
 	}, nil
 }
 
@@ -678,6 +635,36 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	var channel chan *discordgo.MessageEmbed
 
 	if allBls {
+		query, options := parseSearchOptions(searchRes.CardId)
+
+		// Search both sellers and vendors
+		var wg sync.WaitGroup
+		wg.Add(2)
+
+		go func() {
+			searchRes.ResultsSellers, _ = searchSellersFirstResult(query, options, false)
+			wg.Done()
+		}()
+		go func() {
+			searchRes.ResultsVendors = searchVendorsFirstResult(query, options)
+			wg.Done()
+		}()
+
+		wg.Wait()
+
+		// Rebuild the search query
+		searchQuery := co.Name
+		if options["edition"] != "" {
+			searchQuery += " s:" + options["edition"]
+		}
+		if options["number"] != "" {
+			searchQuery += " cn:" + options["number"]
+		}
+		if options["foil"] != "" {
+			searchQuery += " f:" + options["foil"]
+		}
+		searchRes.SearchQuery = searchQuery
+
 		ogFields = search2fields(searchRes)
 	} else if lastSold {
 		// Since grabLastSold is slow, spawn a goroutine and wait for the real
