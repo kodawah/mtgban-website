@@ -392,6 +392,13 @@ span {
     line-height: 1;
 }
 
+span.emoji {
+    font-size: 24px;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 1;
+}
+
 /* Hide short text by default */
 .short-text {
     display: none;

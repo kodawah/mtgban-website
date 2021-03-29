@@ -7,6 +7,10 @@
     <title>{{.Title}}</title>
     <script type="text/javascript" src="../js/autocomplete.js"></script>
     <script type="text/javascript" src="../js/fetchnames.js"></script>
+    {{if not (eq .ChartID "")}}
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js"></script>
+        <script type="text/javascript" src="../js/chartopts.js"></script>
+    {{end}}
 </head>
 <body>
 
@@ -85,6 +89,9 @@
                     </li>
                     <br>
 
+                    {{if .CanChart}}
+                        <li>You can access <b>historical data</b> from a few major vendors by clicking on 📊 for each card.</li>
+                    {{end}}
                     <li>Data is refreshed periodically over the day.</li>
                     <li>Entries are formatted as <i>card name (foil status) - edition (collector #)</i>.</li>
                     <li>The percentage found in buylist offers is the <b>price ratio</b>, the higher it is, the more a vendor is looking to purchase that card.</li>
@@ -109,6 +116,17 @@
                             <div id="printings" style="text-align: center; max-width:354px; display: block;"></div>
                         </td>
                     </tr>
+                    {{if not (eq .Alternative "")}}
+                        <tr>
+                            <td>
+                                <span class="emoji">
+                                    <center>
+                                    <a href="/search?chart={{.Alternative}}" title="Check Foil/Non Foil version">✨✨✨</a>
+                                    </center>
+                                </span>
+                            </td>
+                        </tr>
+                    {{end}}
                     <tr>
                         <td style="background-color: #f8f8f8;">
                             {{if .HasReserved}}
@@ -125,6 +143,37 @@
             <div class="indent sticky">
                 {{$firstImg := ""}}
                 {{$firstPrint := ""}}
+
+                {{if and .CanChart (not (eq .ChartID ""))}}
+                    <div style="margin-left: 10px; float: left;">
+                        <canvas id="cardChart" width="740" height="420"></canvas>
+                        <br>
+                        <hr>
+                        <br>
+                    </div>
+                    <script>
+                        var ctx = document.getElementById('cardChart').getContext('2d');
+                        var cardChart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: {{.AxisLabels}},
+                                datasets: [
+                                    {{range .Datasets}}
+                                        {
+                                            label: {{.Name}},
+                                            data: {{.Data}},
+                                            backgroundColor: {{.Color}},
+                                            borderColor: {{.Color}},
+                                            fill: false,
+                                        },
+                                    {{end}}
+                                ]
+                            },
+                            options: getChartOpts(),
+                        });
+                    </script>
+                {{end}}
+
                 <table class="searchResults">
                     <tr>
                         <th colspan="4" class="stickyCategory"><h2 align=center>Sellers</h2></th>
@@ -139,12 +188,12 @@
 
                         <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};" title="{{$card.Title}}">
                             <th colspan="4" class="wrap stickyHeader" style="text-align: left; vertical-align: middle;">
-                                <table style="margin:0 0">
+                                <table style="margin:0 0 0 18">
                                     <tr style="background-color:rgba(0, 0, 0, 0);">
                                         <td rowspan=2>
                                             <i class="ss {{$card.Keyrune}} ss-2x ss-fw"></i>
                                         </td>
-                                        <td>
+                                        <td width=100%>
                                             <a href="{{$card.SearchURL}}">
                                                 {{$card.Name}}
                                             </a>
@@ -158,6 +207,13 @@
                                                 •
                                             {{end}}
                                         </td>
+                                        {{if $.CanChart}}
+                                            <td rowspan=2>
+                                                <span class="emoji">
+                                                    <a href="/search?chart={{$cardId}}" title="See historical data">📊</a>
+                                                </span>
+                                            </td>
+                                        {{end}}
                                     </tr>
                                     <tr style="background-color:rgba(0, 0, 0, 0); margin-bottom: 0px;">
                                         <td>
@@ -229,12 +285,12 @@
                         {{$entries := (index $.FoundVendors $cardId)}}
                         <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};" title="{{$card.Title}}">
                             <th colspan="4" class="wrap stickyHeader" style="text-align: left; vertical-align: middle;">
-                                <table style="margin:0 0">
+                                <table style="margin:0 0 0 18">
                                     <tr style="background-color:rgba(0, 0, 0, 0);">
                                         <td rowspan=2>
                                             <i class="ss {{$card.Keyrune}} ss-2x ss-fw"></i>
                                         </td>
-                                        <td>
+                                        <td width=100%>
                                             <a href="{{$card.SearchURL}}">
                                                 {{$card.Name}}
                                             </a>
@@ -248,6 +304,13 @@
                                                 •
                                             {{end}}
                                         </td>
+                                        {{if $.CanChart}}
+                                            <td rowspan=2>
+                                                <span class="emoji">
+                                                    <a href="/search?chart={{$cardId}}" title="See historical data">📊</a>
+                                                </span>
+                                            </td>
+                                        {{end}}
                                     </tr>
                                     <tr style="background-color:rgba(0, 0, 0, 0);">
                                         <td>

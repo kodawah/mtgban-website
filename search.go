@@ -55,6 +55,11 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		blocklist = strings.Split(blocklistOpt, ",")
 	}
 
+	// Check if user can access chart data
+	canChart, _ := strconv.ParseBool(GetParamFromSig(sig, "SearchChart"))
+	canChart = canChart || (DevMode && !SigCheck)
+	pageVars.CanChart = canChart
+
 	query := r.FormValue("q")
 	if len(query) > MaxSearchQueryLen {
 		pageVars.ErrorMessage = TooLongMessage
@@ -63,7 +68,17 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Query is not null, let's get processing
+	chartId := r.FormValue("chart")
+	// Check if query is a valid ID
+	co, err := mtgmatcher.GetUUID(chartId)
+	if err != nil {
+		chartId = ""
+	} else {
+		// Override the query when chart is requested
+		query = chartId
+	}
+
+	// If query is empty there is nothing to do
 	if query == "" {
 		render(w, "search.html", pageVars)
 		return
@@ -203,30 +218,73 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	pageVars.SellerKeys = sortedKeysSeller
 	pageVars.VendorKeys = sortedKeysVendor
 
-	var source string
-	utm := r.FormValue("utm_source")
-	if utm == "banbot" {
-		id := r.FormValue("utm_affiliate")
-		source = fmt.Sprintf("banbot (%s)", id)
-	} else if utm == "autocard" {
-		source = "autocard anywhere"
-	} else {
-		u, err := url.Parse(r.Referer())
+	// CHART ALL THE THINGS
+	if chartId != "" {
+		// Rebuild the original query
+		searchQuery := cleanQuery
+		if options["edition"] != "" {
+			searchQuery += " s:" + options["edition"]
+		}
+		if options["number"] != "" {
+			searchQuery += " cn:" + options["number"]
+		}
+		if options["foil"] != "" {
+			searchQuery += " f:" + options["foil"]
+		}
+		pageVars.SearchQuery = searchQuery
+
+		// Retrieve data
+		labels, err := getDateAxisValues(chartId)
 		if err != nil {
-			log.Println(err)
-			source = "n/a"
+			pageVars.InfoMessage = "No chart data available"
 		} else {
-			if strings.Contains(u.Host, "mtgban") {
-				source = u.Path
-			} else {
-				source = u.String()
+			pageVars.AxisLabels = labels
+			pageVars.ChartID = chartId
+
+			for _, config := range enabledDatasets {
+				dataset, err := getDataset(chartId, labels, config)
+				if err != nil {
+					log.Println(err)
+					continue
+				}
+				pageVars.Datasets = append(pageVars.Datasets, dataset)
 			}
 		}
+
+		altId, err := mtgmatcher.Match(&mtgmatcher.Card{
+			Id:   chartId,
+			Foil: !co.Foil,
+		})
+		if err == nil && altId != chartId {
+			pageVars.Alternative = altId
+		}
+	} else {
+		// Display tracking for non-chart requests
+		var source string
+		utm := r.FormValue("utm_source")
+		if utm == "banbot" {
+			id := r.FormValue("utm_affiliate")
+			source = fmt.Sprintf("banbot (%s)", id)
+		} else if utm == "autocard" {
+			source = "autocard anywhere"
+		} else {
+			u, err := url.Parse(r.Referer())
+			if err != nil {
+				log.Println(err)
+				source = "n/a"
+			} else {
+				if strings.Contains(u.Host, "mtgban") {
+					source = u.Path
+				} else {
+					source = u.String()
+				}
+			}
+		}
+		user := GetParamFromSig(sig, "UserEmail")
+		msg := fmt.Sprintf("[%s] from %s by %s", query, source, user)
+		Notify("search", msg)
+		LogPages["Search"].Println(msg)
 	}
-	user := GetParamFromSig(sig, "UserEmail")
-	msg := fmt.Sprintf("[%s] from %s by %s", query, source, user)
-	Notify("search", msg)
-	LogPages["Search"].Println(msg)
 
 	render(w, "search.html", pageVars)
 }

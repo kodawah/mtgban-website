@@ -554,6 +554,10 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 		} else {
 			v.Set("SearchDisabled", "DEFAULT")
 		}
+		switch tierTitle {
+		case "Root", "Admin":
+			v.Set("SearchChart", "true")
+		}
 	}
 	if v.Get("Explore") == "true" {
 		switch tierTitle {

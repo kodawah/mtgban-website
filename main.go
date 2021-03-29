@@ -113,6 +113,12 @@ type PageVars struct {
 	MemoryStatus string
 	LatestHash   string
 	CacheSize    int
+
+	AxisLabels  []string
+	Datasets    []*Dataset
+	CanChart    bool
+	ChartID     string
+	Alternative string
 }
 
 type NavElem struct {
@@ -156,6 +162,7 @@ var OptionalFields = []string{
 	"UserEmail",
 	"UserTier",
 	"SearchDisabled",
+	"SearchChart",
 	"ArbitEnabled",
 	"ArbitDisabledVendors",
 	"ExpEnabled",
