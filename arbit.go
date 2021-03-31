@@ -122,15 +122,14 @@ func Global(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		if anyEnabled {
-			if seller.Info().Shorthand == TCG_MARKET ||
-				seller.Info().Shorthand == MKM_TREND ||
-				SliceStringHas(Config.GlobalAllowList, seller.Info().Shorthand) {
+			if SliceStringHas(Config.GlobalAllowList, seller.Info().Shorthand) {
 				if !anyExperiment && SliceStringHas(Config.SearchBlockList, seller.Info().Shorthand) {
 					continue
 				}
 				allowlistSellers = append(allowlistSellers, seller.Info().Shorthand)
 			}
 		} else {
+			// These are hardcoded to provide a preview of the tool
 			if seller.Info().Shorthand != TCG_MARKET &&
 				seller.Info().Shorthand != MKM_TREND {
 				continue
@@ -146,8 +145,7 @@ func Global(w http.ResponseWriter, r *http.Request) {
 			log.Println("nil seller at position", i)
 			continue
 		}
-		if seller.Info().Shorthand == TCG_MARKET ||
-			seller.Info().Shorthand == MKM_TREND {
+		if SliceStringHas(Config.GlobalProbeList, seller.Info().Shorthand) {
 			continue
 		}
 		blocklistVendors = append(blocklistVendors, seller.Info().Shorthand)

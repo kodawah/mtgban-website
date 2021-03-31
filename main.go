@@ -258,6 +258,7 @@ var Config struct {
 	ArbitBlockVendors   []string          `json:"arbit_block_vendors"`
 	SearchBlockList     []string          `json:"search_block_list"`
 	GlobalAllowList     []string          `json:"global_allow_list"`
+	GlobalProbeList     []string          `json:"global_probe_list"`
 	Patreon             struct {
 		Secret map[string]string `json:"secret"`
 		Emails map[string]string `json:"emails"`
