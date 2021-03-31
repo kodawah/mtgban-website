@@ -495,7 +495,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		if pageVars.GlobalMode {
 			entry.HasCredit = false
 			entry.LastUpdate = scraper.Info().InventoryTimestamp.Format(time.RFC3339)
-			entry.HasConditions = !scraper.Info().MetadataOnly
+			entry.HasConditions = source.Info().MetadataOnly
 		}
 
 		pageVars.Arb = append(pageVars.Arb, entry)
