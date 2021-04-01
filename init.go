@@ -277,8 +277,9 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 				start := time.Now()
 				log.Printf("Stashing %s inventory data to DB", seller.Info().Shorthand)
 				inv, _ := seller.Inventory()
+				key := seller.Info().InventoryTimestamp.Format("2006-01-02")
 				for uuid, entries := range inv {
-					err = db.HSet(context.Background(), uuid, seller.Info().InventoryTimestamp, entries[0].Price).Err()
+					err = db.HSet(context.Background(), uuid, key, entries[0].Price).Err()
 					if err != nil {
 						log.Printf("redis error for %s: %s", uuid, err)
 					}
@@ -788,8 +789,9 @@ func loadVendors(newVendors []mtgban.Vendor) {
 				start := time.Now()
 				log.Printf("Stashing %s buylist data to DB", Vendors[i].Info().Name)
 				bl, _ := Vendors[i].Buylist()
+				key := Vendors[i].Info().BuylistTimestamp.Format("2006-01-02")
 				for uuid, entries := range bl {
-					err := opts.RDB.HSet(context.Background(), uuid, Vendors[i].Info().BuylistTimestamp, entries[0].BuyPrice).Err()
+					err := opts.RDB.HSet(context.Background(), uuid, key, entries[0].BuyPrice).Err()
 					if err != nil {
 						log.Printf("redis error for %s: %s", uuid, err)
 					}
