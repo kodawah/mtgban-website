@@ -698,33 +698,33 @@ func loadSellers(newSellers []mtgban.Seller) {
 				continue
 			}
 
-			if Sellers[i] != nil && time.Now().Sub(Sellers[i].Info().InventoryTimestamp) < SkipRefreshCooldown {
-				log.Println("Skipping because too recent")
-				continue
-			}
-			log.Println("Loading from scraper")
-
 			opts := ScraperOptions[ScraperMap[newSellers[i].Info().Shorthand]]
 
-			// Load inventory
-			opts.Mutex.Lock()
-			opts.Busy = true
-			inv, err := newSellers[i].Inventory()
-			opts.Busy = false
-			opts.Mutex.Unlock()
-			if err != nil {
-				log.Println(newSellers[i].Info().Name, "error", err)
-				continue
-			}
-			if len(inv) == 0 {
-				log.Println(newSellers[i].Info().Name, "empty inventory")
-				continue
+			// If the old scraper data is old enough, pull from the new scraper
+			// and update it in the global slice
+			if Sellers[i] == nil || time.Now().Sub(Sellers[i].Info().InventoryTimestamp) > SkipRefreshCooldown {
+				log.Println("Loading from scraper")
+
+				// Load inventory
+				opts.Mutex.Lock()
+				opts.Busy = true
+				inv, err := newSellers[i].Inventory()
+				opts.Busy = false
+				opts.Mutex.Unlock()
+				if err != nil {
+					log.Println(newSellers[i].Info().Name, "error", err)
+					continue
+				}
+				if len(inv) == 0 {
+					log.Println(newSellers[i].Info().Name, "empty inventory")
+					continue
+				}
+
+				// Save seller in global array
+				Sellers[i] = newSellers[i]
 			}
 
-			// Save seller in global array
-			Sellers[i] = newSellers[i]
-
-			err = dumpInventoryToFile(Sellers[i], currentDir, fname)
+			err := dumpInventoryToFile(Sellers[i], currentDir, fname)
 			if err != nil {
 				log.Println(err)
 				continue
@@ -757,35 +757,39 @@ func loadVendors(newVendors []mtgban.Vendor) {
 
 			log.Println("Loaded from file")
 		} else {
-			if Vendors[i] != nil && time.Now().Sub(Vendors[i].Info().BuylistTimestamp) < SkipRefreshCooldown {
-				log.Println("Skipping because too recent")
-				continue
-			}
-			log.Println("Loading from scraper")
-
 			opts := ScraperOptions[ScraperMap[newVendors[i].Info().Shorthand]]
 
-			// Load buylist
-			opts.Mutex.Lock()
-			opts.Busy = true
-			bl, err := newVendors[i].Buylist()
-			opts.Busy = false
-			opts.Mutex.Unlock()
-			if err != nil {
-				log.Println(newVendors[i].Info().Name, "error", err)
-				continue
-			}
-			if len(bl) == 0 {
-				log.Println(newVendors[i].Info().Name, "empty buylist")
-				continue
+			// If the old scraper data is old enough, pull from the new scraper
+			// and update it in the global slice
+			if Vendors[i] == nil || time.Now().Sub(Vendors[i].Info().BuylistTimestamp) > SkipRefreshCooldown {
+				log.Println("Loading from scraper")
+
+				// Load buylist
+				opts.Mutex.Lock()
+				opts.Busy = true
+				bl, err := newVendors[i].Buylist()
+				opts.Busy = false
+				opts.Mutex.Unlock()
+				if err != nil {
+					log.Println(newVendors[i].Info().Name, "error", err)
+					continue
+				}
+				if len(bl) == 0 {
+					log.Println(newVendors[i].Info().Name, "empty buylist")
+					continue
+				}
+
+				// Save vendor in global array
+				Vendors[i] = newVendors[i]
 			}
 
 			// Stash data to DB if requested
 			if opts.StashBuylist {
 				start := time.Now()
-				log.Printf("Stashing %s buylist data to DB", newVendors[i].Info().Name)
+				log.Printf("Stashing %s buylist data to DB", Vendors[i].Info().Name)
+				bl, _ := Vendors[i].Buylist()
 				for uuid, entries := range bl {
-					err = opts.RDB.HSet(context.Background(), uuid, newVendors[i].Info().BuylistTimestamp, entries[0].BuyPrice).Err()
+					err := opts.RDB.HSet(context.Background(), uuid, Vendors[i].Info().BuylistTimestamp, entries[0].BuyPrice).Err()
 					if err != nil {
 						log.Printf("redis error for %s: %s", uuid, err)
 					}
@@ -793,10 +797,7 @@ func loadVendors(newVendors []mtgban.Vendor) {
 				log.Println("Took", time.Now().Sub(start))
 			}
 
-			// Save vendor in global array
-			Vendors[i] = newVendors[i]
-
-			err = dumpBuylistToFile(Vendors[i], currentDir, fname)
+			err := dumpBuylistToFile(Vendors[i], currentDir, fname)
 			if err != nil {
 				log.Println(err)
 				continue
