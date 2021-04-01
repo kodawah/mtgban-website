@@ -47,22 +47,11 @@ func prepareCKAPI() error {
 
 		cardId, err := mtgmatcher.Match(theCard)
 		if err != nil {
-			log.Println(err)
-			log.Println(theCard)
-			log.Println(card)
-			alias, ok := err.(*mtgmatcher.AliasingError)
-			if ok {
-				probes := alias.Probe()
-				for _, probe := range probes {
-					log.Println("-", probe)
-				}
-			}
 			continue
 		}
 
 		co, err := mtgmatcher.GetUUID(cardId)
 		if err != nil {
-			log.Println(cardId, err)
 			continue
 		}
 
