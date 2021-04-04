@@ -14,6 +14,10 @@ func reloadCSI() {
 	reloadSingle("coolstuffinc")
 }
 
+func reloadSCG() {
+	reloadSingle("starcitygames")
+}
+
 func reloadSingle(name string) {
 	log.Println("Reloading", name)
 
