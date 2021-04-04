@@ -526,7 +526,7 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 	case "Root":
 		v.Set("Explore", "true")
 		fallthrough
-	case "Admin":
+	case "Admin", "Developer":
 		v.Set("Search", "true")
 		v.Set("Newspaper", "true")
 		v.Set("Sleepers", "true")
@@ -536,10 +536,14 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 		v.Set("Admin", "true")
 	}
 	if v.Get("Arbit") == "true" {
-		if tierTitle == "Root" {
+		switch tierTitle {
+		case "Root":
 			v.Set("ArbitEnabled", "ALL")
 			v.Set("ArbitDisabledVendors", "NONE")
-		} else {
+		case "Developer":
+			v.Set("ArbitEnabled", "DEV")
+			v.Set("ArbitDisabledVendors", "NONE")
+		default:
 			v.Set("ArbitEnabled", "DEFAULT")
 			v.Set("ArbitDisabledVendors", "DEFAULT")
 		}

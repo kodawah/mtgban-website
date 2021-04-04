@@ -84,6 +84,8 @@ func arbit(w http.ResponseWriter, r *http.Request, reverse bool) {
 			}
 			allowlistSellers = append(allowlistSellers, seller.Info().Shorthand)
 		}
+	} else if allowlistSellersOpt == "DEV" {
+		allowlistSellers = append(Config.ArbitDefaultSellers, Config.DevSellers...)
 	} else if allowlistSellersOpt == "DEFAULT" || allowlistSellersOpt == "" {
 		allowlistSellers = Config.ArbitDefaultSellers
 	} else {
