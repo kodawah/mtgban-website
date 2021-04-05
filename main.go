@@ -418,8 +418,10 @@ func openDBs() (err error) {
 	return nil
 }
 
+const DefaultConfigPath = "config.json"
+
 func main() {
-	config := flag.String("cfg", "config.json", "Load configuration file")
+	config := flag.String("cfg", DefaultConfigPath, "Load configuration file")
 	devMode := flag.Bool("dev", false, "Enable developer mode")
 	sigCheck := flag.Bool("sig", false, "Enable signature verification")
 	logdir := flag.String("log", "logs", "Directory for scrapers logs")

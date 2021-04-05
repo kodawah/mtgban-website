@@ -161,6 +161,16 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 
 		go deleteOldCache()
 
+	case "config":
+		v = url.Values{}
+		v.Set("msg", "New config loaded!")
+		doReboot = true
+
+		err := loadVars(DefaultConfigPath)
+		if err != nil {
+			v.Set("msg", "Failed to reload config: "+err.Error())
+		}
+
 	case "scrapers":
 		v = url.Values{}
 		v.Set("msg", "Reloading scrapers in the background...")
