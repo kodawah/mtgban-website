@@ -281,7 +281,7 @@ var ExploreDB *sql.DB
 
 var LastSoldDB = redis.NewClient(&redis.Options{
 	Addr: "localhost:6379",
-	DB:   0,
+	DB:   15,
 })
 
 func Favicon(w http.ResponseWriter, r *http.Request) {
