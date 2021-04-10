@@ -192,10 +192,13 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 	printings := ""
 	if len(flags) > 1 && flags[1] {
 		// Hack to generate HTML in the template
-		for i, print := range co.Printings {
-			set := mtgmatcher.GetSets()[print]
+		for i, setCode := range co.Printings {
+			set, found := mtgmatcher.GetSets()[setCode]
+			if !found {
+				continue
+			}
 			keyruneCode := strings.ToLower(set.KeyruneCode)
-			printings += fmt.Sprintf("<a class='pagination' title='%s' href='/search?q=%s'><i class='ss ss-%s ss-2x'></i> </a>", set.Name, url.QueryEscape(co.Name+" s:"+print), keyruneCode)
+			printings += fmt.Sprintf("<a class='pagination' title='%s' href='/search?q=%s'><i class='ss ss-%s ss-2x'></i> </a>", set.Name, url.QueryEscape(co.Name+" s:"+setCode), keyruneCode)
 			if i == MaxRuneSymbols && len(co.Printings) > MaxRuneSymbols {
 				printings += "<br>and many more (too many to list)..."
 				break
