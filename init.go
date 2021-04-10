@@ -323,6 +323,9 @@ type scraperOption struct {
 	// while for Market scrapers, the key is the name of the subseller
 	RDBs map[string]*redis.Client
 
+	// Save inventory data from this scraper to the associated redis DB
+	StashInventory bool
+
 	// Save buylist data from this scraper to the associated redis DB
 	StashBuylist bool
 
@@ -349,13 +352,18 @@ var ScraperOptions = map[string]*scraperOption{
 			scraper.Partner = Config.Affiliate["CK"]
 			return scraper, nil
 		},
+		StashInventory: true,
+		StashBuylist:   true,
 		RDBs: map[string]*redis.Client{
+			"retail": redis.NewClient(&redis.Options{
+				Addr: "localhost:6379",
+				DB:   0,
+			}),
 			"buylist": redis.NewClient(&redis.Options{
 				Addr: "localhost:6379",
 				DB:   1,
 			}),
 		},
-		StashBuylist: true,
 	},
 	"coolstuffinc": &scraperOption{
 		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
@@ -715,6 +723,26 @@ func loadSellers(newSellers []mtgban.Seller) {
 
 				// Save seller in global array
 				Sellers[i] = newSellers[i]
+			}
+
+			// Stash data to DB if requested
+			if opts.StashInventory {
+				start := time.Now()
+				log.Printf("Stashing %s inventory data to DB", Sellers[i].Info().Name)
+				inv, _ := Sellers[i].Inventory()
+				// Supply some default price adjustment in case NM is not available
+				grade := map[string]float64{
+					"NM": 1, "SP": 1.25, "MP": 1.67, "HP": 2.5, "PO": 4,
+				}
+				key := Sellers[i].Info().InventoryTimestamp.Format("2006-01-02")
+				for uuid, entries := range inv {
+					price := entries[0].Price * grade[entries[0].Conditions]
+					err := opts.RDBs["retail"].HSet(context.Background(), uuid, key, price).Err()
+					if err != nil {
+						log.Printf("redis error for %s: %s", uuid, err)
+					}
+				}
+				log.Println("Took", time.Now().Sub(start))
 			}
 
 			err := dumpInventoryToFile(Sellers[i], currentDir, fname)
