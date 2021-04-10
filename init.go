@@ -268,7 +268,7 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 		// Stash to redis if requested
 		if ScraperOptions[key].StashMarkets {
 			for _, seller := range sellers {
-				db, found := ScraperOptions[key].MarketRDBs[seller.Info().Shorthand]
+				db, found := ScraperOptions[key].RDBs[seller.Info().Shorthand]
 				if !found {
 					continue
 				}
@@ -318,17 +318,16 @@ type scraperOption struct {
 	// For Market scrapers, list the buylists that should be preserved
 	KeepersBL string
 
-	// The redis DB where to stash data
-	RDB *redis.Client
+	// The redis DBs where to stash data
+	// For classic inventory/buylist the key is just "retail" and "buylist",
+	// while for Market scrapers, the key is the name of the subseller
+	RDBs map[string]*redis.Client
 
 	// Save buylist data from this scraper to the associated redis DB
 	StashBuylist bool
 
 	// Save market data from this scraper to the associated redis DB
 	StashMarkets bool
-
-	// For Market scrapers, the array of redis DBs where each
-	MarketRDBs map[string]*redis.Client
 
 	// Log where scrapers... log
 	Logger *log.Logger
@@ -350,10 +349,12 @@ var ScraperOptions = map[string]*scraperOption{
 			scraper.Partner = Config.Affiliate["CK"]
 			return scraper, nil
 		},
-		RDB: redis.NewClient(&redis.Options{
-			Addr: "localhost:6379",
-			DB:   1,
-		}),
+		RDBs: map[string]*redis.Client{
+			"buylist": redis.NewClient(&redis.Options{
+				Addr: "localhost:6379",
+				DB:   1,
+			}),
+		},
 		StashBuylist: true,
 	},
 	"coolstuffinc": &scraperOption{
@@ -418,7 +419,7 @@ var ScraperOptions = map[string]*scraperOption{
 		},
 		Keepers:      []string{TCG_LOW, TCG_MARKET},
 		StashMarkets: true,
-		MarketRDBs: map[string]*redis.Client{
+		RDBs: map[string]*redis.Client{
 			TCG_LOW: redis.NewClient(&redis.Options{
 				Addr: "localhost:6379",
 				DB:   2,
@@ -782,7 +783,7 @@ func loadVendors(newVendors []mtgban.Vendor) {
 				bl, _ := Vendors[i].Buylist()
 				key := Vendors[i].Info().BuylistTimestamp.Format("2006-01-02")
 				for uuid, entries := range bl {
-					err := opts.RDB.HSet(context.Background(), uuid, key, entries[0].BuyPrice).Err()
+					err := opts.RDBs["buylist"].HSet(context.Background(), uuid, key, entries[0].BuyPrice).Err()
 					if err != nil {
 						log.Printf("redis error for %s: %s", uuid, err)
 					}
