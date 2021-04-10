@@ -475,7 +475,18 @@ var ScraperOptions = map[string]*scraperOption{
 			scraper.LogCallback = logger.Printf
 			return scraper, nil
 		},
-		Keepers: []string{MKM_LOW, MKM_TREND},
+		Keepers:      []string{MKM_LOW, MKM_TREND},
+		StashMarkets: true,
+		RDBs: map[string]*redis.Client{
+			MKM_LOW: redis.NewClient(&redis.Options{
+				Addr: "localhost:6379",
+				DB:   4,
+			}),
+			MKM_TREND: redis.NewClient(&redis.Options{
+				Addr: "localhost:6379",
+				DB:   5,
+			}),
+		},
 	},
 	"cardsphere": &scraperOption{
 		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
