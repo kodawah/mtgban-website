@@ -162,8 +162,6 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		// Iterate on array, always passthrough, except for specific entries
 		for i := range indexArray {
 			switch indexArray[i].ScraperName {
-			case TCG_DIRECT:
-				indexArray[i].ScraperName = "mtgPapa"
 			case MKM_LOW:
 				// Save reference to the array
 				tmp = append(tmp, indexArray[i])
