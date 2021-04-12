@@ -207,7 +207,7 @@
                                                 •
                                             {{end}}
                                         </td>
-                                        {{if $.CanChart}}
+                                        {{if and (eq $.ChartID "") $.CanChart}}
                                             <td rowspan=2>
                                                 <span class="emoji">
                                                     <a href="/search?chart={{$cardId}}" title="See historical data">📊</a>
@@ -304,7 +304,7 @@
                                                 •
                                             {{end}}
                                         </td>
-                                        {{if $.CanChart}}
+                                        {{if and (eq $.ChartID "") $.CanChart}}
                                             <td rowspan=2>
                                                 <span class="emoji">
                                                     <a href="/search?chart={{$cardId}}" title="See historical data">📊</a>
