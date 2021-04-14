@@ -136,7 +136,7 @@ const (
 	MaxBeforeShrink = 18
 
 	// After this amount just stop adding symbols
-	MaxRuneSymbols = 58
+	MaxRuneSymbols = 57
 )
 
 func uuid2card(cardId string, flags ...bool) GenericCard {
