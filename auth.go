@@ -555,7 +555,7 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 			v.Set("SearchDisabled", "DEFAULT")
 		}
 		switch tierTitle {
-		case "Root", "Admin":
+		case "Root", "Admin", "Test Role":
 			v.Set("SearchChart", "true")
 		}
 	}
