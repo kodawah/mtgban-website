@@ -163,7 +163,12 @@ func parseMessage(content string) (*searchResult, error) {
 				if err != nil {
 					return nil, fmt.Errorf("No edition found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", code)
 				}
-				return nil, fmt.Errorf("No card found named \"%s\" in %s 乁| ･ิ ∧ ･ิ |ㄏ", query, set.Name)
+				msg := fmt.Sprintf("No card found named \"%s\" in %s 乁| ･ิ ∧ ･ิ |ㄏ", query, set.Name)
+				printings, err := mtgmatcher.Printings4Card(query)
+				if err == nil {
+					msg = fmt.Sprintf("%s\n\"%s\" is printed in %s.", msg, query, printings2line(printings))
+				}
+				return nil, fmt.Errorf("%s", msg)
 			}
 			return nil, fmt.Errorf("No card found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", query)
 		}
@@ -726,6 +731,14 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
+func printings2line(printings []string) string {
+	line := strings.Join(printings, ", ")
+	if len(printings) > MaxPrintings {
+		line = strings.Join(printings[:MaxPrintings], ", ") + " and more"
+	}
+	return line
+}
+
 func prepareCard(searchRes *searchResult, ogFields []embedField, guildId string, lastSold bool) *discordgo.MessageEmbed {
 	// Convert search results into proper fields
 	var fields []*discordgo.MessageEmbedField
@@ -741,10 +754,7 @@ func prepareCard(searchRes *searchResult, ogFields []embedField, guildId string,
 	card := uuid2card(searchRes.CardId, true)
 	co, _ := mtgmatcher.GetUUID(searchRes.CardId)
 
-	printings := strings.Join(co.Printings, ", ")
-	if len(co.Printings) > MaxPrintings {
-		printings = strings.Join(co.Printings[:MaxPrintings], ", ") + " and more"
-	}
+	printings := printings2line(co.Printings)
 	if searchRes.EditionSearched != "" && len(co.Variations) > 0 {
 		cn := []string{co.Number}
 		for _, varid := range co.Variations {
