@@ -106,9 +106,8 @@ async function autocomplete(form, inp) {
         } else if (e.keyCode == 27) {
             /* If the ESC key is pressed just close everything */
             closeAllLists();
-        } else if (e.keyCode == 9) {
-            /* If the TAB key is pressed
-            * do not move focus */
+        } else if (e.keyCode == 9 || e.keyCode == 39) {
+            /* If the TAB or RIGHT ARROW keys are pressed do not move focus */
             e.preventDefault();
             /* initialize the input field with what is selected */
             this.value = x[currentFocus].textContent;
