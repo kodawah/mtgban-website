@@ -119,11 +119,9 @@
                     {{if not (eq .Alternative "")}}
                         <tr>
                             <td>
-                                <span class="emoji">
-                                    <center>
-                                    <a href="/search?chart={{.Alternative}}" title="Check Foil/Non Foil version">✨✨✨</a>
-                                    </center>
-                                </span>
+                                <center>
+                                    <a class="btn warning" href="/search?chart={{.Alternative}}">Switch Foil/Non-Foil</a>
+                                </center>
                             </td>
                         </tr>
                     {{end}}
