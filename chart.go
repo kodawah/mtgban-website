@@ -54,6 +54,18 @@ var enabledDatasets = []scraperConfig{
 		KindName:    "buylist",
 		Color:       "rgb(54, 162, 235)",
 	},
+	{
+		PublicName:  "Cardmarket Low",
+		ScraperName: "cardmarket",
+		KindName:    MKM_LOW,
+		Color:       "rgb(235, 205, 86)",
+	},
+	{
+		PublicName:  "Cardmarket Trend",
+		ScraperName: "cardmarket",
+		KindName:    MKM_TREND,
+		Color:       "rgb(201, 203, 207)",
+	},
 }
 
 // Get all the keys that will be used as x asis labels
