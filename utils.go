@@ -145,7 +145,12 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 		return GenericCard{}
 	}
 
+	var stocksURL string
 	_, stocks := Infos["STKS"][cardId]
+	entries, found := Infos["STKSIndex"][cardId]
+	if found {
+		stocksURL = entries[0].URL
+	}
 
 	variant := ""
 	switch {
@@ -223,6 +228,7 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 		Reserved:  co.Card.IsReserved,
 		SearchURL: fmt.Sprintf("/search?q=%s", url.QueryEscape(query)),
 		Stocks:    stocks,
+		StocksURL: stocksURL,
 		Printings: printings,
 	}
 }

@@ -258,6 +258,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		if err == nil && altId != chartId {
 			pageVars.Alternative = altId
 		}
+
+		pageVars.StocksURL = pageVars.Metadata[chartId].StocksURL
 	} else {
 		// Display tracking for non-chart requests
 		var source string

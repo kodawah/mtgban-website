@@ -843,13 +843,21 @@ func loadVendors(newVendors []mtgban.Vendor) {
 }
 
 func loadInfos() {
-	seller := mtgstocks.NewScraper()
+	log.Println("Loading infos")
+	for _, seller := range []mtgban.Seller{
+		mtgstocks.NewScraper(), mtgstocks.NewScraperIndex(),
+	} {
+		loadMtgstocks(seller)
+	}
+	log.Println("stocks refreshed")
+	Notify("refresh", "stocks refreshed")
+}
+
+func loadMtgstocks(seller mtgban.Seller) {
 	inv, err := seller.Inventory()
 	if err != nil {
 		log.Println(err)
 		return
 	}
 	Infos[seller.Info().Shorthand] = inv
-	log.Println("stocks refreshed")
-	Notify("refresh", "stocks refreshed")
 }

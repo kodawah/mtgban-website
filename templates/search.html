@@ -125,6 +125,15 @@
                             </td>
                         </tr>
                     {{end}}
+                    {{if not (eq .StocksURL "")}}
+                        <tr>
+                            <td>
+                                <center>
+                                    <a class="btn success" href="{{.StocksURL}}" target="_blank">Check MTGStocks charts</a>
+                                </center>
+                            </td>
+                        </tr>
+                    {{end}}
                     <tr>
                         <td style="background-color: #f8f8f8;">
                             {{if .HasReserved}}

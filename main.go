@@ -39,6 +39,7 @@ type GenericCard struct {
 	Title     string
 	SearchURL string
 	Stocks    bool
+	StocksURL string
 	Printings string
 }
 
@@ -119,6 +120,7 @@ type PageVars struct {
 	CanChart    bool
 	ChartID     string
 	Alternative string
+	StocksURL   string
 }
 
 type NavElem struct {
