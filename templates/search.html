@@ -137,10 +137,18 @@
                     <tr>
                         <td style="background-color: #f8f8f8;">
                             {{if .HasReserved}}
-                                <h4>* = Part of the <a href="https://mtg.gamepedia.com/Reserved_List">Reserved List</a></h4>
+                                <h4>
+                                    {{if not (eq .ChartID "")}}<center>{{else}}* ={{end}}
+                                    Part of the <a href="https://mtg.gamepedia.com/Reserved_List">Reserved List</a>
+                                    {{if not (eq .ChartID "")}}</center>{{end}}
+                                </h4>
                             {{end}}
                             {{if .HasStocks}}
-                                <h4>• = On <a href="https://mtgstocks.com/interests">MTGStocks Interests</a> page</h4>
+                                <h4>
+                                    {{if not (eq .ChartID "")}}<center>{{else}}• ={{end}}
+                                    On <a href="https://mtgstocks.com/interests">MTGStocks Interests</a> page
+                                    {{if not (eq .ChartID "")}}</center>{{end}}
+                                </h4>
                             {{end}}
                         </td>
                     </tr>
