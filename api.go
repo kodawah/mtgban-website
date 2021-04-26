@@ -37,6 +37,10 @@ func prepareCKAPI() error {
 		return err
 	}
 
+	// Backup option for stashing CK data
+	rdb := ScraperOptions["cardkingdom"].RDBs["buylist"]
+	key := time.Now().Format("2006-01-02")
+
 	output := map[string]*ck2id{}
 
 	for _, card := range list {
@@ -48,6 +52,11 @@ func prepareCKAPI() error {
 		cardId, err := mtgmatcher.Match(theCard)
 		if err != nil {
 			continue
+		}
+
+		err = rdb.HSetNX(context.Background(), cardId, key, card.BuyPrice).Err()
+		if err != nil {
+			log.Printf("redis error for %s: %s", cardId, err)
 		}
 
 		co, err := mtgmatcher.GetUUID(cardId)
