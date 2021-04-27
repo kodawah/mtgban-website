@@ -1,3 +1,14 @@
+// Custom positioner to draw the tooltip on the bottom
+Chart.Tooltip.positioners.bottom = function(elements, position) {
+    if (!elements.length) {
+        return false;
+    }
+    return {
+        x: elements[0]._view.x,
+        y: this._chart.chartArea.bottom,
+    }
+};
+
 function getChartOpts() {
     return {
         responsive: true,
@@ -14,7 +25,7 @@ function getChartOpts() {
         // The labels appearing on top of points
         tooltips: {
             mode: "index",
-            position: "nearest",
+            position: "bottom",
             intersect: false,
             callbacks: {
                 // Make sure there is a $ and floating point looks sane
