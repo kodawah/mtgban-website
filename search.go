@@ -278,7 +278,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				if strings.Contains(u.Host, "mtgban") {
 					source = u.Path
 				} else {
-					source = u.String()
+					// Avoid automatic URL expansion in Discord
+					source = fmt.Sprintf("<%s>", u.String())
 				}
 			}
 		}
