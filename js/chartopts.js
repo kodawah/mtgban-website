@@ -25,14 +25,30 @@ Chart.controllers.banWithLine = Chart.controllers.line.extend({
     }
 });
 
-// Custom positioner to draw the tooltip on the bottom
+// Custom positioner to draw the tooltip on the bottom or top if it covers anything
 Chart.Tooltip.positioners.bottom = function(elements, position) {
     if (!elements.length) {
         return false;
     }
+    var pos = this._chart.chartArea.bottom;
+    var topPos = this._chart.chartArea.top;
+    var tooltipHeight = this._chart.tooltip._view.height + this._chart.tooltip._view.footerMarginTop;
+
+    // The very first hover event might not have drawn the tooltip yet so make up
+    // some height value using the default font size plus some margin
+    if (isNaN(tooltipHeight)) {
+        tooltipHeight = elements.length * 12 + 26
+    }
+
+    elements.forEach(function(element) {
+        if (element._view.y > pos - tooltipHeight) {
+            pos = topPos;
+        }
+    });
+
     return {
         x: elements[0]._view.x,
-        y: this._chart.chartArea.bottom,
+        y: pos,
     }
 };
 
