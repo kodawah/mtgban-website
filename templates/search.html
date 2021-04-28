@@ -36,7 +36,7 @@
             <img class="center" src="img/promo/search.jpg">
         {{end}}
     {{else}}
-        <h1>Welcome to BAN Search</h1>
+        <h1>Welcome to BAN {{if and .CanChart (not (eq .ChartID ""))}}Chart{{end}} Search</h1>
         <div class="indent sticky" style="top:48px; background-color:#f8f8f8; z-index: 3; width: min-content;">
             <form class="search autocomplete" action="search" autocomplete="off" id="searchform">
                 <label style="clear: both; float: left;" for="searchbox">
