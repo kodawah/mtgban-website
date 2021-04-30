@@ -299,3 +299,21 @@ func readSetFlag(w http.ResponseWriter, r *http.Request, queryParam, cookieName 
 	})
 	return flag
 }
+
+// Retrieve default blocklists according to the signature contents
+func getDefaultBlocklists(sig string) ([]string, []string) {
+	var blocklistRetail, blocklistBuylist []string
+	blocklistRetailOpt := GetParamFromSig(sig, "SearchDisabled")
+	if blocklistRetailOpt == "DEFAULT" || blocklistRetailOpt == "" {
+		blocklistRetail = Config.SearchRetailBlockList
+	} else if blocklistRetailOpt != "NONE" {
+		blocklistRetail = strings.Split(blocklistRetailOpt, ",")
+	}
+	blocklistBuylistOpt := GetParamFromSig(sig, "SearchBuylistDisabled")
+	if blocklistBuylistOpt == "DEFAULT" || blocklistBuylistOpt == "" {
+		blocklistBuylist = Config.SearchBuylistBlockList
+	} else if blocklistBuylistOpt != "NONE" {
+		blocklistBuylist = strings.Split(blocklistBuylistOpt, ",")
+	}
+	return blocklistRetail, blocklistBuylist
+}

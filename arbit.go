@@ -125,7 +125,7 @@ func Global(w http.ResponseWriter, r *http.Request) {
 		}
 		if anyEnabled {
 			if SliceStringHas(Config.GlobalAllowList, seller.Info().Shorthand) {
-				if !anyExperiment && SliceStringHas(Config.SearchBlockList, seller.Info().Shorthand) {
+				if !anyExperiment && SliceStringHas(Config.SearchRetailBlockList, seller.Info().Shorthand) {
 					continue
 				}
 				allowlistSellers = append(allowlistSellers, seller.Info().Shorthand)

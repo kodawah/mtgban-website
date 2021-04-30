@@ -551,8 +551,10 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 	if v.Get("Search") == "true" {
 		if tierTitle == "Root" {
 			v.Set("SearchDisabled", "NONE")
+			v.Set("SearchBuylistDisabled", "NONE")
 		} else {
 			v.Set("SearchDisabled", "DEFAULT")
+			v.Set("SearchBuylistDisabled", "DEFAULT")
 		}
 		switch tierTitle {
 		case "Root", "Admin", "Test Role":

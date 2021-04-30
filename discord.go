@@ -834,7 +834,7 @@ func longestName(results []SearchEntry) (out int) {
 // Retrieve cards from Sellers using the very first result
 func searchSellersFirstResult(query string, options map[string]string, index bool) (results []SearchEntry, cardId string) {
 	// Skip any store based outside of the US
-	skipped := append(Config.SearchBlockList, "TCG Direct")
+	skipped := append(Config.SearchRetailBlockList, "TCG Direct")
 	if !index {
 		for _, seller := range Sellers {
 			if seller.Info().CountryFlag != "" {
@@ -901,7 +901,7 @@ func searchSellersFirstResult(query string, options map[string]string, index boo
 // Retrieve cards from Vendors using the very first result
 func searchVendorsFirstResult(query string, options map[string]string) (results []SearchEntry) {
 	// Skip any store based outside of the US
-	skipped := Config.SearchBlockList
+	skipped := Config.SearchBuylistBlockList
 	for _, vendor := range Vendors {
 		if vendor.Info().CountryFlag != "" {
 			skipped = append(skipped, vendor.Info().Shorthand)

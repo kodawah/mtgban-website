@@ -47,13 +47,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	pageVars := genPageNav("Search", sig)
 
-	var blocklist []string
-	blocklistOpt := GetParamFromSig(sig, "SearchDisabled")
-	if blocklistOpt == "DEFAULT" || blocklistOpt == "" {
-		blocklist = Config.SearchBlockList
-	} else if blocklistOpt != "NONE" {
-		blocklist = strings.Split(blocklistOpt, ",")
-	}
+	blocklistRetail, blocklistBuylist := getDefaultBlocklists(sig)
 
 	// Check if user can access chart data
 	canChart, _ := strconv.ParseBool(GetParamFromSig(sig, "SearchChart"))
@@ -93,7 +87,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	// SEARCH
 	cleanQuery, options := parseSearchOptions(query)
-	foundSellers, foundVendors, tooMany := searchParallel(cleanQuery, options, blocklist)
+	foundSellers, foundVendors, tooMany := searchParallel(cleanQuery, options, blocklistRetail, blocklistBuylist)
 
 	// Display a message if there are too many entries
 	if tooMany {
@@ -667,17 +661,17 @@ func searchVendors(query string, blocklist []string, options map[string]string) 
 	return
 }
 
-func searchParallel(query string, options map[string]string, blocklist []string) (foundSellers map[string]map[string][]SearchEntry, foundVendors map[string][]SearchEntry, tooMany bool) {
+func searchParallel(query string, options map[string]string, blocklistRetail, blocklistBuylist []string) (foundSellers map[string]map[string][]SearchEntry, foundVendors map[string][]SearchEntry, tooMany bool) {
 	var manySellers, manyVendors bool
 	var wg sync.WaitGroup
 	wg.Add(2)
 
 	go func() {
-		foundSellers, manySellers = searchSellers(query, blocklist, options)
+		foundSellers, manySellers = searchSellers(query, blocklistRetail, options)
 		wg.Done()
 	}()
 	go func() {
-		foundVendors, manyVendors = searchVendors(query, blocklist, options)
+		foundVendors, manyVendors = searchVendors(query, blocklistBuylist, options)
 		wg.Done()
 	}()
 
@@ -688,7 +682,7 @@ func searchParallel(query string, options map[string]string, blocklist []string)
 	if len(foundSellers) == 0 && len(foundVendors) == 0 &&
 		(options["search_mode"] == "exact" || options["search_mode"] == "") {
 		options["search_mode"] = "prefix"
-		return searchParallel(query, options, blocklist)
+		return searchParallel(query, options, blocklistRetail, blocklistBuylist)
 	}
 
 	return foundSellers, foundVendors, manySellers || manyVendors

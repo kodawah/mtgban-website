@@ -5,7 +5,6 @@ import (
 	"math"
 	"net/http"
 	"sort"
-	"strings"
 
 	"github.com/kodabb/go-mtgban/mtgban"
 	"github.com/kodabb/go-mtgban/mtgmatcher"
@@ -38,13 +37,7 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 
 	pageVars := genPageNav("Sleepers", sig)
 
-	var blocklist []string
-	blocklistOpt := GetParamFromSig(sig, "SearchDisabled")
-	if blocklistOpt == "DEFAULT" || blocklistOpt == "" {
-		blocklist = Config.SearchBlockList
-	} else if blocklistOpt != "NONE" {
-		blocklist = strings.Split(blocklistOpt, ",")
-	}
+	blocklistRetail, blocklistBuylist := getDefaultBlocklists(sig)
 
 	tiers := map[string]int{}
 
@@ -73,7 +66,7 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		// Skip any seller explicitly in blocklist
-		if SliceStringHas(blocklist, seller.Info().Shorthand) {
+		if SliceStringHas(blocklistRetail, seller.Info().Shorthand) {
 			continue
 		}
 
@@ -90,7 +83,7 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 			}
 
 			// Skip any vendor explicitly in blocklist
-			if SliceStringHas(blocklist, vendor.Info().Shorthand) {
+			if SliceStringHas(blocklistBuylist, vendor.Info().Shorthand) {
 				continue
 			}
 

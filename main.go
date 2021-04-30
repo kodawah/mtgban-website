@@ -164,6 +164,7 @@ var OptionalFields = []string{
 	"UserEmail",
 	"UserTier",
 	"SearchDisabled",
+	"SearchBuylistDisabled",
 	"SearchChart",
 	"ArbitEnabled",
 	"ArbitDisabledVendors",
@@ -255,21 +256,22 @@ func init() {
 }
 
 var Config struct {
-	Port                int               `json:"port"`
-	DBAddress           string            `json:"db_address"`
-	DiscordHook         string            `json:"discord_hook"`
-	Affiliate           map[string]string `json:"affiliate"`
-	AffiliatesList      []string          `json:"affiliates_list"`
-	Api                 map[string]string `json:"api"`
-	DiscordToken        string            `json:"discord_token"`
-	DiscordAllowList    []string          `json:"discord_allowlist"`
-	DevSellers          []string          `json:"dev_sellers"`
-	ArbitDefaultSellers []string          `json:"arbit_default_sellers"`
-	ArbitBlockVendors   []string          `json:"arbit_block_vendors"`
-	SearchBlockList     []string          `json:"search_block_list"`
-	GlobalAllowList     []string          `json:"global_allow_list"`
-	GlobalProbeList     []string          `json:"global_probe_list"`
-	Patreon             struct {
+	Port                   int               `json:"port"`
+	DBAddress              string            `json:"db_address"`
+	DiscordHook            string            `json:"discord_hook"`
+	Affiliate              map[string]string `json:"affiliate"`
+	AffiliatesList         []string          `json:"affiliates_list"`
+	Api                    map[string]string `json:"api"`
+	DiscordToken           string            `json:"discord_token"`
+	DiscordAllowList       []string          `json:"discord_allowlist"`
+	DevSellers             []string          `json:"dev_sellers"`
+	ArbitDefaultSellers    []string          `json:"arbit_default_sellers"`
+	ArbitBlockVendors      []string          `json:"arbit_block_vendors"`
+	SearchRetailBlockList  []string          `json:"search_block_list"`
+	SearchBuylistBlockList []string          `json:"search_buylist_block_list"`
+	GlobalAllowList        []string          `json:"global_allow_list"`
+	GlobalProbeList        []string          `json:"global_probe_list"`
+	Patreon                struct {
 		Secret map[string]string `json:"secret"`
 		Emails map[string]string `json:"emails"`
 	} `json:"patreon"`
