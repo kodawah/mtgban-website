@@ -439,7 +439,6 @@ var ScraperOptions = map[string]*scraperOption{
 		},
 	},
 	"magiccorner": &scraperOption{
-		OnlySeller: true,
 		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper, err := magiccorner.NewScraper()
 			if err != nil {
