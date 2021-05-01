@@ -50,7 +50,13 @@
                                 {{else if eq $j 1}}
                                     <a href="?logs={{$cell}}" target="_blank">{{$cell}}</a>
                                 {{else}}
+                                    {{if eq $j 4}}
+                                        <center>
+                                    {{end}}
                                     {{$cell}}
+                                    {{if eq $j 4}}
+                                        </center>
+                                    {{end}}
                                 {{end}}
                             </td>
                         {{end}}
@@ -77,7 +83,13 @@
                                 {{else if eq $j 1}}
                                     <a href="?logs={{$cell}}" target="_blank">{{$cell}}</a>
                                 {{else}}
+                                    {{if eq $j 4}}
+                                        <center>
+                                    {{end}}
                                     {{$cell}}
+                                    {{if eq $j 4}}
+                                        </center>
+                                    {{end}}
                                 {{end}}
                             </td>
                         {{end}}
