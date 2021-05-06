@@ -551,11 +551,13 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 			// Check if the message contains potential links
 		} else if strings.Contains(m.Content, "cardkingdom.com/mtg") ||
+			strings.Contains(m.Content, "coolstuffinc.com/page") ||
 			(strings.Contains(m.Content, "shop.tcgplayer.com/") && !strings.Contains(m.Content, "shop.tcgplayer.com/seller")) {
 			// Iterate over each segment of the message and look for known links
 			fields := strings.Fields(m.Content)
 			for _, field := range fields {
 				if !strings.Contains(field, "cardkingdom.com/mtg") &&
+					!strings.Contains(field, "coolstuffinc.com/page") &&
 					!strings.Contains(field, "shop.tcgplayer.com/") {
 					continue
 				}
@@ -571,10 +573,13 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 				// Flags for later use
 				isCK := strings.Contains(field, "cardkingdom.com/mtg")
+				isCSI := strings.Contains(field, "coolstuffinc.com/page")
 				isTCG := strings.Contains(field, "shop.tcgplayer.com/")
 
 				// Add the MTGBAN affiliation
-				if true {
+				if isCSI {
+					v.Set("utm_referrer", Config.Affiliate["CSI"])
+				} else if isCK || isTCG {
 					commonTag := Config.Affiliate["CK"]
 					v.Set("partner", commonTag)
 					v.Set("utm_source", commonTag)
