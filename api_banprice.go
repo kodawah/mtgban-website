@@ -190,6 +190,11 @@ func getSellerPrices(mode string, enabledStores []string, filterByEdition, filte
 		}
 		sellerTag := seller.Info().Shorthand
 
+		// Only keep singles
+		if seller.Info().SealedMode {
+			continue
+		}
+
 		// Skip any seller that are not enabled
 		if !SliceStringHas(enabledStores, sellerTag) && !DevMode {
 			continue
@@ -249,6 +254,11 @@ func getVendorPrices(mode string, enabledStores []string, filterByEdition, filte
 			continue
 		}
 		vendorTag := vendor.Info().Shorthand
+
+		// Only keep singles
+		if vendor.Info().SealedMode {
+			continue
+		}
 
 		// Skip any vendor that are not enabled
 		if !SliceStringHas(enabledStores, vendorTag) && !DevMode {
