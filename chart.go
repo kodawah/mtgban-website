@@ -80,7 +80,14 @@ func getDateAxisValues(cardId string) ([]string, error) {
 		return nil, err
 	}
 	if len(keys) == 0 {
-		return nil, errors.New("no data available")
+		db = ScraperOptions["tcg_index"].RDBs[TCG_LOW]
+		keys, err = db.HKeys(context.Background(), cardId).Result()
+		if err != nil {
+			return nil, err
+		}
+		if len(keys) == 0 {
+			return nil, errors.New("no data available")
+		}
 	}
 	return keys, nil
 }
