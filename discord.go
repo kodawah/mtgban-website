@@ -850,7 +850,7 @@ func searchSellersFirstResult(query string, options map[string]string, index boo
 	skipped := append(Config.SearchRetailBlockList, "TCG Direct")
 	if !index {
 		for _, seller := range Sellers {
-			if seller.Info().CountryFlag != "" {
+			if seller != nil && seller.Info().CountryFlag != "" {
 				skipped = append(skipped, seller.Info().Shorthand)
 			}
 		}
@@ -916,7 +916,7 @@ func searchVendorsFirstResult(query string, options map[string]string) (results 
 	// Skip any store based outside of the US
 	skipped := Config.SearchBuylistBlockList
 	for _, vendor := range Vendors {
-		if vendor.Info().CountryFlag != "" {
+		if vendor != nil && vendor.Info().CountryFlag != "" {
 			skipped = append(skipped, vendor.Info().Shorthand)
 		}
 	}
