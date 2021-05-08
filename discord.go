@@ -781,7 +781,7 @@ func prepareCard(searchRes *searchResult, ogFields []embedField, guildId string,
 		link = "https://shop.tcgplayer.com/product/productsearch?id=" + co.Identifiers["tcgplayerProductId"]
 		affiliate := Config.Affiliate["TCG"]
 		if affiliate != "" {
-			link += fmt.Sprintf("&utm_campaign=affiliate&utm_medium=%s&utm_source=%s&partner=%s", affiliate, affiliate, affiliate)
+			link += fmt.Sprintf("&utm_campaign=affiliate&utm_medium=%s&utm_source=%s&partner=%s", UTM_BOT, affiliate, affiliate)
 		}
 	}
 
