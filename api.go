@@ -61,9 +61,11 @@ func prepareCKAPI() error {
 				log.Printf("redis error for %s: %s", cardId, err)
 			}
 		}
-		err = rdbBL.HSetNX(context.Background(), cardId, key, card.BuyPrice).Err()
-		if err != nil {
-			log.Printf("redis error for %s: %s", cardId, err)
+		if card.BuyQuantity > 0 {
+			err = rdbBL.HSetNX(context.Background(), cardId, key, card.BuyPrice).Err()
+			if err != nil {
+				log.Printf("redis error for %s: %s", cardId, err)
+			}
 		}
 
 		co, err := mtgmatcher.GetUUID(cardId)
