@@ -37,7 +37,8 @@ func prepareCKAPI() error {
 	}
 
 	// Backup option for stashing CK data
-	rdb := ScraperOptions["cardkingdom"].RDBs["buylist"]
+	rdbRT := ScraperOptions["cardkingdom"].RDBs["retail"]
+	rdbBL := ScraperOptions["cardkingdom"].RDBs["buylist"]
 	key := time.Now().Format("2006-01-02")
 
 	output := map[string]*ck2id{}
@@ -53,7 +54,14 @@ func prepareCKAPI() error {
 			continue
 		}
 
-		err = rdb.HSetNX(context.Background(), cardId, key, card.BuyPrice).Err()
+		if card.SellQuantity > 0 {
+			// We use Set for retail because prices are more accurate
+			err = rdbRT.HSet(context.Background(), cardId, key, card.SellPrice).Err()
+			if err != nil {
+				log.Printf("redis error for %s: %s", cardId, err)
+			}
+		}
+		err = rdbBL.HSetNX(context.Background(), cardId, key, card.BuyPrice).Err()
 		if err != nil {
 			log.Printf("redis error for %s: %s", cardId, err)
 		}

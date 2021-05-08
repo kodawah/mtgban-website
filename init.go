@@ -748,7 +748,9 @@ func loadSellers(newSellers []mtgban.Seller) {
 				key := Sellers[i].Info().InventoryTimestamp.Format("2006-01-02")
 				for uuid, entries := range inv {
 					price := entries[0].Price * grade[entries[0].Conditions]
-					err := opts.RDBs["retail"].HSet(context.Background(), uuid, key, price).Err()
+					// Use NX because the price might have already been set using more accurate
+					// information (instead of the derivation above)
+					err := opts.RDBs["retail"].HSetNX(context.Background(), uuid, key, price).Err()
 					if err != nil {
 						log.Printf("redis error for %s: %s", uuid, err)
 					}
