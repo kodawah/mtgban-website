@@ -798,7 +798,11 @@ func prepareCard(searchRes *searchResult, ogFields []embedField, guildId string,
 		title += " ✨"
 	}
 
-	desc := fmt.Sprintf("[%s] %s\nPrinted in %s.\n\n", card.SetCode, card.Title, printings)
+	desc := fmt.Sprintf("[%s] %s\n", card.SetCode, card.Title)
+	if !co.Sealed {
+		desc = fmt.Sprintf("%sPrinted in %s.\n", printings)
+	}
+	desc += "\n"
 
 	embed := discordgo.MessageEmbed{
 		Title:       title,
