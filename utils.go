@@ -116,7 +116,12 @@ func editionTitle(cardId string) string {
 		foil = " Foil"
 	}
 
-	return fmt.Sprintf("%s -%s %s #%s", co.Edition, foil, strings.Title(co.Card.Rarity), co.Card.Number)
+	num := ""
+	if !co.Sealed {
+		num = "#" + co.Card.Number
+	}
+
+	return fmt.Sprintf("%s -%s %s %s", co.Edition, foil, strings.Title(co.Card.Rarity), num)
 }
 
 func insertNavBar(page string, nav []NavElem, extra []NavElem) []NavElem {
