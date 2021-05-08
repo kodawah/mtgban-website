@@ -50,7 +50,34 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	enabledStores := strings.Split(GetParamFromSig(sig, "API"), ",")
+	storesOpt := GetParamFromSig(sig, "API")
+	var enabledStores []string
+	switch storesOpt {
+	case "ALL_ACCESS":
+		for _, seller := range Sellers {
+			if seller != nil && !SliceStringHas(Config.SearchRetailBlockList, seller.Info().Shorthand) {
+				enabledStores = append(enabledStores, seller.Info().Shorthand)
+			}
+		}
+		for _, vendor := range Vendors {
+			if vendor != nil && !SliceStringHas(Config.SearchBuylistBlockList, vendor.Info().Shorthand) {
+				enabledStores = append(enabledStores, vendor.Info().Shorthand)
+			}
+		}
+	case "DEV_ACCESS":
+		for _, seller := range Sellers {
+			if seller != nil {
+				enabledStores = append(enabledStores, seller.Info().Shorthand)
+			}
+		}
+		for _, vendor := range Vendors {
+			if vendor != nil {
+				enabledStores = append(enabledStores, vendor.Info().Shorthand)
+			}
+		}
+	default:
+		enabledStores = strings.Split(storesOpt, ",")
+	}
 	out.Meta.Stores = enabledStores
 	enabledModes := strings.Split(GetParamFromSig(sig, "APImode"), ",")
 	out.Meta.Modes = enabledModes
