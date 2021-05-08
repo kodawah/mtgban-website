@@ -357,6 +357,11 @@ func noSigning(next http.Handler) http.Handler {
 
 func enforceAPISigning(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !DatabaseLoaded {
+			w.Write([]byte(`{"error": "try again later"}`))
+			return
+		}
+
 		w.Header().Add("Content-Type", "application/json")
 
 		sig := r.FormValue("sig")
