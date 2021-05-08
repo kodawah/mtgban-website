@@ -93,7 +93,7 @@ func loadInventoryFromFile(info mtgban.ScraperInfo, fname string) (mtgban.Seller
 
 func dumpInventoryToFile(seller mtgban.Seller, currentDir, fname string) error {
 	// Create dump file
-	outName := currentDir + "/" + seller.Info().Name + ".csv"
+	outName := currentDir + "/" + seller.Info().Shorthand + ".csv"
 	file, err := os.Create(outName)
 	if err != nil {
 		return err
@@ -140,7 +140,7 @@ func loadBuylistFromFile(info mtgban.ScraperInfo, fname string) (mtgban.Vendor, 
 
 func dumpBuylistToFile(vendor mtgban.Vendor, currentDir, fname string) error {
 	// Create dump file
-	outName := currentDir + "/" + vendor.Info().Name + ".csv"
+	outName := currentDir + "/" + vendor.Info().Shorthand + ".csv"
 	file, err := os.Create(outName)
 	if err != nil {
 		return err
@@ -650,7 +650,7 @@ func loadScrapers(doSellers, doVendors bool) {
 				log.Println(i, "<nil>")
 				continue
 			}
-			log.Println(i, newSellers[i].Info().Name)
+			log.Println(i, newSellers[i].Info().Name, newSellers[i].Info().Shorthand)
 		}
 		loadSellers(newSellers)
 	}
@@ -661,7 +661,7 @@ func loadScrapers(doSellers, doVendors bool) {
 				log.Println(i, "<nil>")
 				continue
 			}
-			log.Println(i, newVendors[i].Info().Name)
+			log.Println(i, newVendors[i].Info().Name, newVendors[i].Info().Shorthand)
 		}
 		loadVendors(newVendors)
 	}
@@ -691,9 +691,9 @@ func loadSellers(newSellers []mtgban.Seller) {
 
 	// Load Sellers
 	for i := range newSellers {
-		log.Println(newSellers[i].Info().Name, "Inventory")
+		log.Println(newSellers[i].Info().Name, newSellers[i].Info().Shorthand, "Inventory")
 
-		fname := dirName + newSellers[i].Info().Name + "-latest.csv"
+		fname := dirName + newSellers[i].Info().Shorthand + "-latest.csv"
 		if init && fileExists(fname) {
 			seller, err := loadInventoryFromFile(newSellers[i].Info(), fname)
 			if err != nil {
@@ -724,11 +724,11 @@ func loadSellers(newSellers []mtgban.Seller) {
 				opts.Busy = false
 				opts.Mutex.Unlock()
 				if err != nil {
-					log.Println(newSellers[i].Info().Name, "error", err)
+					log.Println(newSellers[i].Info().Name, newSellers[i].Info().Shorthand, "error", err)
 					continue
 				}
 				if len(inv) == 0 {
-					log.Println(newSellers[i].Info().Name, "empty inventory")
+					log.Println(newSellers[i].Info().Name, newSellers[i].Info().Shorthand, "empty inventory")
 					continue
 				}
 
@@ -739,7 +739,7 @@ func loadSellers(newSellers []mtgban.Seller) {
 			// Stash data to DB if requested
 			if opts.StashInventory {
 				start := time.Now()
-				log.Printf("Stashing %s inventory data to DB", Sellers[i].Info().Name)
+				log.Println("Stashing", Sellers[i].Info().Name, Sellers[i].Info().Shorthand, "inventory data to DB")
 				inv, _ := Sellers[i].Inventory()
 				// Supply some default price adjustment in case NM is not available
 				grade := map[string]float64{
@@ -778,9 +778,9 @@ func loadVendors(newVendors []mtgban.Vendor) {
 
 	// Load Vendors
 	for i := range newVendors {
-		log.Println(newVendors[i].Info().Name, "Buylist")
+		log.Println(newVendors[i].Info().Name, newVendors[i].Info().Shorthand, "Buylist")
 
-		fname := dirName + newVendors[i].Info().Name + "-latest.csv"
+		fname := dirName + newVendors[i].Info().Shorthand + "-latest.csv"
 		if init && fileExists(fname) {
 			vendor, err := loadBuylistFromFile(newVendors[i].Info(), fname)
 			if err != nil {
@@ -805,11 +805,11 @@ func loadVendors(newVendors []mtgban.Vendor) {
 				opts.Busy = false
 				opts.Mutex.Unlock()
 				if err != nil {
-					log.Println(newVendors[i].Info().Name, "error", err)
+					log.Println(newVendors[i].Info().Name, newVendors[i].Info().Shorthand, "error", err)
 					continue
 				}
 				if len(bl) == 0 {
-					log.Println(newVendors[i].Info().Name, "empty buylist")
+					log.Println(newVendors[i].Info().Name, newVendors[i].Info().Shorthand, "empty buylist")
 					continue
 				}
 
@@ -820,7 +820,7 @@ func loadVendors(newVendors []mtgban.Vendor) {
 			// Stash data to DB if requested
 			if opts.StashBuylist {
 				start := time.Now()
-				log.Printf("Stashing %s buylist data to DB", Vendors[i].Info().Name)
+				log.Println("Stashing", Vendors[i].Info().Name, Vendors[i].Info().Shorthand, "buylist data to DB")
 				bl, _ := Vendors[i].Buylist()
 				key := Vendors[i].Info().BuylistTimestamp.Format("2006-01-02")
 				for uuid, entries := range bl {
