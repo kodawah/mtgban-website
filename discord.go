@@ -298,6 +298,10 @@ func search2fields(searchRes *searchResult) (fields []embedField) {
 		}
 		if len(results) == 0 {
 			field.Value = "N/A"
+			// The very first item is allowed not to have entries
+			if fieldsNames[i] == "Index" {
+				continue
+			}
 		}
 
 		fields = append(fields, field)
