@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"path"
@@ -101,6 +102,12 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	if doBuylist && (SliceStringHas(enabledModes, "buylist") || DevMode) {
 		out.Buylist = getVendorPrices(idOpt, enabledStores, filterByEdition, filterByHash)
+	}
+
+	if !DevMode {
+		user := GetParamFromSig(sig, "UserEmail")
+		msg := fmt.Sprintf("%s requested an API dump ('%s','%s')", user, filterByEdition, filterByHash)
+		Notify("api", msg)
 	}
 
 	if out.Retail == nil && out.Buylist == nil {
