@@ -150,12 +150,12 @@ func parseMessage(content string) (*searchResult, error) {
 	// We can be quite sure that one of the index will contain the card requested,
 	// so we translate the result into a new query to feed to the other searches
 	resultsIndex, cardId := searchSellersFirstResult(query, options, true)
-	if len(resultsIndex) == 0 {
+	if cardId == "" {
 		// Use a more relaxed search mode if nothing was found (similar to what is
 		// done in main search
 		options["search_mode"] = "prefix"
 		resultsIndex, cardId = searchSellersFirstResult(query, options, true)
-		if len(resultsIndex) == 0 {
+		if cardId == "" {
 			// Not found again, let's provide a meaningful error
 			if options["edition"] != "" {
 				code := strings.Split(options["edition"], ",")[0]
