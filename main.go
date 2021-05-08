@@ -173,6 +173,7 @@ var OptionalFields = []string{
 	"AnyEnabled",
 	"AnyExperimentsEnabled",
 	"API",
+	"APImode",
 }
 
 // The key matches the query parameter of the permissions defined in sign()
@@ -558,6 +559,7 @@ func main() {
 	}
 
 	http.Handle("/api/mtg/", enforceAPISigning(http.HandlerFunc(PriceLastSoldAPI)))
+	http.Handle("/api/mtgban/", enforceAPISigning(http.HandlerFunc(PriceAPI)))
 	http.Handle("/api/mtgjson/ck.json", enforceAPISigning(http.HandlerFunc(API)))
 	http.HandleFunc("/favicon.ico", Favicon)
 	http.HandleFunc("/auth", Auth)
