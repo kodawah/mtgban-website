@@ -533,6 +533,44 @@ var ScraperOptions = map[string]*scraperOption{
 			return scraper, nil
 		},
 	},
+	"cardkingdom_sealed": &scraperOption{
+		DevEnabled: true,
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
+			scraper := cardkingdom.NewScraperSealed()
+			scraper.LogCallback = logger.Printf
+			scraper.Partner = Config.Affiliate["CK"]
+			return scraper, nil
+		},
+		StashInventory: true,
+		StashBuylist:   true,
+		RDBs: map[string]*redis.Client{
+			"retail": redis.NewClient(&redis.Options{
+				Addr: "localhost:6379",
+				DB:   0,
+			}),
+			"buylist": redis.NewClient(&redis.Options{
+				Addr: "localhost:6379",
+				DB:   1,
+			}),
+		},
+	},
+	"tcg_sealed": &scraperOption{
+		DevEnabled: true,
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
+			scraper := tcgplayer.NewScraperSealed(Config.Api["tcg_public"], Config.Api["tcg_private"])
+			scraper.Affiliate = Config.Affiliate["TCG"]
+			scraper.LogCallback = logger.Printf
+			scraper.MaxConcurrency = 4
+			return scraper, nil
+		},
+		StashInventory: true,
+		RDBs: map[string]*redis.Client{
+			"retail": redis.NewClient(&redis.Options{
+				Addr: "localhost:6379",
+				DB:   2,
+			}),
+		},
+	},
 }
 
 // Associate Scraper shorthands to ScraperOptions keys
