@@ -79,7 +79,7 @@ func arbit(w http.ResponseWriter, r *http.Request, reverse bool) {
 
 	if allowlistSellersOpt == "ALL" {
 		for _, seller := range Sellers {
-			if seller == nil {
+			if seller == nil || seller.Info().SealedMode {
 				continue
 			}
 			allowlistSellers = append(allowlistSellers, seller.Info().Shorthand)
