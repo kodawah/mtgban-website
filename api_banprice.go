@@ -26,8 +26,6 @@ type PriceAPIOutput struct {
 	Meta  struct {
 		Date     time.Time `json:"date"`
 		Version  string    `json:"version"`
-		Stores   []string  `json:"stores,omitempty"`
-		Modes    []string  `json:"modes,omitempty"`
 		IdFormat string    `json:"id_format,omitempty"`
 	} `json:"meta"`
 
@@ -78,9 +76,7 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 	default:
 		enabledStores = strings.Split(storesOpt, ",")
 	}
-	out.Meta.Stores = enabledStores
 	enabledModes := strings.Split(GetParamFromSig(sig, "APImode"), ",")
-	out.Meta.Modes = enabledModes
 	idOpt := r.FormValue("id")
 	out.Meta.IdFormat = idOpt
 
