@@ -358,7 +358,7 @@ func noSigning(next http.Handler) http.Handler {
 func enforceAPISigning(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !DatabaseLoaded {
-			w.Write([]byte(`{"error": "try again later"}`))
+			http.Error(w, http.StatusText(http.StatusServiceUnavailable), http.StatusServiceUnavailable)
 			return
 		}
 
