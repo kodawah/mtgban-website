@@ -571,6 +571,24 @@ var ScraperOptions = map[string]*scraperOption{
 			}),
 		},
 	},
+	"cardmarket_sealed": &scraperOption{
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
+			scraper, err := cardmarket.NewScraperSealed(Config.Api["mkm_app_token"], Config.Api["mkm_app_secret"])
+			if err != nil {
+				return nil, err
+			}
+			scraper.Affiliate = Config.Affiliate["MKM"]
+			scraper.LogCallback = logger.Printf
+			return scraper, nil
+		},
+		StashInventory: true,
+		RDBs: map[string]*redis.Client{
+			"retail": redis.NewClient(&redis.Options{
+				Addr: "localhost:6379",
+				DB:   4,
+			}),
+		},
+	},
 }
 
 // Associate Scraper shorthands to ScraperOptions keys
