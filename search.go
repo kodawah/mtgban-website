@@ -236,6 +236,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			pageVars.ChartID = chartId
 
 			for _, config := range enabledDatasets {
+				if co.Sealed && !config.HasSealed {
+					continue
+				}
 				dataset, err := getDataset(chartId, labels, config)
 				if err != nil {
 					log.Println(err)

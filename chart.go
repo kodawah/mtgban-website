@@ -11,6 +11,7 @@ type Dataset struct {
 	Color  string
 	AxisID string
 	Hidden bool
+	Sealed bool
 }
 
 type scraperConfig struct {
@@ -19,6 +20,7 @@ type scraperConfig struct {
 	KindName    string
 	Color       string
 	Hidden      bool
+	HasSealed   bool
 }
 
 /*
@@ -37,6 +39,7 @@ var enabledDatasets = []scraperConfig{
 		ScraperName: "tcg_index",
 		KindName:    TCG_LOW,
 		Color:       "rgb(255, 99, 132)",
+		HasSealed:   true,
 	},
 	{
 		PublicName:  "TCGplayer Market",
@@ -50,18 +53,21 @@ var enabledDatasets = []scraperConfig{
 		ScraperName: "cardkingdom",
 		KindName:    "retail",
 		Color:       "rgb(162, 235, 54)",
+		HasSealed:   true,
 	},
 	{
 		PublicName:  "Card Kingdom Buylist",
 		ScraperName: "cardkingdom",
 		KindName:    "buylist",
 		Color:       "rgb(54, 162, 235)",
+		HasSealed:   true,
 	},
 	{
 		PublicName:  "Cardmarket Low",
 		ScraperName: "cardmarket",
 		KindName:    MKM_LOW,
 		Color:       "rgb(235, 205, 86)",
+		HasSealed:   true,
 	},
 	{
 		PublicName:  "Cardmarket Trend",
