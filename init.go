@@ -217,8 +217,8 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 			}
 
 			// Load if all the sellers inventory timestamps are past the cooldown
-			if SliceStringHas(names, seller.Info().Name) && time.Now().Sub(seller.Info().InventoryTimestamp) < SkipRefreshCooldown {
-				log.Println("Trying to skip", seller.Info().Name, "because too recent")
+			if SliceStringHas(names, seller.Info().Shorthand) && time.Now().Sub(seller.Info().InventoryTimestamp) < SkipRefreshCooldown {
+				log.Println("Trying to skip", seller.Info().Name, seller.Info().Shorthand, "because too recent")
 			} else {
 				needsLoading = true
 			}
@@ -253,7 +253,7 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 				// Add selected seller to the future global seller map
 				newbc.Register(seller)
 
-				fname := dirName + seller.Info().Name + "-latest.csv"
+				fname := dirName + seller.Info().Shorthand + "-latest.csv"
 
 				err = dumpInventoryToFile(seller, currentDir, fname)
 				if err != nil {
