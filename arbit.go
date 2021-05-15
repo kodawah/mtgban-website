@@ -329,7 +329,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	}
 
 	pageVars.ScraperShort = source.Info().Shorthand
-	pageVars.HasAffiliate = SliceStringHas(Config.AffiliatesList, source.Info().Name)
+	pageVars.HasAffiliate = SliceStringHas(Config.AffiliatesList, source.Info().Shorthand)
 	pageVars.QtyNotAvailable = source.Info().NoQuantityInventory
 	pageVars.UseCredit = useCredit
 	pageVars.FilterCond = nocond
