@@ -94,7 +94,7 @@ func updateSellers(scraper mtgban.Scraper) {
 		if Sellers[i] != nil && Sellers[i].Info().Shorthand == scraper.Info().Shorthand {
 			inv, err := scraper.(mtgban.Seller).Inventory()
 			if err != nil {
-				log.Println(err)
+				log.Println(Sellers[i].Info().Name, "error", err)
 				continue
 			}
 			if len(inv) == 0 {
