@@ -75,7 +75,7 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 				log.Println("nil vendor at position", j)
 				continue
 			}
-			if vendor.Info().Name == seller.Info().Name {
+			if vendor.Info().Shorthand == seller.Info().Shorthand {
 				continue
 			}
 			if vendor.Info().CountryFlag != "" {

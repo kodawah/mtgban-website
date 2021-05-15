@@ -312,7 +312,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 
 		nav.Link += "?" + v.Encode()
 
-		if source != nil && source.Info().Name == scraper.Info().Name {
+		if source != nil && source.Info().Shorthand == scraper.Info().Shorthand {
 			nav.Active = true
 			nav.Class = "selected"
 		}
@@ -401,7 +401,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	}
 
 	for _, scraper := range scrapers {
-		if scraper.Info().Name == source.Info().Name {
+		if scraper.Info().Shorthand == source.Info().Shorthand {
 			continue
 		}
 		if pageVars.ReverseMode {
