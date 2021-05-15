@@ -65,6 +65,9 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 		if seller.Info().CountryFlag != "" {
 			continue
 		}
+		if seller.Info().SealedMode {
+			continue
+		}
 		// Skip any seller explicitly in blocklist
 		if SliceStringHas(blocklistRetail, seller.Info().Shorthand) {
 			continue
