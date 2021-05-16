@@ -40,7 +40,7 @@ type SearchEntry struct {
 	Secondary     float64
 }
 
-var re = regexp.MustCompile(`(s|c|f|sm|cn|vndr|r|all):(("([^"]+)"|\S+))+`)
+var re = regexp.MustCompile(`(s|c|f|sm|cn|vndr|r|all|m):(("([^"]+)"|\S+))+`)
 
 func Search(w http.ResponseWriter, r *http.Request) {
 	sig := getSignatureFromCookies(r)
@@ -331,6 +331,8 @@ func parseSearchOptions(query string) (string, map[string]string) {
 			// Hack to show all versions of a card
 		case strings.HasPrefix(field, "all:"):
 			ignore, _ = strconv.ParseBool(code)
+		case strings.HasPrefix(field, "m:"):
+			options["mode"] = code
 		}
 	}
 
@@ -439,6 +441,14 @@ func shouldSkipCard(query, cardId string, options map[string]string) bool {
 		return true
 	}
 
+	// Skip cards that are not from the desired mode
+	if options["mode"] != "" {
+		if (options["mode"] == "sealed" && !co.Sealed) ||
+			(options["mode"] == "singles" && co.Sealed) {
+			return true
+		}
+	}
+
 	// Skip cards that are not of the desired set
 	if options["edition"] != "" {
 		filters := strings.Split(options["edition"], ",")
@@ -512,6 +522,14 @@ func searchSellers(query string, blocklist []string, options map[string]string) 
 		if options["scraper"] != "" {
 			filters := strings.Split(options["scraper"], ",")
 			if !SliceStringHas(filters, seller.Info().Shorthand) {
+				continue
+			}
+		}
+
+		// Skip sellers not from the desired mode
+		if options["mode"] != "" {
+			if (options["mode"] == "sealed" && !seller.Info().SealedMode) ||
+				(options["mode"] == "singles" && seller.Info().SealedMode) {
 				continue
 			}
 		}
@@ -611,6 +629,13 @@ func searchVendors(query string, blocklist []string, options map[string]string) 
 		if options["scraper"] != "" {
 			filters := strings.Split(options["scraper"], ",")
 			if !SliceStringHas(filters, vendor.Info().Shorthand) {
+				continue
+			}
+		}
+
+		if options["mode"] != "" {
+			if (options["mode"] == "sealed" && !vendor.Info().SealedMode) ||
+				(options["mode"] == "singles" && vendor.Info().SealedMode) {
 				continue
 			}
 		}
