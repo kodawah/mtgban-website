@@ -121,6 +121,9 @@ type PageVars struct {
 	ChartID     string
 	Alternative string
 	StocksURL   string
+
+	EditionSort []string
+	EditionList map[string][]EditionEntry
 }
 
 type NavElem struct {
@@ -166,6 +169,7 @@ var OptionalFields = []string{
 	"SearchDisabled",
 	"SearchBuylistDisabled",
 	"SearchChart",
+	"SearchSealed",
 	"ArbitEnabled",
 	"ArbitDisabledVendors",
 	"ExpEnabled",

@@ -129,15 +129,19 @@ func editionTitle(cardId string) string {
 }
 
 func insertNavBar(page string, nav []NavElem, extra []NavElem) []NavElem {
-	i := 0
-	for i = range nav {
-		if nav[i].Name == page {
-			break
+	out := make([]NavElem, len(nav)+len(extra))
+	var j int
+	for i := range nav {
+		out[j] = nav[i]
+		if out[j].Name == page {
+			for e := range extra {
+				j++
+				out[j] = extra[e]
+			}
 		}
+		j++
 	}
-	tail := nav[i:]
-	nav = append(nav[:i], extra...)
-	return append(nav, tail...)
+	return out
 }
 
 const (

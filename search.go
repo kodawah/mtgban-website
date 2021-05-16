@@ -55,6 +55,30 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	pageVars.CanChart = canChart
 
 	query := r.FormValue("q")
+
+	canSealed, _ := strconv.ParseBool(GetParamFromSig(sig, "SearchSealed"))
+	canSealed = canSealed || (DevMode && !SigCheck)
+
+	if canSealed {
+		mode := r.FormValue("mode")
+
+		pageVars.Nav = insertNavBar("Search", pageVars.Nav, []NavElem{
+			NavElem{
+				Name:   "Sealed",
+				Short:  "🧱",
+				Link:   "/search?mode=sealed",
+				Active: mode == "sealed" || strings.Contains(query, "m:sealed"),
+				Class:  "selected",
+			},
+		})
+
+		if mode == "sealed" {
+			getSealedEditions(&pageVars)
+			render(w, "product.html", pageVars)
+			return
+		}
+	}
+
 	if len(query) > MaxSearchQueryLen {
 		pageVars.ErrorMessage = TooLongMessage
 

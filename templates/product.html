@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Rosario:400' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../css/main.css">
+    <link href="//cdn.jsdelivr.net/npm/keyrune@latest/css/keyrune.css" rel="stylesheet" type="text/css" />
+    <title>{{.Title}}</title>
+</head>
+<body>
+
+<nav>
+    <ul>
+        <li><a href="https://www.patreon.com/ban_community"><img src="img/misc/patreon.png" width=48></a></li>
+        <li><a href="https://discord.gg/hcXpMZB"><img src="img/misc/discord.png" width=48></a></li>
+        {{range .Nav}}
+            <li>
+                <a {{if .Active}}class="{{.Class}}"{{end}} href="{{.Link}}">
+                    <span>{{.Short}} {{.Name}}</span>
+                </a>
+            </li>
+        {{end}}
+        <li>Last data refresh: {{.LastUpdate}}</li>
+    </ul>
+</nav>
+
+<div class="mainbody">
+    {{if ne .ErrorMessage ""}}
+        <h1>{{.ErrorMessage}}</h1>
+        {{if .ShowPromo}}
+            <img class="center" src="img/promo/search.jpg">
+        {{end}}
+    {{else}}
+        <h1>Welcome to BAN Sealed</h1>
+        <div class="indent" style="max-width: 85%">
+            <p style="max-width: 60%">
+                Jump to
+                {{range $key := .EditionSort}}
+                    <a class="btn normal" href="#{{.}}">{{.}}</a>
+                {{end}}
+            </p>
+
+            {{range $key := .EditionSort}}
+                <div class="sticky" style="top: 48px; background-color: #f8f8f8;">
+                    <span class="anchor" id="{{.}}"></span>
+                    <h3 class="storename">{{.}}</a></h3>
+                    <hr width=15%>
+                </div>
+
+                <div class="indent" style="max-width: 85%; padding-top:10px">
+                    {{$editionList := index $.EditionList $key }}
+                    {{range $editionList}}
+                        <nobr>
+                            <i class="ss ss-{{.Keyrune}} ss-2x ss-fw"></i>
+                            <a class="btn normal" href="/search?q=s:{{.Code}} m:sealed">
+                                {{.Name}}
+                            </a>
+                        </nobr>
+                    {{end}}
+                </div>
+                <br>
+            {{end}}
+        </div>
+        <div style="clear:both;"></div>
+    {{end}}
+    <br>
+</div>
+</body>
+</html>
