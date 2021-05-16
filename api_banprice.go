@@ -112,6 +112,7 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 					filterByHash = append(filterByHash, altId)
 				}
 			}
+			filterByEdition = co.SetCode
 		}
 
 		if filterByEdition == "" && filterByHash == nil {
