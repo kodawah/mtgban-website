@@ -82,7 +82,7 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 
 	var doRetail, doBuylist bool
 	filterByEdition := ""
-	filterByHash := ""
+	var filterByHash []string
 	if strings.Contains(urlPath, "/") {
 		base := strings.TrimSuffix(path.Base(urlPath), ".json")
 
@@ -91,21 +91,30 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 		if err == nil {
 			filterByEdition = set.Code
 		} else {
-			_, err = mtgmatcher.GetUUID(base)
+			co, err := mtgmatcher.GetUUID(base)
 			if err != nil {
 				// Try again, assuming it was a scryfall id
 				uuid := mtgmatcher.Scryfall2UUID(base)
-				_, err = mtgmatcher.GetUUID(uuid)
+				co, err = mtgmatcher.GetUUID(uuid)
 				if err == nil {
 					base = uuid
 				}
 			}
 			if err == nil {
-				filterByHash = base
+				filterByHash = append(filterByHash, base)
+
+				// Check if there is a foil (or nonfoil) version of the card
+				altId, err := mtgmatcher.Match(&mtgmatcher.Card{
+					Id:   base,
+					Foil: !co.Foil,
+				})
+				if err == nil {
+					filterByHash = append(filterByHash, altId)
+				}
 			}
 		}
 
-		if filterByEdition == "" && filterByHash == "" {
+		if filterByEdition == "" && filterByHash == nil {
 			out.Error = "Not found"
 			json.NewEncoder(w).Encode(&out)
 			return
@@ -129,7 +138,7 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 
 	if !DevMode {
 		user := GetParamFromSig(sig, "UserEmail")
-		msg := fmt.Sprintf("%s requested an API dump ('%s','%s')", user, filterByEdition, filterByHash)
+		msg := fmt.Sprintf("%s requested an API dump ('%s','%q')", user, filterByEdition, filterByHash)
 		Notify("api", msg)
 	}
 
@@ -176,7 +185,7 @@ func getIdFunc(mode string) func(co *mtgmatcher.CardObject) string {
 	}
 }
 
-func getSellerPrices(mode string, enabledStores []string, filterByEdition, filterByHash string) map[string]map[string]*BanPrice {
+func getSellerPrices(mode string, enabledStores []string, filterByEdition string, filterByHash []string) map[string]map[string]*BanPrice {
 	out := map[string]map[string]*BanPrice{}
 	idFunc := getIdFunc(mode)
 	for i, seller := range Sellers {
@@ -217,7 +226,7 @@ func getSellerPrices(mode string, enabledStores []string, filterByEdition, filte
 
 			if filterByEdition != "" && co.SetCode != filterByEdition {
 				continue
-			} else if filterByHash != "" && cardId != filterByHash {
+			} else if filterByHash != nil && !SliceStringHas(filterByHash, cardId) {
 				continue
 			}
 
@@ -241,7 +250,7 @@ func getSellerPrices(mode string, enabledStores []string, filterByEdition, filte
 	return out
 }
 
-func getVendorPrices(mode string, enabledStores []string, filterByEdition, filterByHash string) map[string]map[string]*BanPrice {
+func getVendorPrices(mode string, enabledStores []string, filterByEdition string, filterByHash []string) map[string]map[string]*BanPrice {
 	out := map[string]map[string]*BanPrice{}
 	idFunc := getIdFunc(mode)
 	for i, vendor := range Vendors {
@@ -282,7 +291,7 @@ func getVendorPrices(mode string, enabledStores []string, filterByEdition, filte
 
 			if filterByEdition != "" && co.SetCode != filterByEdition {
 				continue
-			} else if filterByHash != "" && cardId != filterByHash {
+			} else if filterByHash != nil && !SliceStringHas(filterByHash, cardId) {
 				continue
 			}
 
