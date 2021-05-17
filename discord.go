@@ -800,7 +800,7 @@ func prepareCard(searchRes *searchResult, ogFields []embedField, guildId string,
 
 	desc := fmt.Sprintf("[%s] %s\n", card.SetCode, card.Title)
 	if !co.Sealed {
-		desc = fmt.Sprintf("%sPrinted in %s.\n", printings)
+		desc = fmt.Sprintf("%sPrinted in %s.\n", desc, printings)
 	}
 	desc += "\n"
 
