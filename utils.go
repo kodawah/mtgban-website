@@ -187,14 +187,23 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 			variant = "Extended Art"
 		case co.HasPromoType(mtgjson.PromoTypeGodzilla):
 			variant = "Godzilla"
-		case co.BorderColor == mtgjson.BorderColorBorderless:
+		case co.BorderColor == mtgjson.BorderColorBorderless && co.SetCode != "STA":
 			variant = "Borderless"
 		case co.HasFrameEffect(mtgjson.FrameEffectFoilEtched):
 			variant = "Etched Foil"
 		}
 	}
 
-	if strings.Contains(co.Card.Number, "★") && co.Card.HasUniqueLanguage("Japanese") {
+	isJPN := false
+	switch co.SetCode {
+	case "WAR":
+		isJPN = strings.Contains(co.Card.Number, "★")
+	case "STA":
+		num, _ := strconv.Atoi(strings.TrimSuffix(co.Number, "e"))
+		isJPN = num > 63
+	}
+
+	if isJPN {
 		if variant != "" {
 			variant = " " + variant
 		}
