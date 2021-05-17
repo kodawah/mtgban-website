@@ -113,6 +113,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	cleanQuery, options := parseSearchOptions(query)
 	foundSellers, foundVendors, tooMany := searchParallel(cleanQuery, options, blocklistRetail, blocklistBuylist)
 
+	pageVars.IsSealed = options["mode"] == "sealed"
+
 	// Display a message if there are too many entries
 	if tooMany {
 		pageVars.InfoMessage = TooManyMessage

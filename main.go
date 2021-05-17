@@ -124,6 +124,7 @@ type PageVars struct {
 
 	EditionSort []string
 	EditionList map[string][]EditionEntry
+	IsSealed    bool
 }
 
 type NavElem struct {

@@ -42,7 +42,7 @@
                 <label style="clear: both; float: left;" for="searchbox">
                     {{if eq .SearchQuery "" }}
                         Search for a card, or <a href="search?q=random">surprise me</a>
-                    {{else}}
+                    {{else if not .IsSealed}}
                         <a href="search?q={{.SearchQuery}} all:true">Show all versions</a>, or
                         <a href="search?q={{.SearchQuery}}&b={{not .SearchBest}}">
                             {{if .SearchBest}}
@@ -241,7 +241,7 @@
                         </tr>
                         {{range $conditions := $.CondKeys}}
                             {{$entries := (index $condsEntry $conditions)}}
-                            {{if ne $conditions "INDEX"}}
+                            {{if and (ne $conditions "INDEX") (not $.IsSealed)}}
                                 {{if $entries}}
                                     <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};">
                                         <td colspan="4"><i>Conditions: {{$conditions}}</i></th>
