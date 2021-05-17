@@ -773,6 +773,9 @@ func prepareCard(searchRes *searchResult, ogFields []embedField, guildId string,
 			}
 			cn = append(cn, co.Number)
 		}
+		sort.Slice(cn, func(i, j int) bool {
+			return cn[i] < cn[j]
+		})
 		printings = fmt.Sprintf("%s. Variants in %s are %s", printings, searchRes.EditionSearched, strings.Join(cn, ", "))
 	}
 
