@@ -414,7 +414,7 @@ func parseSearchOptions(query string) (string, map[string]string) {
 
 	// Hack to ignore all search options
 	if ignore {
-		return query, nil
+		return query, map[string]string{}
 	}
 
 	return query, options
