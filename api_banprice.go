@@ -80,7 +80,6 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 	idOpt := r.FormValue("id")
 	out.Meta.IdFormat = idOpt
 
-	var doRetail, doBuylist bool
 	filterByEdition := ""
 	var filterByHash []string
 	if strings.Contains(urlPath, "/") {
@@ -123,24 +122,23 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if strings.HasPrefix(urlPath, "retail") {
-		doRetail = true
-	} else if strings.HasPrefix(urlPath, "buylist") {
-		doBuylist = true
-	} else if strings.HasPrefix(urlPath, "all") {
-		doRetail, doBuylist = true, true
-	}
-
-	if doRetail && (SliceStringHas(enabledModes, "retail") || DevMode) {
+	dumpType := ""
+	canRetail := SliceStringHas(enabledModes, "retail") || (SliceStringHas(enabledModes, "all") || (DevMode && !SigCheck))
+	canBuylist := SliceStringHas(enabledModes, "buylist") || (SliceStringHas(enabledModes, "all") || (DevMode && !SigCheck))
+	if (strings.HasPrefix(urlPath, "retail") || strings.HasPrefix(urlPath, "all")) && canRetail {
+		dumpType += "retail"
 		out.Retail = getSellerPrices(idOpt, enabledStores, filterByEdition, filterByHash)
 	}
-	if doBuylist && (SliceStringHas(enabledModes, "buylist") || DevMode) {
+	if (strings.HasPrefix(urlPath, "buylist") || strings.HasPrefix(urlPath, "all")) && canBuylist {
+		dumpType += "buylist"
 		out.Buylist = getVendorPrices(idOpt, enabledStores, filterByEdition, filterByHash)
 	}
 
-	if !DevMode {
-		user := GetParamFromSig(sig, "UserEmail")
-		msg := fmt.Sprintf("%s requested an API dump ('%s','%q')", user, filterByEdition, filterByHash)
+	user := GetParamFromSig(sig, "UserEmail")
+	msg := fmt.Sprintf("%s requested a '%s' API dump ('%s','%q')", user, dumpType, filterByEdition, filterByHash)
+	if DevMode {
+		log.Println(msg)
+	} else {
 		Notify("api", msg)
 	}
 
