@@ -411,8 +411,14 @@ func enforceAPISigning(next http.Handler) http.Handler {
 		sig = v.Get("Signature")
 		exp := v.Get("Expires")
 
+		secret := os.Getenv("BAN_SECRET")
+		user_secret, found := Config.ApiUserSecrets[v.Get("UserEmail")]
+		if found {
+			secret = user_secret
+		}
+
 		data := fmt.Sprintf("%s%s%s%s", r.Method, exp, getBaseURL(r), q.Encode())
-		valid := signHMACSHA1Base64([]byte(os.Getenv("BAN_SECRET")), []byte(data))
+		valid := signHMACSHA1Base64([]byte(secret), []byte(data))
 		expires, err := strconv.ParseInt(exp, 10, 64)
 		if SigCheck && (err != nil || valid != sig || expires < time.Now().Unix()) {
 			if DevMode {

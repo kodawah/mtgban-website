@@ -281,6 +281,7 @@ var Config struct {
 		Secret map[string]string `json:"secret"`
 		Emails map[string]string `json:"emails"`
 	} `json:"patreon"`
+	ApiUserSecrets map[string]string `json:"api_user_secrets"`
 }
 
 var DevMode bool
