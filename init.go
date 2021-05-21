@@ -671,8 +671,6 @@ func loadScrapers(doSellers, doVendors bool) {
 		ScraperMap[scraper.Info().Shorthand] = key
 	}
 
-	log.Println(ScraperMap)
-
 	// Sort the sellers/vendors arrays by name
 	//
 	// Note that pointers are shared between these two arrays,
