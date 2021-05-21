@@ -265,7 +265,9 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 				tierTitle = "Modern"
 			case "LEGACY", "LEGACY (Early Adopters)":
 				tierTitle = "Legacy"
-			case "Test Role", "Mod's":
+			case "Mod's":
+				tierTitle = "Mods"
+			case "Test Role":
 				tierTitle = "Test Role"
 			}
 		}
@@ -559,7 +561,7 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 	case "Root":
 		v.Set("Explore", "true")
 		fallthrough
-	case "Admin", "Developer":
+	case "Admin", "Developer", "Mods":
 		v.Set("Search", "true")
 		v.Set("Newspaper", "true")
 		v.Set("Sleepers", "true")
@@ -582,11 +584,15 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 		}
 	}
 	if v.Get("Search") == "true" {
-		if tierTitle == "Root" || tierTitle == "Admin" {
+		switch tierTitle {
+		case "Root", "Admin":
 			v.Set("SearchDisabled", "NONE")
 			v.Set("SearchBuylistDisabled", "NONE")
 			v.Set("SearchSealed", "true")
-		} else {
+		case "Mods":
+			v.Set("SearchSealed", "true")
+			fallthrough
+		default:
 			v.Set("SearchDisabled", "DEFAULT")
 			v.Set("SearchBuylistDisabled", "DEFAULT")
 		}
