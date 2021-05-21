@@ -117,7 +117,6 @@ type PageVars struct {
 
 	AxisLabels  []string
 	Datasets    []*Dataset
-	CanChart    bool
 	ChartID     string
 	Alternative string
 	StocksURL   string

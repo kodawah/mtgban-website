@@ -590,7 +590,6 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 			v.Set("SearchDisabled", "DEFAULT")
 			v.Set("SearchBuylistDisabled", "DEFAULT")
 		}
-		v.Set("SearchChart", "true")
 	}
 	if v.Get("Explore") == "true" {
 		switch tierTitle {

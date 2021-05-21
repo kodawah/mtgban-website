@@ -36,7 +36,7 @@
             <img class="center" src="img/promo/search.jpg">
         {{end}}
     {{else}}
-        <h1>Welcome to BAN {{if and .CanChart (not (eq .ChartID ""))}}Chart{{end}} Search</h1>
+        <h1>Welcome to BAN {{if not (eq .ChartID "")}}Chart{{end}} Search</h1>
         <div class="indent sticky" style="top:48px; background-color:#f8f8f8; z-index: 3; width: min-content;">
             <form class="search autocomplete" action="search" autocomplete="off" id="searchform">
                 <label style="clear: both; float: left;" for="searchbox">
@@ -89,9 +89,7 @@
                     </li>
                     <br>
 
-                    {{if .CanChart}}
-                        <li>You can access <b>historical data</b> from a few major vendors by clicking on 📊 for each card.</li>
-                    {{end}}
+                    <li>You can access <b>historical data</b> from a few major vendors by clicking on 📊 for each card.</li>
                     <li>Data is refreshed periodically over the day.</li>
                     <li>Entries are formatted as <i>card name (foil status) - edition (collector #)</i>.</li>
                     <li>The percentage found in buylist offers is the <b>price ratio</b>, the higher it is, the more a vendor is looking to purchase that card.</li>
@@ -159,7 +157,7 @@
                 {{$firstImg := ""}}
                 {{$firstPrint := ""}}
 
-                {{if and .CanChart (not (eq .ChartID ""))}}
+                {{if not (eq .ChartID "")}}
                     <div style="margin-left: 10px; float: left;">
                         <canvas id="cardChart" width="740" height="420"></canvas>
                         <br>
@@ -223,7 +221,7 @@
                                                 •
                                             {{end}}
                                         </td>
-                                        {{if and (eq $.ChartID "") $.CanChart}}
+                                        {{if eq $.ChartID ""}}
                                             <td rowspan=2>
                                                 <span class="emoji">
                                                     <a href="/search?chart={{$cardId}}" title="See historical data">📊</a>
@@ -320,7 +318,7 @@
                                                 •
                                             {{end}}
                                         </td>
-                                        {{if and (eq $.ChartID "") $.CanChart}}
+                                        {{if eq $.ChartID ""}}
                                             <td rowspan=2>
                                                 <span class="emoji">
                                                     <a href="/search?chart={{$cardId}}" title="See historical data">📊</a>

@@ -49,11 +49,6 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	blocklistRetail, blocklistBuylist := getDefaultBlocklists(sig)
 
-	// Check if user can access chart data
-	canChart, _ := strconv.ParseBool(GetParamFromSig(sig, "SearchChart"))
-	canChart = canChart || (DevMode && !SigCheck)
-	pageVars.CanChart = canChart
-
 	query := r.FormValue("q")
 
 	canSealed, _ := strconv.ParseBool(GetParamFromSig(sig, "SearchSealed"))
