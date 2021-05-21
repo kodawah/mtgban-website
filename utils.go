@@ -211,6 +211,9 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 	}
 
 	query := fmt.Sprintf("%s s:%s cn:%s f:%t", co.Name, co.SetCode, co.Number, co.Foil)
+	if co.Sealed {
+		query = co.Name
+	}
 
 	smallImg := false
 	if len(flags) > 0 {
