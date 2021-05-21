@@ -681,10 +681,16 @@ func loadScrapers(doSellers, doVendors bool) {
 	// global arrays in the end.
 	newSellers := newbc.Sellers()
 	sort.Slice(newSellers, func(i, j int) bool {
+		if newSellers[i].Info().Name == newSellers[j].Info().Name {
+			return newSellers[i].Info().Shorthand < newSellers[j].Info().Shorthand
+		}
 		return newSellers[i].Info().Name < newSellers[j].Info().Name
 	})
 	newVendors := newbc.Vendors()
 	sort.Slice(newVendors, func(i, j int) bool {
+		if newVendors[i].Info().Name == newVendors[j].Info().Name {
+			return newVendors[i].Info().Shorthand < newVendors[j].Info().Shorthand
+		}
 		return newVendors[i].Info().Name < newVendors[j].Info().Name
 	})
 
