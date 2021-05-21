@@ -561,14 +561,16 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 	case "Root":
 		v.Set("Explore", "true")
 		fallthrough
-	case "Admin", "Developer", "Mods":
+	case "Admin":
+		v.Set("Reverse", "true")
+		v.Set("Admin", "true")
+		fallthrough
+	case "Developer", "Mods":
 		v.Set("Search", "true")
 		v.Set("Newspaper", "true")
 		v.Set("Sleepers", "true")
 		v.Set("Arbit", "true")
 		v.Set("Global", "true")
-		v.Set("Reverse", "true")
-		v.Set("Admin", "true")
 	}
 	if v.Get("Arbit") == "true" {
 		switch tierTitle {
