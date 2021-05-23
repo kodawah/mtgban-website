@@ -101,7 +101,7 @@ func dumpInventoryToFile(seller mtgban.Seller, currentDir, fname string) error {
 	defer file.Close()
 
 	// Write everything to dump file
-	err = mtgban.WriteInventoryToCSV(seller, file)
+	err = mtgban.WriteSellerToCSV(seller, file)
 	if err != nil {
 		return err
 	}
@@ -148,7 +148,7 @@ func dumpBuylistToFile(vendor mtgban.Vendor, currentDir, fname string) error {
 	defer file.Close()
 
 	// Write everything to dump file
-	err = mtgban.WriteBuylistToCSV(vendor, file)
+	err = mtgban.WriteVendorToCSV(vendor, file)
 	if err != nil {
 		return err
 	}
