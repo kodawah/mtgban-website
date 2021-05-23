@@ -186,9 +186,7 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if !skip {
-			go func() {
-				loadScrapers(true, true)
-			}()
+			go loadScrapers()
 		}
 
 	case "server":

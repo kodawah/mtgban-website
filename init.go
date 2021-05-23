@@ -594,7 +594,7 @@ var ScraperOptions = map[string]*scraperOption{
 // Associate Scraper shorthands to ScraperOptions keys
 var ScraperMap map[string]string
 
-func loadScrapers(doSellers, doVendors bool) {
+func loadScrapers() {
 	init := !DatabaseLoaded
 	if init {
 		log.Println("Loading data")
@@ -703,28 +703,25 @@ func loadScrapers(doSellers, doVendors bool) {
 		Infos = map[string]mtgban.InventoryRecord{}
 	}
 
-	if doSellers {
-		log.Println("Sellers table")
-		for i := range newSellers {
-			if newSellers[i] == nil {
-				log.Println(i, "<nil>")
-				continue
-			}
-			log.Println(i, newSellers[i].Info().Name, newSellers[i].Info().Shorthand)
+	log.Println("Sellers table")
+	for i := range newSellers {
+		if newSellers[i] == nil {
+			log.Println(i, "<nil>")
+			continue
 		}
-		loadSellers(newSellers)
+		log.Println(i, newSellers[i].Info().Name, newSellers[i].Info().Shorthand)
 	}
-	if doVendors {
-		log.Println("Vendors table")
-		for i := range newVendors {
-			if newVendors[i] == nil {
-				log.Println(i, "<nil>")
-				continue
-			}
-			log.Println(i, newVendors[i].Info().Name, newVendors[i].Info().Shorthand)
+	loadSellers(newSellers)
+
+	log.Println("Vendors table")
+	for i := range newVendors {
+		if newVendors[i] == nil {
+			log.Println(i, "<nil>")
+			continue
 		}
-		loadVendors(newVendors)
+		log.Println(i, newVendors[i].Info().Name, newVendors[i].Info().Shorthand)
 	}
+	loadVendors(newVendors)
 
 	go loadInfos()
 

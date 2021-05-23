@@ -484,7 +484,7 @@ func main() {
 			log.Fatalln(err)
 		}
 
-		loadScrapers(true, true)
+		loadScrapers()
 		DatabaseLoaded = true
 
 		// Nothing else to do if hacking around
@@ -495,9 +495,7 @@ func main() {
 		// Set up new refreshes as needed
 		c := cron.New()
 		// refresh every day at 13:10
-		c.AddFunc("10 13 * * *", func() {
-			loadScrapers(true, true)
-		})
+		c.AddFunc("10 13 * * *", loadScrapers)
 		// refresh CK at every 6th hour, 10 minutes past the hour
 		c.AddFunc("10 */6 * * *", reloadCK)
 		// refresh TCG at every 6th hour, 15 minutes past the hour
