@@ -1,10 +1,12 @@
 package main
 
 import (
+	"log"
 	"sort"
 	"strings"
 	"time"
 
+	"github.com/kodabb/go-mtgban/mtgban"
 	"github.com/kodabb/go-mtgban/mtgmatcher"
 )
 
@@ -111,4 +113,115 @@ func getSealedEditions(pageVars *PageVars) {
 	})
 
 	pageVars.EditionList = listEditions
+}
+
+func runSealedAnalysis() {
+	log.Println("Running set analysis")
+
+	var tcgInventory mtgban.InventoryRecord
+	for _, seller := range Sellers {
+		if seller != nil && seller.Info().Shorthand == TCG_LOW {
+			tcgInventory, _ = seller.Inventory()
+		}
+	}
+
+	var ckBuylist mtgban.BuylistRecord
+	for _, vendor := range Vendors {
+		if vendor != nil && vendor.Info().Shorthand == "CK" {
+			ckBuylist, _ = vendor.Buylist()
+		}
+	}
+
+	inv := map[string]float64{}
+	invFoil := map[string]float64{}
+	bl := map[string]float64{}
+	blFoil := map[string]float64{}
+
+	uuids := mtgmatcher.GetUUIDs()
+	for uuid, co := range uuids {
+		entriesBl, found := ckBuylist[uuid]
+		if !found {
+			switch co.Rarity {
+			case "mythic":
+				if co.Foil {
+					blFoil[co.SetCode] += 0.30
+				} else {
+					bl[co.SetCode] += 0.30
+				}
+			case "rare":
+				if co.Foil {
+					blFoil[co.SetCode] += 0.30
+				} else {
+					bl[co.SetCode] += 0.10
+				}
+			case "common", "uncommon":
+				if co.Foil {
+					blFoil[co.SetCode] += 0.05
+				} else {
+					bl[co.SetCode] += 0.005
+				}
+			default:
+				if co.IsPromo {
+					if co.Foil {
+						blFoil[co.SetCode] += 0.05
+					} else {
+						bl[co.SetCode] += 0.05
+					}
+				} else if mtgmatcher.IsBasicLand(co.Name) {
+					if co.Foil {
+						blFoil[co.SetCode] += 0.10
+					} else {
+						bl[co.SetCode] += 0.01
+					}
+				}
+			}
+		} else {
+			if co.Foil {
+				blFoil[co.SetCode] += entriesBl[0].BuyPrice
+			} else {
+				bl[co.SetCode] += entriesBl[0].BuyPrice
+			}
+		}
+
+		entriesInv, found := tcgInventory[uuid]
+		if found {
+			if co.Foil {
+				invFoil[co.SetCode] += entriesInv[0].Price
+			} else {
+				inv[co.SetCode] += entriesInv[0].Price
+			}
+		}
+	}
+
+	totalValueByTcgLow := mtgban.InventoryRecord{}
+	for code, price := range inv {
+		totalValueByTcgLow[code] = append(totalValueByTcgLow[code], mtgban.InventoryEntry{
+			Price: price,
+		})
+	}
+	Infos["TotalValueByTcgLow"] = totalValueByTcgLow
+
+	totalFoilValueByTcgLow := mtgban.InventoryRecord{}
+	for code, price := range invFoil {
+		totalFoilValueByTcgLow[code] = append(totalFoilValueByTcgLow[code], mtgban.InventoryEntry{
+			Price: price,
+		})
+	}
+	Infos["TotalFoilValueByTcgLow"] = totalFoilValueByTcgLow
+
+	totalValueByBuylist := mtgban.InventoryRecord{}
+	for code, price := range bl {
+		totalValueByBuylist[code] = append(totalValueByBuylist[code], mtgban.InventoryEntry{
+			Price: price,
+		})
+	}
+	Infos["TotalValueBuylist"] = totalValueByBuylist
+
+	totalFoilValueByBuylist := mtgban.InventoryRecord{}
+	for code, price := range blFoil {
+		totalFoilValueByBuylist[code] = append(totalFoilValueByBuylist[code], mtgban.InventoryEntry{
+			Price: price,
+		})
+	}
+	Infos["TotalFoilValueBuylist"] = totalFoilValueByBuylist
 }

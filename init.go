@@ -724,6 +724,7 @@ func loadScrapers() {
 	loadVendors(newVendors)
 
 	go loadInfos()
+	go runSealedAnalysis()
 
 	// Load prices for API users
 	if !DevMode {

@@ -81,6 +81,24 @@ table.searchResults {
     min-width:360px;
 }
 
+table.setValue {
+    table-layout: fixed;
+    width: 95%;
+}
+
+tr.setValue {
+    background-color: rgba(0, 0, 0, 0.0) !important;
+}
+
+td.setValue {
+    width: 65%;
+    white-space: nowrap;
+}
+
+tr.setValue:hover {
+    background-color: rgba(0, 0, 0, 0.0) !important;
+}
+
 h1 {
     color: #17375e;
     margin-left: 20px;
