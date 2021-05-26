@@ -335,11 +335,10 @@ func parseSearchOptions(query string) (string, map[string]string) {
 		case strings.HasPrefix(field, "r:"):
 			options["rarity"] = strings.ToLower(code)
 		case strings.HasPrefix(field, "f:"):
-			options["foil"] = code
-			if options["foil"] == "yes" || options["foil"] == "y" {
+			val, _ := strconv.ParseBool(code)
+			options["foil"] = "false"
+			if val {
 				options["foil"] = "true"
-			} else if options["foil"] == "no" || options["foil"] == "n" {
-				options["foil"] = "false"
 			}
 		case strings.HasPrefix(field, "sm:"):
 			options["search_mode"] = strings.ToLower(code)
