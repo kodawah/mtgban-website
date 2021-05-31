@@ -59,9 +59,10 @@ var editionSkips = map[string]string{
 	"Rivals Quick Start Set": "",
 }
 
-func getSealedEditions(pageVars *PageVars) {
+func getSealedEditions() ([]string, map[string][]EditionEntry) {
 	sets := mtgmatcher.GetSets()
 
+	sortedEditions := []string{}
 	listEditions := map[string][]EditionEntry{}
 	for _, set := range sets {
 		if set.SealedProduct == nil {
@@ -106,14 +107,14 @@ func getSealedEditions(pageVars *PageVars) {
 		sort.Slice(listEditions[key], func(i, j int) bool {
 			return listEditions[key][i].Date.After(listEditions[key][j].Date)
 		})
-		pageVars.EditionSort = append(pageVars.EditionSort, key)
+		sortedEditions = append(sortedEditions, key)
 	}
 
-	sort.Slice(pageVars.EditionSort, func(i, j int) bool {
-		return listEditions[pageVars.EditionSort[i]][0].Date.After(listEditions[pageVars.EditionSort[j]][0].Date)
+	sort.Slice(sortedEditions, func(i, j int) bool {
+		return listEditions[sortedEditions[i]][0].Date.After(listEditions[sortedEditions[j]][0].Date)
 	})
 
-	pageVars.EditionList = listEditions
+	return sortedEditions, listEditions
 }
 
 var ProductKeys = []string{

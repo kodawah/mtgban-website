@@ -292,6 +292,9 @@ var Sellers []mtgban.Seller
 var Vendors []mtgban.Vendor
 var Infos map[string]mtgban.InventoryRecord
 
+var SealedEditionsSorted []string
+var SealedEditionsList map[string][]EditionEntry
+
 var Newspaper3dayDB *sql.DB
 var Newspaper1dayDB *sql.DB
 var ExploreDB *sql.DB

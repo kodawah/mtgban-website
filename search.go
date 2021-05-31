@@ -68,7 +68,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		})
 
 		if mode == "sealed" {
-			getSealedEditions(&pageVars)
+			pageVars.EditionSort = SealedEditionsSorted
+			pageVars.EditionList = SealedEditionsList
 			render(w, "product.html", pageVars)
 			return
 		}
