@@ -234,7 +234,7 @@ a.selected:hover{
     height: 480px;
     background-image: url("/img/misc/background.png");
     background-repeat: no-repeat;
-    background-color: #292929;
+    background-color: white;
 }
 .mainbody{
     padding-top: 75px;
