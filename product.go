@@ -116,6 +116,20 @@ func getSealedEditions(pageVars *PageVars) {
 	pageVars.EditionList = listEditions
 }
 
+var ProductKeys = []string{
+	"TotalValueByTcgLow",
+	"TotalFoilValueByTcgLow",
+	"TotalValueBuylist",
+	"TotalFoilValueBuylist",
+}
+
+var ProductTitles = []string{
+	"Set Value by TCGLow",
+	"Foil Set Value by TCGLow",
+	"Set Value by Buylist",
+	"Foil Set Value by Buylist",
+}
+
 // Check if it makes sense to keep two keep foil and nonfoil separate
 func combineFinish(setCode string) bool {
 	set, err := mtgmatcher.GetSet(setCode)
@@ -166,6 +180,11 @@ func runSealedAnalysis() {
 
 	uuids := mtgmatcher.GetUUIDs()
 	for uuid, co := range uuids {
+		// Skip sets that are not well tracked upstream
+		if co.SetCode == "PMEI" || co.BorderColor == "gold" {
+			continue
+		}
+
 		// Determine whether to keep prices separated or combine them
 		useFoil := co.Foil && !combineFinish(co.SetCode)
 
@@ -223,35 +242,18 @@ func runSealedAnalysis() {
 		}
 	}
 
-	totalValueByTcgLow := mtgban.InventoryRecord{}
-	for code, price := range inv {
-		totalValueByTcgLow[code] = append(totalValueByTcgLow[code], mtgban.InventoryEntry{
-			Price: price,
-		})
+	for i, records := range []map[string]float64{
+		inv,
+		invFoil,
+		bl,
+		blFoil,
+	} {
+		record := mtgban.InventoryRecord{}
+		for code, price := range records {
+			record[code] = append(record[code], mtgban.InventoryEntry{
+				Price: price,
+			})
+		}
+		Infos[ProductKeys[i]] = record
 	}
-	Infos["TotalValueByTcgLow"] = totalValueByTcgLow
-
-	totalFoilValueByTcgLow := mtgban.InventoryRecord{}
-	for code, price := range invFoil {
-		totalFoilValueByTcgLow[code] = append(totalFoilValueByTcgLow[code], mtgban.InventoryEntry{
-			Price: price,
-		})
-	}
-	Infos["TotalFoilValueByTcgLow"] = totalFoilValueByTcgLow
-
-	totalValueByBuylist := mtgban.InventoryRecord{}
-	for code, price := range bl {
-		totalValueByBuylist[code] = append(totalValueByBuylist[code], mtgban.InventoryEntry{
-			Price: price,
-		})
-	}
-	Infos["TotalValueBuylist"] = totalValueByBuylist
-
-	totalFoilValueByBuylist := mtgban.InventoryRecord{}
-	for code, price := range blFoil {
-		totalFoilValueByBuylist[code] = append(totalFoilValueByBuylist[code], mtgban.InventoryEntry{
-			Price: price,
-		})
-	}
-	Infos["TotalFoilValueBuylist"] = totalFoilValueByBuylist
 }

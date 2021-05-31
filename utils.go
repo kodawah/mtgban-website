@@ -242,20 +242,9 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 
 	if co.Sealed {
 		printings = "<table class='setValue'>"
-		keys := []string{
-			"TotalValueByTcgLow",
-			"TotalFoilValueByTcgLow",
-			"TotalValueBuylist",
-			"TotalFoilValueBuylist",
-		}
-		titles := []string{
-			"Set Value by TCGLow",
-			"Foil Set Value by TCGLow",
-			"Set Value by Buylist",
-			"Foil Set Value by Buylist",
-		}
-		for i, title := range titles {
-			entries, found := Infos[keys[i]][co.SetCode]
+
+		for i, title := range ProductTitles {
+			entries, found := Infos[ProductKeys[i]][co.SetCode]
 			if found {
 				printings += fmt.Sprintf("<tr class='setValue'><td class='setValue'>%s</td><td>$ %.02f</td></tr>", title, entries[0].Price)
 			}
