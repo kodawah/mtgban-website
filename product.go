@@ -116,6 +116,32 @@ func getSealedEditions(pageVars *PageVars) {
 	pageVars.EditionList = listEditions
 }
 
+// Check if it makes sense to keep two keep foil and nonfoil separate
+func combineFinish(setCode string) bool {
+	set, err := mtgmatcher.GetSet(setCode)
+	if err != nil {
+		return false
+	}
+
+	setType := set.Type
+	rename, found := categoryOverrides[setCode]
+	if found {
+		setType = rename
+	}
+	switch setType {
+	case "commander",
+		"box",
+		"duel_deck",
+		"from_the_vault",
+		"masterpiece",
+		"memorabilia",
+		"promo":
+		return true
+	}
+
+	return false
+}
+
 func runSealedAnalysis() {
 	log.Println("Running set analysis")
 
@@ -140,36 +166,39 @@ func runSealedAnalysis() {
 
 	uuids := mtgmatcher.GetUUIDs()
 	for uuid, co := range uuids {
+		// Determine whether to keep prices separated or combine them
+		useFoil := co.Foil && !combineFinish(co.SetCode)
+
 		entriesBl, found := ckBuylist[uuid]
 		if !found {
 			switch co.Rarity {
 			case "mythic":
-				if co.Foil {
+				if useFoil {
 					blFoil[co.SetCode] += 0.30
 				} else {
 					bl[co.SetCode] += 0.30
 				}
 			case "rare":
-				if co.Foil {
+				if useFoil {
 					blFoil[co.SetCode] += 0.30
 				} else {
 					bl[co.SetCode] += 0.10
 				}
 			case "common", "uncommon":
-				if co.Foil {
+				if useFoil {
 					blFoil[co.SetCode] += 0.05
 				} else {
 					bl[co.SetCode] += 0.005
 				}
 			default:
 				if co.IsPromo {
-					if co.Foil {
+					if useFoil {
 						blFoil[co.SetCode] += 0.05
 					} else {
 						bl[co.SetCode] += 0.05
 					}
 				} else if mtgmatcher.IsBasicLand(co.Name) {
-					if co.Foil {
+					if useFoil {
 						blFoil[co.SetCode] += 0.10
 					} else {
 						bl[co.SetCode] += 0.01
@@ -177,7 +206,7 @@ func runSealedAnalysis() {
 				}
 			}
 		} else {
-			if co.Foil {
+			if useFoil {
 				blFoil[co.SetCode] += entriesBl[0].BuyPrice
 			} else {
 				bl[co.SetCode] += entriesBl[0].BuyPrice
@@ -186,7 +215,7 @@ func runSealedAnalysis() {
 
 		entriesInv, found := tcgInventory[uuid]
 		if found {
-			if co.Foil {
+			if useFoil {
 				invFoil[co.SetCode] += entriesInv[0].Price
 			} else {
 				inv[co.SetCode] += entriesInv[0].Price
