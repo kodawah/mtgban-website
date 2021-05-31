@@ -119,6 +119,8 @@ func getSealedEditions(pageVars *PageVars) {
 var ProductKeys = []string{
 	"TotalValueByTcgLow",
 	"TotalFoilValueByTcgLow",
+	"TotalValueByTcgLowMinusBulk",
+	"TotalFoilValueByTcgLowMinusBulk",
 	"TotalValueBuylist",
 	"TotalFoilValueBuylist",
 }
@@ -126,9 +128,15 @@ var ProductKeys = []string{
 var ProductTitles = []string{
 	"Set Value by TCGLow",
 	"Foil Set Value by TCGLow",
+	"Set Value less Bulk",
+	"Foil Set Value less Bulk",
 	"Set Value by Buylist",
 	"Foil Set Value by Buylist",
 }
+
+const (
+	bulkPrice = 2.99
+)
 
 // Check if it makes sense to keep two keep foil and nonfoil separate
 func combineFinish(setCode string) bool {
@@ -175,6 +183,8 @@ func runSealedAnalysis() {
 
 	inv := map[string]float64{}
 	invFoil := map[string]float64{}
+	invNoBulk := map[string]float64{}
+	invNoBulkFoil := map[string]float64{}
 	bl := map[string]float64{}
 	blFoil := map[string]float64{}
 
@@ -239,12 +249,22 @@ func runSealedAnalysis() {
 			} else {
 				inv[co.SetCode] += entriesInv[0].Price
 			}
+
+			if entriesInv[0].Price > bulkPrice {
+				if useFoil {
+					invNoBulkFoil[co.SetCode] += entriesInv[0].Price
+				} else {
+					invNoBulk[co.SetCode] += entriesInv[0].Price
+				}
+			}
 		}
 	}
 
 	for i, records := range []map[string]float64{
 		inv,
 		invFoil,
+		invNoBulk,
+		invNoBulkFoil,
 		bl,
 		blFoil,
 	} {
