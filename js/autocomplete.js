@@ -53,7 +53,13 @@ async function autocomplete(form, inp) {
                     closeAllLists();
 
                     /* Submit the form (so that onSubmit may trigger) */
-                    form.requestSubmit();
+                    /* We need to use this extended workaround due to Safari */
+                    const fakeButton = document.createElement('button');
+                    fakeButton.type = this.type;
+                    fakeButton.style.display = 'none';
+                    form.appendChild(fakeButton);
+                    fakeButton.click();
+                    fakeButton.remove();
                 });
                 a.appendChild(b);
             }
