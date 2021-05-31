@@ -38,7 +38,7 @@
     {{else}}
         <h1>Welcome to BAN {{if not (eq .ChartID "")}}Chart{{end}} Search</h1>
         <div class="indent sticky" style="top:48px; background-color:#f8f8f8; z-index: 3; width: min-content;">
-            <form class="search autocomplete" action="search" autocomplete="off" id="searchform">
+            <form class="search autocomplete" action="search" autocomplete="off" spellcheck="false" id="searchform">
                 <label style="clear: both; float: left;" for="searchbox">
                     {{if eq .SearchQuery "" }}
                         Search for a card, or <a href="search?q=random">surprise me</a>
