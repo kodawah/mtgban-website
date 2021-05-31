@@ -38,10 +38,10 @@ var categoryEdition = map[string]string{
 }
 
 var categoryOverrides = map[string]string{
-	"CC1":  "Spellbook Series",
-	"CM1":  "Boxed Sets",
-	"CMB1": "Reprint Sets",
-	"PTG":  "Boxed Sets",
+	"CC1":  "spellbook",
+	"CM1":  "box",
+	"CMB1": "masters",
+	"PTG":  "box",
 }
 
 var editionRenames = map[string]string{
@@ -78,13 +78,14 @@ func getSealedEditions(pageVars *PageVars) {
 			continue
 		}
 
-		category, found := categoryEdition[set.Type]
-		if !found {
-			category = set.Type
-		}
+		setType := set.Type
 		rename, found := categoryOverrides[set.Code]
 		if found {
-			category = rename
+			setType = rename
+		}
+		category, found := categoryEdition[setType]
+		if !found {
+			category = set.Type
 		}
 
 		name := set.Name
