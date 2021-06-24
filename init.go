@@ -627,7 +627,7 @@ func loadScrapers() {
 				FileName:    path.Join(LogDir, key+".log"),
 				MaxSize:     500 * 1024,       // 500K duh!
 				Flags:       logfile.FileOnly, // Default append
-				OldVersions: 2,
+				OldVersions: 1,
 			})
 			if err != nil {
 				log.Println("Failed to create logFile for %s: %s", key, err)
