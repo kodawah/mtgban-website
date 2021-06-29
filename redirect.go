@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/kodabb/go-mtgban/mtgmatcher"
 )
 
 const UTM_BOT = "banbot"
@@ -25,7 +27,16 @@ func Redirect(w http.ResponseWriter, r *http.Request) {
 						http.NotFound(w, r)
 						return
 					}
-					entries := inv[hash]
+
+					// Look up the hash: mtgjson, scryfall, and tcgproductid in order
+					entries, found := inv[hash]
+					if !found {
+						entries, found = inv[mtgmatcher.Scryfall2UUID(hash)]
+						if !found {
+							entries, found = inv[mtgmatcher.Tcg2UUID(hash)]
+						}
+					}
+
 					for _, entry := range entries {
 						link := entry.URL
 						// Change the utm default query param to improve tracking
@@ -52,7 +63,16 @@ func Redirect(w http.ResponseWriter, r *http.Request) {
 						http.NotFound(w, r)
 						return
 					}
-					entries := bl[hash]
+
+					// Look up the hash: mtgjson, scryfall, and tcgproductid in order
+					entries, found := bl[hash]
+					if !found {
+						entries, found = bl[mtgmatcher.Scryfall2UUID(hash)]
+						if !found {
+							entries, found = bl[mtgmatcher.Tcg2UUID(hash)]
+						}
+					}
+
 					for _, entry := range entries {
 						http.Redirect(w, r, entry.URL, http.StatusFound)
 						return
