@@ -24,9 +24,8 @@ type BanPrice struct {
 type PriceAPIOutput struct {
 	Error string `json:"error,omitempty"`
 	Meta  struct {
-		Date     time.Time `json:"date"`
-		Version  string    `json:"version"`
-		IdFormat string    `json:"id_format,omitempty"`
+		Date    time.Time `json:"date"`
+		Version string    `json:"version"`
 	} `json:"meta"`
 
 	// uuid > store > price {foil/regular}
@@ -78,7 +77,6 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	enabledModes := strings.Split(GetParamFromSig(sig, "APImode"), ",")
 	idOpt := r.FormValue("id")
-	out.Meta.IdFormat = idOpt
 
 	filterByEdition := ""
 	var filterByHash []string
