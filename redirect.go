@@ -14,10 +14,15 @@ func Redirect(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/go/")
 	fields := strings.Split(path, "/")
 
-	if len(fields) == 3 {
+	if len(fields) == 2 || len(fields) == 3 {
 		kind := fields[0]
-		store := fields[1]
-		hash := fields[2]
+		store := fields[len(fields)-2]
+		hash := fields[len(fields)-1]
+
+		// Default to retail in short mode
+		if kind == store {
+			kind = "r"
+		}
 
 		if kind == "r" || kind == "i" {
 			for _, seller := range Sellers {
