@@ -92,8 +92,11 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 		} else {
 			co, err := mtgmatcher.GetUUID(base)
 			if err != nil {
-				// Try again, assuming it was a scryfall id
+				// Try again, assuming it was a scryfall id, fallback to tcg id
 				uuid := mtgmatcher.Scryfall2UUID(base)
+				if uuid == "" {
+					uuid = mtgmatcher.Tcg2UUID(base)
+				}
 				co, err = mtgmatcher.GetUUID(uuid)
 				if err == nil {
 					base = uuid
