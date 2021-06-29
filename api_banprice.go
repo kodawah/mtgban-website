@@ -29,6 +29,7 @@ type PriceAPIOutput struct {
 	Meta  struct {
 		Date    time.Time `json:"date"`
 		Version string    `json:"version"`
+		BaseURL string    `json:"base_url"`
 	} `json:"meta"`
 
 	// uuid > store > price {foil/regular}
@@ -41,6 +42,7 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 	out := PriceAPIOutput{}
 	out.Meta.Date = time.Now()
 	out.Meta.Version = APIVersion
+	out.Meta.BaseURL = getBaseURL(r) + "/go/"
 
 	urlPath := strings.TrimPrefix(r.URL.Path, "/api/mtgban/")
 
