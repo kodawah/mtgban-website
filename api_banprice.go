@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 
@@ -19,6 +20,8 @@ const (
 type BanPrice struct {
 	Regular float64 `json:"regular,omitempty"`
 	Foil    float64 `json:"foil,omitempty"`
+	Qty     int     `json:"qty,omitempty"`
+	QtyFoil int     `json:"qty_foil,omitempty"`
 }
 
 type PriceAPIOutput struct {
@@ -77,6 +80,7 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	enabledModes := strings.Split(GetParamFromSig(sig, "APImode"), ",")
 	idOpt := r.FormValue("id")
+	qty, _ := strconv.ParseBool(r.FormValue("qty"))
 
 	filterByEdition := ""
 	var filterByHash []string
@@ -128,15 +132,19 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 	canBuylist := SliceStringHas(enabledModes, "buylist") || (SliceStringHas(enabledModes, "all") || (DevMode && !SigCheck))
 	if (strings.HasPrefix(urlPath, "retail") || strings.HasPrefix(urlPath, "all")) && canRetail {
 		dumpType += "retail"
-		out.Retail = getSellerPrices(idOpt, enabledStores, filterByEdition, filterByHash)
+		out.Retail = getSellerPrices(idOpt, enabledStores, filterByEdition, filterByHash, qty)
 	}
 	if (strings.HasPrefix(urlPath, "buylist") || strings.HasPrefix(urlPath, "all")) && canBuylist {
 		dumpType += "buylist"
-		out.Buylist = getVendorPrices(idOpt, enabledStores, filterByEdition, filterByHash)
+		out.Buylist = getVendorPrices(idOpt, enabledStores, filterByEdition, filterByHash, qty)
 	}
 
 	user := GetParamFromSig(sig, "UserEmail")
 	msg := fmt.Sprintf("%s requested a '%s' API dump ('%s','%q')", user, dumpType, filterByEdition, filterByHash)
+	if qty {
+		msg += " with quantities"
+	}
+
 	if DevMode {
 		log.Println(msg)
 	} else {
@@ -186,7 +194,7 @@ func getIdFunc(mode string) func(co *mtgmatcher.CardObject) string {
 	}
 }
 
-func getSellerPrices(mode string, enabledStores []string, filterByEdition string, filterByHash []string) map[string]map[string]*BanPrice {
+func getSellerPrices(mode string, enabledStores []string, filterByEdition string, filterByHash []string, qty bool) map[string]map[string]*BanPrice {
 	out := map[string]map[string]*BanPrice{}
 	idFunc := getIdFunc(mode)
 	for i, seller := range Sellers {
@@ -240,10 +248,27 @@ func getSellerPrices(mode string, enabledStores []string, filterByEdition string
 			if out[id][sellerTag] == nil {
 				out[id][sellerTag] = &BanPrice{}
 			}
+
+			// Determine whether the response should include qty information
+			// Needs to be explicitly requested, all the index prices are skipped,
+			// TCG is too due to how quantities are stored in mtgban (FIXME?)
+			// (only for retail).
+			shouldQty := qty && !seller.Info().MetadataOnly && sellerTag != "TCG Player" && sellerTag != "TCG Direct"
+
 			if co.Foil {
 				out[id][sellerTag].Foil = inventory[cardId][0].Price
+				if shouldQty {
+					for i := range inventory[cardId] {
+						out[id][sellerTag].QtyFoil += inventory[cardId][i].Quantity
+					}
+				}
 			} else {
 				out[id][sellerTag].Regular = inventory[cardId][0].Price
+				if shouldQty {
+					for i := range inventory[cardId] {
+						out[id][sellerTag].Qty += inventory[cardId][i].Quantity
+					}
+				}
 			}
 		}
 	}
@@ -251,7 +276,7 @@ func getSellerPrices(mode string, enabledStores []string, filterByEdition string
 	return out
 }
 
-func getVendorPrices(mode string, enabledStores []string, filterByEdition string, filterByHash []string) map[string]map[string]*BanPrice {
+func getVendorPrices(mode string, enabledStores []string, filterByEdition string, filterByHash []string, qty bool) map[string]map[string]*BanPrice {
 	out := map[string]map[string]*BanPrice{}
 	idFunc := getIdFunc(mode)
 	for i, vendor := range Vendors {
@@ -307,8 +332,18 @@ func getVendorPrices(mode string, enabledStores []string, filterByEdition string
 			}
 			if co.Foil {
 				out[id][vendorTag].Foil = buylist[cardId][0].BuyPrice
+				if qty && !vendor.Info().MetadataOnly {
+					for i := range buylist[cardId] {
+						out[id][vendorTag].QtyFoil += buylist[cardId][i].Quantity
+					}
+				}
 			} else {
 				out[id][vendorTag].Regular = buylist[cardId][0].BuyPrice
+				if qty && !vendor.Info().MetadataOnly {
+					for i := range buylist[cardId] {
+						out[id][vendorTag].Qty += buylist[cardId][i].Quantity
+					}
+				}
 			}
 		}
 	}
