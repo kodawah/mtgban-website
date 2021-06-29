@@ -108,7 +108,7 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 					Id:   base,
 					Foil: !co.Foil,
 				})
-				if err == nil {
+				if err == nil && altId != base {
 					filterByHash = append(filterByHash, altId)
 				}
 
