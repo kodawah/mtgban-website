@@ -117,9 +117,8 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 				if err == nil && altId != base {
 					filterByHash = append(filterByHash, altId)
 				}
-
-				filterByEdition = co.SetCode
 			}
+			filterByEdition = co.SetCode
 		}
 
 		if filterByEdition == "" && filterByHash == nil {
@@ -237,7 +236,8 @@ func getSellerPrices(mode string, enabledStores []string, filterByEdition string
 
 			if filterByEdition != "" && co.SetCode != filterByEdition {
 				continue
-			} else if filterByHash != nil && !SliceStringHas(filterByHash, cardId) {
+			}
+			if filterByHash != nil && !SliceStringHas(filterByHash, cardId) {
 				continue
 			}
 
@@ -319,7 +319,8 @@ func getVendorPrices(mode string, enabledStores []string, filterByEdition string
 
 			if filterByEdition != "" && co.SetCode != filterByEdition {
 				continue
-			} else if filterByHash != nil && !SliceStringHas(filterByHash, cardId) {
+			}
+			if filterByHash != nil && !SliceStringHas(filterByHash, cardId) {
 				continue
 			}
 
