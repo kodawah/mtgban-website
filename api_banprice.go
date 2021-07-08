@@ -275,13 +275,8 @@ func getSellerPrices(mode string, enabledStores []string, filterByVendor string,
 						out[id][sellerTag].Conditions = map[string]float64{}
 					}
 					for i := range inventory[cardId] {
-						// Append a foil suffix for all id modes that do not keep
-						// and non-foil ids separate
 						condTag := inventory[cardId][i].Conditions
-						if mode != "" && mode != "mtgban" && mode != "ck" {
-							condTag += "_foil"
-						}
-						out[id][sellerTag].Conditions[condTag] = inventory[cardId][i].Price
+						out[id][sellerTag].Conditions[condTag+"_foil"] = inventory[cardId][i].Price
 					}
 				}
 			} else {
@@ -376,13 +371,8 @@ func getVendorPrices(mode string, enabledStores []string, filterByVendor string,
 						out[id][vendorTag].Conditions = map[string]float64{}
 					}
 					for i := range buylist[cardId] {
-						// Append a foil suffix for all id modes that do not keep
-						// and non-foil ids separate
 						condTag := buylist[cardId][i].Conditions
-						if mode != "" && mode != "mtgban" && mode != "ck" {
-							condTag += "_foil"
-						}
-						out[id][vendorTag].Conditions[condTag] = buylist[cardId][i].BuyPrice
+						out[id][vendorTag].Conditions[condTag+"_foil"] = buylist[cardId][i].BuyPrice
 					}
 				}
 			} else {
