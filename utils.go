@@ -179,14 +179,14 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 		variant = "Game Day"
 	case co.HasPromoType(mtgjson.PromoTypeBuyABox):
 		variant = "Buy-a-Box"
+	case co.HasPromoType(mtgjson.PromoTypeGodzilla):
+		variant = "Godzilla"
 	case co.HasPromoType(mtgjson.PromoTypeBoosterfun):
 		switch {
 		case co.HasFrameEffect(mtgjson.FrameEffectShowcase):
 			variant = "Showcase"
 		case co.HasFrameEffect(mtgjson.FrameEffectExtendedArt):
 			variant = "Extended Art"
-		case co.HasPromoType(mtgjson.PromoTypeGodzilla):
-			variant = "Godzilla"
 		case co.BorderColor == mtgjson.BorderColorBorderless && co.SetCode != "STA":
 			variant = "Borderless"
 		case co.HasFrameEffect(mtgjson.FrameEffectFoilEtched):
