@@ -119,8 +119,10 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 				if err == nil && altId != base {
 					filterByHash = append(filterByHash, altId)
 				}
+
+				// Speed up search by keeping only the needed edition
+				filterByEdition = co.SetCode
 			}
-			filterByEdition = co.SetCode
 		}
 
 		if filterByEdition == "" && filterByHash == nil {
