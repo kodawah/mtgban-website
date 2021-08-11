@@ -121,6 +121,8 @@ func getSealedEditions() ([]string, map[string][]EditionEntry) {
 var ProductKeys = []string{
 	"TotalValueByTcgLow",
 	"TotalFoilValueByTcgLow",
+	"TotalValueByTcgDirect",
+	"TotalFoilValueByTcgDirect",
 	"TotalValueByTcgLowMinusBulk",
 	"TotalFoilValueByTcgLowMinusBulk",
 	"TotalValueBuylist",
@@ -130,6 +132,8 @@ var ProductKeys = []string{
 var ProductTitles = []string{
 	"Set Value by TCGLow",
 	"Foil Set Value by TCGLow",
+	"Set Value by TCG Direct",
+	"Foil Set Value by TCG Direct",
 	"Set Value less Bulk",
 	"Foil Set Value less Bulk",
 	"Set Value by Buylist",
@@ -170,9 +174,16 @@ func runSealedAnalysis() {
 	log.Println("Running set analysis")
 
 	var tcgInventory mtgban.InventoryRecord
+	var tcgDirect mtgban.InventoryRecord
 	for _, seller := range Sellers {
-		if seller != nil && seller.Info().Shorthand == TCG_LOW {
+		if seller == nil {
+			continue
+		}
+		if seller.Info().Shorthand == TCG_LOW {
 			tcgInventory, _ = seller.Inventory()
+		}
+		if seller.Info().Shorthand == TCG_DIRECT {
+			tcgDirect, _ = seller.Inventory()
 		}
 	}
 
@@ -185,6 +196,8 @@ func runSealedAnalysis() {
 
 	inv := map[string]float64{}
 	invFoil := map[string]float64{}
+	invDirect := map[string]float64{}
+	invDirectFoil := map[string]float64{}
 	invNoBulk := map[string]float64{}
 	invNoBulkFoil := map[string]float64{}
 	bl := map[string]float64{}
@@ -260,11 +273,21 @@ func runSealedAnalysis() {
 				}
 			}
 		}
+		entriesInv, found = tcgDirect[uuid]
+		if found {
+			if useFoil {
+				invDirectFoil[co.SetCode] += entriesInv[0].Price
+			} else {
+				invDirect[co.SetCode] += entriesInv[0].Price
+			}
+		}
 	}
 
 	for i, records := range []map[string]float64{
 		inv,
 		invFoil,
+		invDirect,
+		invDirectFoil,
 		invNoBulk,
 		invNoBulkFoil,
 		bl,
