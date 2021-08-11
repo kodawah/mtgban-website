@@ -35,6 +35,7 @@ var categoryEdition = map[string]string{
 	"promo":            "Boxed Sets",
 	"spellbook":        "Spellbook Series",
 	"starter":          "Starter Sets",
+	"vanguard":         "Boxed Sets",
 }
 
 var categoryOverrides = map[string]string{
