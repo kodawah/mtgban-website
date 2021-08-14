@@ -541,21 +541,6 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 	v := url.Values{}
 	// Enable option according to tier
 	switch tierTitle {
-	case "Modern":
-		v.Set("Search", "true")
-		v.Set("Newspaper", "true")
-		v.Set("Global", "true")
-	case "Legacy":
-		v.Set("Search", "true")
-		v.Set("Newspaper", "true")
-		v.Set("Sleepers", "true")
-		v.Set("Global", "true")
-	case "Test Role":
-		v.Set("Search", "true")
-		v.Set("Newspaper", "true")
-		v.Set("Sleepers", "true")
-		v.Set("Arbit", "true")
-		v.Set("Global", "true")
 	case "Root":
 		v.Set("Explore", "true")
 		fallthrough
@@ -564,10 +549,16 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 		v.Set("Admin", "true")
 		fallthrough
 	case "Developer", "Mods":
+		fallthrough
+	case "Test Role":
+		v.Set("Arbit", "true")
+		fallthrough
+	case "Legacy":
+		v.Set("Sleepers", "true")
+		fallthrough
+	case "Modern":
 		v.Set("Search", "true")
 		v.Set("Newspaper", "true")
-		v.Set("Sleepers", "true")
-		v.Set("Arbit", "true")
 		v.Set("Global", "true")
 	}
 	if v.Get("Arbit") == "true" {
