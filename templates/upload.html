@@ -166,7 +166,7 @@
                                                             {{if not $entry}}
                                                                 -
                                                             {{else}}
-                                                                $ {{printf "%.2f" (banprice2price $entry)}}
+                                                                <nobr>$ {{printf "%.2f" (banprice2price $entry)}}</nobr>
                                                             {{end}}
                                                     </h4>
                                                 </td>
@@ -205,7 +205,7 @@
                                                 {{if eq $price 0.0}}
                                                     -
                                                 {{else}}
-                                                    $ {{printf "%.2f" $price}}
+                                                    <nobr>$ {{printf "%.2f" $price}}</nobr>
                                                 {{end}}
                                             </h4>
                                         </td>
