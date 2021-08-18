@@ -166,6 +166,7 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 
 	for _, name := range names {
 		ScraperMap[name] = key
+		ScraperNames[name] = name
 	}
 	var needsLoading bool
 
@@ -595,6 +596,9 @@ var ScraperOptions = map[string]*scraperOption{
 // Associate Scraper shorthands to ScraperOptions keys
 var ScraperMap map[string]string
 
+// Assiciate Scraper shorthands to Scraper Names
+var ScraperNames map[string]string
+
 func loadScrapers() {
 	init := !DatabaseLoaded
 	if init {
@@ -615,6 +619,9 @@ func loadScrapers() {
 	// reference the mutex more freely
 	if ScraperMap == nil {
 		ScraperMap = map[string]string{}
+	}
+	if ScraperNames == nil {
+		ScraperNames = map[string]string{}
 	}
 
 	for key, opt := range ScraperOptions {
@@ -670,6 +677,7 @@ func loadScrapers() {
 			newbc.Register(scraper)
 		}
 		ScraperMap[scraper.Info().Shorthand] = key
+		ScraperNames[scraper.Info().Shorthand] = scraper.Info().Name
 	}
 
 	// Sort the sellers/vendors arrays by name
