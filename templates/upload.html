@@ -48,9 +48,9 @@
         </div>
         <script type="text/javascript">
             window.pressed = function(){
-                var a = document.getElementById('file');
-                if (a.value != "")    {
-                    var theSplit = a.value.split('\\');
+                var label = document.getElementById('file');
+                if (label.value != "") {
+                    var theSplit = label.value.split('\\');
                     fileLabel.innerHTML = theSplit[theSplit.length-1];
                     var btn = document.getElementById('submit');
                     btn.disabled = false;
