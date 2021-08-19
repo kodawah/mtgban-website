@@ -55,12 +55,6 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	log.Printf("File Size: %+v bytes", handler.Size)
 	log.Printf("MIME Header: %+v", handler.Header)
 
-	if handler.Header.Get("Content-Type") != "text/csv" {
-		pageVars.WarningMessage = "unsupported file type"
-		render(w, "upload.html", pageVars)
-		return
-	}
-
 	blocklistRetail, blocklistBuylist := getDefaultBlocklists(sig)
 	var enabledStores []string
 
