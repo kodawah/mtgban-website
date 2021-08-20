@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -165,7 +164,7 @@ func loadCsv(reader io.Reader) ([]UploadEntry, error) {
 		return nil, errors.New("error reading file header")
 	}
 
-	if len(first) < 3 {
+	if len(first) < 2 {
 		log.Println("Too few fields: %v", first)
 		return nil, errors.New("too few fields")
 	}
@@ -174,8 +173,6 @@ func loadCsv(reader io.Reader) ([]UploadEntry, error) {
 	indexMap := map[string]int{
 		"cardName": 0,
 		"edition":  1,
-		"variant":  2,
-		"printing": int(math.Min(3, float64(len(first)-1))),
 	}
 
 	// Parse the header to understand where these fields are
@@ -186,13 +183,13 @@ func loadCsv(reader io.Reader) ([]UploadEntry, error) {
 			indexMap["id"] = i
 		case strings.Contains(field, "name") && !strings.Contains(field, "edition") && !strings.Contains(field, "set"):
 			indexMap["cardName"] = i
-		case strings.Contains(field, "edition") || strings.Contains(field, "set "):
+		case strings.Contains(field, "edition") || strings.Contains(field, "set"):
 			indexMap["edition"] = i
-		case strings.Contains(field, "number") || strings.Contains(field, "variant") || strings.Contains(field, "variation"):
+		case indexMap["variant"] == 0 && (strings.Contains(field, "number") || strings.Contains(field, "variant") || strings.Contains(field, "variation")):
 			indexMap["variant"] = i
-		case strings.Contains(field, "foil") || strings.Contains(field, "printing") || field == "f/nf" || field == "nf/f":
+		case indexMap["printing"] == 0 && (strings.Contains(field, "foil") || strings.Contains(field, "printing") || field == "f/nf" || field == "nf/f"):
 			indexMap["printing"] = i
-		case strings.Contains(field, "price"):
+		case indexMap["price"] == 0 && (strings.Contains(field, "price")):
 			indexMap["price"] = i
 		}
 	}
@@ -219,15 +216,22 @@ func loadCsv(reader io.Reader) ([]UploadEntry, error) {
 		if found {
 			res.Card.Id = record[indexMap["id"]]
 		}
+
 		res.Card.Name = record[indexMap["cardName"]]
 		res.Card.Edition = record[indexMap["edition"]]
-		res.Card.Variation = record[indexMap["variant"]]
+
+		_, found = indexMap["variant"]
+		if found {
+			res.Card.Variation = record[indexMap["variant"]]
+		}
 
 		printing := strings.ToLower(record[indexMap["printing"]])
-		if printing == "y" || printing == "yes" || printing == "true" || printing == "foil" {
+		if printing == "y" || printing == "yes" || printing == "true" || printing == "foil" ||
+			mtgmatcher.Contains(res.Card.Variation, "foil") {
 			res.Card.Foil = true
 		}
-		_, found = indexMap["printing"]
+
+		_, found = indexMap["price"]
 		if found {
 			res.OriginalPrice, _ = strconv.ParseFloat(record[indexMap["price"]], 64)
 		}
