@@ -184,17 +184,29 @@ func loadCsv(reader io.Reader) ([]UploadEntry, error) {
 		field = strings.ToLower(field)
 		switch {
 		case field == "id" || (strings.Contains(field, "id") && (strings.Contains(field, "tcg") || strings.Contains(field, "scyfall"))):
-			indexMap["id"] = i
+			_, found := indexMap["id"]
+			if !found {
+				indexMap["id"] = i
+			}
 		case strings.Contains(field, "name") && !strings.Contains(field, "edition") && !strings.Contains(field, "set"):
 			indexMap["cardName"] = i
 		case strings.Contains(field, "edition") || strings.Contains(field, "set"):
 			indexMap["edition"] = i
-		case indexMap["variant"] == 0 && (strings.Contains(field, "number") || strings.Contains(field, "variant") || strings.Contains(field, "variation")):
-			indexMap["variant"] = i
-		case indexMap["printing"] == 0 && (strings.Contains(field, "foil") || strings.Contains(field, "printing") || field == "f/nf" || field == "nf/f"):
-			indexMap["printing"] = i
-		case indexMap["price"] == 0 && (strings.Contains(field, "price")):
-			indexMap["price"] = i
+		case strings.Contains(field, "number") || strings.Contains(field, "variant") || strings.Contains(field, "variation"):
+			_, found := indexMap["variant"]
+			if !found {
+				indexMap["variant"] = i
+			}
+		case strings.Contains(field, "foil") || strings.Contains(field, "printing") || field == "f/nf" || field == "nf/f":
+			_, found := indexMap["printing"]
+			if !found {
+				indexMap["printing"] = i
+			}
+		case strings.Contains(field, "price"):
+			_, found := indexMap["price"]
+			if !found {
+				indexMap["price"] = i
+			}
 		}
 	}
 
