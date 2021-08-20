@@ -140,7 +140,11 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	// Logs
 	user := GetParamFromSig(sig, "UserEmail")
-	msg := fmt.Sprintf("%s uploaded %d entries from %s, took %v", user, len(cardIds), handler.Filename, time.Since(start))
+	msgMode := "retail"
+	if blMode {
+		msgMode = "buylist"
+	}
+	msg := fmt.Sprintf("%s uploaded %d %s entries from %s, took %v", user, msgMode, len(cardIds), handler.Filename, time.Since(start))
 	Notify("upload", msg)
 	LogPages["Upload"].Println(msg)
 	if DevMode {
