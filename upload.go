@@ -198,6 +198,7 @@ func loadCsv(reader io.Reader) ([]UploadEntry, error) {
 		}
 	}
 
+	foundHashes := map[string]bool{}
 	var i int
 	var uploadEntries []UploadEntry
 	for {
@@ -242,12 +243,19 @@ func loadCsv(reader io.Reader) ([]UploadEntry, error) {
 
 		res.CardId, err = mtgmatcher.Match(&res.Card)
 
+		// Skip repeated entries
+		if foundHashes[res.CardId] {
+			continue
+		}
+
+		// Report any errors to the user or track which hash was found
 		if err != nil {
 			res.MismatchError = fmt.Errorf("record on line %d: %s", i+1, err.Error())
+		} else {
+			foundHashes[res.CardId] = true
 		}
 
 		uploadEntries = append(uploadEntries, res)
-
 	}
 
 	return uploadEntries, nil
