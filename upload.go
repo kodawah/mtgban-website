@@ -243,7 +243,8 @@ func loadCsv(reader io.Reader) ([]UploadEntry, error) {
 		}
 
 		printing := strings.ToLower(record[indexMap["printing"]])
-		if printing == "y" || printing == "yes" || printing == "true" || printing == "foil" ||
+		if printing == "y" || printing == "yes" || printing == "true" ||
+			mtgmatcher.Contains(printing, "foil") ||
 			mtgmatcher.Contains(res.Card.Variation, "foil") {
 			res.Card.Foil = true
 		}
