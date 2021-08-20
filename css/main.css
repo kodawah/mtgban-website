@@ -104,7 +104,7 @@ td.setValue {
     white-space: nowrap;
 }
 
-td a {
+td.fullAnchor a {
     display: block;
     width: 100%;
 }
