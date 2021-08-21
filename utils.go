@@ -316,14 +316,25 @@ func readSetFlag(w http.ResponseWriter, r *http.Request, queryParam, cookieName 
 	val := r.FormValue(queryParam)
 	flag, err := strconv.ParseBool(val)
 	if err != nil {
-		for _, cookie := range r.Cookies() {
-			if cookie.Name == cookieName {
-				flag, _ = strconv.ParseBool(cookie.Value)
-				return flag
-			}
-		}
-		return false
+		flag, _ = strconv.ParseBool(readCookie(r, cookieName))
+		return flag
 	}
+	setCookie(w, r, cookieName, val)
+	return flag
+}
+
+// Read a cookie from the request
+func readCookie(r *http.Request, cookieName string) string {
+	for _, cookie := range r.Cookies() {
+		if cookie.Name == cookieName {
+			return cookie.Value
+		}
+	}
+	return ""
+}
+
+// Set a cookie in the response with no expiration at the default root
+func setCookie(w http.ResponseWriter, r *http.Request, cookieName, value string) {
 	domain := "mtgban.com"
 	if strings.Contains(getBaseURL(r), "localhost") {
 		domain = "localhost"
@@ -334,9 +345,9 @@ func readSetFlag(w http.ResponseWriter, r *http.Request, queryParam, cookieName 
 		Path:   "/",
 		// No expiration
 		Expires: time.Now().Add(10 * 365 * 24 * 60 * 60 * time.Second),
-		Value:   val,
+		Value:   value,
 	})
-	return flag
+	return
 }
 
 // Retrieve default blocklists according to the signature contents
