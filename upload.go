@@ -39,6 +39,58 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	blMode := readSetFlag(w, r, "mode", "uploadMode")
 	pageVars.IsBuylist = blMode
 
+	blocklistRetail, blocklistBuylist := getDefaultBlocklists(sig)
+	var enabledStores []string
+	var allSellers []string
+	var allVendors []string
+
+	// Load all possible sellers, and vendors according to user permissions
+	for _, seller := range Sellers {
+		if seller != nil && !SliceStringHas(blocklistRetail, seller.Info().Shorthand) && !seller.Info().SealedMode {
+			allSellers = append(allSellers, seller.Info().Shorthand)
+		}
+	}
+	for _, vendor := range Vendors {
+		if vendor != nil && !SliceStringHas(blocklistBuylist, vendor.Info().Shorthand) && !vendor.Info().SealedMode {
+			allVendors = append(allVendors, vendor.Info().Shorthand)
+		}
+	}
+
+	// Set the store names for the <select> box
+	pageVars.SellerKeys = allSellers
+	pageVars.VendorKeys = allVendors
+
+	// Load the preferred list of enabled stores for the <select> box
+	// The first check is for when the cookie is not yet set
+	enabledSellers := readCookie(r, "enabledSellers")
+	if len(enabledSellers) == 0 {
+		pageVars.EnabledSellers = allSellers
+	} else {
+		pageVars.EnabledSellers = strings.Split(enabledSellers, "|")
+	}
+	enabledVendors := readCookie(r, "enabledVendors")
+	if len(enabledVendors) == 0 {
+		pageVars.EnabledVendors = allVendors
+	} else {
+		pageVars.EnabledVendors = strings.Split(enabledVendors, "|")
+	}
+
+	// Filter out any unselected store from the full list
+	stores := r.Form["stores"]
+	if blMode {
+		for _, store := range stores {
+			if SliceStringHas(allVendors, store) {
+				enabledStores = append(enabledStores, store)
+			}
+		}
+	} else {
+		for _, store := range stores {
+			if SliceStringHas(allSellers, store) {
+				enabledStores = append(enabledStores, store)
+			}
+		}
+	}
+
 	// FormFile returns the first file for the given key `myFile`
 	// it also returns the FileHeader so we can get the Filename,
 	// the Header and the size of the file
@@ -49,27 +101,20 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
+	// Save user preferred stores in cookies and make sure the page is updated with those
+	if blMode {
+		setCookie(w, r, "enabledVendors", strings.Join(enabledStores, "|"))
+		pageVars.EnabledVendors = enabledStores
+	} else {
+		setCookie(w, r, "enabledSellers", strings.Join(enabledStores, "|"))
+		pageVars.EnabledSellers = enabledStores
+	}
+
 	log.Printf("Buylist mode: %+v", blMode)
+	log.Printf("Enabled stores: %+v", enabledStores)
 	log.Printf("Uploaded File: %+v", handler.Filename)
 	log.Printf("File Size: %+v bytes", handler.Size)
 	log.Printf("MIME Header: %+v", handler.Header)
-
-	blocklistRetail, blocklistBuylist := getDefaultBlocklists(sig)
-	var enabledStores []string
-
-	if blMode {
-		for _, vendor := range Vendors {
-			if vendor != nil && !SliceStringHas(blocklistBuylist, vendor.Info().Shorthand) && !vendor.Info().SealedMode {
-				enabledStores = append(enabledStores, vendor.Info().Shorthand)
-			}
-		}
-	} else {
-		for _, seller := range Sellers {
-			if seller != nil && !SliceStringHas(blocklistRetail, seller.Info().Shorthand) && !seller.Info().SealedMode {
-				enabledStores = append(enabledStores, seller.Info().Shorthand)
-			}
-		}
-	}
 
 	start := time.Now()
 

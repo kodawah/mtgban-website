@@ -131,6 +131,8 @@ type PageVars struct {
 	UploadEntries  []UploadEntry
 	IsBuylist      bool
 	TotalEntries   map[string]float64
+	EnabledSellers []string
+	EnabledVendors []string
 }
 
 type NavElem struct {
@@ -606,6 +608,9 @@ func render(w http.ResponseWriter, tmpl string, pageVars PageVars) {
 				return p.Regular
 			}
 			return p.Foil
+		},
+		"slice_has": func(s []string, p string) bool {
+			return SliceStringHas(s, p)
 		},
 	}
 
