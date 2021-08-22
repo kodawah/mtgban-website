@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -18,7 +17,6 @@ import (
 
 	"database/sql"
 
-	redis "github.com/go-redis/redis/v8"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/leemcloughlin/logfile"
 	cron "gopkg.in/robfig/cron.v2"
@@ -318,11 +316,6 @@ var Newspaper3dayDB *sql.DB
 var Newspaper1dayDB *sql.DB
 var ExploreDB *sql.DB
 
-var LastSoldDB = redis.NewClient(&redis.Options{
-	Addr: "localhost:6379",
-	DB:   15,
-})
-
 func Favicon(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "img/misc/favicon.ico")
 }
@@ -445,11 +438,6 @@ func openDBs() (err error) {
 		return err
 	}
 	ExploreDB, err = sql.Open("mysql", Config.DBAddress+"/sites")
-	if err != nil {
-		return err
-	}
-
-	err = LastSoldDB.Ping(context.Background()).Err()
 	if err != nil {
 		return err
 	}

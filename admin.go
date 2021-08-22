@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -281,26 +280,8 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 	pageVars.MemoryStatus = mem()
 	pageVars.LatestHash, _ = latestHash()
 	pageVars.CurrentTime = time.Now()
-	pageVars.CacheSize = redisCacheSize()
 
 	render(w, "admin.html", pageVars)
-}
-
-func redisCacheSize() (res int) {
-	var cursor uint64
-	var keys []string
-	for {
-		var err error
-		keys, cursor, err = LastSoldDB.Scan(context.Background(), cursor, "*", 10).Result()
-		if err != nil {
-			break
-		}
-		res += len(keys)
-		if cursor == 0 {
-			break
-		}
-	}
-	return
 }
 
 func latestHash() (string, error) {
