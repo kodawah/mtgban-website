@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/360EntSecGroup-Skylar/excelize/v2"
 	"github.com/kodabb/go-mtgban/mtgmatcher"
 )
 
@@ -119,7 +120,14 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 
 	// Load data
-	uploadedData, err := loadCsv(file)
+	var uploadedData []UploadEntry
+	if strings.HasSuffix(handler.Filename, ".xls") || strings.HasSuffix(handler.Filename, ".xlsx") ||
+		handler.Header.Get("Content-Type") == "application/vnd.ms-excel" ||
+		handler.Header.Get("Content-Type") == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" {
+		uploadedData, err = loadXls(file)
+	} else {
+		uploadedData, err = loadCsv(file)
+	}
 	if err != nil {
 		pageVars.WarningMessage = err.Error()
 		render(w, "upload.html", pageVars)
@@ -200,21 +208,8 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	render(w, "upload.html", pageVars)
 }
 
-func loadCsv(reader io.Reader) ([]UploadEntry, error) {
-	csvReader := csv.NewReader(reader)
-
-	// Load header
-	first, err := csvReader.Read()
-	if err == io.EOF {
-		return nil, errors.New("empty input file")
-	}
-	if err != nil {
-		log.Println("Error reading header: %v", err)
-		return nil, errors.New("error reading file header")
-	}
-
+func parseHeader(first []string) (map[string]int, error) {
 	if len(first) < 2 {
-		log.Println("Too few fields: %v", first)
 		return nil, errors.New("too few fields")
 	}
 
@@ -255,6 +250,116 @@ func loadCsv(reader io.Reader) ([]UploadEntry, error) {
 		}
 	}
 
+	return indexMap, nil
+}
+
+func parseRow(indexMap map[string]int, record []string) UploadEntry {
+	var res UploadEntry
+
+	_, found := indexMap["id"]
+	if found {
+		res.Card.Id = record[indexMap["id"]]
+	}
+
+	res.Card.Name = record[indexMap["cardName"]]
+	res.Card.Edition = record[indexMap["edition"]]
+
+	_, found = indexMap["variant"]
+	if found {
+		res.Card.Variation = record[indexMap["variant"]]
+	}
+
+	printing := strings.ToLower(record[indexMap["printing"]])
+	if printing == "y" || printing == "yes" || printing == "true" ||
+		mtgmatcher.Contains(printing, "foil") ||
+		mtgmatcher.Contains(res.Card.Variation, "foil") {
+		res.Card.Foil = true
+	}
+
+	_, found = indexMap["price"]
+	if found {
+		res.OriginalPrice, _ = strconv.ParseFloat(record[indexMap["price"]], 64)
+	}
+
+	res.CardId, res.MismatchError = mtgmatcher.Match(&res.Card)
+
+	return res
+}
+
+func loadXls(reader io.Reader) ([]UploadEntry, error) {
+	f, err := excelize.OpenReader(reader)
+	if err != nil {
+		return nil, err
+	}
+
+	sheets := f.GetSheetList()
+	if len(sheets) == 0 {
+		return nil, errors.New("empty xls file")
+	}
+
+	// Get all the rows in the Sheet1.
+	rows, err := f.GetRows(sheets[0])
+	if err != nil {
+		return nil, err
+	}
+
+	if len(rows) == 0 {
+		return nil, errors.New("empty sheet")
+	}
+
+	indexMap, err := parseHeader(rows[0])
+	if err != nil {
+		return nil, err
+	}
+
+	foundHashes := map[string]bool{}
+	var i int
+	var uploadEntries []UploadEntry
+	for {
+		i++
+		if i > MaxUploadEntries || i >= len(rows) {
+			break
+		} else if len(rows[i]) != len(rows[0]) {
+			var res UploadEntry
+			res.MismatchError = errors.New("wrong number of fields")
+			uploadEntries = append(uploadEntries, res)
+			continue
+		}
+
+		res := parseRow(indexMap, rows[i])
+
+		// Skip repeated entries
+		if foundHashes[res.CardId] {
+			continue
+		}
+		if res.MismatchError == nil {
+			foundHashes[res.CardId] = true
+		}
+
+		uploadEntries = append(uploadEntries, res)
+	}
+
+	return uploadEntries, nil
+}
+
+func loadCsv(reader io.Reader) ([]UploadEntry, error) {
+	csvReader := csv.NewReader(reader)
+
+	// Load header
+	first, err := csvReader.Read()
+	if err == io.EOF {
+		return nil, errors.New("empty input file")
+	}
+	if err != nil {
+		log.Println("Error reading header: %v", err)
+		return nil, errors.New("error reading file header")
+	}
+
+	indexMap, err := parseHeader(first)
+	if err != nil {
+		return nil, err
+	}
+
 	foundHashes := map[string]bool{}
 	var i int
 	var uploadEntries []UploadEntry
@@ -264,42 +369,17 @@ func loadCsv(reader io.Reader) ([]UploadEntry, error) {
 			break
 		}
 
-		res := UploadEntry{}
 		record, err := csvReader.Read()
 		if err == io.EOF {
 			break
 		} else if err != nil {
+			var res UploadEntry
 			res.MismatchError = err
 			uploadEntries = append(uploadEntries, res)
 			continue
 		}
 
-		_, found := indexMap["id"]
-		if found {
-			res.Card.Id = record[indexMap["id"]]
-		}
-
-		res.Card.Name = record[indexMap["cardName"]]
-		res.Card.Edition = record[indexMap["edition"]]
-
-		_, found = indexMap["variant"]
-		if found {
-			res.Card.Variation = record[indexMap["variant"]]
-		}
-
-		printing := strings.ToLower(record[indexMap["printing"]])
-		if printing == "y" || printing == "yes" || printing == "true" ||
-			mtgmatcher.Contains(printing, "foil") ||
-			mtgmatcher.Contains(res.Card.Variation, "foil") {
-			res.Card.Foil = true
-		}
-
-		_, found = indexMap["price"]
-		if found {
-			res.OriginalPrice, _ = strconv.ParseFloat(record[indexMap["price"]], 64)
-		}
-
-		res.CardId, err = mtgmatcher.Match(&res.Card)
+		res := parseRow(indexMap, record)
 
 		// Skip repeated entries
 		if foundHashes[res.CardId] {
@@ -307,8 +387,8 @@ func loadCsv(reader io.Reader) ([]UploadEntry, error) {
 		}
 
 		// Report any errors to the user or track which hash was found
-		if err != nil {
-			res.MismatchError = fmt.Errorf("record on line %d: %s", i+1, err.Error())
+		if res.MismatchError != nil {
+			res.MismatchError = fmt.Errorf("record on line %d: %s", i+1, res.MismatchError.Error())
 		} else {
 			foundHashes[res.CardId] = true
 		}
