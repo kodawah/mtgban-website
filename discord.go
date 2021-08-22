@@ -309,10 +309,21 @@ func search2fields(searchRes *searchResult) (fields []embedField) {
 	return
 }
 
-type PriceEntry struct {
-	Title    string  `json:"title"`
-	Price    float64 `json:"price"`
-	Shipping float64 `json:"shipping"`
+type TCGLastSold struct {
+	PreviousPage string `json:"previousPage"`
+	NextPage     string `json:"nextPage"`
+	ResultCount  int    `json:"resultCount"`
+	Data         []struct {
+		Condition     string    `json:"condition"`
+		Variant       string    `json:"variant"`
+		Language      string    `json:"language"`
+		Quantity      int       `json:"quantity"`
+		Title         string    `json:"title"`
+		ListingType   string    `json:"listingType"`
+		PurchasePrice float64   `json:"purchasePrice"`
+		ShippingPrice float64   `json:"shippingPrice"`
+		OrderDate     time.Time `json:"orderDate"`
+	} `json:"data"`
 }
 
 func grabLastSold(cardId string, lang string) ([]embedField, error) {
@@ -330,71 +341,60 @@ func grabLastSold(cardId string, lang string) ([]embedField, error) {
 		return nil, nil
 	}
 
-	link := "http://localhost:8081/" + tcgId
-	if lang != "" {
-		link += "?lang=" + lang
-	}
+	link := "https://mpapi.tcgplayer.com/v2/product/" + tcgId + "/latestsales?offset=0&limit=25"
 	resp, err := cleanhttp.DefaultClient().Get(link)
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	var entries map[string][]PriceEntry
-	err = json.Unmarshal(data, &entries)
+	var tcgLastSoldResp TCGLastSold
+	err = json.Unmarshal(data, &tcgLastSoldResp)
 	if err != nil {
 		log.Println(string(data))
 		return nil, err
 	}
 
-	var shipping []string
 	var hasValues bool
-	for i, entry := range entries["TCG Last Sold Listing"] {
+	for _, entry := range tcgLastSoldResp.Data {
 		// If the card requested is the foil version, skip any non-foil entry
-		if co.Foil && !strings.Contains(entry.Title, "Foil") {
+		if co.Foil && entry.Variant != "Foil" {
 			continue
 		}
 
 		// If language is requested, skip any language non matching it
-		if lang != "" && !strings.HasSuffix(entry.Title, lang) {
+		if lang != "" && entry.Language != lang {
 			continue
 		}
 
 		value := "-"
-		if entry.Price != 0 {
+		if entry.PurchasePrice != 0 {
 			hasValues = true
-			value = fmt.Sprintf("$%0.2f", entry.Price)
-			shipping = append(shipping, fmt.Sprintf("%0.2f", entry.Shipping))
+			value = fmt.Sprintf("$%0.2f", entry.PurchasePrice)
+			if entry.ShippingPrice != 0 {
+				value += fmt.Sprintf(" (+$%0.2f)", entry.ShippingPrice)
+			}
 		}
 		fields = append(fields, embedField{
-			Name:   entry.Title,
+			Name:   entry.OrderDate.Format("2006-01-02"),
 			Value:  value,
 			Inline: true,
 		})
 
-		if i == 4 || i == 9 {
-			field := embedField{
-				Name:   "Shipping",
-				Value:  strings.Join(shipping, " "),
-				Inline: true,
-			}
-			if field.Value == "" {
-				field.Value = "n/a"
-			}
-			fields = append(fields, field)
-			// Reset the shipping slice
-			shipping = shipping[:0]
+		if len(fields) > 5 {
+			break
 		}
 	}
 
 	// No prices received, this is not an error,
 	// but print a message warning the user
 	if !hasValues {
-		log.Println("No last sold prices available")
+		log.Println("No last sold prices available for id", tcgId)
 		return nil, nil
 	}
 
