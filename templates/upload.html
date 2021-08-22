@@ -36,8 +36,15 @@
                 <form enctype="multipart/form-data" action="/upload" method="post">
                     <input type="radio" id="retail" name="mode" value="false" {{if not .IsBuylist}}checked{{end}} onchange="reloadSelect('retail')">
                     <label for="retail">Retail</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <input type="radio" id="buylist" name="mode" value="true" {{if .IsBuylist}}checked{{end}} onchange="reloadSelect('buylist')">
-                    <label for="buylist">Buylist</label><br>
+                    <input type="radio" id="buylist" name="mode" value="true" {{if .IsBuylist}}checked{{end}} onchange="reloadSelect('buylist')" {{if not .CanBuylist}}disabled{{end}}>
+                    <label for="buylist">
+                        {{if .CanBuylist}}
+                            Buylist
+                        {{else}}
+                            <s title="Join Legacy to gain access to buylist prices!">Buylist</s>
+                        {{end}}
+                    </label>
+                    <br>
                     <br>
                     <select name="stores" id="stores" multiple></select>
                     <br>

@@ -38,7 +38,16 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	// Check cookies to set preferences
 	blMode := readSetFlag(w, r, "mode", "uploadMode")
+
+	// Disable buylist if not permitted
+	canBuylist, _ := strconv.ParseBool(GetParamFromSig(sig, "UploadBuylistEnabled"))
+	if !canBuylist {
+		blMode = false
+	}
+
+	// Set flags needed to show elements on the page ui
 	pageVars.IsBuylist = blMode
+	pageVars.CanBuylist = canBuylist
 
 	blocklistRetail, blocklistBuylist := getDefaultBlocklists(sig)
 	var enabledStores []string

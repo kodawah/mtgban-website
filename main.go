@@ -133,6 +133,7 @@ type PageVars struct {
 	TotalEntries   map[string]float64
 	EnabledSellers []string
 	EnabledVendors []string
+	CanBuylist     bool
 }
 
 type NavElem struct {
@@ -183,6 +184,7 @@ var OptionalFields = []string{
 	"ArbitDisabledVendors",
 	"ExpEnabled",
 	"NewsEnabled",
+	"UploadBuylistEnabled",
 	"AnyEnabled",
 	"AnyExperimentsEnabled",
 	"API",
