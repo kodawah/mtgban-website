@@ -136,7 +136,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	} else if strings.HasSuffix(handler.Filename, ".xlsx") {
 		uploadedData, err = loadXlsx(file)
 	} else {
-		uploadedData, err = loadCsv(file)
+		uploadedData, err = loadCsv(file, ',')
 	}
 	if err != nil {
 		pageVars.WarningMessage = err.Error()
@@ -421,8 +421,16 @@ func loadXlsx(reader io.Reader) ([]UploadEntry, error) {
 	return uploadEntries, nil
 }
 
-func loadCsv(reader io.Reader) ([]UploadEntry, error) {
+func loadCsv(reader io.ReadSeeker, comma rune) ([]UploadEntry, error) {
 	csvReader := csv.NewReader(reader)
+
+	csvReader.TrimLeadingSpace = true
+	csvReader.Comma = comma
+
+	// In case we are not using a sane csv
+	if comma != ',' {
+		csvReader.LazyQuotes = true
+	}
 
 	// Load header
 	first, err := csvReader.Read()
@@ -430,8 +438,15 @@ func loadCsv(reader io.Reader) ([]UploadEntry, error) {
 		return nil, errors.New("empty input file")
 	}
 	if err != nil {
-		log.Println("Error reading header: %v", err)
+		log.Println("Error reading header:", err)
 		return nil, errors.New("error reading file header")
+	}
+
+	// If there is a single element, parsing didn't work
+	// try again with a different delimiter
+	if len(first) == 1 && comma == ',' {
+		reader.Seek(0, io.SeekStart)
+		return loadCsv(reader, '\t')
 	}
 
 	indexMap, err := parseHeader(first)
