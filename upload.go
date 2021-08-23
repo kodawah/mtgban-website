@@ -75,7 +75,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	// The first check is for when the cookie is not yet set
 	enabledSellers := readCookie(r, "enabledSellers")
 	if len(enabledSellers) == 0 {
-		pageVars.EnabledSellers = allSellers
+		pageVars.EnabledSellers = Config.AffiliatesList
 	} else {
 		pageVars.EnabledSellers = strings.Split(enabledSellers, "|")
 	}
