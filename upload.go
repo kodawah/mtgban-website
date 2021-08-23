@@ -220,25 +220,29 @@ func parseHeader(first []string) (map[string]int, error) {
 		return nil, errors.New("too few fields")
 	}
 
-	// Set some default values for the mandatory fields
-	indexMap := map[string]int{
-		"cardName": 0,
-		"edition":  1,
-	}
+	indexMap := map[string]int{}
 
 	// Parse the header to understand where these fields are
 	for i, field := range first {
 		field = strings.ToLower(field)
 		switch {
+		case strings.Contains(field, "stock"):
+			continue
 		case field == "id" || (strings.Contains(field, "id") && (strings.Contains(field, "tcg") || strings.Contains(field, "scyfall"))):
 			_, found := indexMap["id"]
 			if !found {
 				indexMap["id"] = i
 			}
 		case strings.Contains(field, "name") && !strings.Contains(field, "edition") && !strings.Contains(field, "set"):
-			indexMap["cardName"] = i
+			_, found := indexMap["cardName"]
+			if !found {
+				indexMap["cardName"] = i
+			}
 		case strings.Contains(field, "edition") || strings.Contains(field, "set"):
-			indexMap["edition"] = i
+			_, found := indexMap["edition"]
+			if !found {
+				indexMap["edition"] = i
+			}
 		case strings.Contains(field, "number") || strings.Contains(field, "variant") || strings.Contains(field, "variation"):
 			_, found := indexMap["variant"]
 			if !found {
@@ -255,6 +259,16 @@ func parseHeader(first []string) (map[string]int, error) {
 				indexMap["price"] = i
 			}
 		}
+	}
+
+	// Set some default values for the mandatory fields
+	_, found := indexMap["cardName"]
+	if !found {
+		indexMap["cardName"] = 0
+	}
+	_, found = indexMap["cardName"]
+	if !found {
+		indexMap["edition"] = 1
 	}
 
 	return indexMap, nil
