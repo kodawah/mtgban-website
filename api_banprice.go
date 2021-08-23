@@ -54,6 +54,9 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	storesOpt := GetParamFromSig(sig, "API")
+	if DevMode && storesOpt == "" {
+		storesOpt = "DEV_ACCESS"
+	}
 	var enabledStores []string
 	switch storesOpt {
 	case "ALL_ACCESS":
@@ -85,7 +88,12 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 	idOpt := r.FormValue("id")
 	qty, _ := strconv.ParseBool(r.FormValue("qty"))
 	conds, _ := strconv.ParseBool(r.FormValue("conds"))
+
+	// Filter by user preference, as long as it's listed in the enebled stores
 	filterByVendor := r.FormValue("vendor")
+	if SliceStringHas(enabledStores, filterByVendor) {
+		enabledStores = []string{filterByVendor}
+	}
 
 	filterByEdition := ""
 	var filterByHash []string
@@ -138,11 +146,11 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 	canBuylist := SliceStringHas(enabledModes, "buylist") || (SliceStringHas(enabledModes, "all") || (DevMode && !SigCheck))
 	if (strings.HasPrefix(urlPath, "retail") || strings.HasPrefix(urlPath, "all")) && canRetail {
 		dumpType += "retail"
-		out.Retail = getSellerPrices(idOpt, enabledStores, filterByVendor, filterByEdition, filterByHash, qty, conds)
+		out.Retail = getSellerPrices(idOpt, enabledStores, filterByEdition, filterByHash, qty, conds)
 	}
 	if (strings.HasPrefix(urlPath, "buylist") || strings.HasPrefix(urlPath, "all")) && canBuylist {
 		dumpType += "buylist"
-		out.Buylist = getVendorPrices(idOpt, enabledStores, filterByVendor, filterByEdition, filterByHash, qty, conds)
+		out.Buylist = getVendorPrices(idOpt, enabledStores, filterByEdition, filterByHash, qty, conds)
 	}
 
 	user := GetParamFromSig(sig, "UserEmail")
@@ -200,7 +208,7 @@ func getIdFunc(mode string) func(co *mtgmatcher.CardObject) string {
 	}
 }
 
-func getSellerPrices(mode string, enabledStores []string, filterByVendor string, filterByEdition string, filterByHash []string, qty bool, conds bool) map[string]map[string]*BanPrice {
+func getSellerPrices(mode string, enabledStores []string, filterByEdition string, filterByHash []string, qty bool, conds bool) map[string]map[string]*BanPrice {
 	out := map[string]map[string]*BanPrice{}
 	idFunc := getIdFunc(mode)
 	for i, seller := range Sellers {
@@ -215,13 +223,8 @@ func getSellerPrices(mode string, enabledStores []string, filterByVendor string,
 			continue
 		}
 
-		// If filtering by vendor, only keep the one requested
-		if filterByVendor != "" && seller.Info().Shorthand != filterByVendor {
-			continue
-		}
-
 		// Skip any seller that are not enabled
-		if !SliceStringHas(enabledStores, sellerTag) && !DevMode {
+		if !SliceStringHas(enabledStores, sellerTag) {
 			continue
 		}
 
@@ -273,7 +276,7 @@ func getSellerPrices(mode string, enabledStores []string, filterByVendor string,
 					for i := range inventory[cardId] {
 						out[id][sellerTag].QtyFoil += inventory[cardId][i].Quantity
 					}
-				} else if filterByVendor != "" || (filterByHash != nil && conds) {
+				} else if len(enabledStores) == 1 || (filterByHash != nil && conds) {
 					if out[id][sellerTag].Conditions == nil {
 						out[id][sellerTag].Conditions = map[string]float64{}
 					}
@@ -288,7 +291,7 @@ func getSellerPrices(mode string, enabledStores []string, filterByVendor string,
 					for i := range inventory[cardId] {
 						out[id][sellerTag].Qty += inventory[cardId][i].Quantity
 					}
-				} else if filterByVendor != "" || (filterByHash != nil && conds) {
+				} else if len(enabledStores) == 1 || (filterByHash != nil && conds) {
 					if out[id][sellerTag].Conditions == nil {
 						out[id][sellerTag].Conditions = map[string]float64{}
 					}
@@ -303,7 +306,7 @@ func getSellerPrices(mode string, enabledStores []string, filterByVendor string,
 	return out
 }
 
-func getVendorPrices(mode string, enabledStores []string, filterByVendor string, filterByEdition string, filterByHash []string, qty bool, conds bool) map[string]map[string]*BanPrice {
+func getVendorPrices(mode string, enabledStores []string, filterByEdition string, filterByHash []string, qty bool, conds bool) map[string]map[string]*BanPrice {
 	out := map[string]map[string]*BanPrice{}
 	idFunc := getIdFunc(mode)
 	for i, vendor := range Vendors {
@@ -315,11 +318,6 @@ func getVendorPrices(mode string, enabledStores []string, filterByVendor string,
 
 		// Only keep singles
 		if vendor.Info().SealedMode {
-			continue
-		}
-
-		// If filtering by vendor, only keep the one requested
-		if filterByVendor != "" && vendor.Info().Shorthand != filterByVendor {
 			continue
 		}
 
@@ -369,7 +367,7 @@ func getVendorPrices(mode string, enabledStores []string, filterByVendor string,
 					for i := range buylist[cardId] {
 						out[id][vendorTag].QtyFoil += buylist[cardId][i].Quantity
 					}
-				} else if filterByVendor != "" || (filterByHash != nil && conds) {
+				} else if len(enabledStores) == 1 || (filterByHash != nil && conds) {
 					if out[id][vendorTag].Conditions == nil {
 						out[id][vendorTag].Conditions = map[string]float64{}
 					}
@@ -384,7 +382,7 @@ func getVendorPrices(mode string, enabledStores []string, filterByVendor string,
 					for i := range buylist[cardId] {
 						out[id][vendorTag].Qty += buylist[cardId][i].Quantity
 					}
-				} else if filterByVendor != "" || (filterByHash != nil && conds) {
+				} else if len(enabledStores) == 1 || (filterByHash != nil && conds) {
 					if out[id][vendorTag].Conditions == nil {
 						out[id][vendorTag].Conditions = map[string]float64{}
 					}

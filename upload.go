@@ -158,9 +158,9 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	// Search
 	var results map[string]map[string]*BanPrice
 	if blMode {
-		results = getVendorPrices("", enabledStores, "", "", cardIds, false, false)
+		results = getVendorPrices("", enabledStores, "", cardIds, false, false)
 	} else {
-		results = getSellerPrices("", enabledStores, "", "", cardIds, false, false)
+		results = getSellerPrices("", enabledStores, "", cardIds, false, false)
 	}
 
 	pageVars.Metadata = map[string]GenericCard{}
