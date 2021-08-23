@@ -21,11 +21,20 @@ type rateLimiter struct {
 	visitors map[string]*visitor
 }
 
-const reqSec = 10
+const (
+	APIRequestsPerSec  = 10
+	UserRequestsPerSec = 3
+)
 
 var APIRateLimiter = &rateLimiter{
-	rate:     reqSec,
+	rate:     APIRequestsPerSec,
 	burst:    2,
+	visitors: map[string]*visitor{},
+}
+
+var UserRateLimiter = &rateLimiter{
+	rate:     UserRequestsPerSec,
+	burst:    1,
 	visitors: map[string]*visitor{},
 }
 

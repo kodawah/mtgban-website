@@ -43,6 +43,7 @@ const (
 	ErrMsgDenied  = "Something went wrong while accessing this page"
 	ErrMsgExpired = "You've been logged out"
 	ErrMsgRestart = "Website is restarting, please try again in a few minutes"
+	ErrMsgUseAPI  = "Slow down, you're making too many requests! For heavy data use consider the BAN API"
 )
 
 func getUserToken(code, baseURL, ref string) (string, error) {
@@ -357,7 +358,7 @@ func noSigning(next http.Handler) http.Handler {
 
 func enforceAPISigning(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("RateLimit-Limit", fmt.Sprint(reqSec))
+		w.Header().Add("RateLimit-Limit", fmt.Sprint(APIRequestsPerSec))
 
 		ip, err := IpAddress(r)
 		if err != nil {
@@ -450,6 +451,14 @@ func enforceSigning(next http.Handler) http.Handler {
 		}
 
 		pageVars := genPageNav("Error", sig)
+
+		if !UserRateLimiter.allow(GetParamFromSig(sig, "UserEmail")) {
+			pageVars.Title = "Too Many Requests"
+			pageVars.ErrorMessage = ErrMsgUseAPI
+
+			render(w, "home.html", pageVars)
+			return
+		}
 
 		raw, err := base64.StdEncoding.DecodeString(sig)
 		if SigCheck && err != nil {
