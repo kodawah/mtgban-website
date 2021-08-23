@@ -558,10 +558,10 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 		v.Set("Admin", "true")
 		fallthrough
 	case "Developer", "Mods":
-		v.Set("Upload", "true")
 		fallthrough
 	case "Test Role":
 		v.Set("Arbit", "true")
+		v.Set("Upload", "true")
 		fallthrough
 	case "Legacy":
 		v.Set("Sleepers", "true")
