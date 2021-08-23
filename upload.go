@@ -130,9 +130,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	// Load data
 	var uploadedData []UploadEntry
-	if strings.HasSuffix(handler.Filename, ".xls") || strings.HasSuffix(handler.Filename, ".xlsx") ||
-		handler.Header.Get("Content-Type") == "application/vnd.ms-excel" ||
-		handler.Header.Get("Content-Type") == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" {
+	if strings.HasSuffix(handler.Filename, ".xls") || strings.HasSuffix(handler.Filename, ".xlsx") {
 		uploadedData, err = loadXls(file)
 	} else {
 		uploadedData, err = loadCsv(file)
