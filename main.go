@@ -125,7 +125,9 @@ type PageVars struct {
 	IsSealed    bool
 
 	CompactEntries map[string]map[string]*BanPrice
+	IndexEntries   map[string]map[string]*BanPrice
 	ScraperKeys    []string
+	IndexKeys      []string
 	UploadEntries  []UploadEntry
 	IsBuylist      bool
 	TotalEntries   map[string]float64

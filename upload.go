@@ -57,7 +57,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	// Load all possible sellers, and vendors according to user permissions
 	for _, seller := range Sellers {
-		if seller != nil && !SliceStringHas(blocklistRetail, seller.Info().Shorthand) && !seller.Info().SealedMode {
+		if seller != nil && !SliceStringHas(blocklistRetail, seller.Info().Shorthand) && !seller.Info().SealedMode && !seller.Info().MetadataOnly {
 			allSellers = append(allSellers, seller.Info().Shorthand)
 		}
 	}
@@ -162,6 +162,11 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	} else {
 		results = getSellerPrices("", enabledStores, "", cardIds, false, false)
 	}
+
+	indexKeys := []string{TCG_LOW, TCG_MARKET}
+	indexResults := getSellerPrices("", indexKeys, "", cardIds, false, false)
+	pageVars.IndexEntries = indexResults
+	pageVars.IndexKeys = indexKeys
 
 	pageVars.Metadata = map[string]GenericCard{}
 	pageVars.SearchQuery = handler.Filename

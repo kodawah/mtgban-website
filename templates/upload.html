@@ -181,6 +181,26 @@
                                     </tr>
                                 </table>
                             </td>
+                            <td rowspan=2>
+                                {{$cardId := .CardId}}
+                                {{range $.IndexKeys}}
+                                    {{$indexEntry := (index $.IndexEntries $cardId)}}
+                                    {{if $indexEntry}}
+                                        {{$entry := (index $indexEntry .)}}
+                                        <nobr>
+                                            <a class="btn normal" {{if $entry}}href="https://mtgban.com/go/{{.}}/{{$cardId}}"{{end}} target="_blank">
+                                                {{.}}:
+                                            </a>
+                                            {{if not $entry}}
+                                                n/a
+                                            {{else}}
+                                                $ {{printf "%.2f" (banprice2price $entry)}}
+                                            {{end}}
+                                        </nobr>
+                                    {{end}}
+                                    <br>
+                                {{end}}
+                            </td>
                         </tr>
                         <tr class="no-hover" >
                             <td>
