@@ -139,18 +139,24 @@
                 <br>
                 <ul class="indent">
                     <li>Upload a file and let the <i>Magic</i> begin!</li>
-                    <li>This tool can read data from <b>CSV</b>, <b>Excel</b> files, or from a remote <b>Google Spreadsheets</b>.</li>
-                    <li>The Excel sheet can be in any location as long as it contains the <pre>mtgban</pre> indication. Otherwise the system will use the first sheet found.</li>
-                    <li>The Google Spreadsheet needs to be publicly accessible from the internet, and there needs to be a sheet named with <pre>mtgban</pre>, or the first sheet found will be used.</li>
-                    <li>The URL used will be saved as a preference and you'll be able to use it later.</li>
+                    <ul class="indent">
+                        <li>This tool can read data from <b>CSV</b>, <b>Excel</b> files, or from a remote <b>Google Spreadsheets</b>.</li>
+                        <ul class="indent">
+                            <li>The Excel sheet can be in any location as long as it contains the <pre>mtgban</pre> indication. Otherwise the system will use the first sheet found.</li>
+                            <li>The Google Spreadsheet needs to be publicly accessible from the internet, and there needs to be a sheet named with <pre>mtgban</pre>, or the first sheet found will be used.</li>
+                            <li>The URL used will be saved as a preference and you'll be able to use it later.</li>
+                        </ul>
+                        <li>Data may be in any format, as long as the file contains a comma or tab separated header in the first row, with sensible indication on what the column contains (eg. <i>card name</i> and <i>edition</i> as a minimum).</li>
+                        <li>For this reason, the most popular CSV files are supported out of the box, such as from <b>TCG</b>, <b>Deckbox</b>, or <b>Cardsphere</b>.</li>
+                        <li>The file cannot be larger than 10MB, and it may contain up to 150 entries.</li>
+                        <li>Multiple conditions and quantity fields are currently ignored.</li>
+                    </ul>
                     <li>The result will be a page containing Retail or Buylist prices from all the available stores on BAN for each recognised card entry.</li>
-                    <li>Note that buylist prices are available for our <b>Legacy</b> patrons only.</li>
-                    <li>You can filter out unwanted store prices by selecting/deselecting them from the list, pressing CTRL or CMD when clicking on them.</li>
-                    <li>Data may be in any format, as long as the file contains a comma or tab separated header in the first row, with sensible indication on what the column contains (eg. <i>card name</i> and <i>edition</i> as a minimum).</li>
-                    <li>For this reason, the most popular CSV files are supported out of the box, such as from <b>TCG</b>, <b>Deckbox</b>, or <b>Cardsphere</b>.</li>
-                    <li>The file cannot be larger than 10MB, and it may contain up to 150 entries.</li>
-                    <li>Multiple conditions and quantity fields are currently ignored.</li>
-                    <li>Card recognition works best when data strictly follows <b>Scryfall</b> notation. If it fails, try finding your card there and tweaking your entry accordingly.</li>
+                    <ul class="indent">
+                        <li>Note that buylist prices are available for our <b>Legacy</b> patrons only.</li>
+                        <li>You can filter out unwanted store prices by selecting/deselecting them from the list, pressing CTRL or CMD when clicking on them.</li>
+                        <li>Card recognition works best when data strictly follows <b>Scryfall</b> notation. If it fails, try finding your card there and tweaking your entry accordingly.</li>
+                    </ul>
                     <li>If anything doesn't work, post your file on Discord and we'll take a look.</li>
                 </ul>
              </div>
