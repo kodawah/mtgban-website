@@ -221,6 +221,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				} else {
 					tmp = append(tmp, indexArray[i])
 				}
+			case TCG_DIRECT_LOW:
+				// Skip this one for search results
+				continue
 			default:
 				tmp = append(tmp, indexArray[i])
 			}

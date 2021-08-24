@@ -182,6 +182,7 @@
                                 </table>
                             </td>
                             <td rowspan=2>
+                                <br><br>
                                 {{$cardId := .CardId}}
                                 {{range $.IndexKeys}}
                                     {{$indexEntry := (index $.IndexEntries $cardId)}}
@@ -200,6 +201,7 @@
                                     {{end}}
                                     <br>
                                 {{end}}
+                                <hr>
                             </td>
                         </tr>
                         <tr class="no-hover" >

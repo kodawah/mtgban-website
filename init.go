@@ -39,8 +39,9 @@ import (
 
 const (
 	// from TCGIndex
-	TCG_LOW    = "TCG Low"
-	TCG_MARKET = "TCG Market"
+	TCG_LOW        = "TCG Low"
+	TCG_MARKET     = "TCG Market"
+	TCG_DIRECT_LOW = "TCG Direct Low"
 
 	// from TCGMrkt
 	TCG_MAIN    = "TCG Player"
@@ -427,7 +428,11 @@ var ScraperOptions = map[string]*scraperOption{
 			scraper.MaxConcurrency = 4
 			return scraper, nil
 		},
-		Keepers:      []string{TCG_LOW, TCG_MARKET},
+		Keepers: []string{
+			TCG_LOW,
+			TCG_MARKET,
+			TCG_DIRECT_LOW,
+		},
 		StashMarkets: true,
 		RDBs: map[string]*redis.Client{
 			TCG_LOW: redis.NewClient(&redis.Options{

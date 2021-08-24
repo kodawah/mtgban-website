@@ -163,7 +163,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		results = getSellerPrices("", enabledStores, "", cardIds, false, false)
 	}
 
-	indexKeys := []string{TCG_LOW, TCG_MARKET}
+	indexKeys := []string{TCG_LOW, TCG_MARKET, TCG_DIRECT_LOW}
 	indexResults := getSellerPrices("", indexKeys, "", cardIds, false, false)
 	pageVars.IndexEntries = indexResults
 	pageVars.IndexKeys = indexKeys
