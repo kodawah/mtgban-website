@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/360EntSecGroup-Skylar/excelize/v2"
+	"github.com/extrame/xls"
 	"github.com/kodabb/go-mtgban/mtgmatcher"
 )
 
@@ -130,8 +131,10 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	// Load data
 	var uploadedData []UploadEntry
-	if strings.HasSuffix(handler.Filename, ".xls") || strings.HasSuffix(handler.Filename, ".xlsx") {
-		uploadedData, err = loadXls(file)
+	if strings.HasSuffix(handler.Filename, ".xls") {
+		uploadedData, err = loadOldXls(file)
+	} else if strings.HasSuffix(handler.Filename, ".xlsx") {
+		uploadedData, err = loadXlsx(file)
 	} else {
 		uploadedData, err = loadCsv(file)
 	}
@@ -307,7 +310,62 @@ func parseRow(indexMap map[string]int, record []string) UploadEntry {
 	return res
 }
 
-func loadXls(reader io.Reader) ([]UploadEntry, error) {
+func loadOldXls(reader io.ReadSeeker) ([]UploadEntry, error) {
+	f, err := xls.OpenReader(reader, "")
+	if err != nil {
+		return nil, err
+	}
+
+	firstSheet := f.GetSheet(0)
+	if firstSheet == nil || firstSheet.MaxRow == 0 {
+		return nil, errors.New("empty xls file")
+	}
+
+	record := make([]string, firstSheet.Row(0).LastCol())
+	for i := range record {
+		record[i] = firstSheet.Row(0).Col(i)
+	}
+
+	indexMap, err := parseHeader(record)
+	if err != nil {
+		return nil, err
+	}
+
+	foundHashes := map[string]bool{}
+	var i int
+	var uploadEntries []UploadEntry
+	for {
+		i++
+		if i > MaxUploadEntries || i > int(firstSheet.MaxRow) {
+			break
+		} else if len(record) != firstSheet.Row(i).LastCol() {
+			var res UploadEntry
+			res.MismatchError = errors.New("wrong number of fields")
+			uploadEntries = append(uploadEntries, res)
+			continue
+		}
+
+		for j := range record {
+			record[j] = firstSheet.Row(i).Col(j)
+		}
+
+		res := parseRow(indexMap, record)
+
+		// Skip repeated entries
+		if foundHashes[res.CardId] {
+			continue
+		}
+		if res.MismatchError == nil {
+			foundHashes[res.CardId] = true
+		}
+
+		uploadEntries = append(uploadEntries, res)
+	}
+
+	return uploadEntries, nil
+}
+
+func loadXlsx(reader io.Reader) ([]UploadEntry, error) {
 	f, err := excelize.OpenReader(reader)
 	if err != nil {
 		return nil, err
@@ -315,7 +373,7 @@ func loadXls(reader io.Reader) ([]UploadEntry, error) {
 
 	sheets := f.GetSheetList()
 	if len(sheets) == 0 {
-		return nil, errors.New("empty xls file")
+		return nil, errors.New("empty xlsx file")
 	}
 
 	// Get all the rows in the Sheet1.
