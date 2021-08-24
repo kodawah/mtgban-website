@@ -169,7 +169,10 @@
                                         </td>
                                         {{if .OriginalPrice}}
                                             <td width=100%>
-                                                Your price: <b><nobr>$ {{printf "%.2f" .OriginalPrice}}</nobr></b>
+                                                <nobr>Loaded price<nobr><br>
+                                                <b>
+                                                    <nobr>$ {{printf "%.2f" .OriginalPrice}}</nobr>
+                                                </b>
                                             </td>
                                         {{end}}
                                         <td width=100%>
