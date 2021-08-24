@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	MaxUploadEntries = 100
+	MaxUploadEntries = 150
 
 	TooManyEntriesMessage = "Note that this tool supports a maximum of 100 entries at a time"
 )
