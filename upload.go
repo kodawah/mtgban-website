@@ -321,14 +321,24 @@ func loadOldXls(reader io.ReadSeeker) ([]UploadEntry, error) {
 		return nil, err
 	}
 
-	firstSheet := f.GetSheet(0)
-	if firstSheet == nil || firstSheet.MaxRow == 0 {
+	// Search for the possible main sheet
+	sheetIndex := 0
+	for i := 0; i < f.NumSheets(); i++ {
+		sheet := f.GetSheet(i)
+		if sheet != nil && strings.Contains(strings.ToLower(sheet.Name), "mtgban") {
+			sheetIndex = i
+			break
+		}
+	}
+
+	sheet := f.GetSheet(sheetIndex)
+	if sheet == nil || sheet.MaxRow == 0 {
 		return nil, errors.New("empty xls file")
 	}
 
-	record := make([]string, firstSheet.Row(0).LastCol())
+	record := make([]string, sheet.Row(0).LastCol())
 	for i := range record {
-		record[i] = firstSheet.Row(0).Col(i)
+		record[i] = sheet.Row(0).Col(i)
 	}
 
 	indexMap, err := parseHeader(record)
@@ -341,9 +351,9 @@ func loadOldXls(reader io.ReadSeeker) ([]UploadEntry, error) {
 	var uploadEntries []UploadEntry
 	for {
 		i++
-		if i > MaxUploadEntries || i > int(firstSheet.MaxRow) {
+		if i > MaxUploadEntries || i > int(sheet.MaxRow) {
 			break
-		} else if len(record) != firstSheet.Row(i).LastCol() {
+		} else if len(record) != sheet.Row(i).LastCol() {
 			var res UploadEntry
 			res.MismatchError = errors.New("wrong number of fields")
 			uploadEntries = append(uploadEntries, res)
@@ -351,7 +361,7 @@ func loadOldXls(reader io.ReadSeeker) ([]UploadEntry, error) {
 		}
 
 		for j := range record {
-			record[j] = firstSheet.Row(i).Col(j)
+			record[j] = sheet.Row(i).Col(j)
 		}
 
 		res := parseRow(indexMap, record)
@@ -381,8 +391,17 @@ func loadXlsx(reader io.Reader) ([]UploadEntry, error) {
 		return nil, errors.New("empty xlsx file")
 	}
 
+	// Search for the possible main sheet
+	sheetIndex := 0
+	for i, sheet := range sheets {
+		if strings.Contains(strings.ToLower(sheet), "mtgban") {
+			sheetIndex = i
+			break
+		}
+	}
+
 	// Get all the rows in the Sheet1.
-	rows, err := f.GetRows(sheets[0])
+	rows, err := f.GetRows(sheets[sheetIndex])
 	if err != nil {
 		return nil, err
 	}
