@@ -570,6 +570,8 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 		fallthrough
 	case "Test Role":
 		v.Set("Arbit", "true")
+		fallthrough
+	case "Beta User":
 		v.Set("Upload", "true")
 		fallthrough
 	case "Legacy":
