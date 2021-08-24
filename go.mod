@@ -18,5 +18,6 @@ require (
 	golang.org/x/oauth2 v0.0.0-20210218202405-ba52d332ba99
 	golang.org/x/sys v0.0.0-20210315160823-c6e025ad8005
 	golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e
+	gopkg.in/Iwark/spreadsheet.v2 v2.0.0-20191122095212-08231195c43b
 	gopkg.in/robfig/cron.v2 v2.0.0-20150107220207-be2e0b0deed5
 )

@@ -7,12 +7,16 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
+	"path"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/360EntSecGroup-Skylar/excelize/v2"
 	"github.com/extrame/xls"
+	"gopkg.in/Iwark/spreadsheet.v2"
+
 	"github.com/kodabb/go-mtgban/mtgmatcher"
 )
 
@@ -86,6 +90,9 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		pageVars.EnabledVendors = strings.Split(enabledVendors, "|")
 	}
 
+	cachedGdocURL := readCookie(r, "gdocURL")
+	pageVars.RemoteLinkURL = cachedGdocURL
+
 	// Filter out any unselected store from the full list
 	stores := r.Form["stores"]
 	if blMode {
@@ -102,15 +109,35 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// FormFile returns the first file for the given key `myFile`
+	// Load spreadsheet cloud url if present
+	gdocURL := r.FormValue("gdocURL")
+
+	// FormFile returns the first file for the given key `cardListFile`
 	// it also returns the FileHeader so we can get the Filename,
 	// the Header and the size of the file
 	file, handler, err := r.FormFile("cardListFile")
-	if err != nil {
+	if err != nil && gdocURL == "" {
 		render(w, "upload.html", pageVars)
 		return
+	} else if err == nil {
+		defer file.Close()
 	}
-	defer file.Close()
+
+	if gdocURL != "" {
+		log.Printf("Loading spreadsheet: %+v", gdocURL)
+
+		// Reset the cookie for this preference
+		if cachedGdocURL != gdocURL {
+			setCookie(w, r, "gdocURL", gdocURL)
+			pageVars.RemoteLinkURL = gdocURL
+		}
+	} else {
+		log.Printf("Uploaded File: %+v", handler.Filename)
+		log.Printf("File Size: %+v bytes", handler.Size)
+		log.Printf("MIME Header: %+v", handler.Header)
+	}
+	log.Printf("Buylist mode: %+v", blMode)
+	log.Printf("Enabled stores: %+v", enabledStores)
 
 	// Save user preferred stores in cookies and make sure the page is updated with those
 	if blMode {
@@ -121,17 +148,13 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		pageVars.EnabledSellers = enabledStores
 	}
 
-	log.Printf("Buylist mode: %+v", blMode)
-	log.Printf("Enabled stores: %+v", enabledStores)
-	log.Printf("Uploaded File: %+v", handler.Filename)
-	log.Printf("File Size: %+v bytes", handler.Size)
-	log.Printf("MIME Header: %+v", handler.Header)
-
 	start := time.Now()
 
 	// Load data
 	var uploadedData []UploadEntry
-	if strings.HasSuffix(handler.Filename, ".xls") {
+	if gdocURL != "" {
+		uploadedData, err = loadSpreadsheet(gdocURL)
+	} else if strings.HasSuffix(handler.Filename, ".xls") {
 		uploadedData, err = loadOldXls(file)
 	} else if strings.HasSuffix(handler.Filename, ".xlsx") {
 		uploadedData, err = loadXlsx(file)
@@ -169,7 +192,11 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	pageVars.IndexKeys = indexKeys
 
 	pageVars.Metadata = map[string]GenericCard{}
-	pageVars.SearchQuery = handler.Filename
+	if gdocURL != "" {
+		pageVars.SearchQuery = gdocURL
+	} else {
+		pageVars.SearchQuery = handler.Filename
+	}
 	pageVars.ScraperKeys = enabledStores
 	pageVars.CompactEntries = results
 	pageVars.UploadEntries = uploadedData
@@ -212,7 +239,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	if blMode {
 		msgMode = "buylist"
 	}
-	msg := fmt.Sprintf("%s uploaded %d %s entries from %s, took %v", user, len(cardIds), msgMode, handler.Filename, time.Since(start))
+	msg := fmt.Sprintf("%s uploaded %d %s entries from %s, took %v", user, len(cardIds), msgMode, pageVars.SearchQuery, time.Since(start))
 	Notify("upload", msg)
 	LogPages["Upload"].Println(msg)
 	if DevMode {
@@ -313,6 +340,81 @@ func parseRow(indexMap map[string]int, record []string) UploadEntry {
 	res.CardId, res.MismatchError = mtgmatcher.Match(&res.Card)
 
 	return res
+}
+
+func loadSpreadsheet(link string) ([]UploadEntry, error) {
+	u, err := url.Parse(link)
+	if err != nil {
+		return nil, err
+	}
+
+	service := spreadsheet.NewServiceWithClient(GoogleDocsClient)
+
+	hash := path.Base(strings.TrimSuffix(u.Path, "/edit"))
+	spreadsheet, err := service.FetchSpreadsheet(hash)
+	if err != nil {
+		return nil, err
+	}
+
+	sheetIndex := 0
+	for i := 0; i < len(spreadsheet.Sheets); i++ {
+		if strings.Contains(strings.ToLower(spreadsheet.Sheets[i].Properties.Title), "mtgban") {
+			sheetIndex = i
+			break
+		}
+	}
+
+	sheet, err := spreadsheet.SheetByIndex(uint(sheetIndex))
+	if err != nil {
+		return nil, err
+	}
+
+	if len(sheet.Rows) == 0 {
+		return nil, errors.New("empty xls file")
+	}
+
+	record := make([]string, len(sheet.Rows[0]))
+	for i := range record {
+		record[i] = sheet.Rows[0][i].Value
+	}
+
+	indexMap, err := parseHeader(record)
+	if err != nil {
+		return nil, err
+	}
+
+	foundHashes := map[string]bool{}
+	var i int
+	var uploadEntries []UploadEntry
+	for {
+		i++
+		if i > MaxUploadEntries || i > len(sheet.Rows) {
+			break
+		} else if len(record) != len(sheet.Rows[i]) {
+			var res UploadEntry
+			res.MismatchError = errors.New("wrong number of fields")
+			uploadEntries = append(uploadEntries, res)
+			continue
+		}
+
+		for j := range record {
+			record[j] = sheet.Rows[i][j].Value
+		}
+
+		res := parseRow(indexMap, record)
+
+		// Skip repeated entries
+		if foundHashes[res.CardId] {
+			continue
+		}
+		if res.MismatchError == nil {
+			foundHashes[res.CardId] = true
+		}
+
+		uploadEntries = append(uploadEntries, res)
+	}
+
+	return uploadEntries, nil
 }
 
 func loadOldXls(reader io.ReadSeeker) ([]UploadEntry, error) {

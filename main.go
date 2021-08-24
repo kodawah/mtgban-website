@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
@@ -19,6 +21,8 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/leemcloughlin/logfile"
+	"golang.org/x/oauth2/google"
+	"gopkg.in/Iwark/spreadsheet.v2"
 	cron "gopkg.in/robfig/cron.v2"
 
 	"github.com/kodabb/go-mtgban/mtgban"
@@ -134,6 +138,7 @@ type PageVars struct {
 	EnabledSellers []string
 	EnabledVendors []string
 	CanBuylist     bool
+	RemoteLinkURL  string
 }
 
 type NavElem struct {
@@ -299,7 +304,8 @@ var Config struct {
 		Secret map[string]string `json:"secret"`
 		Emails map[string]string `json:"emails"`
 	} `json:"patreon"`
-	ApiUserSecrets map[string]string `json:"api_user_secrets"`
+	ApiUserSecrets    map[string]string `json:"api_user_secrets"`
+	GoogleCredentials string            `json:"google_credentials"`
 }
 
 var DevMode bool
@@ -317,6 +323,8 @@ var SealedEditionsList map[string][]EditionEntry
 var Newspaper3dayDB *sql.DB
 var Newspaper1dayDB *sql.DB
 var ExploreDB *sql.DB
+
+var GoogleDocsClient *http.Client
 
 func Favicon(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "img/misc/favicon.ico")
@@ -447,6 +455,20 @@ func openDBs() (err error) {
 	return nil
 }
 
+func loadGoogleCredentials(credentials string) (*http.Client, error) {
+	data, err := ioutil.ReadFile(credentials)
+	if err != nil {
+		return nil, err
+	}
+
+	conf, err := google.JWTConfigFromJSON(data, spreadsheet.Scope)
+	if err != nil {
+		return nil, err
+	}
+
+	return conf.Client(context.Background()), nil
+}
+
 const DefaultConfigPath = "config.json"
 
 func main() {
@@ -476,6 +498,15 @@ func main() {
 		log.Fatalln(err)
 	}
 	LogPages = map[string]*log.Logger{}
+
+	GoogleDocsClient, err = loadGoogleCredentials(Config.GoogleCredentials)
+	if err != nil {
+		if DevMode {
+			log.Println("Error creating a Google client:", err)
+		} else {
+			log.Fatalln(err)
+		}
+	}
 
 	err = openDBs()
 	if err != nil {

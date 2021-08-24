@@ -48,11 +48,22 @@
                     <br>
                     <select name="stores" id="stores" multiple></select>
                     <br>
-                    <input type="file" id="file" name="cardListFile" accept=".csv,text/csv,.xls,application/vnd.ms-excel,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none;" onchange="pressed()"><br>
+                    <input type="file" id="file" name="cardListFile" accept=".csv,text/csv,.xls,application/vnd.ms-excel,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none;" onchange="pressed()">
+                    <input type="hidden" id="gdocURL" name="gdocURL" value="{{.RemoteLinkURL}}">
+                    <br>
                     <a class="btn default">
-                        <label for="file" id="fileLabel">Select file</label><br>
-                    </a><br>
-                    <input type="submit" id="submit" value="&nbsp;&nbsp;Upload&nbsp;&nbsp;" disabled>
+                        <label for="file" id="fileLabel">Select local csv/xls</label>
+                    </a>
+                    or
+                    <a class="btn default" href="javascript:askForURL()" id="urlLabel" title="{{.RemoteLinkURL}}">
+                        {{if .RemoteLinkURL}}
+                            Cloud URL loaded
+                        {{else}}
+                            Load spreadsheet
+                        {{end}}
+                    </a>
+                    <br><br>
+                    <input type="submit" id="submit" value="&nbsp;&nbsp;Upload&nbsp;&nbsp;" {{if not .RemoteLinkURL}}disabled{{end}}>
                 </form>
             </center>
         </div>
@@ -80,8 +91,31 @@
                 if (label.value != "") {
                     var theSplit = label.value.split('\\');
                     fileLabel.innerHTML = theSplit[theSplit.length-1];
+
+                    var input = document.getElementById('gdocURL');
+                    input.value = "";
+
+                    var url = document.getElementById('urlLabel');
+                    url.innerHTML = "Select spreadsheet";
+
                     var btn = document.getElementById('submit');
                     btn.disabled = false;
+               }
+            };
+            window.askForURL = function(){
+                let url = prompt("Please enter the URL for your public Google spreadsheet", "{{.RemoteLinkURL}}");
+                if (url != null && url.startsWith("https://docs.google.com/spreadsheets/")) {
+                    urlLabel.innerHTML = "Cloud URL loaded"
+                    urlLabel.title = url
+                    fileLabel.innerHTML = "Select local csv/xls";
+
+                    var input = document.getElementById('gdocURL');
+                    input.value = url;
+
+                    var btn = document.getElementById('submit');
+                    btn.disabled = false;
+                } else if (url != null && url != "") {
+                    alert("Invalid URL");
                 }
             };
 
@@ -105,8 +139,10 @@
                 <br>
                 <ul class="indent">
                     <li>Upload a file and let the <i>Magic</i> begin!</li>
-                    <li>This tool can read data from a <b>CSV</b> file or from an <b>Excel</b> file.</li>
+                    <li>This tool can read data from <b>CSV</b>, <b>Excel</b> files, or from a remote <b>Google Spreadsheets</b>.</li>
                     <li>The Excel sheet can be in any location as long as it contains the <pre>mtgban</pre> indication. Otherwise the system will use the first sheet found.</li>
+                    <li>The Google Spreadsheet needs to be publicly accessible from the internet, and there needs to be a sheet named with <pre>mtgban</pre>, or the first sheet found will be used.</li>
+                    <li>The URL used will be saved as a preference and you'll be able to use it later.</li>
                     <li>The result will be a page containing Retail or Buylist prices from all the available stores on BAN for each recognised card entry.</li>
                     <li>Note that buylist prices are available for our <b>Legacy</b> patrons only.</li>
                     <li>You can filter out unwanted store prices by selecting/deselecting them from the list, pressing CTRL or CMD when clicking on them.</li>
