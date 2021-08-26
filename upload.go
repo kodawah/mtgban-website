@@ -31,7 +31,9 @@ type UploadEntry struct {
 	CardId        string
 	MismatchError error
 	OriginalPrice float64
-	Quantity      int
+
+	HasQuantity bool
+	Quantity    int
 }
 
 func Upload(w http.ResponseWriter, r *http.Request) {
@@ -203,16 +205,27 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	pageVars.UploadEntries = uploadedData
 	pageVars.TotalEntries = map[string]float64{}
 
-	for _, stores := range results {
-		for shorthand, price := range stores {
-			if price == nil {
+	for i := range uploadedData {
+		cardId := uploadedData[i].CardId
+		for shorthand, banPrice := range results[cardId] {
+			// Skip empty results
+			if banPrice == nil {
 				continue
 			}
-			if price.Regular != 0 {
-				pageVars.TotalEntries[shorthand] += price.Regular
-			} else {
-				pageVars.TotalEntries[shorthand] += price.Foil
+
+			// Grab the correct Price
+			price := banPrice.Regular
+			if price == 0 {
+				price = banPrice.Foil
 			}
+
+			// Adjust for quantity
+			if uploadedData[i].HasQuantity {
+				price *= float64(uploadedData[i].Quantity)
+			}
+
+			// Add to totals
+			pageVars.TotalEntries[shorthand] += price
 		}
 	}
 
@@ -337,13 +350,12 @@ func parseRow(indexMap map[string]int, record []string) UploadEntry {
 	var res UploadEntry
 	var found bool
 
-	// Assume there is at least one entry, then check if any is actually set
-	res.Quantity = 1
 	_, found = indexMap["quantity"]
 	if found {
 		qty := record[indexMap["quantity"]]
 		num, err := strconv.Atoi(qty)
 		if err == nil {
+			res.HasQuantity = true
 			res.Quantity = num
 		}
 	}
@@ -456,7 +468,7 @@ func loadSpreadsheet(link string) ([]UploadEntry, error) {
 		res := parseRow(indexMap, record)
 
 		// Skip cards with no stock
-		if res.Quantity == 0 {
+		if res.HasQuantity && res.Quantity == 0 {
 			continue
 		}
 		// Skip repeated entries
@@ -590,7 +602,7 @@ func loadXlsx(reader io.Reader) ([]UploadEntry, error) {
 		res := parseRow(indexMap, rows[i])
 
 		// Skip cards with no stock
-		if res.Quantity == 0 {
+		if res.HasQuantity && res.Quantity == 0 {
 			continue
 		}
 		// Skip repeated entries
@@ -665,7 +677,7 @@ func loadCsv(reader io.ReadSeeker, comma rune) ([]UploadEntry, error) {
 		res := parseRow(indexMap, record)
 
 		// Skip cards with no stock
-		if res.Quantity == 0 {
+		if res.HasQuantity && res.Quantity == 0 {
 			continue
 		}
 		// Skip repeated entries

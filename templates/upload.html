@@ -157,6 +157,7 @@
                         <li>Note that buylist prices are available for our <b>Legacy</b> patrons only.</li>
                         <li>You can filter out unwanted store prices by selecting/deselecting them from the list, pressing CTRL or CMD when clicking on them.</li>
                         <li>Card recognition works best when data strictly follows <b>Scryfall</b> notation. If it fails, try finding your card there and tweaking your entry accordingly.</li>
+                        <li>A final per-store total row will be added at the end, taking into account the quantity information if present.</li>
                     </ul>
                     <li>If anything doesn't work, post your file on Discord and we'll take a look.</li>
                 </ul>
@@ -212,14 +213,18 @@
                                                 <h6>{{$card.Title}}</h6>
                                             </a>
                                         </td>
+                                        <td width=100%>
                                         {{if .OriginalPrice}}
-                                            <td width=100%>
-                                                <nobr>Loaded price<nobr><br>
-                                                <b>
-                                                    <nobr>$ {{printf "%.2f" .OriginalPrice}}</nobr>
-                                                </b>
-                                            </td>
+                                            <h6>
+                                                <nobr>Price: $ {{printf "%.2f" .OriginalPrice}}</nobr>
+                                            </h6>
                                         {{end}}
+                                        {{if .HasQuantity}}
+                                             <h6>
+                                                 <nobr>Quantity: {{.Quantity}}</nobr>
+                                            </h6>
+                                        {{end}}
+                                        </td>
                                         <td width=100%>
                                             <span class="emoji">
                                                 <a href="/search?chart={{.CardId}}" title="See historical data" target="_blank">📊</a>
