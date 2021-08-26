@@ -288,6 +288,11 @@ func parseHeader(first []string) (map[string]int, error) {
 			if !found {
 				indexMap["printing"] = i
 			}
+		case strings.Contains(field, "sku"):
+			_, found := indexMap["sku"]
+			if !found {
+				indexMap["sku"] = i
+			}
 		case strings.Contains(field, "price"):
 			_, found := indexMap["price"]
 			if !found {
@@ -325,6 +330,11 @@ func parseRow(indexMap map[string]int, record []string) UploadEntry {
 		res.Card.Variation = record[indexMap["variant"]]
 	}
 
+	var sku string
+	_, found = indexMap["sku"]
+	if found {
+		sku = strings.ToLower(record[indexMap["sku"]])
+	}
 	var printing string
 	_, found = indexMap["printing"]
 	if found {
@@ -332,7 +342,8 @@ func parseRow(indexMap map[string]int, record []string) UploadEntry {
 	}
 	if printing == "y" || printing == "yes" || printing == "true" ||
 		strings.Contains(printing, "foil") ||
-		strings.Contains(res.Card.Variation, "foil") {
+		strings.Contains(res.Card.Variation, "foil") ||
+		strings.Contains(sku, "-f-") || strings.Contains(sku, "-fo-") {
 		res.Card.Foil = true
 	}
 
