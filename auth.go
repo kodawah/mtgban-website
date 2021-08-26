@@ -452,7 +452,7 @@ func enforceSigning(next http.Handler) http.Handler {
 
 		pageVars := genPageNav("Error", sig)
 
-		if !UserRateLimiter.allow(GetParamFromSig(sig, "UserEmail")) {
+		if !UserRateLimiter.allow(GetParamFromSig(sig, "UserEmail")) && r.URL.Path != "/admin" {
 			pageVars.Title = "Too Many Requests"
 			pageVars.ErrorMessage = ErrMsgUseAPI
 
