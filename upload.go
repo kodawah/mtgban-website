@@ -31,6 +31,7 @@ type UploadEntry struct {
 	CardId        string
 	MismatchError error
 	OriginalPrice float64
+	Quantity      int
 }
 
 func Upload(w http.ResponseWriter, r *http.Request) {
@@ -261,8 +262,6 @@ func parseHeader(first []string) (map[string]int, error) {
 	for i, field := range first {
 		field = strings.ToLower(field)
 		switch {
-		case strings.Contains(field, "stock"):
-			continue
 		case field == "id" || (strings.Contains(field, "id") && (strings.Contains(field, "tcg") || strings.Contains(field, "scyfall"))):
 			_, found := indexMap["id"]
 			if !found {
@@ -303,6 +302,11 @@ func parseHeader(first []string) (map[string]int, error) {
 			if !found {
 				indexMap["price"] = i
 			}
+		case (strings.Contains(field, "quantity") || strings.Contains(field, "qty") || strings.Contains(field, "stock") || strings.Contains(field, "count")) && !strings.HasPrefix(field, "add") && !strings.HasPrefix(field, "set"):
+			_, found := indexMap["quantity"]
+			if !found {
+				indexMap["quantity"] = i
+			}
 		}
 	}
 
@@ -321,8 +325,20 @@ func parseHeader(first []string) (map[string]int, error) {
 
 func parseRow(indexMap map[string]int, record []string) UploadEntry {
 	var res UploadEntry
+	var found bool
 
-	_, found := indexMap["id"]
+	// Assume there is at least one entry, then check if any is actually set
+	res.Quantity = 1
+	_, found = indexMap["quantity"]
+	if found {
+		qty := record[indexMap["quantity"]]
+		num, err := strconv.Atoi(qty)
+		if err == nil {
+			res.Quantity = num
+		}
+	}
+
+	_, found = indexMap["id"]
 	if found {
 		res.Card.Id = record[indexMap["id"]]
 	}
@@ -429,6 +445,10 @@ func loadSpreadsheet(link string) ([]UploadEntry, error) {
 
 		res := parseRow(indexMap, record)
 
+		// Skip cards with no stock
+		if res.Quantity == 0 {
+			continue
+		}
 		// Skip repeated entries
 		if foundHashes[res.CardId] {
 			continue
@@ -559,6 +579,10 @@ func loadXlsx(reader io.Reader) ([]UploadEntry, error) {
 
 		res := parseRow(indexMap, rows[i])
 
+		// Skip cards with no stock
+		if res.Quantity == 0 {
+			continue
+		}
 		// Skip repeated entries
 		if foundHashes[res.CardId] {
 			continue
@@ -627,6 +651,10 @@ func loadCsv(reader io.ReadSeeker, comma rune) ([]UploadEntry, error) {
 
 		res := parseRow(indexMap, record)
 
+		// Skip cards with no stock
+		if res.Quantity == 0 {
+			continue
+		}
 		// Skip repeated entries
 		if foundHashes[res.CardId] {
 			continue
