@@ -272,6 +272,11 @@ func parseHeader(first []string) (map[string]int, error) {
 			if !found {
 				indexMap["cardName"] = i
 			}
+		case strings.Contains(field, "title"):
+			_, found := indexMap["title"]
+			if !found {
+				indexMap["title"] = i
+			}
 		case strings.Contains(field, "edition") || strings.Contains(field, "set"):
 			_, found := indexMap["edition"]
 			if !found {
@@ -314,6 +319,11 @@ func parseHeader(first []string) (map[string]int, error) {
 	_, found := indexMap["cardName"]
 	if !found {
 		indexMap["cardName"] = 0
+		// Used by some formats that do not set a card name
+		i, found := indexMap["title"]
+		if found {
+			indexMap["cardName"] = i
+		}
 	}
 	_, found = indexMap["edition"]
 	if !found {
