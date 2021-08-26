@@ -147,9 +147,10 @@
                             <li>The URL used will be saved as a preference and you'll be able to use it later.</li>
                         </ul>
                         <li>Data may be in any format, as long as the file contains a comma or tab separated header in the first row, with sensible indication on what the column contains (eg. <i>card name</i> and <i>edition</i> as a minimum).</li>
-                        <li>For this reason, the most popular CSV files are supported out of the box, such as from <b>TCG</b>, <b>Deckbox</b>, or <b>Cardsphere</b>.</li>
+                        <li>For this reason, the most popular CSV files are supported out of the box, <b>TCG</b>, <b>Deckbox</b>, <b>BinderPOS</b>, and <b>Cardsphere</b> among others.</li>
                         <li>The file cannot be larger than 10MB, and it may contain up to 150 entries.</li>
-                        <li>Multiple conditions and quantity fields are currently ignored.</li>
+                        <li>The conditions fields is used only to determine the foiling status.</li>
+                        <li>Rows with a Quantity field set to 0 are skipped.</li>
                     </ul>
                     <li>The result will be a page containing Retail or Buylist prices from all the available stores on BAN for each recognised card entry.</li>
                     <ul class="indent">
