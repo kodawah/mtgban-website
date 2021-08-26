@@ -229,14 +229,14 @@
                                 </table>
                             </td>
                             <td rowspan=2>
-                                {{if not .MismatchError}}
+                                {{$cardId := .CardId}}
+                                {{$indexEntries := (index $.IndexEntries $cardId)}}
+                                {{if $indexEntries}}
                                     <b>Index overview</b>
                                     <br>
-                                    {{$cardId := .CardId}}
                                     {{range $.IndexKeys}}
-                                        {{$indexEntry := (index $.IndexEntries $cardId)}}
-                                        {{if $indexEntry}}
-                                            {{$entry := (index $indexEntry .)}}
+                                        {{if $indexEntries}}
+                                            {{$entry := (index $indexEntries .)}}
                                             <nobr>
                                                 <a class="btn normal" {{if $entry}}href="https://mtgban.com/go/{{.}}/{{$cardId}}"{{end}} target="_blank">
                                                     {{.}}:
