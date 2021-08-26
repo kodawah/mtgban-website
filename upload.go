@@ -301,7 +301,7 @@ func parseHeader(first []string) (map[string]int, error) {
 	if !found {
 		indexMap["cardName"] = 0
 	}
-	_, found = indexMap["cardName"]
+	_, found = indexMap["edition"]
 	if !found {
 		indexMap["edition"] = 1
 	}
