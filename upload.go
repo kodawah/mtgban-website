@@ -283,7 +283,7 @@ func parseHeader(first []string) (map[string]int, error) {
 			if !found {
 				indexMap["variant"] = i
 			}
-		case strings.Contains(field, "foil") || strings.Contains(field, "printing") || field == "f/nf" || field == "nf/f":
+		case strings.Contains(field, "foil") || strings.Contains(field, "printing") || strings.Contains(field, "finish") || field == "f/nf" || field == "nf/f":
 			_, found := indexMap["printing"]
 			if !found {
 				indexMap["printing"] = i
