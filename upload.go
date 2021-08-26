@@ -325,7 +325,11 @@ func parseRow(indexMap map[string]int, record []string) UploadEntry {
 		res.Card.Variation = record[indexMap["variant"]]
 	}
 
-	printing := strings.ToLower(record[indexMap["printing"]])
+	var printing string
+	_, found = indexMap["printing"]
+	if found {
+		printing = strings.ToLower(record[indexMap["printing"]])
+	}
 	if printing == "y" || printing == "yes" || printing == "true" ||
 		mtgmatcher.Contains(printing, "foil") ||
 		mtgmatcher.Contains(res.Card.Variation, "foil") {
