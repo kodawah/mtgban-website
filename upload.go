@@ -21,7 +21,8 @@ import (
 )
 
 const (
-	MaxUploadEntries = 150
+	MaxUploadEntries  = 150
+	MaxUploadFileSize = 5 << 20
 
 	TooManyEntriesMessage = "Note that this tool supports a maximum of 100 entries at a time"
 )
@@ -41,8 +42,8 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	pageVars := genPageNav("Upload", sig)
 
-	// Max file size is 10 MB
-	r.ParseMultipartForm(10 << 20)
+	// Maximum form size
+	r.ParseMultipartForm(MaxUploadFileSize)
 
 	// Check cookies to set preferences
 	blMode := readSetFlag(w, r, "mode", "uploadMode")
