@@ -24,7 +24,7 @@ const (
 	MaxUploadEntries  = 150
 	MaxUploadFileSize = 5 << 20
 
-	TooManyEntriesMessage = "Note that this tool supports a maximum of 100 entries at a time"
+	TooManyEntriesMessage = "Note: you reached the maximum number of entries supported by this tool"
 )
 
 type UploadEntry struct {
