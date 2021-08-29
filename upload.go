@@ -453,7 +453,7 @@ func loadSpreadsheet(link string) ([]UploadEntry, error) {
 	var uploadEntries []UploadEntry
 	for {
 		i++
-		if i > MaxUploadEntries || i > len(sheet.Rows) {
+		if i > MaxUploadEntries || i >= len(sheet.Rows) {
 			break
 		} else if len(record) != len(sheet.Rows[i]) {
 			var res UploadEntry
@@ -522,7 +522,7 @@ func loadOldXls(reader io.ReadSeeker) ([]UploadEntry, error) {
 	var uploadEntries []UploadEntry
 	for {
 		i++
-		if i > MaxUploadEntries || i > int(sheet.MaxRow) {
+		if i > MaxUploadEntries || i >= int(sheet.MaxRow) {
 			break
 		} else if len(record) != sheet.Row(i).LastCol() {
 			var res UploadEntry
