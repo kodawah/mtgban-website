@@ -392,7 +392,7 @@ func parseRow(indexMap map[string]int, record []string) UploadEntry {
 	if printing == "y" || printing == "yes" || printing == "true" ||
 		strings.Contains(printing, "foil") ||
 		strings.Contains(conditions, "foil") ||
-		strings.Contains(res.Card.Variation, "foil") ||
+		strings.Contains(strings.ToLower(res.Card.Variation), "foil") ||
 		strings.Contains(sku, "-f-") || strings.Contains(sku, "-fo-") {
 		res.Card.Foil = true
 	}
