@@ -344,6 +344,7 @@ func parseHeader(first []string) (map[string]int, error) {
 		indexMap["edition"] = 1
 	}
 
+	log.Println("Header map:", indexMap)
 	return indexMap, nil
 }
 
