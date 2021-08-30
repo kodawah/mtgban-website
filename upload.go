@@ -223,6 +223,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			// Adjust for quantity
 			if uploadedData[i].HasQuantity {
 				price *= float64(uploadedData[i].Quantity)
+				pageVars.TotalQuantity += uploadedData[i].Quantity
 			}
 
 			// Add to totals

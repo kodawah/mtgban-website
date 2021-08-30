@@ -302,9 +302,11 @@
                     <tr class="no-hover" style="background-color:#e0f0ff;">
                         <td>
                             <center>
-                                <br>
-                                    <h3>Totals</h3>
-                                <br>
+                                <h3>Totals</h3>
+                                <h6><br>Matches: {{len .CompactEntries}}/{{len .UploadEntries}}</h6>
+                                {{if ne .TotalQuantity 0}}
+                                    <h6>Count: {{.TotalQuantity}}</h6>
+                                {{end}}
                             </center>
                         </td>
                         <td>

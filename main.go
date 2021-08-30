@@ -139,6 +139,7 @@ type PageVars struct {
 	EnabledVendors []string
 	CanBuylist     bool
 	RemoteLinkURL  string
+	TotalQuantity  int
 }
 
 type NavElem struct {
