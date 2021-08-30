@@ -740,8 +740,9 @@ func longestName(results []SearchEntry) (out int) {
 
 // Retrieve cards from Sellers using the very first result
 func searchSellersFirstResult(query string, options map[string]string, index bool) (results []SearchEntry, cardId string) {
-	// Skip any store based outside of the US
-	skipped := append(Config.SearchRetailBlockList, "TCG Direct")
+	// Skip any tcg direct pricing, they usually are too high anyway
+	skipped := append(Config.SearchRetailBlockList, TCG_DIRECT, TCG_DIRECT_LOW)
+	// Skip any store based outside of the US, if it's not an index
 	if !index {
 		for _, seller := range Sellers {
 			if seller != nil && seller.Info().CountryFlag != "" {
