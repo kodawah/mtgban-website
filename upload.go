@@ -352,6 +352,18 @@ func parseRow(indexMap map[string]int, record []string, foundHashes map[string]b
 	var res UploadEntry
 	var found bool
 
+	// Skip empty lines
+	hasContent := false
+	for _, field := range record {
+		if field != "" {
+			hasContent = true
+			break
+		}
+	}
+	if !hasContent {
+		return res, errors.New("empty line")
+	}
+
 	// Load quantity, and skip it if it's present and zero
 	_, found = indexMap["quantity"]
 	if found {
