@@ -348,10 +348,11 @@ func parseHeader(first []string) (map[string]int, error) {
 	return indexMap, nil
 }
 
-func parseRow(indexMap map[string]int, record []string) UploadEntry {
+func parseRow(indexMap map[string]int, record []string, foundHashes map[string]bool) (UploadEntry, error) {
 	var res UploadEntry
 	var found bool
 
+	// Load quantity, and skip it if it's present and zero
 	_, found = indexMap["quantity"]
 	if found {
 		qty := record[indexMap["quantity"]]
@@ -360,6 +361,9 @@ func parseRow(indexMap map[string]int, record []string) UploadEntry {
 			res.HasQuantity = true
 			res.Quantity = num
 		}
+	}
+	if res.HasQuantity && res.Quantity == 0 {
+		return res, errors.New("no stock")
 	}
 
 	_, found = indexMap["id"]
@@ -405,7 +409,14 @@ func parseRow(indexMap map[string]int, record []string) UploadEntry {
 
 	res.CardId, res.MismatchError = mtgmatcher.Match(&res.Card)
 
-	return res
+	if foundHashes[res.CardId] {
+		return res, errors.New("repeated")
+	}
+	if res.MismatchError == nil {
+		foundHashes[res.CardId] = true
+	}
+
+	return res, nil
 }
 
 func loadSpreadsheet(link string) ([]UploadEntry, error) {
@@ -467,18 +478,9 @@ func loadSpreadsheet(link string) ([]UploadEntry, error) {
 			record[j] = sheet.Rows[i][j].Value
 		}
 
-		res := parseRow(indexMap, record)
-
-		// Skip cards with no stock
-		if res.HasQuantity && res.Quantity == 0 {
+		res, err := parseRow(indexMap, record, foundHashes)
+		if err != nil {
 			continue
-		}
-		// Skip repeated entries
-		if foundHashes[res.CardId] {
-			continue
-		}
-		if res.MismatchError == nil {
-			foundHashes[res.CardId] = true
 		}
 
 		uploadEntries = append(uploadEntries, res)
@@ -536,14 +538,9 @@ func loadOldXls(reader io.ReadSeeker) ([]UploadEntry, error) {
 			record[j] = sheet.Row(i).Col(j)
 		}
 
-		res := parseRow(indexMap, record)
-
-		// Skip repeated entries
-		if foundHashes[res.CardId] {
+		res, err := parseRow(indexMap, record, foundHashes)
+		if err != nil {
 			continue
-		}
-		if res.MismatchError == nil {
-			foundHashes[res.CardId] = true
 		}
 
 		uploadEntries = append(uploadEntries, res)
@@ -601,18 +598,9 @@ func loadXlsx(reader io.Reader) ([]UploadEntry, error) {
 			continue
 		}
 
-		res := parseRow(indexMap, rows[i])
-
-		// Skip cards with no stock
-		if res.HasQuantity && res.Quantity == 0 {
+		res, err := parseRow(indexMap, rows[i], foundHashes)
+		if err != nil {
 			continue
-		}
-		// Skip repeated entries
-		if foundHashes[res.CardId] {
-			continue
-		}
-		if res.MismatchError == nil {
-			foundHashes[res.CardId] = true
 		}
 
 		uploadEntries = append(uploadEntries, res)
@@ -676,22 +664,14 @@ func loadCsv(reader io.ReadSeeker, comma rune) ([]UploadEntry, error) {
 			continue
 		}
 
-		res := parseRow(indexMap, record)
-
-		// Skip cards with no stock
-		if res.HasQuantity && res.Quantity == 0 {
-			continue
-		}
-		// Skip repeated entries
-		if foundHashes[res.CardId] {
+		res, err := parseRow(indexMap, record, foundHashes)
+		if err != nil {
 			continue
 		}
 
-		// Report any errors to the user or track which hash was found
+		// Tweak the message to the format from csv errors
 		if res.MismatchError != nil {
 			res.MismatchError = fmt.Errorf("record on line %d: %s", i+1, res.MismatchError.Error())
-		} else {
-			foundHashes[res.CardId] = true
 		}
 
 		uploadEntries = append(uploadEntries, res)
