@@ -67,6 +67,13 @@ nearly black #292929
 
     --almostblue: #879ced;
 
+    --yellow: yellow;
+
+    --mainImage: url("/img/misc/background.png");
+    --darkImage: url("/img/misc/background-dark.png")
+}
+
+.light-theme {
     --normal: var(--black);
     --background: var(--white);
     --tralternatebase: var(--white);
@@ -86,6 +93,34 @@ nearly black #292929
     --awarning: var(--orange);
     --adanger: var(--red);
     --adefault: var(--black);
+
+    --slider: var(--yellow);
+    --backgroundImage: var(--mainImage);
+}
+
+.dark-theme {
+    --normal: var(--darkgrey);
+    --background: var(--lightblack);
+    --tralternatebase: var(--verydarkgrey);
+    --tralternate: var(--grey);
+    --hover: var(--almostgrey);
+    --headingtext: var(--white);
+    --activetext: var(--almostwhite);
+    --navbackground: var(--darkpaleblue);
+    --selectedhover: var(--almostblue);
+    --headerbaground: var(--quasiblack);
+    --normaltext: var(--white);
+    --autocomplete: var(--verywhite);
+
+    --asuccess: var(--green);
+    --anormal: var(--blueish);
+    --ainfo: var(--violet);
+    --awarning: var(--orange);
+    --adanger: var(--red);
+    --adefault: var(--white);
+
+    --slider: var(--navbackground);
+    --backgroundImage: var(--darkImage);
 }
 
 /* reset all margins and padding*/
@@ -304,7 +339,7 @@ a.selected:hover{
 
 .bg{
     height: 480px;
-    background-image: url("/img/misc/background.png");
+    background-image: var(--backgroundImage);
     background-repeat: no-repeat;
     background-color: var(--background);
 }
@@ -553,4 +588,44 @@ td.tiers {
 
 .select-css option {
     font-weight: normal;
+}
+
+.switch {
+    width: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.switch div {
+    position: relative;
+    display: block;
+    background: var(--yellow);
+    width: 18px;
+    border-radius: 50px;
+    padding: 0 0;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+.fa-adjust {
+    transform: rotate(180deg);
+}
+
+.switch input {
+    display: none;
+}
+
+.slider {
+    background-color: var(--slider);
+    transition: 0.4s;
+    border-radius: 34px;
+    height: 12px;
+    width: 12px;
+    display: inline-block;
+    position: relative;
+}
+
+input:checked + .slider {
+    transform: translateX(4px);
 }

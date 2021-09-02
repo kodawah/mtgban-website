@@ -6,8 +6,9 @@
     <link href="//cdn.jsdelivr.net/npm/keyrune@latest/css/keyrune.css" rel="stylesheet" type="text/css" />
     <title>BAN Newspaper - {{.Title}}</title>
 </head>
-<body>
 
+<body class="light-theme">
+<script type="text/javascript" src="../js/themechecker.js"></script>
 <nav>
     <ul>
         <li><a href="https://www.patreon.com/ban_community"><img src="img/misc/patreon.png" width=48></a></li>
@@ -19,7 +20,15 @@
                 </a>
             </li>
         {{end}}
-        <li>Last data refresh: {{.LastUpdate}}</li>
+        <li>
+            <label class="switch">
+                <div>
+                    <input type="checkbox"/>
+                    <span class="slider"></span>
+                </div>
+                <script type="text/javascript" src="../js/nightmode.js"></script>
+            </label>
+        </li>
     </ul>
 </nav>
 

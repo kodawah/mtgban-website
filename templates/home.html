@@ -5,7 +5,9 @@
 <link href='https://fonts.googleapis.com/css?family=Rosario:400' rel='stylesheet' type='text/css'>
 <title>{{.Title}}</title>
 </head>
-<body>
+
+<body class="light-theme">
+<script type="text/javascript" src="../js/themechecker.js"></script>
     <nav>
     <ul>
         <li><a href="https://www.patreon.com/ban_community"><img src="img/misc/patreon.png" width=48></a></li>
@@ -18,6 +20,15 @@
             </li>
         {{end}}
         <li><!--If you're reading this, and would like to help, join our Discord, it's the right place for any talented developer with a passion for mtg!--></li>
+        <li>
+            <label class="switch">
+                <div>
+                    <input type="checkbox"/>
+                    <span class="slider"></span>
+                </div>
+                <script type="text/javascript" src="../js/nightmode.js"></script>
+            </label>
+        </li>
     </ul>
     </nav>
 
