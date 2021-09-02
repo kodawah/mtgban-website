@@ -37,14 +37,14 @@
         {{end}}
     {{else}}
         <h1>Welcome to BAN {{if not (eq .ChartID "")}}Chart{{end}} Search</h1>
-        <div class="indent sticky" style="top:48px; background-color:#f8f8f8; z-index: 3; width: min-content;">
+        <div class="indent sticky" style="top:48px; background-color: var(--background); z-index: 3; width: min-content;">
             <form class="search autocomplete" action="search" autocomplete="off" spellcheck="false" id="searchform">
                 <label style="clear: both; float: left;" for="searchbox">
                     {{if eq .SearchQuery "" }}
-                        Search for a card, or <a href="search?q=random">surprise me</a>
+                        Search for a card, or... <a class="btn info" href="search?q=random">surprise me</a>
                     {{else if not .IsSealed}}
-                        <a href="search?q={{.SearchQuery}} all:true">Show all versions</a>, or
-                        <a href="search?q={{.SearchQuery}}&b={{not .SearchBest}}">
+                        <a class="btn info" href="search?q={{.SearchQuery}} all:true">Show all versions</a> |
+                        <a class="btn info" href="search?q={{.SearchQuery}}&b={{not .SearchBest}}">
                             {{if .SearchBest}}
                                 sort results alphabetically
                             {{else}}
@@ -103,8 +103,8 @@
              </div>
         {{else}}
             <div class="indent sticky" style="top: 120px;">
-                <table style="float: left;">
-                    <tr>
+                <table style="float: left; background-color: var(--background)">
+                    <tr class="no-hover" style="background-color: var(--background)">
                         <td>
                             <img id="cardImage" src="" width="354" height="493"/>
                         </td>
@@ -133,7 +133,7 @@
                         </tr>
                     {{end}}
                     <tr>
-                        <td style="background-color: #f8f8f8;">
+                        <td style="background-color: var(--background);">
                             {{if .HasReserved}}
                                 <h4>
                                     {{if not (eq .ChartID "")}}<center>{{else}}* ={{end}}

@@ -36,6 +36,58 @@
 nearly black #292929
  */
 
+:root {
+    --white: #f8f8f8;
+    --violet: #f2f2ff;
+    --blueish: #e0f0ff;
+
+    --green: green;
+    --blue: #559eff;
+    --dodgerblue: dodgerblue;
+    --orange: orange;
+    --red: red;
+    --black: black;
+
+    --verywhite: #d4d4d4;
+    --lightblack: #222222;
+
+    --paleblue: #96b1cf;
+    --darkpaleblue: #768190;
+
+    --grey: gray;
+    --verydarkgrey: #393939;
+    --darkgrey: #dddddd;
+    --lightgrey: #eaeaea;
+    --almostgrey: #bbbbbb;
+    --quasiblack: #292929;
+
+    --almostwhite: #eeeeee;
+    --bluetext: #17375e;
+    --greytext: #4b5786;
+
+    --almostblue: #879ced;
+
+    --normal: var(--black);
+    --background: var(--white);
+    --tralternatebase: var(--white);
+    --tralternate: var(--violet);
+    --hover: var(--blueish);
+    --headingtext: var(--bluetext);
+    --activetext: var(--greytext);
+    --navbackground: var(--paleblue);
+    --selectedhover: var(--almostblue);
+    --headerbaground: var(--lightgrey);
+    --normaltext: var(--quasiblack);
+    --autocomplete: var(--verywhite);
+
+    --asuccess: var(--green);
+    --anormal: var(--blue);
+    --ainfo: var(--dodgerblue);
+    --awarning: var(--orange);
+    --adanger: var(--red);
+    --adefault: var(--black);
+}
+
 /* reset all margins and padding*/
  * {
     margin: 0;
@@ -44,7 +96,8 @@ nearly black #292929
 }
 
 body {
-    background-color: #f8f8f8;
+    background-color: var(--background);
+    color: var(--normal);
 }
 
 table {
@@ -58,23 +111,23 @@ th, td {
 }
 
 tr:nth-child(even) {
-    background-color: #f2f2ff;
+    background-color: var(--tralternate);
 }
 
 tr:nth-child(odd) {
-    background-color: #f8f8f8;
+    background-color: var(--tralternatebase);
 }
 
 tr:hover {
-    background-color: #e0f0ff;
+    background-color: var(--hover);
 }
 
 tr:nth-child(even).no-hover:hover{
-    background-color: #f2f2ff;
+    background-color: var(--tralternate);
 }
 
 tr:nth-child(odd).no-hover:hover{
-    background-color: #f8f8f8;
+    background-color: var(--background);
 }
 
 th.wrap {
@@ -119,14 +172,14 @@ tr.setValue:hover {
 }
 
 h1 {
-    color: #17375e;
+    color: var(--headingtext);
     margin-left: 20px;
     margin-top: 20px;
     margin-bottom: 10px
 }
 
 p {
-    color:#292929;
+    color: var(--normaltext);
     margin-left: 20px;
     margin-bottom: 20px;
 }
@@ -148,15 +201,15 @@ p {
     text-decoration: underline;
 }
 
-.success {color: green;}
-.normal {color: #559eff;}
-.info {color: dodgerblue;}
-.warning {color: orange;}
-.danger {color: red;}
-.default {color: black;}
+.success {color: var(--asuccess);}
+.normal {color: var(--anormal);}
+.info {color: var(--ainfo);}
+.warning {color: var(--awarning);}
+.danger {color: var(--adanger);}
+.default {color: var(--adefault);}
 
 a {
-    color: dodgerblue;
+    color: var(--ainfo);
     text-decoration: none;
 }
 
@@ -170,7 +223,7 @@ nav ul {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background-color:#96b1cf;
+    background-color: var(--navbackground);
     position: fixed;
     top: 0;
     width: 100%;
@@ -180,7 +233,7 @@ nav ul {
 
 nav li {
     float: left;
-    border-right: 1px solid  #4b5786;
+    border-right: 1px solid var(--greytext);
 }
 
 nav li.optional {
@@ -189,7 +242,7 @@ nav li.optional {
 
 nav li:last-child {
     float: right;
-    color:  #ffffff;
+    color:  var(--activetext);
     text-align: center;
     padding: 14px;
     font-style: italic;
@@ -197,7 +250,7 @@ nav li:last-child {
 
 nav li a {
     display: inline-block;
-    color:  #4b5786;
+    color:  var(--activetext);
     text-align: center;
     padding: 14px 16px;
     text-decoration: none;
@@ -214,7 +267,7 @@ nav li:nth-child(2) a {
 }
 
 nav li a:hover {
-    color: #f8f8f8;
+    color: var(--background);
 }
 
 .index ol {
@@ -229,19 +282,19 @@ nav li a:hover {
 
 
 .active {
-    background-color: #f8f8f8;
-    color: #4b5786;
+    background-color: var(--background);
+    color: var(--activetext);
 }
 a.active:hover{
-    color: #4b5786;
+    color: var(--activetext);
 }
 
 .selected {
-    background-color: #4b5786;
-    color: #f8f8f8;
+    background-color: var(--activetext);
+    color: var(--background);
 }
 a.selected:hover{
-    color: #879ced;
+    color: var(--selectedhover);
 }
 
 #container{width: 900px;}
@@ -253,7 +306,7 @@ a.selected:hover{
     height: 480px;
     background-image: url("/img/misc/background.png");
     background-repeat: no-repeat;
-    background-color: white;
+    background-color: var(--background);
 }
 .mainbody{
     padding-top: 75px;
@@ -264,7 +317,7 @@ a.selected:hover{
 }
 
 .footer {
-    color: #4b5786;
+    color: var(--activetext);
     margin-left: 20px;
 }
 
@@ -327,14 +380,14 @@ th.stickyCategory {
     position: -webkit-sticky;
     position: sticky;
     top: 48px;
-    background-color: #f8f8f8;
+    background-color: var(--background);
 }
 
 th.stickyHeader {
     position: -webkit-sticky;
     position: sticky;
     top: 84px;
-    background-color: #eaeaea;
+    background-color: var(--headerbaground);
     height: 40px;
     z-index: 1;
 }
@@ -343,7 +396,7 @@ th.stickyHeaderTiny {
     position: -webkit-sticky;
     position: sticky;
     top: 72px;
-    background-color: #eaeaea;
+    background-color: var(--headerbaground);
     z-index: 1;
 }
 
@@ -351,12 +404,12 @@ th.stickyHeaderShort {
     position: -webkit-sticky;
     position: sticky;
     top: 48px;
-    background-color: #eaeaea;
+    background-color: var(--headerbaground);
     z-index: 1;
 }
 
 th a {
-    color: black;
+    color: var(--normal);
     text-decoration: none;
 }
 
@@ -378,7 +431,7 @@ th a {
 }
 .autocomplete-items {
     position: absolute;
-    border: 1px solid #d4d4d4;
+    border: 1px solid var(--verywhite);
     border-bottom: none;
     border-top: none;
     z-index: 99;
@@ -396,16 +449,17 @@ th a {
 .autocomplete-items div {
     padding: 10px;
     cursor: pointer;
-    background-color: #fff;
-    border-bottom: 1px solid #d4d4d4;
+    background-color: var(--almostwhite);
+    border-bottom: 1px solid var(--verywhite);
+    color: black;
 }
 /* when hovering an item */
 .autocomplete-items div:hover {
-    background-color: #e9e9e9;
+    background-color: var(--hover);
 }
 /* when navigating through the items using the arrow keys */
 .autocomplete-active {
-    background-color: #96b1cf !important;
+    background-color: var(--navbackground) !important;
     color: #ffffff;
 }
 
@@ -416,7 +470,7 @@ pre {
 }
 
 h3.storename {
-    color: dodgerblue;
+    color: var(--ainfo);
 }
 .anchor{
     display: block;
@@ -457,7 +511,8 @@ table.tiers {
 
 tr.tiers{
     background-color: #1a1a1a;
-    vertical-align: middle;}
+    vertical-align: middle;
+}
 
 td.tiers {
     min-width: 50px;
@@ -470,7 +525,7 @@ td.tiers {
     display: inline;
     font-size: 16px;
     font-weight: 700;
-    color: #17375e;
+    color: var(--headingtext);
     line-height: 1.3;
     padding: .6em 0em .5em .8em;
     width: 100%;
@@ -481,7 +536,7 @@ td.tiers {
     -moz-appearance: none;
     -webkit-appearance: none;
     appearance: none;
-    background-color: #f2f2ff;
+    background-color: var(--tralternate);
 }
 .select-css::-ms-expand {
     display: none;
@@ -491,7 +546,7 @@ td.tiers {
 }
 .select-css:focus {
     border-color: #aaa;
-    color: #17375e;
+    color: var(--headingtext);
 
     outline: none;
 }

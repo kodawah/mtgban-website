@@ -126,7 +126,7 @@
                 }
             </script>
             {{range .Arb}}
-                <div class="sticky" style="top: 48px; background-color: #f8f8f8;">
+                <div class="sticky" style="top: 48px; background-color: var(--background);">
                     <span class="anchor" id="{{.Name}}"></span>
                     <h3 class="storename">{{.Name}}</a></h3>
                     <hr width=20%>
@@ -253,7 +253,7 @@
                             </td>
                         </tr>
                     {{end}}
-                    <tr style="background-color: #f8f8f8;">
+                    <tr style="background-color: var(--background);">
                         <td colspan={{if $.QtyNotAvailable}}12{{else}}13{{end}}>
                             <p style="float: left;">
                                 <i>Last update: {{.LastUpdate}}</i>
