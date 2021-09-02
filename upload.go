@@ -50,6 +50,9 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	// Disable buylist if not permitted
 	canBuylist, _ := strconv.ParseBool(GetParamFromSig(sig, "UploadBuylistEnabled"))
+	if DevMode && !SigCheck {
+		canBuylist = true
+	}
 	if !canBuylist {
 		blMode = false
 	}
