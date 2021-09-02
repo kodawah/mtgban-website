@@ -67,11 +67,16 @@ func keyruneForCardSet(cardId string) string {
 
 	keyrune := set.KeyruneCode
 
+	out := "ss-" + strings.ToLower(keyrune)
 	rarity := co.Card.Rarity
 	if rarity == "special" {
 		rarity = "timeshifted"
 	}
-	out := fmt.Sprintf("ss-%s ss-%s", strings.ToLower(keyrune), rarity)
+	// Skip setting rarity for common, so that a color is not forcefully set
+	// on the symbol, and can become white on a dark theme
+	if rarity != "common" {
+		out += " ss-" + rarity
+	}
 
 	if co.Foil {
 		out += " ss-foil ss-grad"
