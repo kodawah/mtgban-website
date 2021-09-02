@@ -57,6 +57,8 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		blMode = false
 	}
 
+	canOptimize := DevMode
+
 	// Set flags needed to show elements on the page ui
 	pageVars.IsBuylist = blMode
 	pageVars.CanBuylist = canBuylist
@@ -209,7 +211,18 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	pageVars.UploadEntries = uploadedData
 	pageVars.TotalEntries = map[string]float64{}
 
+	var optimizedResults map[string][]mtgmatcher.Card
+	var optimizedTotals map[string]float64
+
+	if canOptimize {
+		optimizedResults = map[string][]mtgmatcher.Card{}
+		optimizedTotals = map[string]float64{}
+	}
+
 	for i := range uploadedData {
+		var bestPrice float64
+		var bestStore string
+
 		cardId := uploadedData[i].CardId
 		for shorthand, banPrice := range results[cardId] {
 			// Skip empty results
@@ -231,7 +244,31 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 			// Add to totals
 			pageVars.TotalEntries[shorthand] += price
+
+			if !canOptimize {
+				continue
+			}
+
+			if blMode {
+				if bestPrice < price {
+					bestPrice = price
+					bestStore = shorthand
+				}
+			} else {
+				if bestPrice == 0 || bestPrice > price {
+					bestPrice = price
+					bestStore = shorthand
+				}
+			}
 		}
+
+		if canOptimize && bestPrice != 0 {
+			optimizedResults[bestStore] = append(optimizedResults[bestStore], uploadedData[i].Card)
+			optimizedTotals[bestStore] += bestPrice
+		}
+	}
+	if canOptimize {
+		log.Println(optimizedResults, optimizedTotals)
 	}
 
 	// Load up image links
