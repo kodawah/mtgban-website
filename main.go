@@ -289,6 +289,7 @@ var Config struct {
 	Port                   int               `json:"port"`
 	DBAddress              string            `json:"db_address"`
 	DiscordHook            string            `json:"discord_hook"`
+	DiscordInviteLink      string            `json:"discord_invite_link"`
 	Affiliate              map[string]string `json:"affiliate"`
 	AffiliatesList         []string          `json:"affiliates_list"`
 	Api                    map[string]string `json:"api"`
@@ -582,6 +583,9 @@ func main() {
 
 	// custom redirector
 	http.HandleFunc("/go/", Redirect)
+	http.HandleFunc("/discord", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, Config.DiscordInviteLink, http.StatusFound)
+	})
 
 	// when navigating to /home it should serve the home page
 	http.Handle("/", noSigning(http.HandlerFunc(Home)))
