@@ -306,6 +306,11 @@
                     {{range $cardId := .VendorKeys}}
                         {{$card := (index $.Metadata $cardId)}}
                         {{$entries := (index $.FoundVendors $cardId)}}
+                        {{if eq $firstImg ""}}
+                            {{$firstImg = $card.ImageURL}}
+                            {{$firstPrint = $card.Printings}}
+                        {{end}}
+
                         <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};" title="{{$card.Title}}">
                             <th colspan="4" class="wrap stickyHeader" style="text-align: left; vertical-align: middle;">
                                 <table style="margin:0 0 0 18">
