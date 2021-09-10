@@ -262,6 +262,7 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 			foundTitle, _ := getUserTier(tc, userId)
 			switch foundTitle {
 			case "PIONEER", "PIONEER (Early Adopters)":
+				tierTitle = "Pioneer"
 			case "MODERN", "MODERN (Early Adopters)":
 				tierTitle = "Modern"
 			case "LEGACY", "LEGACY (Early Adopters)":
@@ -578,9 +579,11 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 		v.Set("Sleepers", "true")
 		fallthrough
 	case "Modern":
-		v.Set("Search", "true")
 		v.Set("Newspaper", "true")
 		v.Set("Global", "true")
+		fallthrough
+	case "Pioneer":
+		v.Set("Search", "true")
 	}
 	if v.Get("Arbit") == "true" {
 		switch tierTitle {
