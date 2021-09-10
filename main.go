@@ -37,6 +37,7 @@ type GenericCard struct {
 	Keyrune   string
 	ImageURL  string
 	Foil      bool
+	Etched    bool
 	Reserved  bool
 	Title     string
 	SearchURL string

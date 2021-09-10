@@ -275,6 +275,7 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 		Number:    co.Card.Number,
 		Variant:   variant,
 		Foil:      co.Foil,
+		Etched:    co.Etched,
 		Keyrune:   keyruneForCardSet(cardId),
 		ImageURL:  scryfallImageURL(cardId, smallImg),
 		Title:     editionTitle(cardId),

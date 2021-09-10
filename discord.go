@@ -340,6 +340,12 @@ func grabLastSold(cardId string, lang string) ([]embedField, error) {
 	if tcgId == "" {
 		return nil, nil
 	}
+	if co.Etched {
+		id, found := co.Identifiers["tcgplayerEtchedProductId"]
+		if found {
+			tcgId = id
+		}
+	}
 
 	link := "https://mpapi.tcgplayer.com/v2/product/" + tcgId + "/latestsales?offset=0&limit=25"
 	resp, err := cleanhttp.DefaultClient().Get(link)
@@ -566,8 +572,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if options["number"] != "" {
 			searchQuery += " cn:" + options["number"]
 		}
-		if options["foil"] != "" {
-			searchQuery += " f:" + options["foil"]
+		if options["finish"] != "" {
+			searchQuery += " f:" + options["finish"]
 		}
 		searchRes.SearchQuery = searchQuery
 
@@ -677,7 +683,16 @@ func prepareCard(searchRes *searchResult, ogFields []embedField, guildId string,
 	title := "Prices for " + card.Name
 	if lastSold {
 		title = "TCG Last Sold prices for " + card.Name
-		link = "https://shop.tcgplayer.com/product/productsearch?id=" + co.Identifiers["tcgplayerProductId"]
+
+		tcgId := co.Identifiers["tcgplayerProductId"]
+		if co.Etched {
+			id, found := co.Identifiers["tcgplayerEtchedProductId"]
+			if found {
+				tcgId = id
+			}
+		}
+
+		link = "https://shop.tcgplayer.com/product/productsearch?id=" + tcgId
 		affiliate := Config.Affiliate["TCG"]
 		if affiliate != "" {
 			link += fmt.Sprintf("&utm_campaign=affiliate&utm_medium=%s&utm_source=%s&partner=%s", UTM_BOT, affiliate, affiliate)
@@ -689,7 +704,9 @@ func prepareCard(searchRes *searchResult, ogFields []embedField, guildId string,
 		title = "[DEV] " + title
 	}
 	// Spark-ly
-	if card.Foil {
+	if card.Etched {
+		title += " 💫"
+	} else if card.Foil {
 		title += " ✨"
 	}
 
