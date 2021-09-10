@@ -234,6 +234,9 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			price := banPrice.Regular
 			if price == 0 {
 				price = banPrice.Foil
+				if price == 0 {
+					price = banPrice.Etched
+				}
 			}
 
 			// Adjust for quantity
