@@ -73,9 +73,12 @@ func prepareCKAPI() error {
 			continue
 		}
 
-		id := strings.TrimSuffix(cardId, "_f")
+		id, found := co.Identifiers["mtgjsonId"]
+		if !found {
+			id = cardId
+		}
 
-		_, found := output[id]
+		_, found = output[id]
 		if !found {
 			output[id] = &ck2id{}
 		}

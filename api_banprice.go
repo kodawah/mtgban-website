@@ -186,10 +186,7 @@ func getIdFunc(mode string) func(co *mtgmatcher.CardObject) string {
 		}
 	case "mtgjson":
 		return func(co *mtgmatcher.CardObject) string {
-			if co.Foil {
-				return strings.TrimSuffix(co.UUID, "_f")
-			}
-			return co.UUID
+			return co.Identifiers["mtgjsonId"]
 		}
 	case "mkm":
 		return func(co *mtgmatcher.CardObject) string {
