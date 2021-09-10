@@ -21,6 +21,7 @@ type meta struct {
 type ck2id struct {
 	Normal *meta `json:"normal,omitempty"`
 	Foil   *meta `json:"foil,omitempty"`
+	Etched *meta `json:"etched,omitempty"`
 }
 
 var CKAPIMutex sync.RWMutex
@@ -78,18 +79,23 @@ func prepareCKAPI() error {
 			id = cardId
 		}
 
+		// Allocate memory
 		_, found = output[id]
 		if !found {
 			output[id] = &ck2id{}
 		}
-		if !co.Foil {
-			output[id].Normal = &meta{}
-			output[id].Normal.Id = card.Id
-			output[id].Normal.URL = "https://www.cardkingdom.com/" + card.URL
+
+		// Set data as needed
+		data := &meta{
+			Id:  card.Id,
+			URL: "https://www.cardkingdom.com/" + card.URL,
+		}
+		if co.Etched {
+			output[id].Etched = data
+		} else if co.Foil {
+			output[id].Foil = data
 		} else {
-			output[id].Foil = &meta{}
-			output[id].Foil.Id = card.Id
-			output[id].Foil.URL = "https://www.cardkingdom.com/" + card.URL
+			output[id].Normal = data
 		}
 	}
 

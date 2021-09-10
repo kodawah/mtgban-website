@@ -20,8 +20,10 @@ const (
 type BanPrice struct {
 	Regular    float64            `json:"regular,omitempty"`
 	Foil       float64            `json:"foil,omitempty"`
+	Etched     float64            `json:"etched,omitempty"`
 	Qty        int                `json:"qty,omitempty"`
 	QtyFoil    int                `json:"qty_foil,omitempty"`
+	QtyEtched  int                `json:"qty_etched,omitempty"`
 	Conditions map[string]float64 `json:"conditions,omitempty"`
 }
 
@@ -33,7 +35,7 @@ type PriceAPIOutput struct {
 		BaseURL string    `json:"base_url"`
 	} `json:"meta"`
 
-	// uuid > store > price {foil/regular}
+	// uuid > store > price {regular/foil/etched}
 	Retail  map[string]map[string]*BanPrice `json:"retail,omitempty"`
 	Buylist map[string]map[string]*BanPrice `json:"buylist,omitempty"`
 }
@@ -129,6 +131,15 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 					filterByHash = append(filterByHash, altId)
 				}
 
+				// and an etched version too
+				altId, err = mtgmatcher.Match(&mtgmatcher.Card{
+					Id:        base,
+					Variation: "Etched",
+				})
+				if err == nil && altId != base {
+					filterByHash = append(filterByHash, altId)
+				}
+
 				// Speed up search by keeping only the needed edition
 				filterByEdition = co.SetCode
 			}
@@ -178,6 +189,12 @@ func getIdFunc(mode string) func(co *mtgmatcher.CardObject) string {
 	switch mode {
 	case "tcg":
 		return func(co *mtgmatcher.CardObject) string {
+			if co.Etched {
+				id, found := co.Identifiers["tcgplayerEtchedProductId"]
+				if found {
+					return id
+				}
+			}
 			return co.Identifiers["tcgplayerProductId"]
 		}
 	case "scryfall":
@@ -194,7 +211,12 @@ func getIdFunc(mode string) func(co *mtgmatcher.CardObject) string {
 		}
 	case "ck":
 		return func(co *mtgmatcher.CardObject) string {
-			if co.Foil {
+			if co.Etched {
+				id, found := co.Identifiers["cardKingdomEtchedId"]
+				if found {
+					return id
+				}
+			} else if co.Foil {
 				return co.Identifiers["cardKingdomFoilId"]
 			}
 			return co.Identifiers["cardKingdomId"]
@@ -267,7 +289,22 @@ func getSellerPrices(mode string, enabledStores []string, filterByEdition string
 			// (only for retail).
 			shouldQty := qty && !seller.Info().MetadataOnly && sellerTag != "TCG Player" && sellerTag != "TCG Direct"
 
-			if co.Foil {
+			if co.Etched {
+				out[id][sellerTag].Etched = inventory[cardId][0].Price
+				if shouldQty {
+					for i := range inventory[cardId] {
+						out[id][sellerTag].QtyEtched += inventory[cardId][i].Quantity
+					}
+				} else if len(enabledStores) == 1 || (filterByHash != nil && conds) {
+					if out[id][sellerTag].Conditions == nil {
+						out[id][sellerTag].Conditions = map[string]float64{}
+					}
+					for i := range inventory[cardId] {
+						condTag := inventory[cardId][i].Conditions
+						out[id][sellerTag].Conditions[condTag+"_etched"] = inventory[cardId][i].Price
+					}
+				}
+			} else if co.Foil {
 				out[id][sellerTag].Foil = inventory[cardId][0].Price
 				if shouldQty {
 					for i := range inventory[cardId] {
@@ -358,7 +395,22 @@ func getVendorPrices(mode string, enabledStores []string, filterByEdition string
 			if out[id][vendorTag] == nil {
 				out[id][vendorTag] = &BanPrice{}
 			}
-			if co.Foil {
+			if co.Etched {
+				out[id][vendorTag].Etched = buylist[cardId][0].BuyPrice
+				if qty && !vendor.Info().MetadataOnly {
+					for i := range buylist[cardId] {
+						out[id][vendorTag].QtyEtched += buylist[cardId][i].Quantity
+					}
+				} else if len(enabledStores) == 1 || (filterByHash != nil && conds) {
+					if out[id][vendorTag].Conditions == nil {
+						out[id][vendorTag].Conditions = map[string]float64{}
+					}
+					for i := range buylist[cardId] {
+						condTag := buylist[cardId][i].Conditions
+						out[id][vendorTag].Conditions[condTag+"_etched"] = buylist[cardId][i].BuyPrice
+					}
+				}
+			} else if co.Foil {
 				out[id][vendorTag].Foil = buylist[cardId][0].BuyPrice
 				if qty && !vendor.Info().MetadataOnly {
 					for i := range buylist[cardId] {
