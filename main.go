@@ -123,6 +123,7 @@ type PageVars struct {
 	ChartID     string
 	Alternative string
 	StocksURL   string
+	AltEtchedId string
 
 	EditionSort []string
 	EditionList map[string][]EditionEntry

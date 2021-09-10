@@ -247,8 +247,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		if options["number"] != "" {
 			searchQuery += " cn:" + options["number"]
 		}
-		if options["foil"] != "" {
-			searchQuery += " f:" + options["foil"]
+		if options["finish"] != "" {
+			searchQuery += " f:" + options["finish"]
 		}
 		pageVars.SearchQuery = searchQuery
 
@@ -279,6 +279,14 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		})
 		if err == nil && altId != chartId {
 			pageVars.Alternative = altId
+		}
+
+		altId, err = mtgmatcher.Match(&mtgmatcher.Card{
+			Id:        chartId,
+			Variation: "Etched",
+		})
+		if err == nil && altId != chartId {
+			pageVars.AltEtchedId = altId
 		}
 
 		pageVars.StocksURL = pageVars.Metadata[chartId].StocksURL
@@ -339,10 +347,8 @@ func parseSearchOptions(query string) (string, map[string]string) {
 		case strings.HasPrefix(field, "r:"):
 			options["rarity"] = strings.ToLower(code)
 		case strings.HasPrefix(field, "f:"):
-			val, _ := strconv.ParseBool(code)
-			options["foil"] = "false"
-			if val {
-				options["foil"] = "true"
+			if SliceStringHas([]string{"etched", "foil", "nonfoil"}, strings.ToLower(code)) {
+				options["finish"] = code
 			}
 		case strings.HasPrefix(field, "sm:"):
 			options["search_mode"] = strings.ToLower(code)
@@ -363,10 +369,13 @@ func parseSearchOptions(query string) (string, map[string]string) {
 	// Filter out the out of standard syntax
 	if strings.HasSuffix(query, "&") {
 		query = strings.TrimSuffix(query, "&")
-		options["foil"] = "false"
+		options["finish"] = "nonfoil"
 	} else if strings.HasSuffix(query, "*") {
 		query = strings.TrimSuffix(query, "*")
-		options["foil"] = "true"
+		options["finish"] = "foil"
+	} else if strings.HasSuffix(query, "~") {
+		query = strings.TrimSuffix(query, "~")
+		options["finish"] = "etched"
 	}
 
 	if strings.HasPrefix(query, "random") {
@@ -402,13 +411,20 @@ func parseSearchOptions(query string) (string, map[string]string) {
 		}
 	} else {
 		// Also support our own ID style
-		card, err := mtgmatcher.GetUUID(strings.TrimSpace(query))
+		co, err := mtgmatcher.GetUUID(strings.TrimSpace(query))
 		if err == nil {
-			query = card.Name
-			options["edition"] = card.SetCode
-			options["number"] = card.Number
-			options["foil"] = fmt.Sprint(card.Foil)
+			query = co.Name
+			options["edition"] = co.SetCode
+			options["number"] = co.Number
 			options["search_mode"] = "exact"
+
+			if co.Etched {
+				options["finish"] = "etched"
+			} else if co.Foil {
+				options["finish"] = "foil"
+			} else {
+				options["finish"] = "nonfoil"
+			}
 		}
 	}
 
@@ -506,14 +522,18 @@ func shouldSkipCard(query, cardId string, options map[string]string) bool {
 	}
 
 	// Skip cards that are not as desired foil
-	if options["foil"] != "" {
-		foilStatus, err := strconv.ParseBool(options["foil"])
-		if err == nil {
-			if foilStatus && !co.Foil {
-				return true
-			} else if !foilStatus && co.Foil {
-				return true
-			}
+	switch options["finish"] {
+	case "etched":
+		if !co.Etched {
+			return true
+		}
+	case "foil":
+		if !co.Foil {
+			return true
+		}
+	case "nonfoil":
+		if co.Foil || co.Etched {
+			return true
 		}
 	}
 
@@ -784,10 +804,18 @@ func sortSets(uuidI, uuidJ string) bool {
 		if editionI == editionJ {
 			// If their number is the same, check for foiling status
 			if cI.Card.Number == cJ.Card.Number {
-				if cI.Foil == true && cJ.Foil == false {
-					return false
-				} else if cI.Foil == false && cJ.Foil == true {
-					return true
+				if cI.Etched || cJ.Etched {
+					if cI.Etched == true && cJ.Etched == false {
+						return false
+					} else if cI.Etched == false && cJ.Etched == true {
+						return true
+					}
+				} else if cI.Foil || cJ.Foil {
+					if cI.Foil == true && cJ.Foil == false {
+						return false
+					} else if cI.Foil == false && cJ.Foil == true {
+						return true
+					}
 				}
 			}
 

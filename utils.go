@@ -208,7 +208,7 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 	case "WAR":
 		isJPN = strings.Contains(co.Card.Number, "★")
 	case "STA":
-		num, _ := strconv.Atoi(strings.TrimSuffix(co.Number, "e"))
+		num, _ := strconv.Atoi(co.Number)
 		isJPN = num > 63
 	}
 
@@ -219,7 +219,14 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 		variant = "JPN" + variant
 	}
 
-	query := fmt.Sprintf("%s s:%s cn:%s f:%t", co.Name, co.SetCode, co.Number, co.Foil)
+	query := fmt.Sprintf("%s s:%s cn:%s", co.Name, co.SetCode, co.Number)
+	if co.Etched {
+		query += " f:etched"
+	} else if co.Foil {
+		query += " f:foil"
+	} else if !co.Etched && !co.Foil {
+		query += " f:nonfoil"
+	}
 	if co.Sealed {
 		query = co.Name
 	}
