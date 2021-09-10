@@ -194,7 +194,7 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 			variant = "Extended Art"
 		case co.BorderColor == mtgjson.BorderColorBorderless && co.SetCode != "STA":
 			variant = "Borderless"
-		case co.HasFrameEffect(mtgjson.FrameEffectFoilEtched):
+		case co.HasFrameEffect(mtgjson.FrameEffectEtched):
 			variant = "Etched Foil"
 		case (co.SetCode == "MH2" || co.SetCode == "H1R") && co.FrameVersion == "1997":
 			variant = "Retro Frame"
