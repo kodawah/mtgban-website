@@ -573,7 +573,6 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 		v.Set("Arbit", "true")
 		fallthrough
 	case "Beta User":
-		v.Set("Upload", "true")
 		fallthrough
 	case "Legacy":
 		v.Set("Sleepers", "true")
@@ -583,6 +582,7 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 		v.Set("Global", "true")
 		fallthrough
 	case "Pioneer":
+		v.Set("Upload", "true")
 		v.Set("Search", "true")
 	}
 	if v.Get("Arbit") == "true" {
@@ -649,6 +649,9 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 	}
 	if v.Get("Upload") == "true" {
 		switch tierTitle {
+		case "Pioneer":
+			v.Set("UploadBuylistEnabled", "false")
+			v.Set("UploadChangeStoresEnabled", "false")
 		case "Modern":
 			v.Set("UploadBuylistEnabled", "false")
 			v.Set("UploadChangeStoresEnabled", "true")
