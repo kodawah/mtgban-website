@@ -130,18 +130,19 @@ type PageVars struct {
 	EditionList map[string][]EditionEntry
 	IsSealed    bool
 
-	CompactEntries map[string]map[string]*BanPrice
-	IndexEntries   map[string]map[string]*BanPrice
-	ScraperKeys    []string
-	IndexKeys      []string
-	UploadEntries  []UploadEntry
-	IsBuylist      bool
-	TotalEntries   map[string]float64
-	EnabledSellers []string
-	EnabledVendors []string
-	CanBuylist     bool
-	RemoteLinkURL  string
-	TotalQuantity  int
+	CompactEntries  map[string]map[string]*BanPrice
+	IndexEntries    map[string]map[string]*BanPrice
+	ScraperKeys     []string
+	IndexKeys       []string
+	UploadEntries   []UploadEntry
+	IsBuylist       bool
+	TotalEntries    map[string]float64
+	EnabledSellers  []string
+	EnabledVendors  []string
+	CanBuylist      bool
+	CanChangeStores bool
+	RemoteLinkURL   string
+	TotalQuantity   int
 }
 
 type NavElem struct {
@@ -193,6 +194,7 @@ var OptionalFields = []string{
 	"ExpEnabled",
 	"NewsEnabled",
 	"UploadBuylistEnabled",
+	"UploadChangeStoresEnabled",
 	"AnyEnabled",
 	"AnyExperimentsEnabled",
 	"API",

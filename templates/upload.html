@@ -55,7 +55,7 @@
                     </label>
                     <br>
                     <br>
-                    <select name="stores" id="stores" multiple></select>
+                    <select name="stores" id="stores" multiple {{if not .CanChangeStores}}disabled title="Increase your tier and customize your Upload experience"{{end}}></select>
                     <br>
                     <input type="file" id="file" name="cardListFile" accept=".csv,text/csv,.xls,application/vnd.ms-excel,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none;" onchange="pressed()">
                     <input type="hidden" id="gdocURL" name="gdocURL" value="{{.RemoteLinkURL}}">

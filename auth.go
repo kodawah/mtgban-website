@@ -651,8 +651,10 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 		switch tierTitle {
 		case "Modern":
 			v.Set("UploadBuylistEnabled", "false")
+			v.Set("UploadChangeStoresEnabled", "true")
 		default:
 			v.Set("UploadBuylistEnabled", "true")
+			v.Set("UploadChangeStoresEnabled", "true")
 		}
 	}
 

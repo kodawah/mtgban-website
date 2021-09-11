@@ -57,11 +57,18 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		blMode = false
 	}
 
+	// Disable changing stores if not permitted
+	canChangeStores, _ := strconv.ParseBool(GetParamFromSig(sig, "UploadChangeStoresEnabled"))
+	if DevMode && !SigCheck {
+		canChangeStores = true
+	}
+
 	canOptimize := DevMode
 
 	// Set flags needed to show elements on the page ui
 	pageVars.IsBuylist = blMode
 	pageVars.CanBuylist = canBuylist
+	pageVars.CanChangeStores = canChangeStores
 
 	blocklistRetail, blocklistBuylist := getDefaultBlocklists(sig)
 	var enabledStores []string
@@ -86,12 +93,14 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	// Load the preferred list of enabled stores for the <select> box
 	// The first check is for when the cookie is not yet set
+	// Force stores if not allowed to change them
 	enabledSellers := readCookie(r, "enabledSellers")
-	if len(enabledSellers) == 0 {
+	if len(enabledSellers) == 0 || !canChangeStores {
 		pageVars.EnabledSellers = Config.AffiliatesList
 	} else {
 		pageVars.EnabledSellers = strings.Split(enabledSellers, "|")
 	}
+
 	enabledVendors := readCookie(r, "enabledVendors")
 	if len(enabledVendors) == 0 {
 		pageVars.EnabledVendors = allVendors
@@ -111,6 +120,10 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	} else {
+		// Override in case not allowed to change list
+		if !canChangeStores {
+			stores = Config.AffiliatesList
+		}
 		for _, store := range stores {
 			if SliceStringHas(allSellers, store) {
 				enabledStores = append(enabledStores, store)
