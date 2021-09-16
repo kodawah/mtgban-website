@@ -196,8 +196,6 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 			variant = "Extended Art"
 		case co.BorderColor == mtgjson.BorderColorBorderless && co.SetCode != "STA":
 			variant = "Borderless"
-		case co.HasFrameEffect(mtgjson.FrameEffectEtched) || co.Etched:
-			variant = "Etched"
 		case (co.SetCode == "MH2" || co.SetCode == "H1R") && co.FrameVersion == "1997":
 			variant = "Retro Frame"
 		}
@@ -222,6 +220,12 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 	query := fmt.Sprintf("%s s:%s cn:%s", co.Name, co.SetCode, co.Number)
 	if co.Etched {
 		query += " f:etched"
+
+		// Append Etched information to the tag
+		if variant != "" {
+			variant += " "
+		}
+		variant += "Etched"
 	} else if co.Foil {
 		query += " f:foil"
 	} else if !co.Etched && !co.Foil {
