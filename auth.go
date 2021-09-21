@@ -577,6 +577,8 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 	case "Legacy":
 		v.Set("Sleepers", "true")
 		fallthrough
+	case "Lost Boys":
+		fallthrough
 	case "Modern":
 		v.Set("Newspaper", "true")
 		v.Set("Global", "true")
