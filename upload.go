@@ -392,12 +392,12 @@ func parseHeader(first []string) (map[string]int, error) {
 			if !found {
 				indexMap["conditions"] = i
 			}
-		case strings.Contains(field, "price"):
+		case strings.Contains(field, "price") || strings.Contains(field, "low"):
 			_, found := indexMap["price"]
 			if !found {
 				indexMap["price"] = i
 			}
-		case (strings.Contains(field, "quantity") || strings.Contains(field, "qty") || strings.Contains(field, "stock") || strings.Contains(field, "count")) && !strings.HasPrefix(field, "add") && !strings.HasPrefix(field, "set"):
+		case (strings.Contains(field, "quantity") || strings.Contains(field, "qty") || strings.Contains(field, "stock") || strings.Contains(field, "count") || strings.Contains(field, "have")) && !strings.HasPrefix(field, "add") && !strings.HasPrefix(field, "set"):
 			_, found := indexMap["quantity"]
 			if !found {
 				indexMap["quantity"] = i
@@ -497,7 +497,7 @@ func parseRow(indexMap map[string]int, record []string, foundHashes map[string]b
 
 	_, found = indexMap["price"]
 	if found {
-		res.OriginalPrice, _ = strconv.ParseFloat(record[indexMap["price"]], 64)
+		res.OriginalPrice, _ = mtgmatcher.ParsePrice(record[indexMap["price"]])
 	}
 
 	res.CardId, res.MismatchError = mtgmatcher.Match(&res.Card)
