@@ -348,7 +348,7 @@ func grabLastSold(cardId string, lang string) ([]embedField, error) {
 	}
 
 	link := "https://mpapi.tcgplayer.com/v2/product/" + tcgId + "/latestsales?offset=0&limit=25"
-	resp, err := cleanhttp.DefaultClient().Get(link)
+	resp, err := cleanhttp.DefaultClient().Post(link, "application/json", strings.NewReader("{}"))
 	if err != nil {
 		return nil, err
 	}
