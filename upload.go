@@ -278,6 +278,30 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
+		// Repeat for indexes
+		for shorthand, banPrice := range indexResults[cardId] {
+			// Only TCG Low
+			if shorthand != TCG_LOW {
+				continue
+			}
+
+			// Skip empty results
+			if banPrice == nil {
+				continue
+			}
+
+			// Grab the correct Price
+			price := banPrice.Regular
+			if price == 0 {
+				price = banPrice.Foil
+				if price == 0 {
+					price = banPrice.Etched
+				}
+			}
+
+			pageVars.TotalEntries[shorthand] += price
+		}
+
 		if canOptimize && bestPrice != 0 {
 			optimizedResults[bestStore] = append(optimizedResults[bestStore], uploadedData[i].Card)
 			optimizedTotals[bestStore] += bestPrice

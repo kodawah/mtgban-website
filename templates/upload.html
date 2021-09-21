@@ -357,6 +357,18 @@
                             </table>
                             <br>
                         </td>
+                        <td>
+                            {{$price := (index $.TotalEntries "TCG Low")}}
+                            {{if $price}}
+                                <b>Index total</b>
+                                <br>
+                                <a class="btn info">
+                                    {{scraper_name "TCG Low"}}:
+                                </a>
+                                <nobr>$ {{printf "%.2f" $price}}</nobr>
+                                    <hr>
+                            {{end}}
+                        </td>
                     </tr>
                 </table>
             </div>
