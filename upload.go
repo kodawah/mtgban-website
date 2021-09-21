@@ -60,7 +60,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	// Disable changing stores if not permitted
 	canChangeStores, _ := strconv.ParseBool(GetParamFromSig(sig, "UploadChangeStoresEnabled"))
 	if DevMode && !SigCheck {
-		canChangeStores = false
+		canChangeStores = true
 	}
 
 	canOptimize := DevMode
