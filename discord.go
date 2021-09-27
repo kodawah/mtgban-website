@@ -78,7 +78,7 @@ func setupDiscord() error {
 // server and tries to join it.
 func guildCreate(s *discordgo.Session, gc *discordgo.GuildCreate) {
 	// Set a "is playing" status
-	s.UpdateStatus(0, "http://mtgban.com")
+	s.UpdateGameStatus(0, "http://mtgban.com")
 
 	// If guild is authorized, then we can proceed as normal
 	if SliceStringHas(Config.DiscordAllowList, gc.Guild.ID) {
