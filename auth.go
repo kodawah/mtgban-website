@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -344,6 +345,8 @@ func putSignatureInCookies(w http.ResponseWriter, r *http.Request, sig string) {
 // and the signature from invite links
 func noSigning(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer recoverPanic(w)
+
 		if PatreonHost == "" {
 			PatreonHost = getBaseURL(r) + "/auth"
 		}
@@ -359,6 +362,8 @@ func noSigning(next http.Handler) http.Handler {
 
 func enforceAPISigning(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer recoverPanic(w)
+
 		w.Header().Add("RateLimit-Limit", fmt.Sprint(APIRequestsPerSec))
 
 		ip, err := IpAddress(r)
@@ -436,6 +441,8 @@ func enforceAPISigning(next http.Handler) http.Handler {
 
 func enforceSigning(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer recoverPanic(w)
+
 		if PatreonHost == "" {
 			PatreonHost = getBaseURL(r) + "/auth"
 		}
@@ -551,6 +558,36 @@ func enforceSigning(next http.Handler) http.Handler {
 
 		gziphandler.GzipHandler(next).ServeHTTP(w, r)
 	})
+}
+
+func recoverPanic(w http.ResponseWriter) {
+	errPanic := recover()
+	if errPanic != nil {
+		log.Println("panic occurred:", errPanic)
+
+		// Print full stack to stdout
+		buf := make([]byte, 1<<16)
+		runtime.Stack(buf, true)
+		log.Printf("%s", buf)
+
+		// Restrict size to fit into discord message
+		if len(buf) > 1024 {
+			buf = buf[:1024]
+		}
+
+		var msg string
+		err, ok := errPanic.(error)
+		if ok {
+			msg = err.Error()
+		} else {
+			msg = "unknown error"
+		}
+		Notify("panic", "@here "+msg)
+		Notify("panic", string(buf))
+
+		http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 }
 
 func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string, string) {

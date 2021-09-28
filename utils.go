@@ -312,7 +312,10 @@ func Notify(kind, message string) {
 	go func() {
 		var payload Notification
 		payload.Username = kind
-		payload.Content = message
+		if DevMode {
+			payload.Content = "[DEV] "
+		}
+		payload.Content += message
 
 		reqBody, err := json.Marshal(&payload)
 		if err != nil {
