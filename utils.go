@@ -261,15 +261,30 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 	}
 
 	if co.Sealed {
-		printings = "<table class='setValue'>"
+		// The first chunk is always present, even for foil-only sets
+		printings = "<h6>Set Value</h6><table class='setValue'>"
 
 		for i, title := range ProductTitles {
 			entries, found := Infos[ProductKeys[i]][co.SetCode]
 			if found {
-				printings += fmt.Sprintf("<tr class='setValue'><td class='setValue'>%s</td><td>$ %.02f</td></tr>", title, entries[0].Price)
+				printings += fmt.Sprintf("<tr class='setValue'><td class='setValue'><h5>%s</h5></td><td>$ %.02f</td></tr>", title, entries[0].Price)
 			}
 		}
 		printings += "</table>"
+
+		// The second chunk is optional, check for the first key
+		if len(Infos[ProductFoilKeys[0]][co.SetCode]) > 0 {
+			printings += "<br>"
+			printings += "<h6>Foil Set Value</h6><table class='setValue'>"
+
+			for i, title := range ProductTitles {
+				entries, found := Infos[ProductFoilKeys[i]][co.SetCode]
+				if found {
+					printings += fmt.Sprintf("<tr class='setValue'><td class='setValue'><h5>%s</h5></td><td>$ %.02f</td></tr>", title, entries[0].Price)
+				}
+			}
+			printings += "</table>"
+		}
 	}
 
 	return GenericCard{

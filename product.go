@@ -120,24 +120,23 @@ func getSealedEditions() ([]string, map[string][]EditionEntry) {
 
 var ProductKeys = []string{
 	"TotalValueByTcgLow",
-	"TotalFoilValueByTcgLow",
 	"TotalValueByTcgDirect",
-	"TotalFoilValueByTcgDirect",
 	"TotalValueByTcgLowMinusBulk",
-	"TotalFoilValueByTcgLowMinusBulk",
 	"TotalValueBuylist",
+}
+
+var ProductFoilKeys = []string{
+	"TotalFoilValueByTcgLow",
+	"TotalFoilValueByTcgDirect",
+	"TotalFoilValueByTcgLowMinusBulk",
 	"TotalFoilValueBuylist",
 }
 
 var ProductTitles = []string{
-	"Set Value by TCGLow",
-	"Foil Set Value by TCGLow",
-	"Set Value by TCG Direct",
-	"Foil Set Value by TCG Direct",
-	"Set Value less Bulk",
-	"Foil Set Value less Bulk",
-	"Set Value by Buylist",
-	"Foil Set Value by Buylist",
+	"by TCGLow",
+	"by TCG Direct",
+	"by TCGLow without Bulk",
+	"by CK Buylist",
 }
 
 const (
@@ -285,12 +284,12 @@ func runSealedAnalysis() {
 
 	for i, records := range []map[string]float64{
 		inv,
-		invFoil,
 		invDirect,
-		invDirectFoil,
 		invNoBulk,
-		invNoBulkFoil,
 		bl,
+		invFoil,
+		invDirectFoil,
+		invNoBulkFoil,
 		blFoil,
 	} {
 		record := mtgban.InventoryRecord{}
@@ -299,6 +298,13 @@ func runSealedAnalysis() {
 				Price: price,
 			})
 		}
-		Infos[ProductKeys[i]] = record
+		// Keep the two key sets separate
+		key := ""
+		if i >= len(ProductKeys) {
+			key = ProductFoilKeys[i%len(ProductKeys)]
+		} else {
+			key = ProductKeys[i]
+		}
+		Infos[key] = record
 	}
 }

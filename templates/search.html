@@ -118,37 +118,45 @@
                             <img id="cardImage" src="" width="354" height="493"/>
                         </td>
                     </tr>
-                    <tr>
-                        <td>
-                            <div id="printings" style="text-align: center; max-width:354px; display: block;"></div>
-                        </td>
-                    </tr>
-                    {{if not (eq .Alternative "")}}
+                    {{if .IsSealed}}
                         <tr>
                             <td>
-                                <center>
-                                    <a class="btn warning" href="/search?chart={{.Alternative}}">Switch Foil/Non-Foil</a>
-                                </center>
+                                <div id="printings" style="max-width:354px; display: block;"></div>
                             </td>
                         </tr>
-                    {{end}}
-                    {{if not (eq .AltEtchedId "")}}
+                    {{else}}
                         <tr>
                             <td>
-                                <center>
-                                    <a class="btn warning" href="/search?chart={{.AltEtchedId}}">Switch Etched/Non-Etched</a>
-                                </center>
+                                <div id="printings" style="text-align: center; max-width:354px; display: block;"></div>
                             </td>
                         </tr>
-                    {{end}}
-                    {{if not (eq .StocksURL "")}}
-                        <tr>
-                            <td>
-                                <center>
-                                    <a class="btn success" href="{{.StocksURL}}" target="_blank">Check MTGStocks charts</a>
-                                </center>
-                            </td>
-                        </tr>
+                        {{if not (eq .Alternative "")}}
+                            <tr>
+                                <td>
+                                    <center>
+                                        <a class="btn warning" href="/search?chart={{.Alternative}}">Switch Foil/Non-Foil</a>
+                                    </center>
+                                </td>
+                            </tr>
+                        {{end}}
+                        {{if not (eq .AltEtchedId "")}}
+                            <tr>
+                                <td>
+                                    <center>
+                                        <a class="btn warning" href="/search?chart={{.AltEtchedId}}">Switch Etched/Non-Etched</a>
+                                    </center>
+                                </td>
+                            </tr>
+                        {{end}}
+                        {{if not (eq .StocksURL "")}}
+                            <tr>
+                                <td>
+                                    <center>
+                                        <a class="btn success" href="{{.StocksURL}}" target="_blank">Check MTGStocks charts</a>
+                                    </center>
+                                </td>
+                            </tr>
+                        {{end}}
                     {{end}}
                     <tr>
                         <td style="background-color: var(--background);">
