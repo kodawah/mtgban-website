@@ -131,6 +131,16 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Private call from newspaper
+	hashes := r.Form["hashes"]
+	if len(hashes) != 0 && len(stores) == 0 {
+		if blMode {
+			enabledStores = pageVars.EnabledVendors
+		} else {
+			enabledStores = pageVars.EnabledSellers
+		}
+	}
+
 	// Load spreadsheet cloud url if present
 	gdocURL := r.FormValue("gdocURL")
 
@@ -138,14 +148,17 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	// it also returns the FileHeader so we can get the Filename,
 	// the Header and the size of the file
 	file, handler, err := r.FormFile("cardListFile")
-	if err != nil && gdocURL == "" {
+	if err != nil && gdocURL == "" && len(hashes) == 0 {
 		render(w, "upload.html", pageVars)
 		return
 	} else if err == nil {
 		defer file.Close()
 	}
 
-	if gdocURL != "" {
+	if len(hashes) != 0 {
+		log.Printf("Loading from POST %d cards", len(hashes))
+		pageVars.CardHashes = hashes
+	} else if gdocURL != "" {
 		log.Printf("Loading spreadsheet: %+v", gdocURL)
 
 		// Reset the cookie for this preference
@@ -174,7 +187,9 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	// Load data
 	var uploadedData []UploadEntry
-	if gdocURL != "" {
+	if len(hashes) != 0 {
+		uploadedData, err = loadHashes(hashes)
+	} else if gdocURL != "" {
 		uploadedData, err = loadSpreadsheet(gdocURL)
 	} else if strings.HasSuffix(handler.Filename, ".xls") {
 		uploadedData, err = loadOldXls(file)
@@ -214,7 +229,9 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	pageVars.IndexKeys = indexKeys
 
 	pageVars.Metadata = map[string]GenericCard{}
-	if gdocURL != "" {
+	if len(hashes) != 0 {
+		pageVars.SearchQuery = "hashes"
+	} else if gdocURL != "" {
 		pageVars.SearchQuery = gdocURL
 	} else {
 		pageVars.SearchQuery = handler.Filename
@@ -510,6 +527,18 @@ func parseRow(indexMap map[string]int, record []string, foundHashes map[string]b
 	}
 
 	return res, nil
+}
+
+func loadHashes(hashes []string) ([]UploadEntry, error) {
+	var uploadEntries []UploadEntry
+
+	for i := range hashes {
+		uploadEntries = append(uploadEntries, UploadEntry{
+			CardId: hashes[i],
+		})
+	}
+
+	return uploadEntries, nil
 }
 
 func loadSpreadsheet(link string) ([]UploadEntry, error) {

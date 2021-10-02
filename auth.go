@@ -671,6 +671,7 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 			v.Set("NewsEnabled", "3day")
 		case "Root", "Admin":
 			v.Set("NewsEnabled", "0day")
+			v.Set("NewsBridgeEnabled", "true")
 		default:
 			v.Set("NewsEnabled", "1day")
 		}

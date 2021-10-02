@@ -215,6 +215,21 @@
                                 <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index={{.TotalIndex}}&filter={{.FilterSet}}&rarity={{$.FilterRarity}}">&gt;</a>
                             {{end}}
                             </p>
+
+                            {{if .CanBridge}}
+                                <center>
+                                    <form action="/upload" method="post">
+                                        <input type="hidden" name="mode" value="false"/>
+                                        {{range .CardHashes}}
+                                            <input type="hidden" name="hashes" value="{{.}}"/>
+                                        {{end}}
+                                        <a class="btn success" style="text-align: center;" href='#' onclick='this.parentNode.submit(); return false;'>Load this page in the Uploader tool</a>
+                                        <noscript>
+                                            <input type="submit" value="Check Uplaoder!" />
+                                        </noscript>
+                                    </form>
+                                </center>
+                            {{end}}
                         </td>
                     </tr>
                 </table>

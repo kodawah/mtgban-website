@@ -566,6 +566,8 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	enabledBridge, _ := strconv.ParseBool(GetParamFromSig(sig, "NewsBridgeEnabled"))
+
 	pageVars.ToC = NewspaperPages
 
 	r.ParseForm()
@@ -761,6 +763,7 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 		// Will iterate over card data in the template, since it's limited
 		// to the results actually available
 		pageVars.Cards = append(pageVars.Cards, uuid2card(result[1], true))
+		pageVars.CardHashes = append(pageVars.CardHashes, result[1])
 
 		// Allocate a table row with as many fields as returned by the SELECT
 		pageVars.Table[i] = make([]string, len(result))
@@ -788,6 +791,8 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 			pageVars.InfoMessage = "No results for the current filter options"
 		}
 	}
+
+	pageVars.CanBridge = enabledBridge || (DevMode && !SigCheck)
 
 	render(w, "news.html", pageVars)
 }

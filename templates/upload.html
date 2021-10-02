@@ -69,19 +69,26 @@
                     <input type="file" id="file" name="cardListFile" accept=".csv,text/csv,.xls,application/vnd.ms-excel,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none;" onchange="pressed()">
                     <input type="hidden" id="gdocURL" name="gdocURL" value="{{.RemoteLinkURL}}">
                     <br>
-                    <a class="btn default">
-                        <label for="file" id="fileLabel">Select local csv/xls</label>
-                    </a>
-                    or
-                    <a class="btn default" href="javascript:askForURL()" id="urlLabel" title="{{.RemoteLinkURL}}">
-                        {{if .RemoteLinkURL}}
-                            Cloud URL loaded
-                        {{else}}
-                            Load spreadsheet
+                    {{if .CardHashes}}
+                        {{range .CardHashes}}
+                            <input type="hidden" name="hashes" value="{{.}}"/>
                         {{end}}
-                    </a>
+                        <label for="file" id="fileLabel">Loaded page from Newspaper</label>
+                    {{else}}
+                        <a class="btn default">
+                            <label for="file" id="fileLabel">Select local csv/xls</label>
+                        </a>
+                        or
+                        <a class="btn default" href="javascript:askForURL()" id="urlLabel" title="{{.RemoteLinkURL}}">
+                            {{if .RemoteLinkURL}}
+                                Cloud URL loaded
+                            {{else}}
+                                Load spreadsheet
+                            {{end}}
+                        </a>
+                    {{end}}
                     <br><br>
-                    <input type="submit" id="submit" value="&nbsp;&nbsp;Upload&nbsp;&nbsp;" {{if not .RemoteLinkURL}}disabled{{end}}>
+                    <input type="submit" id="submit" value="&nbsp;&nbsp;Upload&nbsp;&nbsp;" {{if and (not .RemoteLinkURL) (not .CardHashes)}}disabled{{end}}>
                 </form>
             </center>
         </div>

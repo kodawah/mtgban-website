@@ -105,6 +105,8 @@ type PageVars struct {
 	Editions     []string
 	FilterRarity string
 	Rarities     []string
+	CardHashes   []string
+	CanBridge    bool
 
 	Sleepers [7]SleeperEntry
 
@@ -193,6 +195,7 @@ var OptionalFields = []string{
 	"ArbitDisabledVendors",
 	"ExpEnabled",
 	"NewsEnabled",
+	"NewsBridgeEnabled",
 	"UploadBuylistEnabled",
 	"UploadChangeStoresEnabled",
 	"AnyEnabled",
