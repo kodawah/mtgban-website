@@ -165,6 +165,8 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	start := time.Now()
+
 	dumpType := ""
 	canRetail := SliceStringHas(enabledModes, "retail") || (SliceStringHas(enabledModes, "all") || (DevMode && !SigCheck))
 	canBuylist := SliceStringHas(enabledModes, "buylist") || (SliceStringHas(enabledModes, "all") || (DevMode && !SigCheck))
@@ -178,7 +180,7 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := GetParamFromSig(sig, "UserEmail")
-	msg := fmt.Sprintf("%s requested a '%s' API dump ('%s','%q')", user, dumpType, filterByEdition, filterByHash)
+	msg := fmt.Sprintf("[%v] %s requested a '%s' API dump ('%s','%q')", time.Since(start), user, dumpType, filterByEdition, filterByHash)
 	if qty {
 		msg += " with quantities"
 	}
