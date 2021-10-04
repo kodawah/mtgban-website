@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -49,7 +50,7 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 
 	urlPath := strings.TrimPrefix(r.URL.Path, "/api/mtgban/")
 
-	if !strings.HasSuffix(urlPath, ".json") {
+	if !strings.HasSuffix(urlPath, ".json") && !strings.HasSuffix(urlPath, ".csv") {
 		out.Error = "Not found"
 		json.NewEncoder(w).Encode(&out)
 		return
@@ -100,7 +101,12 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 	filterByEdition := ""
 	var filterByHash []string
 	if strings.Contains(urlPath, "/") {
-		base := strings.TrimSuffix(path.Base(urlPath), ".json")
+		base := path.Base(urlPath)
+		if strings.HasSuffix(urlPath, ".json") {
+			base = strings.TrimSuffix(base, ".json")
+		} else if strings.HasSuffix(urlPath, ".csv") {
+			base = strings.TrimSuffix(base, ".csv")
+		}
 
 		// Check if the path element is a set name or a hash
 		set, err := mtgmatcher.GetSet(base)
@@ -152,6 +158,13 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Only filtered output can have csv encoding, and only for retail or buylist requests
+	if strings.HasSuffix(urlPath, ".csv") && ((filterByEdition == "" && filterByHash == nil) || strings.HasPrefix(urlPath, "all")) {
+		out.Error = "Not found"
+		json.NewEncoder(w).Encode(&out)
+		return
+	}
+
 	dumpType := ""
 	canRetail := SliceStringHas(enabledModes, "retail") || (SliceStringHas(enabledModes, "all") || (DevMode && !SigCheck))
 	canBuylist := SliceStringHas(enabledModes, "buylist") || (SliceStringHas(enabledModes, "all") || (DevMode && !SigCheck))
@@ -172,6 +185,11 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 	if conds {
 		msg += " with conditions"
 	}
+	if strings.HasSuffix(urlPath, ".json") {
+		msg += " in json"
+	} else if strings.HasSuffix(urlPath, ".csv") {
+		msg += " in csv"
+	}
 
 	if DevMode {
 		log.Println(msg)
@@ -185,6 +203,25 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if strings.HasSuffix(urlPath, ".json") {
+		json.NewEncoder(w).Encode(&out)
+		return
+	} else if strings.HasSuffix(urlPath, ".csv") {
+		w.Header().Set("Content-Type", "text/csv")
+		var err error
+		csvWriter := csv.NewWriter(w)
+		if out.Retail != nil {
+			err = BanPrice2CSV(csvWriter, out.Retail, qty, conds)
+		} else if out.Buylist != nil {
+			err = BanPrice2CSV(csvWriter, out.Buylist, qty, conds)
+		}
+		if err != nil {
+			log.Println(err)
+		}
+		return
+	}
+
+	out.Error = "Internal Server Error"
 	json.NewEncoder(w).Encode(&out)
 }
 
@@ -447,4 +484,80 @@ func getVendorPrices(mode string, enabledStores []string, filterByEdition string
 	}
 
 	return out
+}
+
+func BanPrice2CSV(w *csv.Writer, pm map[string]map[string]*BanPrice, shouldQty, shouldCond bool) error {
+	var condKeys []string
+
+	header := []string{"UUID", "Store", "Regular Price", "Foil Price", "Etched Price"}
+	if shouldQty {
+		header = append(header, "Regular Quantity", "Foil Quantity", "Etched Quantity")
+	}
+	if shouldCond {
+		condKeys = []string{
+			"NM", "SP", "MP", "HP", "PO",
+			"NM_foil", "SP_foil", "MP_foil", "HP_foil", "PO_foil",
+			"NM_etched", "SP_etched", "MP_etched", "HP_etched", "PO_etched",
+		}
+		header = append(header, condKeys...)
+	}
+
+	err := w.Write(header)
+	if err != nil {
+		return err
+	}
+
+	for id := range pm {
+		for scraper, entry := range pm[id] {
+			var regular, foil, etched string
+			var regularQty, foilQty, etchedQty string
+
+			if entry.Regular != 0 {
+				regular = fmt.Sprintf("%0.2f", entry.Regular)
+				if shouldQty && entry.Qty != 0 {
+					regularQty = fmt.Sprintf("%d", entry.Qty)
+				}
+			}
+			if entry.Foil != 0 {
+				foil = fmt.Sprintf("%0.2f", entry.Foil)
+				if shouldQty && entry.QtyFoil != 0 {
+					foilQty = fmt.Sprintf("%d", entry.QtyFoil)
+				}
+			}
+			if entry.Etched != 0 {
+				etched = fmt.Sprintf("%0.2f", entry.Etched)
+				if shouldQty && entry.QtyEtched != 0 {
+					etchedQty = fmt.Sprintf("%d", entry.QtyEtched)
+				}
+			}
+
+			record := []string{
+				id,
+				scraper,
+				regular,
+				foil,
+				etched,
+			}
+			if shouldQty {
+				record = append(record, regularQty, foilQty, etchedQty)
+			}
+			if shouldCond {
+				for _, tag := range condKeys {
+					var priceStr string
+					price := entry.Conditions[tag]
+					if price != 0 {
+						priceStr = fmt.Sprintf("%0.2f", price)
+					}
+					record = append(record, priceStr)
+				}
+			}
+
+			err = w.Write(record)
+			if err != nil {
+				return err
+			}
+		}
+		w.Flush()
+	}
+	return nil
 }
