@@ -169,6 +169,9 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 	if qty {
 		msg += " with quantities"
 	}
+	if conds {
+		msg += " with conditions"
+	}
 
 	if DevMode {
 		log.Println(msg)
