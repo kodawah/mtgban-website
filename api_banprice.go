@@ -56,7 +56,7 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	storesOpt := GetParamFromSig(sig, "API")
-	if DevMode && storesOpt == "" {
+	if DevMode && !SigCheck && storesOpt == "" {
 		storesOpt = "DEV_ACCESS"
 	}
 	var enabledStores []string
