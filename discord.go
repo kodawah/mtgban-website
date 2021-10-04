@@ -482,7 +482,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				// Flags for later use
 				isCK := strings.Contains(field, "cardkingdom.com/mtg")
 				isCSI := strings.Contains(field, "coolstuffinc.com/page")
-				isTCG := strings.Contains(field, "shop.tcgplayer.com/")
+				isTCG := strings.Contains(field, "tcgplayer.com/product")
 
 				// Add the MTGBAN affiliation
 				if isCSI {
@@ -506,8 +506,18 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				if isCK {
 					title += " at Card Kingdom"
 				} else if isTCG {
-					if title == "Productsearch" {
-						title = "Your search"
+					// Sometimes there is the product id embedded in the URL,
+					// try to find it and use it to decorate the title
+					productId := strings.TrimPrefix(u.Path, "/product/")
+
+					if strings.Contains(productId, "/") {
+						productId = strings.TrimSuffix(productId, "/"+path.Base(u.Path))
+					}
+					productId = mtgmatcher.Tcg2UUID(productId)
+					co, err := mtgmatcher.GetUUID(productId)
+					if err == nil {
+						// Keep the edition first to mimic the normal style
+						title = fmt.Sprintf("Magic %s %s", co.Edition, co.Name)
 					}
 					title += " at TCGplayer"
 				}
