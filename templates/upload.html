@@ -433,6 +433,7 @@
                 </script>
 
                 <div class="indent sticky">
+                    <span class="anchor" id="top"></span>
                     <h2>Buylist Optimizer</h2>
                     <br>
                     <p>
@@ -443,7 +444,10 @@
                             {{$scraperKey := .}}
                             {{$entries := index $.Optimized $scraperKey}}
                             {{if $entries}}
-                                {{len $entries}} cards to <b>{{scraper_name $scraperKey}}</b>: $ {{printf "%.2f" (index $.OptimizedTotals $scraperKey)}}<br>
+                                <a class="btn default" href="#{{$scraperKey}}">
+                                    {{len $entries}} cards to <b>{{scraper_name $scraperKey}}</b>: $ {{printf "%.2f" (index $.OptimizedTotals $scraperKey)}}
+                                </a>
+                                <br>
                             {{end}}
                         {{end}}
                     </p>
@@ -453,7 +457,10 @@
                             {{$entries := index $.Optimized $scraperKey}}
                             {{if $entries}}
                                 <tr>
-                                    <b>{{scraper_name $scraperKey}}</b> - $ {{printf "%.2f" (index $.OptimizedTotals $scraperKey)}}<br>
+                                    <span class="anchor" id="{{$scraperKey}}"></span>
+                                    <a class="btn default" href="#top">
+                                        <b>{{scraper_name $scraperKey}}</b> - $ {{printf "%.2f" (index $.OptimizedTotals $scraperKey)}}<br>
+                                    </a>
                                     <table onmouseout="document.getElementById('hoverImage').src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';">
                                         {{range $entries}}
                                             {{$card := (index $.Metadata .)}}
