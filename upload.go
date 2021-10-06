@@ -63,7 +63,9 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		canChangeStores = true
 	}
 
-	canOptimize := DevMode
+	// Enable optimizer calculation if allowed for buylists
+	optimizerOpt, _ := strconv.ParseBool(GetParamFromSig(sig, "UploadOptimizer"))
+	canOptimize := optimizerOpt && blMode
 
 	// Set flags needed to show elements on the page ui
 	pageVars.IsBuylist = blMode
@@ -241,11 +243,12 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	pageVars.UploadEntries = uploadedData
 	pageVars.TotalEntries = map[string]float64{}
 
-	var optimizedResults map[string][]mtgmatcher.Card
+	var optimizedResults map[string][]string
 	var optimizedTotals map[string]float64
+	var highestTotal float64
 
 	if canOptimize {
-		optimizedResults = map[string][]mtgmatcher.Card{}
+		optimizedResults = map[string][]string{}
 		optimizedTotals = map[string]float64{}
 	}
 
@@ -320,12 +323,15 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if canOptimize && bestPrice != 0 {
-			optimizedResults[bestStore] = append(optimizedResults[bestStore], uploadedData[i].Card)
+			optimizedResults[bestStore] = append(optimizedResults[bestStore], uploadedData[i].CardId)
 			optimizedTotals[bestStore] += bestPrice
+			highestTotal += bestPrice
 		}
 	}
 	if canOptimize {
-		log.Println(optimizedResults, optimizedTotals)
+		pageVars.Optimized = optimizedResults
+		pageVars.OptimizedTotals = optimizedTotals
+		pageVars.HighestTotal = highestTotal
 	}
 
 	// Load up image links

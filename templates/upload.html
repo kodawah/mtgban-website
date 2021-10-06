@@ -379,12 +379,96 @@
                     </tr>
                 </table>
             </div>
+
+            {{if .Optimized}}
+                <div style="clear:both;"></div>
+
+                <hr style="margin-left:20px;" width=58%> <br>
+
+                <img id="hoverImage" src="" style="position:absolute; z-index: 3;"/>
+
+                <script type="text/javascript">
+                    var hoverImage = document.getElementById("hoverImage");
+
+                    document.addEventListener("mousemove", getMouse);
+
+                    setInterval(followMouse, 10);
+
+                    var mouse = {x:0, y:0}; //mouse.x, mouse.y
+
+                    function getMouse(e){
+                        mouse.x = e.pageX+10;
+                        mouse.y = e.pageY+10;
+                    }
+
+                    function followMouse(){
+                        hoverImage.style.left = mouse.x + "px";
+                        hoverImage.style.top = mouse.y + "px";
+                    }
+                </script>
+
+                <div class="indent sticky">
+                    <h2>Buylist Optimizer</h2>
+                    <br>
+                    <p>
+                        {{len .Optimized}} different buylists for a theoretical maximum of $ {{printf "%.2f" .HighestTotal}}
+                    </p>
+                    <p>
+                        {{range .ScraperKeys}}
+                            {{$scraperKey := .}}
+                            {{$entries := index $.Optimized $scraperKey}}
+                            {{if $entries}}
+                                {{len $entries}} cards to <b>{{scraper_name $scraperKey}}</b>: $ {{printf "%.2f" (index $.OptimizedTotals $scraperKey)}}<br>
+                            {{end}}
+                        {{end}}
+                    </p>
+                    <table>
+                        {{range .ScraperKeys}}
+                            {{$scraperKey := .}}
+                            {{$entries := index $.Optimized $scraperKey}}
+                            {{if $entries}}
+                                <tr>
+                                    <b>{{scraper_name $scraperKey}}</b> - $ {{printf "%.2f" (index $.OptimizedTotals $scraperKey)}}<br>
+                                    <table onmouseout="document.getElementById('hoverImage').src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';">
+                                        {{range $entries}}
+                                            {{$card := (index $.Metadata .)}}
+                                            <tr onmouseover="document.getElementById('hoverImage').src={{$card.ImageURL}};">
+                                                <td>
+                                                    <a href="{{$card.SearchURL}}">{{$card.Name}}</a>{{if $card.Reserved}} *{{end}}{{if $card.Stocks}} •{{end}}
+                                                </td>
+                                                <td>
+                                                    <i class="ss {{$card.Keyrune}} ss-1x ss-fw"></i> {{$card.Edition}}
+                                                </td>
+                                                <td>
+                                                    {{$card.Number}}
+                                                </td>
+                                                <td>
+                                                    {{if $card.Etched}}
+                                                        <span title="Etched">💫</span>
+                                                    {{else if $card.Foil}}
+                                                        <span title="Foil">✨</span>
+                                                    {{end}}
+                                                </td>
+                                                <td>
+                                                    {{$scraperEntries := (index $.CompactEntries .)}}
+                                                    {{$subEntry := (index $scraperEntries $scraperKey)}}
+                                                    $ {{printf "%.2f" (banprice2price $subEntry)}}
+                                                </td>
+                                            </tr>
+                                        {{end}}
+                                    </table>
+                                    <br>
+                                </tr>
+                            {{end}}
+                        {{end}}
+                    </table>
+                </div>
+            {{end}}
         {{end}}
     {{end}}
 
     <div style="clear:both;"></div>
 
-    <br>
     <div class="indent">
         {{if .HasReserved}}
             <h4>* = Part of the <a href="https://mtg.gamepedia.com/Reserved_List">Reserved List</a></h4>

@@ -695,6 +695,9 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 		case "Modern":
 			v.Set("UploadBuylistEnabled", "false")
 			v.Set("UploadChangeStoresEnabled", "true")
+		case "Root", "Admin":
+			v.Set("UploadOptimizer", "true")
+			fallthrough
 		default:
 			v.Set("UploadBuylistEnabled", "true")
 			v.Set("UploadChangeStoresEnabled", "true")

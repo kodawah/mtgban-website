@@ -145,6 +145,9 @@ type PageVars struct {
 	CanChangeStores bool
 	RemoteLinkURL   string
 	TotalQuantity   int
+	Optimized       map[string][]string
+	OptimizedTotals map[string]float64
+	HighestTotal    float64
 }
 
 type NavElem struct {
@@ -198,6 +201,7 @@ var OptionalFields = []string{
 	"NewsBridgeEnabled",
 	"UploadBuylistEnabled",
 	"UploadChangeStoresEnabled",
+	"UploadOptimizer",
 	"AnyEnabled",
 	"AnyExperimentsEnabled",
 	"API",
