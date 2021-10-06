@@ -510,12 +510,16 @@ func parseRow(indexMap map[string]int, record []string, foundHashes map[string]b
 	if found {
 		printing = strings.ToLower(record[indexMap["printing"]])
 	}
-	if printing == "y" || printing == "yes" || printing == "true" ||
-		strings.Contains(printing, "foil") ||
-		strings.Contains(conditions, "foil") ||
-		strings.Contains(strings.ToLower(res.Card.Variation), "foil") ||
-		strings.Contains(sku, "-f-") || strings.Contains(sku, "-fo-") {
+	switch printing {
+	case "y", "yes", "true", "t", "1":
 		res.Card.Foil = true
+	default:
+		if strings.Contains(printing, "foil") ||
+			strings.Contains(conditions, "foil") ||
+			strings.Contains(strings.ToLower(res.Card.Variation), "foil") ||
+			strings.Contains(sku, "-f-") || strings.Contains(sku, "-fo-") {
+			res.Card.Foil = true
+		}
 	}
 
 	_, found = indexMap["price"]
