@@ -258,18 +258,10 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 		cardId := uploadedData[i].CardId
 		for shorthand, banPrice := range results[cardId] {
+			price := getPrice(banPrice)
 			// Skip empty results
-			if banPrice == nil {
-				continue
-			}
-
-			// Grab the correct Price
-			price := banPrice.Regular
 			if price == 0 {
-				price = banPrice.Foil
-				if price == 0 {
-					price = banPrice.Etched
-				}
+				continue
 			}
 
 			// Adjust for quantity
@@ -280,6 +272,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 			// Add to totals
 			pageVars.TotalEntries[shorthand] += price
+			pageVars.TotalEntries[TCG_LOW] += getPrice(indexResults[cardId][TCG_LOW])
 
 			if !canOptimize {
 				continue
@@ -296,30 +289,6 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 					bestStore = shorthand
 				}
 			}
-		}
-
-		// Repeat for indexes
-		for shorthand, banPrice := range indexResults[cardId] {
-			// Only TCG Low
-			if shorthand != TCG_LOW {
-				continue
-			}
-
-			// Skip empty results
-			if banPrice == nil {
-				continue
-			}
-
-			// Grab the correct Price
-			price := banPrice.Regular
-			if price == 0 {
-				price = banPrice.Foil
-				if price == 0 {
-					price = banPrice.Etched
-				}
-			}
-
-			pageVars.TotalEntries[shorthand] += price
 		}
 
 		if canOptimize && bestPrice != 0 {
@@ -367,6 +336,23 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	// Touchdown!
 	render(w, "upload.html", pageVars)
+}
+
+func getPrice(banPrice *BanPrice) float64 {
+	if banPrice == nil {
+		return 0
+	}
+
+	// Grab the correct Price
+	price := banPrice.Regular
+	if price == 0 {
+		price = banPrice.Foil
+		if price == 0 {
+			price = banPrice.Etched
+		}
+	}
+
+	return price
 }
 
 func parseHeader(first []string) (map[string]int, error) {
