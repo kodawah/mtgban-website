@@ -65,7 +65,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	// Enable optimizer calculation if allowed for buylists
 	optimizerOpt, _ := strconv.ParseBool(GetParamFromSig(sig, "UploadOptimizer"))
-	canOptimize := optimizerOpt && blMode
+	canOptimize := (optimizerOpt || (DevMode && !SigCheck)) && blMode
 
 	// Set flags needed to show elements on the page ui
 	pageVars.IsBuylist = blMode
