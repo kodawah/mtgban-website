@@ -252,11 +252,25 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		optimizedTotals = map[string]float64{}
 	}
 
+	missingCounts := map[string]int{}
+	missingPrices := map[string]float64{}
+
 	for i := range uploadedData {
 		var bestPrice float64
 		var bestStore string
 
 		cardId := uploadedData[i].CardId
+
+		// Search for any missing entries (ie cards not sold or bought by a vendor)
+		for _, shorthand := range enabledStores {
+			_, found := results[cardId][shorthand]
+			if !found {
+				missingCounts[shorthand]++
+				missingPrices[shorthand] += getPrice(indexResults[cardId][TCG_LOW])
+			}
+		}
+
+		// Run summaries for each vendor
 		for shorthand, banPrice := range results[cardId] {
 			price := getPrice(banPrice)
 			// Skip empty results
@@ -302,6 +316,9 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		pageVars.OptimizedTotals = optimizedTotals
 		pageVars.HighestTotal = highestTotal
 	}
+
+	pageVars.MissingCounts = missingCounts
+	pageVars.MissingPrices = missingPrices
 
 	// Load up image links
 	for _, data := range uploadedData {

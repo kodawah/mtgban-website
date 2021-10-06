@@ -186,6 +186,7 @@
                         <li>If a card is missing in BAN Searchm it will be missing here too. In particular tokens and art series cards are not supported.</li>
                         <li>The <pre>aliasing error</pre> happens when a parsed card has multiple variations (such as basic land or a modern promo). To fix this make sure to include the card number or a description of the variant in your file.</li>
                         <li>A final per-store total row will be added at the end, taking into account the quantity information if present.</li>
+                        <li>Below that row, you will find a summary of how many cards were not found in any given store, and an estimation (using TCG Low) of the value missing.</li>
                         <li>If price or quantity data is found in your entries, it will be displayed above the results.</li>
                     </ul>
                     <li>If anything doesn't work, post your file on Discord and we'll take a look.</li>
@@ -328,10 +329,19 @@
                         <td>
                             <center>
                                 <h3>Totals</h3>
-                                <h6><br>Matches: {{len .CompactEntries}}/{{len .UploadEntries}}</h6>
-                                {{if ne .TotalQuantity 0}}
-                                    <h6>Count: {{.TotalQuantity}}</h6>
-                                {{end}}
+                                <div style="height: 2px">&nbsp;</div>
+                                <h6>Matches: {{len .CompactEntries}}/{{len .UploadEntries}}</h6>
+                                <h6>
+                                    {{if ne .TotalQuantity 0}}
+                                        Count: {{.TotalQuantity}}
+                                    {{else}}
+                                        &nbsp;
+                                    {{end}}
+                                </h6>
+                                <div style="height: 10px">&nbsp;</div>
+                                <h6>
+                                    No {{if $.IsBuylist}}buylist{{else}}retail{{end}} /<br>Alt. Estimate
+                                </h6>
                             </center>
                         </td>
                         <td>
@@ -358,6 +368,21 @@
                                                     <nobr>$ {{printf "%.2f" $price}}</nobr>
                                                 {{end}}
                                             </h4>
+                                        </td>
+                                    {{end}}
+                                </tr>
+                                <tr class="no-hover"  style="background-color:rgba(0, 0, 0, 0);">
+                                    {{range $.ScraperKeys}}
+                                        {{$price := (index $.MissingPrices .)}}
+                                        {{$count := (index $.MissingCounts .)}}
+                                        <td style="border:1px solid black">
+                                            <h6 style="text-align:center">
+                                                {{if $count}}
+                                                    {{$count}} / $ {{printf "%.2f" $price}}
+                                                {{else}}
+                                                -
+                                                {{end}}
+                                            </h6>
                                         </td>
                                     {{end}}
                                 </tr>
