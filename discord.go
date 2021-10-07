@@ -256,8 +256,7 @@ func search2fields(searchRes *searchResult) (fields []embedField) {
 						if tag == "TCG" {
 							subs[j] = strings.Replace(subs[j], "TCG Low", "TCG (Low/Market)", 1)
 						} else if tag == "MKM" {
-							subs[j] = strings.Replace(subs[j], "MKM Low", "MKM (Low/Trend)", 1)
-							extraSpaces = " "
+							subs[j] = strings.Replace(subs[j], "MKM Low", "MKM (Low/Trend) ", 1)
 						}
 						// Append the other price
 						subs[j] += fmt.Sprintf(" / $%0.2f", entry.Price)
