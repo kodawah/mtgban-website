@@ -215,20 +215,21 @@
                     </script>
                 {{end}}
 
-                <table class="searchResults">
+                <table>
                     <tr>
-                        <th colspan="4" class="stickyCategory"><h2 align=center>Sellers</h2></th>
+                        <th class="stickyCategory"><h2 align=center>Sellers</h2></th>
+                        <th class="stickyCategory"><h2 align=center>Buyers</h2></th>
                     </tr>
-                    {{range $cardId := .SellerKeys}}
+
+                    {{range $cardId := .AllKeys}}
                         {{$card := (index $.Metadata $cardId)}}
-                        {{$condsEntry := (index $.FoundSellers $cardId)}}
                         {{if eq $firstImg ""}}
                             {{$firstImg = $card.ImageURL}}
                             {{$firstPrint = $card.Printings}}
                         {{end}}
 
                         <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};" title="{{$card.Title}}">
-                            <th colspan="4" class="wrap stickyHeader" style="text-align: left; vertical-align: middle;">
+                            <th colspan="2" class="wrap stickyHeader" style="text-align: left; vertical-align: middle;">
                                 <table style="margin:0 0 0 18">
                                     <tr style="background-color:rgba(0, 0, 0, 0);">
                                         <td rowspan=2>
@@ -264,130 +265,104 @@
                                 </table>
                             </th>
                         </tr>
-                        {{range $conditions := $.CondKeys}}
-                            {{$entries := (index $condsEntry $conditions)}}
-                            {{if and (ne $conditions "INDEX") (not $.IsSealed)}}
-                                {{if $entries}}
-                                    <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};">
-                                        <td colspan="4"><i>Conditions: {{$conditions}}</i></th>
-                                    </tr>
-                                {{end}}
-                            {{end}}
-                            {{range $entries}}
-                                <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};">
-                                    <td>
-                                        <a class="btn normal" href="{{.URL}}" target="_blank" rel="nofollow">
-                                            {{.ScraperName}}
-                                            {{if ne $conditions "INDEX"}}
-                                                {{.Country}}
-                                            {{end}}
-                                        </a>
-                                    </td>
-                                    <td style="text-align: center; vertical-align: middle;">
-                                        $ {{printf "%.2f" .Price}}
-                                    </td>
-                                    {{if .IndexCombined}}
-                                        <td style="text-align: center; vertical-align: middle;">
-                                            /
-                                        </td>
-                                        <td style="text-align: center; vertical-align: middle;">
-                                            $ {{printf "%.2f" .Secondary}}
-                                        </td>
-                                    {{else}}
-                                        <td>
-                                        </td>
-                                        <td style="text-align: center; vertical-align: middle;">
-                                            {{if .ShowDirect}}
-                                                <img style="padding-top:4px;" src="img/misc/direct.png">
-                                            {{else if not .NoQuantity}}
-                                                {{.Quantity}}
-                                            {{end}}
-                                        </td>
+
+                        <tr class="no-hover" style="background-color:rgba(0, 0, 0, 0);">
+                            {{$condsEntry := (index $.FoundSellers $cardId)}}
+                            <td style="vertical-align: {{if not $condsEntry}}middle{{else}}top{{end}}">
+                                <table class="searchResults">
+                                    {{if not $condsEntry}}
+                                        <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};" style="background-color:rgba(0, 0, 0, 0);">
+                                            <td colspan="4">
+                                                <center>
+                                                    <i>No offers</i>
+                                                </center>
+                                            </td>
+                                        </tr>
                                     {{end}}
-                                </tr>
-                            {{end}}
-                        {{end}}
-                    {{end}}
-                    {{if ne .InfoMessage ""}}
-                        <tr>
-                            <td colspan="3" style="text-align: center; vertical-align: middle;">
-                                <h4><i>{{.InfoMessage}}</i></h4>
+                                    {{range $conditions := $.CondKeys}}
+                                        {{$entries := (index $condsEntry $conditions)}}
+                                        {{if and (ne $conditions "INDEX") (not $.IsSealed)}}
+                                            {{if $entries}}
+                                                <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};" style="background-color:rgba(0, 0, 0, 0);">
+                                                    <td colspan="4"><i>Conditions: {{$conditions}}</i></td>
+                                                </tr>
+                                            {{end}}
+                                        {{end}}
+                                        {{range $entries}}
+                                            <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};">
+                                                <td>
+                                                    <a class="btn normal" href="{{.URL}}" target="_blank" rel="nofollow">
+                                                        {{.ScraperName}}
+                                                        {{if ne $conditions "INDEX"}}
+                                                            {{.Country}}
+                                                        {{end}}
+                                                    </a>
+                                                </td>
+                                                <td style="text-align: center; vertical-align: middle;">
+                                                    $ {{printf "%.2f" .Price}}
+                                                </td>
+                                                {{if .IndexCombined}}
+                                                    <td style="text-align: center; vertical-align: middle;">
+                                                        /
+                                                    </td>
+                                                    <td style="text-align: center; vertical-align: middle;">
+                                                        $ {{printf "%.2f" .Secondary}}
+                                                    </td>
+                                                {{else}}
+                                                    <td>
+                                                    </td>
+                                                    <td style="text-align: center; vertical-align: middle;">
+                                                        {{if .ShowDirect}}
+                                                            <img style="padding-top:4px;" src="img/misc/direct.png">
+                                                        {{else if not .NoQuantity}}
+                                                            {{.Quantity}}
+                                                        {{end}}
+                                                    </td>
+                                                {{end}}
+                                            </tr>
+                                        {{end}}
+                                    {{end}}
+                                </table>
+                            </td>
+
+                            {{$entries := (index $.FoundVendors $cardId)}}
+                            <td style="vertical-align: {{if not $entries}}middle{{else}}top{{end}}">
+                                <table class="searchResults">
+                                    {{if not $entries}}
+                                        <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};" style="background-color:rgba(0, 0, 0, 0);">
+                                            <td colspan="4">
+                                                <center>
+                                                    <i>No offers</i>
+                                                </center>
+                                            </td>
+                                        </tr>
+                                    {{end}}
+
+                                    {{range $entries}}
+                                        <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};">
+                                            <td>
+                                                <a class="btn normal" href="{{.URL}}" target="_blank" rel="nofollow">
+                                                    {{.ScraperName}} {{.Country}}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                $ {{printf "%.2f" .Price}}
+                                            </td>
+                                            <td style="text-align: center; vertical-align: middle;">
+                                                {{if ne .Ratio 0.0}}{{printf "%.2f" .Ratio}} %{{end}}
+                                            </td>
+                                            <td style="text-align: center; vertical-align: middle;">
+                                                {{if ne .Quantity 0}}{{.Quantity}}{{end}}
+                                            </td>
+                                        </tr>
+                                    {{end}}
+                                </table>
                             </td>
                         </tr>
                     {{end}}
-                </table>
-
-                <table class="searchResults">
-                    <tr>
-                        <th colspan="4" class="stickyCategory"><h2 align=center>Buyers</h2></th>
-                    </tr>
-                    {{range $cardId := .VendorKeys}}
-                        {{$card := (index $.Metadata $cardId)}}
-                        {{$entries := (index $.FoundVendors $cardId)}}
-                        {{if eq $firstImg ""}}
-                            {{$firstImg = $card.ImageURL}}
-                            {{$firstPrint = $card.Printings}}
-                        {{end}}
-
-                        <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};" title="{{$card.Title}}">
-                            <th colspan="4" class="wrap stickyHeader" style="text-align: left; vertical-align: middle;">
-                                <table style="margin:0 0 0 18">
-                                    <tr style="background-color:rgba(0, 0, 0, 0);">
-                                        <td rowspan=2>
-                                            <i class="ss {{$card.Keyrune}} ss-2x ss-fw"></i>
-                                        </td>
-                                        <td width=100%>
-                                            <a href="{{$card.SearchURL}}">
-                                                {{$card.Name}}
-                                            </a>
-                                            {{if ne $card.Variant ""}}
-                                                <i>({{$card.Variant}})</i>
-                                            {{end}}
-                                            {{if $card.Reserved}}
-                                                *
-                                            {{end}}
-                                            {{if $card.Stocks}}
-                                                •
-                                            {{end}}
-                                        </td>
-                                        {{if eq $.ChartID ""}}
-                                            <td rowspan=2>
-                                                <span class="emoji">
-                                                    <a href="/search?chart={{$cardId}}" title="See historical data">📊</a>
-                                                </span>
-                                            </td>
-                                        {{end}}
-                                    </tr>
-                                    <tr style="background-color:rgba(0, 0, 0, 0);">
-                                        <td>
-                                            <h6>{{$card.Title}}</h6>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </th>
-                        </tr>
-                        {{range $entries}}
-                            <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};">
-                                <td>
-                                    <a class="btn normal" href="{{.URL}}" target="_blank" rel="nofollow">
-                                        {{.ScraperName}} {{.Country}}
-                                    </a>
-                                </td>
-                                <td>
-                                    $ {{printf "%.2f" .Price}}
-                                </td>
-                                <td style="text-align: center; vertical-align: middle;">
-                                    {{if ne .Ratio 0.0}}{{printf "%.2f" .Ratio}} %{{end}}
-                                </td>
-                                <td style="text-align: center; vertical-align: middle;">
-                                    {{if ne .Quantity 0}}{{.Quantity}}{{end}}
-                                </td>
-                            </tr>
-                        {{end}}
-                    {{end}}
                     {{if ne .InfoMessage ""}}
                         <tr>
-                            <td colspan="4" style="text-align: center; vertical-align: middle;">
+                            <td colspan="2" style="text-align: center; vertical-align: middle;">
                                 <h4><i>{{.InfoMessage}}</i></h4>
                             </td>
                         </tr>

@@ -124,8 +124,10 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Make a cardId arrays so that they can be sorted later
-	sortedKeysSeller := make([]string, 0, len(foundSellers))
-	sortedKeysVendor := make([]string, 0, len(foundVendors))
+	pageVars.SellerKeys = make([]string, 0, len(foundSellers))
+	pageVars.VendorKeys = make([]string, 0, len(foundVendors))
+	// Assume the same number of keys are found, will be reallocated if needed
+	allKeys := make([]string, 0, len(foundSellers))
 
 	// Load up image links
 	for cardId := range foundSellers {
@@ -139,7 +141,10 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		if pageVars.Metadata[cardId].Stocks {
 			pageVars.HasStocks = true
 		}
-		sortedKeysSeller = append(sortedKeysSeller, cardId)
+		pageVars.SellerKeys = append(pageVars.SellerKeys, cardId)
+
+		// Always append the card to the main list
+		allKeys = append(allKeys, cardId)
 	}
 	for cardId := range foundVendors {
 		_, found := pageVars.Metadata[cardId]
@@ -152,15 +157,18 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		if pageVars.Metadata[cardId].Stocks {
 			pageVars.HasStocks = true
 		}
-		sortedKeysVendor = append(sortedKeysVendor, cardId)
+		pageVars.VendorKeys = append(pageVars.VendorKeys, cardId)
+
+		// Append the card if it was not already added
+		_, found = foundSellers[cardId]
+		if !found {
+			allKeys = append(allKeys, cardId)
+		}
 	}
 
 	// Sort keys according to the sortSets() function, chronologically
-	sort.Slice(sortedKeysSeller, func(i, j int) bool {
-		return sortSets(sortedKeysSeller[i], sortedKeysSeller[j])
-	})
-	sort.Slice(sortedKeysVendor, func(i, j int) bool {
-		return sortSets(sortedKeysVendor[i], sortedKeysVendor[j])
+	sort.Slice(allKeys, func(i, j int) bool {
+		return sortSets(allKeys[i], allKeys[j])
 	})
 
 	// Optionally sort according to price
@@ -234,8 +242,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	pageVars.FoundSellers = foundSellers
 	pageVars.FoundVendors = foundVendors
-	pageVars.SellerKeys = sortedKeysSeller
-	pageVars.VendorKeys = sortedKeysVendor
+	pageVars.AllKeys = allKeys
 
 	// CHART ALL THE THINGS
 	if chartId != "" {

@@ -60,6 +60,7 @@ type PageVars struct {
 	InfoMessage    string
 	LastUpdate     string
 
+	AllKeys      []string
 	SellerKeys   []string
 	VendorKeys   []string
 	SearchQuery  string
