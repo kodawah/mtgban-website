@@ -40,6 +40,7 @@ var categoryEdition = map[string]string{
 
 var categoryOverrides = map[string]string{
 	"CC1":  "spellbook",
+	"CC2":  "spellbook",
 	"CM1":  "box",
 	"CMB1": "masters",
 	"PTG":  "box",
@@ -47,10 +48,10 @@ var categoryOverrides = map[string]string{
 
 var editionRenames = map[string]string{
 	"Duel Decks Anthology: Elves vs. Goblins": "Duel Decks Anthology",
-	"Magazine Inserts":                        "San Diego Comic-Con",
-	"Mystery Booster Playtest Cards":          "Mystery Booster Convention Edition",
-	"Mystery Booster Retail Edition Foils":    "Mystery Booster Retail Edition",
-	"World Championship Decks 1997":           "World Championship Decks",
+	"Media Inserts":                        "San Diego Comic-Con",
+	"Mystery Booster Playtest Cards":       "Mystery Booster Convention Edition",
+	"Mystery Booster Retail Edition Foils": "Mystery Booster Retail Edition",
+	"World Championship Decks 1997":        "World Championship Decks",
 }
 
 var editionSkips = map[string]string{
