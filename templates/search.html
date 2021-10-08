@@ -111,7 +111,7 @@
                 </ul>
              </div>
         {{else}}
-            <div class="indent sticky" style="top: 120px;">
+            <div class="indent sticky" style="top: 128px;">
                 <table style="float: left; background-color: var(--background)">
                     <tr class="no-hover" style="background-color: var(--background)">
                         <td>
@@ -215,7 +215,7 @@
                     </script>
                 {{end}}
 
-                <table>
+                <table style="background-color: var(--backgroundColor); float:left;">
                     <tr>
                         <th class="stickyCategory"><h2 align=center>Sellers</h2></th>
                         <th class="stickyCategory"><h2 align=center>Buyers</h2></th>
@@ -266,10 +266,10 @@
                             </th>
                         </tr>
 
-                        <tr class="no-hover" style="background-color:rgba(0, 0, 0, 0);">
+                        <tr class="no-hover" style="background-color:rgba(0,0,0,0);">
                             {{$condsEntry := (index $.FoundSellers $cardId)}}
-                            <td style="vertical-align: {{if not $condsEntry}}middle{{else}}top{{end}}">
-                                <table class="searchResults">
+                            <td style="vertical-align: {{if not $condsEntry}}middle{{else}}top{{end}}; padding: 0; margin: 0;">
+                                <table class="searchResults" style="margin: 0 6px 0 12px;">
                                     {{if not $condsEntry}}
                                         <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};" style="background-color:rgba(0, 0, 0, 0);">
                                             <td colspan="4">
@@ -283,8 +283,8 @@
                                         {{$entries := (index $condsEntry $conditions)}}
                                         {{if and (ne $conditions "INDEX") (not $.IsSealed)}}
                                             {{if $entries}}
-                                                <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};" style="background-color:rgba(0, 0, 0, 0);">
-                                                    <td colspan="4"><i>Conditions: {{$conditions}}</i></td>
+                                                <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};">
+                                                    <td colspan="4" style="padding-top: 8px; padding-bottom: 8px"><i>Conditions: {{$conditions}}</i></td>
                                                 </tr>
                                             {{end}}
                                         {{end}}
@@ -326,8 +326,8 @@
                             </td>
 
                             {{$entries := (index $.FoundVendors $cardId)}}
-                            <td style="vertical-align: {{if not $entries}}middle{{else}}top{{end}}">
-                                <table class="searchResults">
+                            <td style="vertical-align: {{if not $entries}}middle{{else}}top{{end}}; padding: 0; margin: 0;">
+                                <table class="searchResults" style="margin: 0 12px 0 6px">
                                     {{if not $entries}}
                                         <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};" style="background-color:rgba(0, 0, 0, 0);">
                                             <td colspan="4">
