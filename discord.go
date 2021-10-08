@@ -481,7 +481,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				// Flags for later use
 				isCK := strings.Contains(field, "cardkingdom.com/mtg")
 				isCSI := strings.Contains(field, "coolstuffinc.com/page")
-				isTCG := strings.Contains(field, "tcgplayer.com/product")
+				isTCG := strings.Contains(field, "tcgplayer.com/")
 
 				// Add the MTGBAN affiliation
 				if isCSI {
@@ -505,6 +505,10 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				if isCK {
 					title += " at Card Kingdom"
 				} else if isTCG {
+					// The old style links do not have the product id and have an extra element
+					if strings.HasSuffix(u.Path, "/listing") {
+						title = strings.Title(strings.Replace(path.Base(strings.TrimSuffix(u.Path, "/listing")), "-", " ", -1))
+					}
 					// Sometimes there is the product id embedded in the URL,
 					// try to find it and use it to decorate the title
 					productId := strings.TrimPrefix(u.Path, "/product/")
