@@ -270,6 +270,9 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
+		// Summary of the entries
+		pageVars.TotalEntries[TCG_LOW] += getPrice(indexResults[cardId][TCG_LOW])
+
 		// Run summaries for each vendor
 		for shorthand, banPrice := range results[cardId] {
 			price := getPrice(banPrice)
@@ -286,7 +289,6 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 			// Add to totals
 			pageVars.TotalEntries[shorthand] += price
-			pageVars.TotalEntries[TCG_LOW] += getPrice(indexResults[cardId][TCG_LOW])
 
 			if !canOptimize {
 				continue
