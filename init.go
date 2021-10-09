@@ -516,7 +516,10 @@ var ScraperOptions = map[string]*scraperOption{
 	"cardtrader": &scraperOption{
 		DevEnabled: true,
 		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
-			scraper := cardtrader.NewScraperMarket(Config.Api["cardtrader"])
+			scraper, err := cardtrader.NewScraperMarket(Config.Api["cardtrader"])
+			if err != nil {
+				return nil, err
+			}
 			scraper.LogCallback = logger.Printf
 			scraper.ShareCode = Config.Affiliate["CT"]
 			return scraper, nil
