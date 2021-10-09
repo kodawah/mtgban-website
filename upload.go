@@ -256,6 +256,11 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	missingPrices := map[string]float64{}
 
 	for i := range uploadedData {
+		// Skip unmatched cards
+		if uploadedData[i].MismatchError != nil {
+			continue
+		}
+
 		var bestPrice float64
 		var bestStore string
 
