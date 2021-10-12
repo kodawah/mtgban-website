@@ -194,10 +194,8 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 			variant = "Showcase"
 		case co.HasFrameEffect(mtgjson.FrameEffectExtendedArt):
 			variant = "Extended Art"
-		case co.BorderColor == mtgjson.BorderColorBorderless && co.SetCode != "STA":
+		case co.BorderColor == mtgjson.BorderColorBorderless:
 			variant = "Borderless"
-		case (co.SetCode == "MH2" || co.SetCode == "H1R") && co.FrameVersion == "1997":
-			variant = "Retro Frame"
 		}
 	}
 
@@ -208,6 +206,18 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 	case "STA":
 		num, _ := strconv.Atoi(co.Number)
 		isJPN = num > 63
+		// Strip "Boderless"
+		variant = ""
+	case "PAFR":
+		if strings.HasSuffix(co.Number, "a") {
+			variant = "Ampersand"
+		}
+	case "MH2", "H1R":
+		if co.FrameVersion == "1997" {
+			variant = "Retro Frame"
+		} else if co.HasFrameEffect(mtgjson.FrameEffectShowcase) {
+			variant = "Sketch"
+		}
 	}
 
 	if isJPN {
