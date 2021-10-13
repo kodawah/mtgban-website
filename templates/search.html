@@ -216,10 +216,12 @@
                 {{end}}
 
                 <table style="background-color: var(--backgroundColor); float:left;">
-                    <tr>
-                        <th class="stickyCategory"><h2 align=center>Sellers</h2></th>
-                        <th class="stickyCategory"><h2 align=center>Buyers</h2></th>
-                    </tr>
+                    {{if .AllKeys}}
+                        <tr>
+                            <th class="stickyCategory"><h2 align=center>Sellers</h2></th>
+                            <th class="stickyCategory"><h2 align=center>Buyers</h2></th>
+                        </tr>
+                    {{end}}
 
                     {{range $cardId := .AllKeys}}
                         {{$card := (index $.Metadata $cardId)}}
