@@ -352,6 +352,10 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	if pageVars.GlobalMode {
 		opts.MinSpread = MinSpreadGlobal
 		opts.MaxSpread = MaxSpreadGlobal
+
+		if source.Info().Shorthand == TCG_DIRECT {
+			opts.Conditions = []string{"MP", "HP", "PO"}
+		}
 	}
 	if noposi {
 		opts.MinSpread = MinSpreadNegative
