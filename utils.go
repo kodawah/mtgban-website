@@ -69,7 +69,7 @@ func keyruneForCardSet(cardId string) string {
 
 	out := "ss-" + strings.ToLower(keyrune)
 	rarity := co.Card.Rarity
-	if rarity == "special" {
+	if rarity == "special" || co.Etched {
 		rarity = "timeshifted"
 	}
 	// Skip setting rarity for common, so that a color is not forcefully set
