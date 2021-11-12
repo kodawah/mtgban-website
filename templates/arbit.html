@@ -146,7 +146,7 @@
                         <th class="stickyHeaderTiny">Card Name</th>
                         <th class="stickyHeaderTiny">Edition</th>
                         <th class="stickyHeaderTiny"><center>#</center></th>
-                        <th class="stickyHeaderTiny">F/NF</th>
+                        <th class="stickyHeaderTiny">Finish</th>
                         {{if not .HasConditions}}
                             <th class="stickyHeaderTiny">Conditions</th>
                         {{end}}
@@ -202,7 +202,12 @@
                                 {{(index $.Metadata .CardId).Number}}
                             </td>
                             <td>
-                                {{if (index $.Metadata .CardId).Foil}}FOIL{{end}}
+                                {{$card := (index $.Metadata .CardId)}}
+                                {{if $card.Etched}}
+                                    <center title="Etched">💫</center>
+                                {{else if $card.Foil}}
+                                    <center title="Foil">✨</center>
+                                {{end}}
                             </td>
                             {{if not $save.HasConditions}}
                                 <td>
