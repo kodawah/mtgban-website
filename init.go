@@ -471,7 +471,6 @@ var ScraperOptions = map[string]*scraperOption{
 		},
 	},
 	"cardmarket": &scraperOption{
-		DevEnabled: true,
 		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper, err := cardmarket.NewScraperIndex(Config.Api["mkm_app_token"], Config.Api["mkm_app_secret"])
 			if err != nil {
