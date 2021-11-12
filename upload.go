@@ -390,7 +390,7 @@ func parseHeader(first []string) (map[string]int, error) {
 	for i, field := range first {
 		field = strings.ToLower(field)
 		switch {
-        case field == "id" || (strings.Contains(field, "id") && (strings.Contains(field, "tcg") || strings.Contains(field, "scryfall"))):
+		case field == "id" || (strings.Contains(field, "id") && (strings.Contains(field, "tcg") || strings.Contains(field, "scryfall"))):
 			_, found := indexMap["id"]
 			if !found {
 				indexMap["id"] = i
