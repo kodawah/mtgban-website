@@ -21,8 +21,9 @@ import (
 )
 
 const (
-	MaxUploadEntries  = 150
-	MaxUploadFileSize = 5 << 20
+	MaxUploadEntries    = 150
+	MaxUploadProEntries = 2000
+	MaxUploadFileSize   = 5 << 20
 
 	TooManyEntriesMessage = "Note: you reached the maximum number of entries supported by this tool"
 )
@@ -187,18 +188,23 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	start := time.Now()
 
+	maxRows := MaxUploadEntries
+	if canOptimize {
+		maxRows = MaxUploadProEntries
+	}
+
 	// Load data
 	var uploadedData []UploadEntry
 	if len(hashes) != 0 {
 		uploadedData, err = loadHashes(hashes)
 	} else if gdocURL != "" {
-		uploadedData, err = loadSpreadsheet(gdocURL)
+		uploadedData, err = loadSpreadsheet(gdocURL, maxRows)
 	} else if strings.HasSuffix(handler.Filename, ".xls") {
-		uploadedData, err = loadOldXls(file)
+		uploadedData, err = loadOldXls(file, maxRows)
 	} else if strings.HasSuffix(handler.Filename, ".xlsx") {
-		uploadedData, err = loadXlsx(file)
+		uploadedData, err = loadXlsx(file, maxRows)
 	} else {
-		uploadedData, err = loadCsv(file, ',')
+		uploadedData, err = loadCsv(file, ',', maxRows)
 	}
 	if err != nil {
 		pageVars.WarningMessage = err.Error()
@@ -213,7 +219,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check not too many entries got uploaded
-	if len(cardIds) >= MaxUploadEntries {
+	if len(cardIds) >= maxRows {
 		pageVars.InfoMessage = TooManyEntriesMessage
 	}
 
@@ -561,7 +567,7 @@ func loadHashes(hashes []string) ([]UploadEntry, error) {
 	return uploadEntries, nil
 }
 
-func loadSpreadsheet(link string) ([]UploadEntry, error) {
+func loadSpreadsheet(link string, maxRows int) ([]UploadEntry, error) {
 	u, err := url.Parse(link)
 	if err != nil {
 		return nil, err
@@ -607,7 +613,7 @@ func loadSpreadsheet(link string) ([]UploadEntry, error) {
 	var uploadEntries []UploadEntry
 	for {
 		i++
-		if i > MaxUploadEntries || i >= len(sheet.Rows) {
+		if i > maxRows || i >= len(sheet.Rows) {
 			break
 		} else if len(record) != len(sheet.Rows[i]) {
 			var res UploadEntry
@@ -631,7 +637,7 @@ func loadSpreadsheet(link string) ([]UploadEntry, error) {
 	return uploadEntries, nil
 }
 
-func loadOldXls(reader io.ReadSeeker) ([]UploadEntry, error) {
+func loadOldXls(reader io.ReadSeeker, maxRows int) ([]UploadEntry, error) {
 	f, err := xls.OpenReader(reader, "")
 	if err != nil {
 		return nil, err
@@ -667,7 +673,7 @@ func loadOldXls(reader io.ReadSeeker) ([]UploadEntry, error) {
 	var uploadEntries []UploadEntry
 	for {
 		i++
-		if i > MaxUploadEntries || i >= int(sheet.MaxRow) {
+		if i > maxRows || i >= int(sheet.MaxRow) {
 			break
 		} else if len(record) != sheet.Row(i).LastCol() {
 			var res UploadEntry
@@ -691,7 +697,7 @@ func loadOldXls(reader io.ReadSeeker) ([]UploadEntry, error) {
 	return uploadEntries, nil
 }
 
-func loadXlsx(reader io.Reader) ([]UploadEntry, error) {
+func loadXlsx(reader io.Reader, maxRows int) ([]UploadEntry, error) {
 	f, err := excelize.OpenReader(reader)
 	if err != nil {
 		return nil, err
@@ -731,7 +737,7 @@ func loadXlsx(reader io.Reader) ([]UploadEntry, error) {
 	var uploadEntries []UploadEntry
 	for {
 		i++
-		if i > MaxUploadEntries || i >= len(rows) {
+		if i > maxRows || i >= len(rows) {
 			break
 		} else if len(rows[i]) != len(rows[0]) {
 			var res UploadEntry
@@ -751,7 +757,7 @@ func loadXlsx(reader io.Reader) ([]UploadEntry, error) {
 	return uploadEntries, nil
 }
 
-func loadCsv(reader io.ReadSeeker, comma rune) ([]UploadEntry, error) {
+func loadCsv(reader io.ReadSeeker, comma rune, maxRows int) ([]UploadEntry, error) {
 	csvReader := csv.NewReader(reader)
 
 	csvReader.TrimLeadingSpace = true
@@ -779,7 +785,7 @@ func loadCsv(reader io.ReadSeeker, comma rune) ([]UploadEntry, error) {
 		if err != nil {
 			return nil, err
 		}
-		return loadCsv(reader, '\t')
+		return loadCsv(reader, '\t', maxRows)
 	}
 
 	indexMap, err := parseHeader(first)
@@ -792,7 +798,7 @@ func loadCsv(reader io.ReadSeeker, comma rune) ([]UploadEntry, error) {
 	var uploadEntries []UploadEntry
 	for {
 		i++
-		if i > MaxUploadEntries {
+		if i > maxRows {
 			break
 		}
 
