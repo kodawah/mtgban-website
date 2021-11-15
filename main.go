@@ -649,7 +649,10 @@ func render(w http.ResponseWriter, tmpl string, pageVars PageVars) {
 			if p.Regular != 0 {
 				return p.Regular
 			}
-			return p.Foil
+			if p.Foil != 0 {
+				return p.Foil
+			}
+			return p.Etched
 		},
 		"slice_has": func(s []string, p string) bool {
 			return SliceStringHas(s, p)
