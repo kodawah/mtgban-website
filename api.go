@@ -26,6 +26,21 @@ type ck2id struct {
 
 var CKAPIMutex sync.RWMutex
 var CKAPIOutput map[string]*ck2id
+var CKAPIData []cardkingdom.CKCard
+
+func CKMirrorAPI(w http.ResponseWriter, r *http.Request) {
+	var pricelist struct {
+		Data []cardkingdom.CKCard `json:"list"`
+	}
+	pricelist.Data = CKAPIData
+
+	err := json.NewEncoder(w).Encode(&pricelist)
+	if err != nil {
+		log.Println(err)
+		w.Write([]byte(`{"error": "` + err.Error() + `"}`))
+		return
+	}
+}
 
 func prepareCKAPI() error {
 	log.Println("Updating CK prices for API users")
@@ -36,6 +51,7 @@ func prepareCKAPI() error {
 		log.Println(err)
 		return err
 	}
+	CKAPIData = list
 
 	// Backup option for stashing CK data
 	rdbRT := ScraperOptions["cardkingdom"].RDBs["retail"]
