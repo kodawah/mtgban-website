@@ -40,7 +40,7 @@ type SearchEntry struct {
 	Secondary     float64
 }
 
-var re = regexp.MustCompile(`(s|c|f|sm|cn|vndr|r|all|m):(("([^"]+)"|\S+))+`)
+var re = regexp.MustCompile(`(s|c|f|sm|cn|vndr|r|all|m|price)[:><](("([^"]+)"|\S+))+`)
 
 func Search(w http.ResponseWriter, r *http.Request) {
 	sig := getSignatureFromCookies(r)
@@ -356,6 +356,12 @@ func parseSearchOptions(query string) (string, map[string]string) {
 		query = strings.Replace(query, field, "", 1)
 
 		index := strings.Index(field, ":")
+		if index == -1 {
+			index = strings.Index(field, "<")
+		}
+		if index == -1 {
+			index = strings.Index(field, ">")
+		}
 		code := field[index+1:]
 
 		switch {
@@ -380,6 +386,10 @@ func parseSearchOptions(query string) (string, map[string]string) {
 			ignore, _ = strconv.ParseBool(code)
 		case strings.HasPrefix(field, "m:"):
 			options["mode"] = code
+		case strings.HasPrefix(field, "price>"):
+			options["price_greater_than"] = fixupStoreCode(code)
+		case strings.HasPrefix(field, "price<"):
+			options["price_less_than"] = fixupStoreCode(code)
 		}
 	}
 
@@ -563,6 +573,52 @@ func shouldSkipCard(query, cardId string, options map[string]string) bool {
 	return false
 }
 
+func shouldSkipSellPrice(cardId string, options map[string]string, refPrice float64) bool {
+	for _, tag := range []string{
+		"price_greater_than",
+		"price_less_than",
+	} {
+		code, found := options[tag]
+		if !found {
+			continue
+		}
+
+		price, err := strconv.ParseFloat(code, 64)
+		if err != nil {
+			for _, seller := range Sellers {
+				if seller != nil && strings.ToLower(seller.Info().Shorthand) == strings.ToLower(code) {
+					inv, err := seller.Inventory()
+					if err != nil {
+						continue
+					}
+					entries, found := inv[cardId]
+					if !found {
+						continue
+					}
+					price = entries[0].Price
+					break
+				}
+			}
+		}
+		if price == 0 {
+			continue
+		}
+
+		switch tag {
+		case "price_greater_than":
+			if price > refPrice {
+				return true
+			}
+		case "price_less_than":
+			if price < refPrice {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
 func searchSellers(query string, blocklist []string, options map[string]string) (foundSellers map[string]map[string][]SearchEntry, tooMany bool) {
 	// Allocate memory
 	foundSellers = map[string]map[string][]SearchEntry{}
@@ -616,6 +672,11 @@ func searchSellers(query string, blocklist []string, options map[string]string) 
 					if !SliceStringHas(filters, entry.Conditions) {
 						continue
 					}
+				}
+
+				// Skip cards that don't match desired pricing
+				if shouldSkipSellPrice(cardId, options, entry.Price) {
+					continue
 				}
 
 				// No price no dice
