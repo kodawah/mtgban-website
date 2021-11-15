@@ -329,6 +329,20 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	render(w, "search.html", pageVars)
 }
 
+func fixupStoreCode(code string) string {
+	switch code {
+	case "TCG_LOW":
+		code = TCG_LOW
+	case "TCG_MARKET":
+		code = TCG_MARKET
+	case "TCG_PLAYER":
+		code = TCG_MAIN
+	case "TCG_DIRECT":
+		code = TCG_DIRECT
+	}
+	return strings.ToLower(code)
+}
+
 func parseSearchOptions(query string) (string, map[string]string) {
 	// Filter out any element from the search syntax
 	options := map[string]string{}
@@ -360,12 +374,8 @@ func parseSearchOptions(query string) (string, map[string]string) {
 		case strings.HasPrefix(field, "sm:"):
 			options["search_mode"] = strings.ToLower(code)
 		case strings.HasPrefix(field, "vndr:"):
-			options["scraper"] = strings.ToUpper(code)
-			// Hack to support the various subseller names of tcg
-			if strings.Contains(options["scraper"], "TCG") {
-				options["scraper"] = strings.Replace(options["scraper"], "TCG", "TCG Player,TCGMkt", 1)
-			}
-			// Hack to show all versions of a card
+			options["scraper"] = fixupStoreCode(code)
+		// Hack to show all versions of a card
 		case strings.HasPrefix(field, "all:"):
 			ignore, _ = strconv.ParseBool(code)
 		case strings.HasPrefix(field, "m:"):
@@ -572,7 +582,7 @@ func searchSellers(query string, blocklist []string, options map[string]string) 
 		// Skip any unwanted sellers
 		if options["scraper"] != "" {
 			filters := strings.Split(options["scraper"], ",")
-			if !SliceStringHas(filters, seller.Info().Shorthand) {
+			if !SliceStringHas(filters, strings.ToLower(seller.Info().Shorthand)) {
 				continue
 			}
 		}
@@ -679,7 +689,7 @@ func searchVendors(query string, blocklist []string, options map[string]string) 
 
 		if options["scraper"] != "" {
 			filters := strings.Split(options["scraper"], ",")
-			if !SliceStringHas(filters, vendor.Info().Shorthand) {
+			if !SliceStringHas(filters, strings.ToLower(vendor.Info().Shorthand)) {
 				continue
 			}
 		}
