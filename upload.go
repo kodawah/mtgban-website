@@ -411,7 +411,7 @@ func parseHeader(first []string) (map[string]int, error) {
 			if !found {
 				indexMap["edition"] = i
 			}
-		case strings.Contains(field, "number") || strings.Contains(field, "variant") || strings.Contains(field, "variation"):
+		case strings.Contains(field, "number") || strings.Contains(field, "variant") || strings.Contains(field, "variation") || strings.Contains(field, "version"):
 			_, found := indexMap["variant"]
 			if !found {
 				indexMap["variant"] = i
