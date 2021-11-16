@@ -98,6 +98,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	start := time.Now()
+
 	// Keep track of what was searched
 	pageVars.SearchQuery = query
 	pageVars.SearchBest = readSetFlag(w, r, "b", "MTGBANSearchPref")
@@ -321,12 +323,21 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		user := GetParamFromSig(sig, "UserEmail")
-		msg := fmt.Sprintf("[%s] from %s by %s", query, source, user)
+		msg := fmt.Sprintf("[%s] from %s by %s (took %v)", query, source, user, time.Since(start))
 		Notify("search", msg)
 		LogPages["Search"].Println(msg)
+		if DevMode {
+			log.Println(msg)
+		}
 	}
 
+	if DevMode {
+		start = time.Now()
+	}
 	render(w, "search.html", pageVars)
+	if DevMode {
+		log.Println("render took", time.Since(start))
+	}
 }
 
 func fixupStoreCode(code string) string {
