@@ -795,7 +795,7 @@ func searchSellersFirstResult(query string, options map[string]string, index boo
 	}
 
 	// Search
-	foundSellers, _ := searchSellers(query, skipped, options)
+	foundSellers := searchSellers(query, skipped, options)
 	if len(foundSellers) == 0 {
 		return
 	}
@@ -875,7 +875,7 @@ func searchVendorsFirstResult(query string, options map[string]string) (results 
 		}
 	}
 
-	foundVendors, _ := searchVendors(query, skipped, options)
+	foundVendors := searchVendors(query, skipped, options)
 	if len(foundVendors) == 0 {
 		return
 	}

@@ -109,14 +109,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	// SEARCH
 	cleanQuery, options := parseSearchOptions(query)
-	foundSellers, foundVendors, tooMany := searchParallel(cleanQuery, options, blocklistRetail, blocklistBuylist)
+	foundSellers, foundVendors := searchParallel(cleanQuery, options, blocklistRetail, blocklistBuylist)
 
 	pageVars.IsSealed = options["mode"] == "sealed"
-
-	// Display a message if there are too many entries
-	if tooMany {
-		pageVars.InfoMessage = TooManyMessage
-	}
 
 	// Early exit if there no matches are found
 	if len(foundSellers) == 0 && len(foundVendors) == 0 {
@@ -146,6 +141,12 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	sort.Slice(allKeys, func(i, j int) bool {
 		return sortSets(allKeys[i], allKeys[j])
 	})
+
+	// Trim too long search results
+	if len(allKeys) > MaxSearchResults {
+		pageVars.InfoMessage = TooManyMessage
+		allKeys = allKeys[:MaxSearchResults]
+	}
 
 	// Load up image links and other metadata
 	for _, cardId := range allKeys {
@@ -619,7 +620,7 @@ func shouldSkipSellPrice(cardId string, options map[string]string, refPrice floa
 	return false
 }
 
-func searchSellers(query string, blocklist []string, options map[string]string) (foundSellers map[string]map[string][]SearchEntry, tooMany bool) {
+func searchSellers(query string, blocklist []string, options map[string]string) (foundSellers map[string]map[string][]SearchEntry) {
 	// Allocate memory
 	foundSellers = map[string]map[string][]SearchEntry{}
 
@@ -687,11 +688,6 @@ func searchSellers(query string, blocklist []string, options map[string]string) 
 				// Check if card already has any entry
 				_, found := foundSellers[cardId]
 				if !found {
-					// Skip when you have too many results
-					if len(foundSellers) > MaxSearchResults {
-						tooMany = true
-						continue
-					}
 					foundSellers[cardId] = map[string][]SearchEntry{}
 				}
 
@@ -735,7 +731,7 @@ func searchSellers(query string, blocklist []string, options map[string]string) 
 	return
 }
 
-func searchVendors(query string, blocklist []string, options map[string]string) (foundVendors map[string][]SearchEntry, tooMany bool) {
+func searchVendors(query string, blocklist []string, options map[string]string) (foundVendors map[string][]SearchEntry) {
 	foundVendors = map[string][]SearchEntry{}
 
 	for i, vendor := range Vendors {
@@ -785,10 +781,6 @@ func searchVendors(query string, blocklist []string, options map[string]string) 
 
 			_, found := foundVendors[cardId]
 			if !found {
-				if len(foundVendors) > MaxSearchResults {
-					tooMany = true
-					continue
-				}
 				foundVendors[cardId] = []SearchEntry{}
 			}
 			name := vendor.Info().Name
@@ -811,17 +803,16 @@ func searchVendors(query string, blocklist []string, options map[string]string) 
 	return
 }
 
-func searchParallel(query string, options map[string]string, blocklistRetail, blocklistBuylist []string) (foundSellers map[string]map[string][]SearchEntry, foundVendors map[string][]SearchEntry, tooMany bool) {
-	var manySellers, manyVendors bool
+func searchParallel(query string, options map[string]string, blocklistRetail, blocklistBuylist []string) (foundSellers map[string]map[string][]SearchEntry, foundVendors map[string][]SearchEntry) {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
 	go func() {
-		foundSellers, manySellers = searchSellers(query, blocklistRetail, options)
+		foundSellers = searchSellers(query, blocklistRetail, options)
 		wg.Done()
 	}()
 	go func() {
-		foundVendors, manyVendors = searchVendors(query, blocklistBuylist, options)
+		foundVendors = searchVendors(query, blocklistBuylist, options)
 		wg.Done()
 	}()
 
@@ -835,7 +826,7 @@ func searchParallel(query string, options map[string]string, blocklistRetail, bl
 		return searchParallel(query, options, blocklistRetail, blocklistBuylist)
 	}
 
-	return foundSellers, foundVendors, manySellers || manyVendors
+	return foundSellers, foundVendors
 }
 
 func sortSets(uuidI, uuidJ string) bool {
