@@ -129,36 +129,14 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	// Assume the same number of keys are found, will be reallocated if needed
 	allKeys := make([]string, 0, len(foundSellers))
 
-	// Load up image links
+	// Append keys to the main array
 	for cardId := range foundSellers {
-		_, found := pageVars.Metadata[cardId]
-		if !found {
-			pageVars.Metadata[cardId] = uuid2card(cardId, false, true)
-		}
-		if pageVars.Metadata[cardId].Reserved {
-			pageVars.HasReserved = true
-		}
-		if pageVars.Metadata[cardId].Stocks {
-			pageVars.HasStocks = true
-		}
-
 		// Always append the card to the main list
 		allKeys = append(allKeys, cardId)
 	}
 	for cardId := range foundVendors {
-		_, found := pageVars.Metadata[cardId]
-		if !found {
-			pageVars.Metadata[cardId] = uuid2card(cardId, false, true)
-		}
-		if pageVars.Metadata[cardId].Reserved {
-			pageVars.HasReserved = true
-		}
-		if pageVars.Metadata[cardId].Stocks {
-			pageVars.HasStocks = true
-		}
-
 		// Append the card if it was not already added
-		_, found = foundSellers[cardId]
+		_, found := foundSellers[cardId]
 		if !found {
 			allKeys = append(allKeys, cardId)
 		}
@@ -168,6 +146,20 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	sort.Slice(allKeys, func(i, j int) bool {
 		return sortSets(allKeys[i], allKeys[j])
 	})
+
+	// Load up image links and other metadata
+	for _, cardId := range allKeys {
+		_, found := pageVars.Metadata[cardId]
+		if !found {
+			pageVars.Metadata[cardId] = uuid2card(cardId, false, true)
+		}
+		if pageVars.Metadata[cardId].Reserved {
+			pageVars.HasReserved = true
+		}
+		if pageVars.Metadata[cardId].Stocks {
+			pageVars.HasStocks = true
+		}
+	}
 
 	// Optionally sort according to price
 	if pageVars.SearchBest {
