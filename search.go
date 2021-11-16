@@ -126,8 +126,6 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Make a cardId arrays so that they can be sorted later
-	pageVars.SellerKeys = make([]string, 0, len(foundSellers))
-	pageVars.VendorKeys = make([]string, 0, len(foundVendors))
 	// Assume the same number of keys are found, will be reallocated if needed
 	allKeys := make([]string, 0, len(foundSellers))
 
@@ -143,7 +141,6 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		if pageVars.Metadata[cardId].Stocks {
 			pageVars.HasStocks = true
 		}
-		pageVars.SellerKeys = append(pageVars.SellerKeys, cardId)
 
 		// Always append the card to the main list
 		allKeys = append(allKeys, cardId)
@@ -159,7 +156,6 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		if pageVars.Metadata[cardId].Stocks {
 			pageVars.HasStocks = true
 		}
-		pageVars.VendorKeys = append(pageVars.VendorKeys, cardId)
 
 		// Append the card if it was not already added
 		_, found = foundSellers[cardId]

@@ -61,8 +61,6 @@ type PageVars struct {
 	LastUpdate     string
 
 	AllKeys      []string
-	SellerKeys   []string
-	VendorKeys   []string
 	SearchQuery  string
 	SearchBest   bool
 	CondKeys     []string
@@ -137,6 +135,8 @@ type PageVars struct {
 	IndexEntries    map[string]map[string]*BanPrice
 	ScraperKeys     []string
 	IndexKeys       []string
+	SellerKeys      []string
+	VendorKeys      []string
 	UploadEntries   []UploadEntry
 	IsBuylist       bool
 	TotalEntries    map[string]float64
