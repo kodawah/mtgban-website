@@ -171,7 +171,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	// Optionally sort according to price
 	if pageVars.SearchBest {
-		for cardId := range foundSellers {
+		for _, cardId := range allKeys {
 			for cond := range foundSellers[cardId] {
 				// These entries are special, do not sort them
 				if cond == "INDEX" {
@@ -181,11 +181,12 @@ func Search(w http.ResponseWriter, r *http.Request) {
 					return foundSellers[cardId][cond][i].Price < foundSellers[cardId][cond][j].Price
 				})
 			}
-		}
-		for cardId := range foundVendors {
-			sort.Slice(foundVendors[cardId], func(i, j int) bool {
-				return foundVendors[cardId][i].Price > foundVendors[cardId][j].Price
-			})
+			_, found := foundVendors[cardId]
+			if found {
+				sort.Slice(foundVendors[cardId], func(i, j int) bool {
+					return foundVendors[cardId][i].Price > foundVendors[cardId][j].Price
+				})
+			}
 		}
 	}
 
