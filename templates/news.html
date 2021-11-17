@@ -207,11 +207,11 @@
                             {{if ne .CurrentIndex 0}}
                                 <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index=&filter={{.FilterSet}}&rarity={{$.FilterRarity}}
                                     ">&lt;</a>
-                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index={{.PrevIndex}}&filter={{.FilterSet}}&rarity={{$.FilterRarity}}">◀</a>
+                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index={{.PrevIndex}}&filter={{.FilterSet}}&rarity={{$.FilterRarity}}"><i class="arrow left"></i></a>
                             {{end}}
                             {{inc .CurrentIndex 1}} / {{inc .TotalIndex 1}}
                             {{if ne .CurrentIndex .TotalIndex}}
-                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index={{.NextIndex}}&filter={{.FilterSet}}&rarity={{$.FilterRarity}}">▶</a>
+                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index={{.NextIndex}}&filter={{.FilterSet}}&rarity={{$.FilterRarity}}"><i class="arrow right"></i></a>
                                 <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index={{.TotalIndex}}&filter={{.FilterSet}}&rarity={{$.FilterRarity}}">&gt;</a>
                             {{end}}
                             </p>
