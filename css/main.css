@@ -84,7 +84,7 @@ nearly black #292929
     --activetext: var(--greytext);
     --navbackground: var(--paleblue);
     --selectedhover: var(--almostblue);
-    --headerbaground: var(--lightgrey);
+    --headerbackground: var(--lightgrey);
     --normaltext: var(--quasiblack);
     --autocomplete: var(--verywhite);
 
@@ -109,7 +109,7 @@ nearly black #292929
     --activetext: var(--almostwhite);
     --navbackground: var(--darkpaleblue);
     --selectedhover: var(--almostblue);
-    --headerbaground: var(--quasiblack);
+    --headerbackground: var(--quasiblack);
     --normaltext: var(--white);
     --autocomplete: var(--verywhite);
 
@@ -252,6 +252,7 @@ a {
 a.pagination {
     color: var(--normal);
     text-decoration: none;
+    display: inline;
 }
 
 nav ul {
@@ -423,7 +424,7 @@ th.stickyHeader {
     position: -webkit-sticky;
     position: sticky;
     top: 84px;
-    background-color: var(--headerbaground);
+    background-color: var(--headerbackground);
     height: 40px;
     z-index: 1;
 }
@@ -432,7 +433,7 @@ th.stickyHeaderTiny {
     position: -webkit-sticky;
     position: sticky;
     top: 72px;
-    background-color: var(--headerbaground);
+    background-color: var(--headerbackground);
     z-index: 1;
 }
 
@@ -440,7 +441,7 @@ th.stickyHeaderShort {
     position: -webkit-sticky;
     position: sticky;
     top: 48px;
-    background-color: var(--headerbaground);
+    background-color: var(--headerbackground);
     z-index: 1;
 }
 
