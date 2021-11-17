@@ -264,7 +264,9 @@
                                     </tr>
                                     <tr style="background-color:rgba(0, 0, 0, 0); margin-bottom: 0px;">
                                         <td>
-                                            <h6>{{$card.Title}}</h6>
+                                            <h6>
+                                                <a href="/search?q=s:{{$card.SetCode}}{{if $.IsSealed}} m:sealed{{end}}">{{$card.Title}}</a>
+                                            </h6>
                                         </td>
                                     </tr>
                                 </table>
