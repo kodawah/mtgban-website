@@ -250,7 +250,7 @@ a {
 }
 
 a.pagination {
-    color: black;
+    color: var(--normal);
     text-decoration: none;
 }
 
