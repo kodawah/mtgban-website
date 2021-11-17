@@ -40,7 +40,7 @@ type SearchEntry struct {
 	Secondary     float64
 }
 
-var re = regexp.MustCompile(`(s|c|f|sm|cn|vndr|r|all|m|price)[:><](("([^"]+)"|\S+))+`)
+var re = regexp.MustCompile(`(s|c|f|sm|cn|store|r|all|m|price)[:><](("([^"]+)"|\S+))+`)
 
 func Search(w http.ResponseWriter, r *http.Request) {
 	sig := getSignatureFromCookies(r)
@@ -406,7 +406,7 @@ func parseSearchOptions(query string) (string, map[string]string) {
 			}
 		case strings.HasPrefix(field, "sm:"):
 			options["search_mode"] = strings.ToLower(code)
-		case strings.HasPrefix(field, "vndr:"):
+		case strings.HasPrefix(field, "store:"):
 			options["scraper"] = fixupStoreCode(code)
 		// Hack to show all versions of a card
 		case strings.HasPrefix(field, "all:"):
