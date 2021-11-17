@@ -536,11 +536,9 @@ func shouldSkipCard(query, cardId string, options map[string]string) bool {
 	}
 
 	// Skip cards that are not from the desired mode
-	if options["mode"] != "" {
-		if (options["mode"] == "sealed" && !co.Sealed) ||
-			(options["mode"] == "singles" && co.Sealed) {
-			return true
-		}
+	if ((options["mode"] == "" || options["mode"] == "singles") && co.Sealed) ||
+		(options["mode"] == "sealed" && !co.Sealed) {
+		return true
 	}
 
 	// Skip cards that are not of the desired set
