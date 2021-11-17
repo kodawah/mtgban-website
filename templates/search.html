@@ -365,6 +365,23 @@
                             </td>
                         </tr>
                     {{end}}
+                    {{if .CurrentIndex}}
+                        <tr style="background-color: var(--headerbackground);">
+                            <td colspan="2" style="text-align: center; vertical-align: middle;">
+                                <p style="display: inline;">
+                                    {{if ne .CurrentIndex 1}}
+                                        <a class="pagination" href="/search?q={{.SearchQuery}}&p=1">&lt;</a>
+                                        <a class="pagination" href="/search?q={{.SearchQuery}}&p={{.PrevIndex}}"><i class="arrow left"></i></a>
+                                    {{end}}
+                                    {{.CurrentIndex}} / {{.TotalIndex}}
+                                    {{if ne .CurrentIndex .TotalIndex}}
+                                        <a class="pagination" href="/search?q={{.SearchQuery}}&p={{.NextIndex}}"><i class="arrow right"></i></a>
+                                        <a class="pagination" href="/search?q={{.SearchQuery}}&p={{.TotalIndex}}">&gt;</a>
+                                    {{end}}
+                                </p>
+                            </td>
+                        </tr>
+                    {{end}}
                     {{if ne .InfoMessage ""}}
                         <tr>
                             <td colspan="2" style="text-align: center; vertical-align: middle;">

@@ -142,10 +142,36 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		return sortSets(allKeys[i], allKeys[j])
 	})
 
-	// Trim too long search results
+	// If results can't fit in one page, chunk response and enable pagination
 	if len(allKeys) > MaxSearchResults {
-		pageVars.InfoMessage = TooManyMessage
-		allKeys = allKeys[:MaxSearchResults]
+		pageVars.TotalIndex = len(allKeys)/MaxSearchResults + 1
+
+		// Parse the requested input page
+		pageIndex, _ := strconv.Atoi(r.FormValue("p"))
+		if pageIndex <= 1 {
+			pageIndex = 1
+		} else if pageIndex > pageVars.TotalIndex {
+			pageIndex = pageVars.TotalIndex
+		}
+
+		// Assign the current page index to enable pagination
+		pageVars.CurrentIndex = pageIndex
+
+		// Initialize previous and next pagination links
+		if pageVars.CurrentIndex > 0 {
+			pageVars.PrevIndex = pageVars.CurrentIndex - 1
+		}
+		if pageVars.CurrentIndex < pageVars.TotalIndex {
+			pageVars.NextIndex = pageVars.CurrentIndex + 1
+		}
+
+		// Chop results where needed
+		head := MaxSearchResults * (pageIndex - 1)
+		tail := MaxSearchResults * pageIndex
+		if tail > len(allKeys) {
+			tail = len(allKeys)
+		}
+		allKeys = allKeys[head:tail]
 	}
 
 	// Load up image links and other metadata
