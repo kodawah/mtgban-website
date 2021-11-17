@@ -370,6 +370,26 @@ func fixupStoreCode(code string) string {
 	return strings.ToLower(code)
 }
 
+func fixupRarity(code string) string {
+	code = strings.ToLower(code)
+	filters := strings.Split(code, ",")
+	for i := range filters {
+		switch filters[i] {
+		case "c":
+			filters[i] = "common"
+		case "u":
+			filters[i] = "uncommon"
+		case "r":
+			filters[i] = "rare"
+		case "m":
+			filters[i] = "mythic"
+		case "s":
+			filters[i] = "special"
+		}
+	}
+	return strings.Join(filters, ",")
+}
+
 func parseSearchOptions(query string) (string, map[string]string) {
 	// Filter out any element from the search syntax
 	options := map[string]string{}
@@ -399,7 +419,7 @@ func parseSearchOptions(query string) (string, map[string]string) {
 		case strings.HasPrefix(field, "cn:"):
 			options["number"] = code
 		case strings.HasPrefix(field, "r:"):
-			options["rarity"] = strings.ToLower(code)
+			options["rarity"] = fixupRarity(code)
 		case strings.HasPrefix(field, "f:"):
 			if SliceStringHas([]string{"etched", "foil", "nonfoil"}, strings.ToLower(code)) {
 				options["finish"] = code
@@ -566,10 +586,8 @@ func shouldSkipCard(query, cardId string, options map[string]string) bool {
 	// Skip cards that are not of the desired rarities
 	if options["rarity"] != "" {
 		filters := strings.Split(options["rarity"], ",")
-		for _, rarity := range filters {
-			if rarity != co.Rarity && !strings.HasPrefix(co.Rarity, rarity) {
-				return true
-			}
+		if !SliceStringHas(filters, co.Rarity) {
+			return true
 		}
 	}
 
