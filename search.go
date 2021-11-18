@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/kodabb/go-mtgban/mtgban"
 	"github.com/kodabb/go-mtgban/mtgmatcher"
 )
 
@@ -664,36 +665,43 @@ func shouldSkipSellPrice(cardId string, options map[string]string, refPrice floa
 	return false
 }
 
+func shouldSkipScraper(scraper mtgban.Scraper, blocklist []string, options map[string]string) bool {
+	if scraper == nil {
+		return true
+	}
+
+	// Skip any seller explicitly in blocklist
+	if SliceStringHas(blocklist, scraper.Info().Shorthand) {
+		return true
+	}
+
+	// Skip any unwanted scraper
+	if options["scraper"] != "" {
+		filters := strings.Split(options["scraper"], ",")
+		if !SliceStringHas(filters, strings.ToLower(scraper.Info().Shorthand)) {
+			return true
+		}
+	}
+
+	// Skip scraper not from the desired mode
+	if options["mode"] != "" {
+		if (options["mode"] == "sealed" && !scraper.Info().SealedMode) ||
+			(options["mode"] == "singles" && scraper.Info().SealedMode) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func searchSellers(query string, blocklist []string, options map[string]string) (foundSellers map[string]map[string][]SearchEntry) {
 	// Allocate memory
 	foundSellers = map[string]map[string][]SearchEntry{}
 
 	// Search sellers
-	for i, seller := range Sellers {
-		if seller == nil {
-			log.Println("nil seller at position", i)
+	for _, seller := range Sellers {
+		if shouldSkipScraper(seller, blocklist, options) {
 			continue
-		}
-
-		// Skip any seller explicitly in blocklist
-		if SliceStringHas(blocklist, seller.Info().Shorthand) {
-			continue
-		}
-
-		// Skip any unwanted sellers
-		if options["scraper"] != "" {
-			filters := strings.Split(options["scraper"], ",")
-			if !SliceStringHas(filters, strings.ToLower(seller.Info().Shorthand)) {
-				continue
-			}
-		}
-
-		// Skip sellers not from the desired mode
-		if options["mode"] != "" {
-			if (options["mode"] == "sealed" && !seller.Info().SealedMode) ||
-				(options["mode"] == "singles" && seller.Info().SealedMode) {
-				continue
-			}
 		}
 
 		// Get inventory
@@ -778,28 +786,9 @@ func searchSellers(query string, blocklist []string, options map[string]string) 
 func searchVendors(query string, blocklist []string, options map[string]string) (foundVendors map[string][]SearchEntry) {
 	foundVendors = map[string][]SearchEntry{}
 
-	for i, vendor := range Vendors {
-		if vendor == nil {
-			log.Println("nil vendor at position", i)
+	for _, vendor := range Vendors {
+		if shouldSkipScraper(vendor, blocklist, options) {
 			continue
-		}
-
-		if SliceStringHas(blocklist, vendor.Info().Shorthand) {
-			continue
-		}
-
-		if options["scraper"] != "" {
-			filters := strings.Split(options["scraper"], ",")
-			if !SliceStringHas(filters, strings.ToLower(vendor.Info().Shorthand)) {
-				continue
-			}
-		}
-
-		if options["mode"] != "" {
-			if (options["mode"] == "sealed" && !vendor.Info().SealedMode) ||
-				(options["mode"] == "singles" && vendor.Info().SealedMode) {
-				continue
-			}
 		}
 
 		buylist, err := vendor.Buylist()
