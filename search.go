@@ -40,7 +40,7 @@ type SearchEntry struct {
 	Secondary     float64
 }
 
-var re = regexp.MustCompile(`(s|c|f|sm|cn|store|r|all|m|price)[:><](("([^"]+)"|\S+))+`)
+var re = regexp.MustCompile(`(s|c|f|sm|cn|store|r|all|m|price|skip)[:><](("([^"]+)"|\S+))+`)
 
 func Search(w http.ResponseWriter, r *http.Request) {
 	sig := getSignatureFromCookies(r)
@@ -433,6 +433,8 @@ func parseSearchOptions(query string) (string, map[string]string) {
 			ignore, _ = strconv.ParseBool(code)
 		case strings.HasPrefix(field, "m:"):
 			options["mode"] = code
+		case strings.HasPrefix(field, "skip:"):
+			options["skip"] = strings.ToLower(code)
 		case strings.HasPrefix(field, "price>"):
 			options["price_greater_than"] = fixupStoreCode(code)
 		case strings.HasPrefix(field, "price<"):
@@ -850,11 +852,15 @@ func searchParallel(query string, options map[string]string, blocklistRetail, bl
 	wg.Add(2)
 
 	go func() {
-		foundSellers = searchSellers(query, blocklistRetail, options)
+		if options["skip"] != "retail" {
+			foundSellers = searchSellers(query, blocklistRetail, options)
+		}
 		wg.Done()
 	}()
 	go func() {
-		foundVendors = searchVendors(query, blocklistBuylist, options)
+		if options["skip"] != "buylist" {
+			foundVendors = searchVendors(query, blocklistBuylist, options)
+		}
 		wg.Done()
 	}()
 
