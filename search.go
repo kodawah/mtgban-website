@@ -41,7 +41,7 @@ type SearchEntry struct {
 	Secondary     float64
 }
 
-var re = regexp.MustCompile(`(s|c|f|sm|cn|store|r|all|m|price|skip)[:><](("([^"]+)"|\S+))+`)
+var re = regexp.MustCompile(`(s|c|f|sm|cn|store|r|all|m|price|skip|region)[:><](("([^"]+)"|\S+))+`)
 
 func Search(w http.ResponseWriter, r *http.Request) {
 	sig := getSignatureFromCookies(r)
@@ -436,6 +436,8 @@ func parseSearchOptions(query string) (string, map[string]string) {
 			options["mode"] = code
 		case strings.HasPrefix(field, "skip:"):
 			options["skip"] = strings.ToLower(code)
+		case strings.HasPrefix(field, "region:"):
+			options["region"] = strings.ToLower(code)
 		case strings.HasPrefix(field, "price>"):
 			options["price_greater_than"] = fixupStoreCode(code)
 		case strings.HasPrefix(field, "price<"):
@@ -687,6 +689,22 @@ func shouldSkipScraper(scraper mtgban.Scraper, blocklist []string, options map[s
 	if options["mode"] != "" {
 		if (options["mode"] == "sealed" && !scraper.Info().SealedMode) ||
 			(options["mode"] == "singles" && scraper.Info().SealedMode) {
+			return true
+		}
+	}
+
+	// Skip scraper not from the requested region
+	switch options["region"] {
+	case "us":
+		if scraper.Info().CountryFlag != "" {
+			return true
+		}
+	case "eu":
+		if scraper.Info().CountryFlag != "EU" {
+			return true
+		}
+	case "jp":
+		if scraper.Info().CountryFlag != "JP" {
 			return true
 		}
 	}
