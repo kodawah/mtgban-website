@@ -52,6 +52,10 @@ const (
 	MKM_LOW   = "MKM Low"
 	MKM_TREND = "MKM Trend"
 
+	// from CT
+	CT_STANDARD = "Card Trader"
+	CT_ZERO     = "Card Trader Zero"
+
 	SkipRefreshCooldown = 2 * time.Hour
 )
 
@@ -522,6 +526,10 @@ var ScraperOptions = map[string]*scraperOption{
 			scraper.LogCallback = logger.Printf
 			scraper.ShareCode = Config.Affiliate["CT"]
 			return scraper, nil
+		},
+		Keepers: []string{
+			CT_STANDARD,
+			CT_ZERO,
 		},
 	},
 	"mtgseattle": &scraperOption{
