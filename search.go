@@ -771,7 +771,7 @@ func searchSellers(query string, blocklist []string, options map[string]string) 
 					URL:         entry.URL,
 					NoQuantity:  seller.Info().NoQuantityInventory || seller.Info().MetadataOnly,
 					ShowDirect:  seller.Info().Name == TCG_DIRECT,
-					Country:     seller.Info().CountryFlag,
+					Country:     Country2flag[seller.Info().CountryFlag],
 				}
 
 				// Touchdown

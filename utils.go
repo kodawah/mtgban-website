@@ -19,6 +19,11 @@ import (
 	"github.com/kodabb/go-mtgban/mtgmatcher/mtgjson"
 )
 
+var Country2flag = map[string]string{
+	"EU": "🇪🇺",
+	"JP": "🇯🇵",
+}
+
 func fileExists(filename string) bool {
 	fi, err := os.Lstat(filename)
 	if errors.Is(err, os.ErrNotExist) {
