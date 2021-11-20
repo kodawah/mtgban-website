@@ -370,6 +370,32 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Return a comma-separated string of set codes, from a comma-separated
+// list of codes or edition names. If no match is found, the input code
+// segment is returned as-is.
+func fixupEdition(code string) string {
+	var out []string
+
+	code = strings.TrimSpace(code)
+	for _, field := range strings.Split(code, ",") {
+		field = strings.TrimPrefix(field, "\"")
+		field = strings.TrimSuffix(field, "\"")
+
+		set, err := mtgmatcher.GetSet(field)
+		if err == nil {
+			out = append(out, set.Code)
+			continue
+		}
+		set, err = mtgmatcher.GetSetByName(field)
+		if err == nil {
+			out = append(out, set.Code)
+			continue
+		}
+		out = append(out, field)
+	}
+	return strings.Join(out, ",")
+}
+
 func fixupStoreCode(code string) string {
 	code = strings.ToUpper(code)
 	filters := strings.Split(code, ",")
@@ -446,7 +472,7 @@ func parseSearchOptions(query string) (string, map[string]string) {
 
 		switch {
 		case strings.HasPrefix(field, "s:"):
-			options["edition"] = findEdition(code)
+			options["edition"] = fixupEdition(code)
 		case strings.HasPrefix(field, "c:"):
 			options["condition"] = strings.ToUpper(code)
 		case strings.HasPrefix(field, "cn:"):
@@ -508,7 +534,7 @@ func parseSearchOptions(query string) (string, map[string]string) {
 		edition := ""
 		elements := strings.Split(query, "|")
 		if len(elements) > 1 {
-			edition = findEdition(elements[1])
+			edition = fixupEdition(elements[1])
 		}
 
 		sets := mtgmatcher.GetSets()
@@ -530,7 +556,7 @@ func parseSearchOptions(query string) (string, map[string]string) {
 		elements := strings.Split(query, "|")
 		query = elements[0]
 		if len(elements) > 1 {
-			options["edition"] = findEdition(elements[1])
+			options["edition"] = fixupEdition(elements[1])
 		}
 		if len(elements) > 2 {
 			options["number"] = strings.TrimSpace(elements[2])
@@ -558,32 +584,6 @@ func parseSearchOptions(query string) (string, map[string]string) {
 	}
 
 	return strings.TrimSpace(query), options
-}
-
-// Return a comma-separated string of set codes, from a comma-separated
-// list of codes or edition names. If no match is found, the input code
-// segment is returned as-is.
-func findEdition(code string) string {
-	var out []string
-
-	code = strings.TrimSpace(code)
-	for _, field := range strings.Split(code, ",") {
-		field = strings.TrimPrefix(field, "\"")
-		field = strings.TrimSuffix(field, "\"")
-
-		set, err := mtgmatcher.GetSet(field)
-		if err == nil {
-			out = append(out, set.Code)
-			continue
-		}
-		set, err = mtgmatcher.GetSetByName(field)
-		if err == nil {
-			out = append(out, set.Code)
-			continue
-		}
-		out = append(out, field)
-	}
-	return strings.Join(out, ",")
 }
 
 func mode2func(mode string) (out func(string, string) bool) {
