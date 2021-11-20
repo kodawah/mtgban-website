@@ -411,6 +411,16 @@ func fixupRarity(code string) string {
 	return strings.Join(filters, ",")
 }
 
+func fixupFinish(code string) string {
+	code = strings.ToLower(code)
+	switch code {
+	case "nonfoil", "foil", "etched":
+	default:
+		code = ""
+	}
+	return code
+}
+
 func parseSearchOptions(query string) (string, map[string]string) {
 	// Filter out any element from the search syntax
 	options := map[string]string{}
@@ -442,9 +452,7 @@ func parseSearchOptions(query string) (string, map[string]string) {
 		case strings.HasPrefix(field, "r:"):
 			options["rarity"] = fixupRarity(code)
 		case strings.HasPrefix(field, "f:"):
-			if SliceStringHas([]string{"etched", "foil", "nonfoil"}, strings.ToLower(code)) {
-				options["finish"] = code
-			}
+			options["finish"] = fixupFinish(code)
 		case strings.HasPrefix(field, "sm:"):
 			options["search_mode"] = strings.ToLower(code)
 		case strings.HasPrefix(field, "store:"):
