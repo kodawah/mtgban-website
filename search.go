@@ -41,7 +41,7 @@ type SearchEntry struct {
 	Secondary     float64
 }
 
-var re = regexp.MustCompile(`(c|f|m|r|s|cn|sm|all|skip|store|seller|vendor|region|price|buy_price)[:><](("([^"]+)"|\S+))+`)
+var re = regexp.MustCompile(`(c|f|m|r|s|t|cn|sm|all|skip|store|seller|vendor|region|price|buy_price)[:><](("([^"]+)"|\S+))+`)
 
 var AllConditions = []string{"INDEX", "NM", "SP", "MP", "HP", "PO"}
 
@@ -478,6 +478,8 @@ func parseSearchOptions(query string) (string, map[string]string) {
 			options["buy_price_greater_than"] = fixupStoreCode(code)
 		case strings.HasPrefix(field, "buy_price<"):
 			options["buy_price_less_than"] = fixupStoreCode(code)
+		case strings.HasPrefix(field, "t:"):
+			options["type"] = strings.Title(code)
 		}
 	}
 
@@ -647,6 +649,15 @@ func shouldSkipCard(query, cardId string, options map[string]string) bool {
 		}
 	case "nonfoil":
 		if co.Foil || co.Etched {
+			return true
+		}
+	}
+
+	// Skip cards that are not of any desided types
+	if options["type"] != "" {
+		if !SliceStringHas(co.Subtypes, options["type"]) &&
+			!SliceStringHas(co.Types, options["type"]) &&
+			!SliceStringHas(co.Supertypes, options["type"]) {
 			return true
 		}
 	}
