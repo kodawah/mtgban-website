@@ -358,25 +358,29 @@ func Search(w http.ResponseWriter, r *http.Request) {
 }
 
 func fixupStoreCode(code string) string {
-	switch code {
-	case "CT":
-		code = CT_STANDARD
-	case "CT0":
-		code = CT_ZERO
-	case "MKM_LOW":
-		code = MKM_LOW
-	case "MKM_TREND":
-		code = MKM_TREND
-	case "TCG_LOW":
-		code = TCG_LOW
-	case "TCG_MARKET":
-		code = TCG_MARKET
-	case "TCG_PLAYER":
-		code = TCG_MAIN
-	case "TCG_DIRECT":
-		code = TCG_DIRECT
+	code = strings.ToUpper(code)
+	filters := strings.Split(code, ",")
+	for i := range filters {
+		switch filters[i] {
+		case "CT":
+			filters[i] = CT_STANDARD
+		case "CT0":
+			filters[i] = CT_ZERO
+		case "MKM_LOW":
+			filters[i] = MKM_LOW
+		case "MKM_TREND":
+			filters[i] = MKM_TREND
+		case "TCG_LOW":
+			filters[i] = TCG_LOW
+		case "TCG_MARKET":
+			filters[i] = TCG_MARKET
+		case "TCG_PLAYER":
+			filters[i] = TCG_MAIN
+		case "TCG_DIRECT":
+			filters[i] = TCG_DIRECT
+		}
 	}
-	return strings.ToLower(code)
+	return strings.ToLower(strings.Join(filters, ","))
 }
 
 func fixupRarity(code string) string {
