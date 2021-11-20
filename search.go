@@ -41,7 +41,7 @@ type SearchEntry struct {
 	Secondary     float64
 }
 
-var re = regexp.MustCompile(`(s|c|f|sm|cn|store|r|all|m|price|skip|region)[:><](("([^"]+)"|\S+))+`)
+var re = regexp.MustCompile(`(s|c|f|sm|cn|store|r|all|m|price|skip|region|seller|vendor)[:><](("([^"]+)"|\S+))+`)
 
 func Search(w http.ResponseWriter, r *http.Request) {
 	sig := getSignatureFromCookies(r)
@@ -441,6 +441,10 @@ func parseSearchOptions(query string) (string, map[string]string) {
 			options["search_mode"] = strings.ToLower(code)
 		case strings.HasPrefix(field, "store:"):
 			options["scraper"] = fixupStoreCode(code)
+		case strings.HasPrefix(field, "seller:"):
+			options["seller"] = fixupStoreCode(code)
+		case strings.HasPrefix(field, "vendor:"):
+			options["vendor"] = fixupStoreCode(code)
 		// Hack to show all versions of a card
 		case strings.HasPrefix(field, "all:"):
 			ignore, _ = strconv.ParseBool(code)
@@ -694,6 +698,24 @@ func shouldSkipScraper(scraper mtgban.Scraper, blocklist []string, options map[s
 		filters := strings.Split(options["scraper"], ",")
 		if !SliceStringHas(filters, strings.ToLower(scraper.Info().Shorthand)) {
 			return true
+		}
+	}
+	if options["seller"] != "" {
+		_, ok := scraper.(mtgban.Seller)
+		if ok {
+			filters := strings.Split(options["seller"], ",")
+			if !SliceStringHas(filters, strings.ToLower(scraper.Info().Shorthand)) {
+				return true
+			}
+		}
+	}
+	if options["vendor"] != "" {
+		_, ok := scraper.(mtgban.Vendor)
+		if ok {
+			filters := strings.Split(options["vendor"], ",")
+			if !SliceStringHas(filters, strings.ToLower(scraper.Info().Shorthand)) {
+				return true
+			}
 		}
 	}
 
