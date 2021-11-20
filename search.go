@@ -41,7 +41,7 @@ type SearchEntry struct {
 	Secondary     float64
 }
 
-var re = regexp.MustCompile(`(c|f|m|r|s|t|cn|sm|skip|store|seller|vendor|region|price|buy_price)[:><](("([^"]+)"|\S+))+`)
+var re = regexp.MustCompile(`-?(c|f|m|r|s|t|cn|sm|skip|store|seller|vendor|region|price|buy_price)[:><](("([^"]+)"|\S+))+`)
 
 var AllConditions = []string{"INDEX", "NM", "SP", "MP", "HP", "PO"}
 
@@ -474,6 +474,12 @@ func parseSearchOptions(query string) (string, map[string]string) {
 		}
 		code := field[index+1:]
 
+		prefix := ""
+		if strings.HasPrefix(field, "-") {
+			prefix = "not_"
+			field = strings.TrimPrefix(field, "-")
+		}
+
 		switch {
 		// Options that modify the search engine
 		case strings.HasPrefix(field, "sm:"):
@@ -485,27 +491,27 @@ func parseSearchOptions(query string) (string, map[string]string) {
 
 		// Options that modify the card searches
 		case strings.HasPrefix(field, "s:"):
-			options["edition"] = fixupEdition(code)
+			options[prefix+"edition"] = fixupEdition(code)
 		case strings.HasPrefix(field, "c:"):
-			options["condition"] = strings.ToUpper(code)
+			options[prefix+"condition"] = strings.ToUpper(code)
 		case strings.HasPrefix(field, "cn:"):
-			options["number"] = code
+			options[prefix+"number"] = code
 		case strings.HasPrefix(field, "r:"):
-			options["rarity"] = fixupRarity(code)
+			options[prefix+"rarity"] = fixupRarity(code)
 		case strings.HasPrefix(field, "f:"):
-			options["finish"] = fixupFinish(code)
+			options[prefix+"finish"] = fixupFinish(code)
 		case strings.HasPrefix(field, "t:"):
-			options["type"] = strings.Title(code)
+			options[prefix+"type"] = strings.Title(code)
 
 		// Options that modify the searched scrapers
 		case strings.HasPrefix(field, "store:"):
-			options["scraper"] = fixupStoreCode(code)
+			options[prefix+"scraper"] = fixupStoreCode(code)
 		case strings.HasPrefix(field, "seller:"):
-			options["seller"] = fixupStoreCode(code)
+			options[prefix+"seller"] = fixupStoreCode(code)
 		case strings.HasPrefix(field, "vendor:"):
-			options["vendor"] = fixupStoreCode(code)
+			options[prefix+"vendor"] = fixupStoreCode(code)
 		case strings.HasPrefix(field, "region:"):
-			options["region"] = strings.ToLower(code)
+			options[prefix+"region"] = strings.ToLower(code)
 
 		// Numerical Options
 		case strings.HasPrefix(field, "price>"):
@@ -643,6 +649,12 @@ func shouldSkipCard(query, cardId string, options map[string]string) bool {
 			return true
 		}
 	}
+	if options["not_number"] != "" {
+		filters := strings.Split(options["not_number"], ",")
+		if SliceStringHas(filters, co.Number) {
+			return true
+		}
+	}
 	if options["number_greater_than"] != "" {
 		ref, err := strconv.Atoi(co.Number)
 		if err == nil {
@@ -669,6 +681,12 @@ func shouldSkipCard(query, cardId string, options map[string]string) bool {
 			return true
 		}
 	}
+	if options["not_rarity"] != "" {
+		filters := strings.Split(options["not_rarity"], ",")
+		if SliceStringHas(filters, co.Rarity) {
+			return true
+		}
+	}
 
 	// Skip cards that are not as desired foil
 	switch options["finish"] {
@@ -691,6 +709,13 @@ func shouldSkipCard(query, cardId string, options map[string]string) bool {
 		if !SliceStringHas(co.Subtypes, options["type"]) &&
 			!SliceStringHas(co.Types, options["type"]) &&
 			!SliceStringHas(co.Supertypes, options["type"]) {
+			return true
+		}
+	}
+	if options["not_type"] != "" {
+		if !(!SliceStringHas(co.Subtypes, options["type"]) &&
+			!SliceStringHas(co.Types, options["type"]) &&
+			!SliceStringHas(co.Supertypes, options["type"])) {
 			return true
 		}
 	}
@@ -809,6 +834,30 @@ func shouldSkipScraper(scraper mtgban.Scraper, blocklist []string, options map[s
 			}
 		}
 	}
+	if options["not_scraper"] != "" {
+		filters := strings.Split(options["not_scraper"], ",")
+		if SliceStringHas(filters, strings.ToLower(scraper.Info().Shorthand)) {
+			return true
+		}
+	}
+	if options["not_seller"] != "" {
+		_, ok := scraper.(mtgban.Seller)
+		if ok {
+			filters := strings.Split(options["not_seller"], ",")
+			if SliceStringHas(filters, strings.ToLower(scraper.Info().Shorthand)) {
+				return true
+			}
+		}
+	}
+	if options["not_vendor"] != "" {
+		_, ok := scraper.(mtgban.Vendor)
+		if ok {
+			filters := strings.Split(options["not_vendor"], ",")
+			if SliceStringHas(filters, strings.ToLower(scraper.Info().Shorthand)) {
+				return true
+			}
+		}
+	}
 
 	// Skip scraper not from the desired mode
 	if options["mode"] != "" {
@@ -830,6 +879,20 @@ func shouldSkipScraper(scraper mtgban.Scraper, blocklist []string, options map[s
 		}
 	case "jp":
 		if scraper.Info().CountryFlag != "JP" {
+			return true
+		}
+	}
+	switch options["not_region"] {
+	case "us":
+		if scraper.Info().CountryFlag == "" {
+			return true
+		}
+	case "eu":
+		if scraper.Info().CountryFlag == "EU" {
+			return true
+		}
+	case "jp":
+		if scraper.Info().CountryFlag == "JP" {
 			return true
 		}
 	}
