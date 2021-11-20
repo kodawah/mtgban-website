@@ -698,7 +698,7 @@ func shouldSkipSellPrice(cardId string, options map[string]string, refPrice floa
 			}
 		}
 		if price == 0 {
-			continue
+			return true
 		}
 
 		switch tag {
