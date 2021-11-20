@@ -43,6 +43,8 @@ type SearchEntry struct {
 
 var re = regexp.MustCompile(`(c|f|m|r|s|cn|sm|all|skip|store|seller|vendor|region|price|buy_price)[:><](("([^"]+)"|\S+))+`)
 
+var AllConditions = []string{"INDEX", "NM", "SP", "MP", "HP", "PO"}
+
 func Search(w http.ResponseWriter, r *http.Request) {
 	sig := getSignatureFromCookies(r)
 
@@ -104,8 +106,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	// Keep track of what was searched
 	pageVars.SearchQuery = query
 	pageVars.SearchBest = readSetFlag(w, r, "b", "MTGBANSearchPref")
-	// Setup conditions keys, all etnries, and images
-	pageVars.CondKeys = []string{"INDEX", "NM", "SP", "MP", "HP", "PO"}
+	pageVars.CondKeys = AllConditions
 	pageVars.Metadata = map[string]GenericCard{}
 
 	// SEARCH
