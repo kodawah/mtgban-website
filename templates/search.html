@@ -321,8 +321,8 @@
                                                     <td>
                                                     </td>
                                                     <td style="text-align: center; vertical-align: middle;">
-                                                        {{if .ShowDirect}}
-                                                            <img style="padding-top:4px;" src="img/misc/direct.png">
+                                                        {{if .BundleIcon}}
+                                                            <img style="padding-top:4px;" src="{{.BundleIcon}}">
                                                         {{else if not .NoQuantity}}
                                                             {{.Quantity}}
                                                         {{end}}

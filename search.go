@@ -33,7 +33,7 @@ type SearchEntry struct {
 	Quantity    int
 	URL         string
 	NoQuantity  bool
-	ShowDirect  bool
+	BundleIcon  string
 
 	Country string
 
@@ -779,7 +779,15 @@ func searchSellers(query string, blocklist []string, options map[string]string) 
 					foundSellers[cardId][conditions] = []SearchEntry{}
 				}
 
+				icon := ""
 				name := seller.Info().Name
+				switch name {
+				case TCG_DIRECT:
+					icon = "img/misc/direct.png"
+				case CT_ZERO:
+					icon = "img/misc/zero.png"
+				}
+
 				// Prepare all the deets
 				res := SearchEntry{
 					ScraperName: name,
@@ -788,7 +796,7 @@ func searchSellers(query string, blocklist []string, options map[string]string) 
 					Quantity:    entry.Quantity,
 					URL:         entry.URL,
 					NoQuantity:  seller.Info().NoQuantityInventory || seller.Info().MetadataOnly,
-					ShowDirect:  seller.Info().Name == TCG_DIRECT,
+					BundleIcon:  icon,
 					Country:     Country2flag[seller.Info().CountryFlag],
 				}
 
