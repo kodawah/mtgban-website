@@ -479,6 +479,16 @@ func parseSearchOptions(query string) (string, map[string]string) {
 			options["buy_price_less_than"] = fixupStoreCode(code)
 		case strings.HasPrefix(field, "t:"):
 			options["type"] = strings.Title(code)
+		case strings.HasPrefix(field, "cn>"):
+			_, err := strconv.Atoi(code)
+			if err == nil {
+				options["number_greater_than"] = code
+			}
+		case strings.HasPrefix(field, "cn<"):
+			_, err := strconv.Atoi(code)
+			if err == nil {
+				options["number_less_than"] = code
+			}
 		}
 	}
 
@@ -620,6 +630,24 @@ func shouldSkipCard(query, cardId string, options map[string]string) bool {
 		filters := strings.Split(options["number"], ",")
 		if !SliceStringHas(filters, co.Number) {
 			return true
+		}
+	}
+	if options["number_greater_than"] != "" {
+		ref, err := strconv.Atoi(co.Number)
+		if err == nil {
+			num, _ := strconv.Atoi(options["number_greater_than"])
+			if num > ref {
+				return true
+			}
+		}
+	}
+	if options["number_less_than"] != "" {
+		ref, err := strconv.Atoi(co.Number)
+		if err == nil {
+			num, _ := strconv.Atoi(options["number_less_than"])
+			if num < ref {
+				return true
+			}
 		}
 	}
 
