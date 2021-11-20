@@ -471,6 +471,15 @@ func parseSearchOptions(query string) (string, map[string]string) {
 		code := field[index+1:]
 
 		switch {
+		// Options that modify the search engine
+		case strings.HasPrefix(field, "sm:"):
+			options["search_mode"] = strings.ToLower(code)
+		case strings.HasPrefix(field, "m:"):
+			options["mode"] = code
+		case strings.HasPrefix(field, "skip:"):
+			options["skip"] = strings.ToLower(code)
+
+		// Options that modify the card searches
 		case strings.HasPrefix(field, "s:"):
 			options["edition"] = fixupEdition(code)
 		case strings.HasPrefix(field, "c:"):
@@ -481,20 +490,20 @@ func parseSearchOptions(query string) (string, map[string]string) {
 			options["rarity"] = fixupRarity(code)
 		case strings.HasPrefix(field, "f:"):
 			options["finish"] = fixupFinish(code)
-		case strings.HasPrefix(field, "sm:"):
-			options["search_mode"] = strings.ToLower(code)
+		case strings.HasPrefix(field, "t:"):
+			options["type"] = strings.Title(code)
+
+		// Options that modify the searched scrapers
 		case strings.HasPrefix(field, "store:"):
 			options["scraper"] = fixupStoreCode(code)
 		case strings.HasPrefix(field, "seller:"):
 			options["seller"] = fixupStoreCode(code)
 		case strings.HasPrefix(field, "vendor:"):
 			options["vendor"] = fixupStoreCode(code)
-		case strings.HasPrefix(field, "m:"):
-			options["mode"] = code
-		case strings.HasPrefix(field, "skip:"):
-			options["skip"] = strings.ToLower(code)
 		case strings.HasPrefix(field, "region:"):
 			options["region"] = strings.ToLower(code)
+
+		// Numerical Options
 		case strings.HasPrefix(field, "price>"):
 			options["price_greater_than"] = fixupStoreCode(code)
 		case strings.HasPrefix(field, "price<"):
@@ -503,8 +512,6 @@ func parseSearchOptions(query string) (string, map[string]string) {
 			options["buy_price_greater_than"] = fixupStoreCode(code)
 		case strings.HasPrefix(field, "buy_price<"):
 			options["buy_price_less_than"] = fixupStoreCode(code)
-		case strings.HasPrefix(field, "t:"):
-			options["type"] = strings.Title(code)
 		case strings.HasPrefix(field, "cn>"):
 			_, err := strconv.Atoi(code)
 			if err == nil {
