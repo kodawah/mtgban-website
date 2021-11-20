@@ -359,6 +359,14 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 func fixupStoreCode(code string) string {
 	switch code {
+	case "CT":
+		code = CT_STANDARD
+	case "CT0":
+		code = CT_ZERO
+	case "MKM_LOW":
+		code = MKM_LOW
+	case "MKM_TREND":
+		code = MKM_TREND
 	case "TCG_LOW":
 		code = TCG_LOW
 	case "TCG_MARKET":
