@@ -518,6 +518,9 @@ func parseSearchOptions(query string) (string, map[string]string) {
 	} else {
 		// Also support our own ID style
 		co, err := mtgmatcher.GetUUID(strings.TrimSpace(query))
+		if err != nil {
+			co, err = mtgmatcher.GetUUID(mtgmatcher.Scryfall2UUID(strings.TrimSpace(query)))
+		}
 		if err == nil {
 			query = co.Name
 			options["edition"] = co.SetCode
