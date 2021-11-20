@@ -584,17 +584,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		wg.Wait()
 
 		// Rebuild the search query
-		searchQuery := co.Name
-		if options["edition"] != "" {
-			searchQuery += " s:" + options["edition"]
-		}
-		if options["number"] != "" {
-			searchQuery += " cn:" + options["number"]
-		}
-		if options["finish"] != "" {
-			searchQuery += " f:" + options["finish"]
-		}
-		searchRes.SearchQuery = searchQuery
+		searchRes.SearchQuery = rebuildSearchQuery(co.Name, options)
 
 		ogFields = search2fields(searchRes)
 	} else if lastSold {

@@ -278,18 +278,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	// CHART ALL THE THINGS
 	if chartId != "" {
-		// Rebuild the original query
-		searchQuery := cleanQuery
-		if options["edition"] != "" {
-			searchQuery += " s:" + options["edition"]
-		}
-		if options["number"] != "" {
-			searchQuery += " cn:" + options["number"]
-		}
-		if options["finish"] != "" {
-			searchQuery += " f:" + options["finish"]
-		}
-		pageVars.SearchQuery = searchQuery
+		// Rebuild the search query
+		pageVars.SearchQuery = rebuildSearchQuery(cleanQuery, options)
 
 		// Retrieve data
 		labels, err := getDateAxisValues(chartId)
@@ -368,6 +358,20 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	if DevMode {
 		log.Println("render took", time.Since(start))
 	}
+}
+
+// Rebuild the original query
+func rebuildSearchQuery(searchQuery string, options map[string]string) string {
+	if options["edition"] != "" {
+		searchQuery += " s:" + options["edition"]
+	}
+	if options["number"] != "" {
+		searchQuery += " cn:" + options["number"]
+	}
+	if options["finish"] != "" {
+		searchQuery += " f:" + options["finish"]
+	}
+	return searchQuery
 }
 
 // Return a comma-separated string of set codes, from a comma-separated
