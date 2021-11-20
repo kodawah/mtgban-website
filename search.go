@@ -41,7 +41,7 @@ type SearchEntry struct {
 	Secondary     float64
 }
 
-var re = regexp.MustCompile(`(c|f|m|r|s|t|cn|sm|all|skip|store|seller|vendor|region|price|buy_price)[:><](("([^"]+)"|\S+))+`)
+var re = regexp.MustCompile(`(c|f|m|r|s|t|cn|sm|skip|store|seller|vendor|region|price|buy_price)[:><](("([^"]+)"|\S+))+`)
 
 var AllConditions = []string{"INDEX", "NM", "SP", "MP", "HP", "PO"}
 
@@ -121,6 +121,11 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		render(w, "search.html", pageVars)
 		return
 	}
+
+	// Allow displaying the "search all" link only when something
+	// was searched and no options were specified for it
+	pageVars.CanShowAll = cleanQuery != "" && len(options) != 0
+	pageVars.CleanSearchQuery = cleanQuery
 
 	// Make a cardId arrays so that they can be sorted later
 	// Assume the same number of keys are found, will be reallocated if needed
@@ -425,9 +430,6 @@ func parseSearchOptions(query string) (string, map[string]string) {
 	// Filter out any element from the search syntax
 	options := map[string]string{}
 
-	// Optionally ignore all search options
-	ignore := false
-
 	// Iterate over the various possible filters
 	fields := re.FindAllString(query, -1)
 	for _, field := range fields {
@@ -461,9 +463,6 @@ func parseSearchOptions(query string) (string, map[string]string) {
 			options["seller"] = fixupStoreCode(code)
 		case strings.HasPrefix(field, "vendor:"):
 			options["vendor"] = fixupStoreCode(code)
-		// Hack to show all versions of a card
-		case strings.HasPrefix(field, "all:"):
-			ignore, _ = strconv.ParseBool(code)
 		case strings.HasPrefix(field, "m:"):
 			options["mode"] = code
 		case strings.HasPrefix(field, "skip:"):
@@ -548,12 +547,7 @@ func parseSearchOptions(query string) (string, map[string]string) {
 		}
 	}
 
-	// Hack to ignore all search options
-	if ignore {
-		return query, map[string]string{}
-	}
-
-	return query, options
+	return strings.TrimSpace(query), options
 }
 
 // Return a comma-separated string of set codes, from a comma-separated

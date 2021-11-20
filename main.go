@@ -68,6 +68,9 @@ type PageVars struct {
 	FoundVendors map[string][]SearchEntry
 	Metadata     map[string]GenericCard
 
+	CanShowAll       bool
+	CleanSearchQuery string
+
 	ScraperShort    string
 	HasAffiliate    bool
 	QtyNotAvailable bool
