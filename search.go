@@ -41,7 +41,7 @@ type SearchEntry struct {
 	Secondary     float64
 }
 
-var re = regexp.MustCompile(`(s|c|f|sm|cn|store|r|all|m|price|skip|region|seller|vendor)[:><](("([^"]+)"|\S+))+`)
+var re = regexp.MustCompile(`(s|c|f|sm|cn|store|r|all|m|price|skip|region|seller|vendor|buy_price)[:><](("([^"]+)"|\S+))+`)
 
 func Search(w http.ResponseWriter, r *http.Request) {
 	sig := getSignatureFromCookies(r)
@@ -465,6 +465,10 @@ func parseSearchOptions(query string) (string, map[string]string) {
 			options["price_greater_than"] = fixupStoreCode(code)
 		case strings.HasPrefix(field, "price<"):
 			options["price_less_than"] = fixupStoreCode(code)
+		case strings.HasPrefix(field, "buy_price>"):
+			options["buy_price_greater_than"] = fixupStoreCode(code)
+		case strings.HasPrefix(field, "buy_price<"):
+			options["buy_price_less_than"] = fixupStoreCode(code)
 		}
 	}
 
@@ -648,6 +652,8 @@ func shouldSkipSellPrice(cardId string, options map[string]string, refPrice floa
 	for _, tag := range []string{
 		"price_greater_than",
 		"price_less_than",
+		"buy_price_greater_than",
+		"buy_price_less_than",
 	} {
 		code, found := options[tag]
 		if !found {
@@ -656,18 +662,38 @@ func shouldSkipSellPrice(cardId string, options map[string]string, refPrice floa
 
 		price, err := strconv.ParseFloat(code, 64)
 		if err != nil {
-			for _, seller := range Sellers {
-				if seller != nil && strings.ToLower(seller.Info().Shorthand) == strings.ToLower(code) {
-					inv, err := seller.Inventory()
-					if err != nil {
-						continue
+			switch tag {
+			case "price_greater_than",
+				"price_less_than":
+				for _, seller := range Sellers {
+					if seller != nil && strings.ToLower(seller.Info().Shorthand) == strings.ToLower(code) {
+						inv, err := seller.Inventory()
+						if err != nil {
+							continue
+						}
+						entries, found := inv[cardId]
+						if !found {
+							continue
+						}
+						price = entries[0].Price
+						break
 					}
-					entries, found := inv[cardId]
-					if !found {
-						continue
+				}
+			case "buy_price_greater_than",
+				"buy_price_less_than":
+				for _, vendor := range Vendors {
+					if vendor != nil && strings.ToLower(vendor.Info().Shorthand) == strings.ToLower(code) {
+						bl, err := vendor.Buylist()
+						if err != nil {
+							continue
+						}
+						entries, found := bl[cardId]
+						if !found {
+							continue
+						}
+						price = entries[0].BuyPrice
+						break
 					}
-					price = entries[0].Price
-					break
 				}
 			}
 		}
@@ -676,11 +702,13 @@ func shouldSkipSellPrice(cardId string, options map[string]string, refPrice floa
 		}
 
 		switch tag {
-		case "price_greater_than":
+		case "price_greater_than",
+			"buy_price_greater_than":
 			if price > refPrice {
 				return true
 			}
-		case "price_less_than":
+		case "price_less_than",
+			"buy_price_less_than":
 			if price < refPrice {
 				return true
 			}
