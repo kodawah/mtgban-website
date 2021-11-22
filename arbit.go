@@ -55,26 +55,29 @@ var FilterOptKeys = []string{
 	"nocomm",
 	"noposi",
 	"nopenny",
+	"nobuypenny",
 	"nolow",
 	"noqty",
 }
 
 // User-readable option name (may be a subset of the options)
 var FilterOptNames = map[string]string{
-	"nocond":  "only NM/SP",
-	"nofoil":  "only non-Foil",
-	"nocomm":  "only Rare/Mythic",
-	"noposi":  "only Negative",
-	"nopenny": "only Bucks+",
-	"nolow":   "only Yield+",
-	"noqty":   "only Quantity+",
+	"nocond":     "only NM/SP",
+	"nofoil":     "only non-Foil",
+	"nocomm":     "only Rare/Mythic",
+	"noposi":     "only Negative",
+	"nopenny":    "only Bucks+",
+	"nobuypenny": "only BuyBucks+",
+	"nolow":      "only Yield+",
+	"noqty":      "only Quantity+",
 }
 
 // Arbit-only options
 var FilteOptNoGlobal = map[string]bool{
-	"nocond": true,
-	"noposi": true,
-	"noqty":  true,
+	"nocond":     true,
+	"nobuypenny": true,
+	"noposi":     true,
+	"noqty":      true,
 }
 
 var BadConditions = []string{"MP", "HP", "PO"}
@@ -379,6 +382,9 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	}
 	if arbitFilters["nopenny"] {
 		opts.MinPrice = 1
+	}
+	if arbitFilters["nobuypenny"] {
+		opts.MinBuyPrice = 1
 	}
 	if arbitFilters["noqty"] {
 		opts.MinQuantity = 1
