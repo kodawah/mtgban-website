@@ -76,14 +76,10 @@ type PageVars struct {
 	QtyNotAvailable bool
 
 	Arb            []Arbitrage
-	UseCredit      bool
-	FilterCond     bool
-	FilterFoil     bool
-	FilterComm     bool
-	FilterNega     bool
-	FilterPenny    bool
-	FilterSpread   bool
-	FilterQuantity bool
+	ArbitOptKeys   []string
+	ArbitOptNames  map[string]string
+	ArbitFilters   map[string]bool
+	ArbitOptNoGlob map[string]bool
 	SortOption     string
 	GlobalMode     bool
 	ReverseMode    bool

@@ -47,6 +47,36 @@ var FilteredEditions = []string{
 	"Fourth Edition Black Border",
 }
 
+// Every single boolean option
+var FilterOptKeys = []string{
+	"credit",
+	"nocond",
+	"nofoil",
+	"nocomm",
+	"noposi",
+	"nopenny",
+	"nolow",
+	"noqty",
+}
+
+// User-readable option name (may be a subset of the options)
+var FilterOptNames = map[string]string{
+	"nocond":  "only NM/SP",
+	"nofoil":  "only non-Foil",
+	"nocomm":  "only Rare/Mythic",
+	"noposi":  "only Negative",
+	"nopenny": "only Bucks+",
+	"nolow":   "only Yield+",
+	"noqty":   "only Quantity+",
+}
+
+// Arbit-only options
+var FilteOptNoGlobal = map[string]bool{
+	"nocond": true,
+	"noposi": true,
+	"noqty":  true,
+}
+
 type Arbitrage struct {
 	Name       string
 	LastUpdate string
@@ -163,13 +193,12 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	r.ParseForm()
 
 	var source mtgban.Scraper
-	var useCredit bool
-	var nocond, nofoil, nocomm, noposi, nopenny, nolow, noqty bool
 	var message string
 	var sorting string
+	arbitFilters := map[string]bool{}
 
 	if pageVars.GlobalMode {
-		nopenny = !nopenny
+		arbitFilters["nopenny"] = !arbitFilters["nopenny"]
 	}
 
 	for k, v := range r.Form {
@@ -215,32 +244,12 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 				message = "Unknown " + v[0] + " source"
 			}
 
-		case "credit":
-			useCredit, _ = strconv.ParseBool(v[0])
-
 		case "sort":
 			sorting = v[0]
 
-		case "nofoil":
-			nofoil, _ = strconv.ParseBool(v[0])
-
-		case "nocond":
-			nocond, _ = strconv.ParseBool(v[0])
-
-		case "nocomm":
-			nocomm, _ = strconv.ParseBool(v[0])
-
-		case "noposi":
-			noposi, _ = strconv.ParseBool(v[0])
-
-		case "nopenny":
-			nopenny, _ = strconv.ParseBool(v[0])
-
-		case "nolow":
-			nolow, _ = strconv.ParseBool(v[0])
-
-		case "noqty":
-			noqty, _ = strconv.ParseBool(v[0])
+		// Assume anything else is a boolean option
+		default:
+			arbitFilters[k], _ = strconv.ParseBool(v[0])
 		}
 	}
 
@@ -300,14 +309,9 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 
 		v := url.Values{}
 		v.Set("source", scraper.Info().Shorthand)
-		v.Set("credit", fmt.Sprint(useCredit))
-		v.Set("nocond", fmt.Sprint(nocond))
-		v.Set("nofoil", fmt.Sprint(nofoil))
-		v.Set("nocomm", fmt.Sprint(nocomm))
-		v.Set("noposi", fmt.Sprint(noposi))
-		v.Set("nopenny", fmt.Sprint(nopenny))
-		v.Set("nolow", fmt.Sprint(nolow))
-		v.Set("noqty", fmt.Sprint(noqty))
+		for key, val := range arbitFilters {
+			v.Set(key, fmt.Sprint(val))
+		}
 		v.Set("sort", fmt.Sprint(sorting))
 
 		nav.Link += "?" + v.Encode()
@@ -331,14 +335,10 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	pageVars.ScraperShort = source.Info().Shorthand
 	pageVars.HasAffiliate = SliceStringHas(Config.AffiliatesList, source.Info().Shorthand)
 	pageVars.QtyNotAvailable = source.Info().NoQuantityInventory
-	pageVars.UseCredit = useCredit
-	pageVars.FilterCond = nocond
-	pageVars.FilterFoil = nofoil
-	pageVars.FilterComm = nocomm
-	pageVars.FilterNega = noposi
-	pageVars.FilterPenny = nopenny
-	pageVars.FilterSpread = nolow
-	pageVars.FilterQuantity = noqty
+	pageVars.ArbitFilters = arbitFilters
+	pageVars.ArbitOptKeys = FilterOptKeys
+	pageVars.ArbitOptNames = FilterOptNames
+	pageVars.ArbitOptNoGlob = FilteOptNoGlobal
 
 	pageVars.Arb = []Arbitrage{}
 	pageVars.Metadata = map[string]GenericCard{}
@@ -347,7 +347,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		MinSpread:     MinSpread,
 		MaxSpread:     MaxSpread,
 		MaxPriceRatio: MaxPriceRatio,
-		NoFoil:        nofoil,
+		NoFoil:        arbitFilters["nofoil"],
 	}
 	if pageVars.GlobalMode {
 		opts.MinSpread = MinSpreadGlobal
@@ -357,27 +357,27 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 			opts.Conditions = []string{"MP", "HP", "PO"}
 		}
 	}
-	if noposi {
+	if arbitFilters["noposi"] {
 		opts.MinSpread = MinSpreadNegative
 		opts.MinDiff = MinDiffNegative
 		opts.MaxSpread = MinSpread
 	}
-	if nolow {
+	if arbitFilters["nolow"] {
 		opts.MinSpread = MinSpreadHighYield
 		if pageVars.GlobalMode {
 			opts.MinSpread = MinSpreadHighYieldGlobal
 		}
 	}
-	if nocond {
+	if arbitFilters["nocond"] {
 		opts.Conditions = []string{"MP", "HP", "PO"}
 	}
-	if nocomm {
+	if arbitFilters["nocomm"] {
 		opts.Rarities = []string{"uncommon", "common"}
 	}
-	if nopenny {
+	if arbitFilters["nopenny"] {
 		opts.MinPrice = 1
 	}
-	if noqty {
+	if arbitFilters["noqty"] {
 		opts.MinQuantity = 1
 	}
 	if pageVars.GlobalMode {
@@ -419,7 +419,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		}
 
 		if scraper.Info().Shorthand == "ABU" {
-			opts.UseTrades = useCredit
+			opts.UseTrades = arbitFilters["credit"]
 		}
 
 		var arbit []mtgban.ArbitEntry

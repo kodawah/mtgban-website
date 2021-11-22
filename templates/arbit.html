@@ -109,18 +109,15 @@
                 </p>
                 <p>
                     Show
-                    {{if not .GlobalMode}}
-                        <a class="btn {{if $.FilterCond}}success{{else}}normal{{end}}" href="?source={{$.ScraperShort}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{not $.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{$.FilterQuantity}}">only NM/SP</a>
-                    {{end}}
-                    <a class="btn {{if $.FilterFoil}}success{{else}}normal{{end}}" href="?source={{$.ScraperShort}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{not $.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{$.FilterQuantity}}">only non-Foil</a>
-                    <a class="btn {{if $.FilterComm}}success{{else}}normal{{end}}" href="?source={{$.ScraperShort}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{not $.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{$.FilterQuantity}}">only Rare/Mythic</a>
-                    {{if not .GlobalMode}}
-                        <a class="btn {{if $.FilterNega}}success{{else}}normal{{end}}" href="?source={{$.ScraperShort}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{not $.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{$.FilterQuantity}}">only Negative</a>
-                    {{end}}
-                    <a class="btn {{if $.FilterPenny}}success{{else}}normal{{end}}" href="?source={{$.ScraperShort}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{not $.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{$.FilterQuantity}}">only Bucks+</a>
-                    <a class="btn {{if $.FilterSpread}}success{{else}}normal{{end}}" href="?source={{$.ScraperShort}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{not $.FilterSpread}}&noqty={{$.FilterQuantity}}">only Yield+</a>
-                    {{if not .GlobalMode}}
-                        <a class="btn {{if $.FilterQuantity}}success{{else}}normal{{end}}" href="?source={{$.ScraperShort}}&sort={{$.SortOption}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&nolow={{$.FilterSpread}}&noqty={{not $.FilterQuantity}}">only Quantity+</a>
+                    {{range $.ArbitOptKeys}}
+                        {{$key := .}}
+                        {{$skipIfGlobal := index $.ArbitOptNoGlob .}}
+                        {{if not (and $.GlobalMode $skipIfGlobal)}}
+                            {{$name := index $.ArbitOptNames .}}
+                            {{if $name}}
+                                <a class="btn {{if index $.ArbitFilters .}}success{{else}}normal{{end}}" href="?source={{$.ScraperShort}}&sort={{$.SortOption}}&{{range $.ArbitOptKeys}}{{$val := index $.ArbitFilters .}}{{.}}={{if eq . $key}}{{not $val}}{{else}}{{$val}}{{end}}&{{end}}">{{$name}}</a>
+                            {{end}}
+                        {{end}}
                     {{end}}
                 </p>
             </div>
@@ -131,7 +128,7 @@
 
             <script type='text/javascript'>
                 function sortBy(sort, name) {
-                    window.location.href = "?&source={{$.ScraperShort}}&credit={{$.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}&sort=" + sort + "#" + name;
+                    window.location.href = "?&source={{$.ScraperShort}}&{{range $.ArbitOptKeys}}{{$val := index $.ArbitFilters .}}{{.}}={{$val}}&{{end}}sort=" + sort + "#" + name;
                 }
             </script>
             {{range .Arb}}
@@ -275,7 +272,7 @@
 
                             <a class="btn default" style="float: right;" href="#top">back to top</a>
                             {{if eq .Name "ABU Games"}}
-                                <a class="btn {{if $.UseCredit}}success{{else}}warning{{end}}" style="float: right;" href="?source={{$.ScraperShort}}&sort={{$.SortOption}}&credit={{not $.UseCredit}}&nocond={{$.FilterCond}}&nofoil={{$.FilterFoil}}&nocomm={{$.FilterComm}}&noposi={{$.FilterNega}}&nopenny={{$.FilterPenny}}">{{if $.UseCredit}}Return to Cash Arbitrage{{else}}Check Credit Arbitrage{{end}}</a>
+                                <a class="btn {{if index $.ArbitFilters "credit"}}success{{else}}warning{{end}}" style="float: right;" href="?source={{$.ScraperShort}}&sort={{$.SortOption}}&{{range $.ArbitOptKeys}}{{$val := index $.ArbitFilters .}}{{.}}={{if eq . "credit"}}{{not $val}}{{else}}{{$val}}{{end}}&{{end}}">{{if index $.ArbitFilters "credit"}}Return to Cash Arbitrage{{else}}Check Credit Arbitrage{{end}}</a>
                             {{end}}
                         </td>
                     </tr>
