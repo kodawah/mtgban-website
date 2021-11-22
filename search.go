@@ -41,7 +41,7 @@ type SearchEntry struct {
 	Secondary     float64
 }
 
-var re = regexp.MustCompile(`-?(c|f|m|r|s|t|cn|sm|skip|store|seller|vendor|region|price|buy_price)[:><](("([^"]+)"|\S+))+`)
+var re = regexp.MustCompile(`-?(c|f|m|r|s|t|cn|sm|date|skip|store|seller|vendor|region|price|buy_price)[:><](("([^"]+)"|\S+))+`)
 
 var AllConditions = []string{"INDEX", "NM", "SP", "MP", "HP", "PO"}
 
@@ -456,6 +456,18 @@ func fixupFinish(code string) string {
 	return code
 }
 
+func fixupDate(code string) string {
+	set, err := mtgmatcher.GetSet(strings.ToUpper(code))
+	if err == nil {
+		code = set.ReleaseDate
+	}
+	_, err = time.Parse("2006-01-02", code)
+	if err == nil {
+		return code
+	}
+	return ""
+}
+
 func parseSearchOptions(query string) (string, map[string]string) {
 	// Filter out any element from the search syntax
 	options := map[string]string{}
@@ -502,6 +514,8 @@ func parseSearchOptions(query string) (string, map[string]string) {
 			options[prefix+"finish"] = fixupFinish(code)
 		case strings.HasPrefix(field, "t:"):
 			options[prefix+"type"] = strings.Title(code)
+		case strings.HasPrefix(field, "date:"):
+			options[prefix+"date"] = fixupDate(code)
 
 		// Options that modify the searched scrapers
 		case strings.HasPrefix(field, "store:"):
@@ -532,6 +546,10 @@ func parseSearchOptions(query string) (string, map[string]string) {
 			if err == nil {
 				options["number_less_than"] = code
 			}
+		case strings.HasPrefix(field, "date>"):
+			options["date_greater_than"] = fixupDate(code)
+		case strings.HasPrefix(field, "date<"):
+			options["date_less_than"] = fixupDate(code)
 		}
 	}
 
@@ -717,6 +735,47 @@ func shouldSkipCard(query, cardId string, options map[string]string) bool {
 			!SliceStringHas(co.Types, options["type"]) &&
 			!SliceStringHas(co.Supertypes, options["type"])) {
 			return true
+		}
+	}
+
+	for _, filter := range []string{"date", "not_date", "date_greater_than", "date_less_than"} {
+		code, found := options[filter]
+		if !found {
+			continue
+		}
+
+		releaseDate, err := time.Parse("2006-01-02", code)
+		if err != nil {
+			continue
+		}
+
+		cardDateStr := co.OriginalReleaseDate
+		if cardDateStr == "" {
+			set, err := mtgmatcher.GetSet(co.SetCode)
+			if err == nil {
+				cardDateStr = set.ReleaseDate
+			}
+		}
+		cardDate, err := time.Parse("2006-01-02", cardDateStr)
+		if err != nil {
+			continue
+		}
+		res := false
+		if options["date"] != "" {
+			res = !cardDate.Equal(releaseDate)
+			switch filter {
+			case "date":
+				res = !cardDate.Equal(releaseDate)
+			case "not_date":
+				res = cardDate.Equal(releaseDate)
+			case "date_greater_than":
+				res = cardDate.Before(releaseDate)
+			case "date_less_than":
+				res = cardDate.After(releaseDate)
+			}
+			if res {
+				return true
+			}
 		}
 	}
 
