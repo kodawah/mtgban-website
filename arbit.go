@@ -57,6 +57,7 @@ var FilterOptKeys = []string{
 	"nopenny",
 	"nobuypenny",
 	"nolow",
+	"nodiff",
 	"noqty",
 }
 
@@ -69,6 +70,7 @@ var FilterOptNames = map[string]string{
 	"nopenny":    "only Bucks+",
 	"nobuypenny": "only BuyBucks+",
 	"nolow":      "only Yield+",
+	"nodiff":     "only Difference+",
 	"noqty":      "only Quantity+",
 }
 
@@ -203,8 +205,10 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	var sorting string
 	arbitFilters := map[string]bool{}
 
+	// Set these flags for global, since it's likely users will want them
 	if pageVars.GlobalMode {
 		arbitFilters["nopenny"] = !arbitFilters["nopenny"]
+		arbitFilters["nodiff"] = !arbitFilters["nodiff"]
 	}
 
 	for k, v := range r.Form {
@@ -385,6 +389,12 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	}
 	if arbitFilters["nobuypenny"] {
 		opts.MinBuyPrice = 1
+	}
+	if arbitFilters["nodiff"] {
+		opts.MinDiff = 1
+		if pageVars.GlobalMode {
+			opts.MinDiff = 5
+		}
 	}
 	if arbitFilters["noqty"] {
 		opts.MinQuantity = 1
