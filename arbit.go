@@ -77,6 +77,9 @@ var FilteOptNoGlobal = map[string]bool{
 	"noqty":  true,
 }
 
+var BadConditions = []string{"MP", "HP", "PO"}
+var UCRarity = []string{"uncommon", "common"}
+
 type Arbitrage struct {
 	Name       string
 	LastUpdate string
@@ -354,7 +357,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		opts.MaxSpread = MaxSpreadGlobal
 
 		if source.Info().Shorthand == TCG_DIRECT {
-			opts.Conditions = []string{"MP", "HP", "PO"}
+			opts.Conditions = BadConditions
 		}
 	}
 	if arbitFilters["noposi"] {
@@ -369,10 +372,10 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		}
 	}
 	if arbitFilters["nocond"] {
-		opts.Conditions = []string{"MP", "HP", "PO"}
+		opts.Conditions = BadConditions
 	}
 	if arbitFilters["nocomm"] {
-		opts.Rarities = []string{"uncommon", "common"}
+		opts.Rarities = UCRarity
 	}
 	if arbitFilters["nopenny"] {
 		opts.MinPrice = 1
