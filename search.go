@@ -1100,7 +1100,7 @@ func searchVendors(query string, blocklist []string, options map[string]string) 
 				Ratio:       entry.PriceRatio,
 				Quantity:    entry.Quantity,
 				URL:         entry.URL,
-				Country:     vendor.Info().CountryFlag,
+				Country:     Country2flag[vendor.Info().CountryFlag],
 			}
 			foundVendors[cardId] = append(foundVendors[cardId], res)
 		}
