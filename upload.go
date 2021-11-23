@@ -401,7 +401,7 @@ func parseHeader(first []string) (map[string]int, error) {
 			if !found {
 				indexMap["id"] = i
 			}
-		case strings.Contains(field, "name") && !strings.Contains(field, "edition") && !strings.Contains(field, "set"):
+		case (strings.Contains(field, "name") && !strings.Contains(field, "edition") && !strings.Contains(field, "set") || field == "card"):
 			_, found := indexMap["cardName"]
 			if !found {
 				indexMap["cardName"] = i
