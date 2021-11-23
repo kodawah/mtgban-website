@@ -61,6 +61,39 @@ var editionSkips = map[string]string{
 	"Rivals Quick Start Set": "",
 }
 
+func getAllEditions() ([]string, map[string]EditionEntry) {
+	sets := mtgmatcher.GetSets()
+
+	sortedEditions := make([]string, 0, len(sets))
+	listEditions := map[string]EditionEntry{}
+	for _, set := range sets {
+		_, found := editionSkips[set.Name]
+		if found {
+			continue
+		}
+
+		date, err := time.Parse("2006-01-02", set.ReleaseDate)
+		if err != nil {
+			continue
+		}
+
+		sortedEditions = append(sortedEditions, set.Code)
+
+		listEditions[set.Code] = EditionEntry{
+			Name:    set.Name,
+			Code:    set.Code,
+			Date:    date,
+			Keyrune: strings.ToLower(set.KeyruneCode),
+		}
+	}
+
+	sort.Slice(sortedEditions, func(i, j int) bool {
+		return listEditions[sortedEditions[i]].Date.After(listEditions[sortedEditions[j]].Date)
+	})
+
+	return sortedEditions, listEditions
+}
+
 func getSealedEditions() ([]string, map[string][]EditionEntry) {
 	sets := mtgmatcher.GetSets()
 

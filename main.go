@@ -334,6 +334,8 @@ var Infos map[string]mtgban.InventoryRecord
 
 var SealedEditionsSorted []string
 var SealedEditionsList map[string][]EditionEntry
+var AllEditionsKeys []string
+var AllEditionsMap map[string]EditionEntry
 
 var Newspaper3dayDB *sql.DB
 var Newspaper1dayDB *sql.DB

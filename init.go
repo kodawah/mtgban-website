@@ -748,6 +748,7 @@ func loadScrapers() {
 	loadVendors(newVendors)
 
 	SealedEditionsSorted, SealedEditionsList = getSealedEditions()
+	AllEditionsKeys, AllEditionsMap = getAllEditions()
 
 	go loadInfos()
 	go runSealedAnalysis()
