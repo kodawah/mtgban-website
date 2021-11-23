@@ -666,7 +666,6 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 				var tmp string
 				err := rows.Scan(&tmp)
 				if err != nil {
-					log.Println("editions missing", err)
 					continue
 				}
 				pageVars.Editions = append(pageVars.Editions, tmp)
