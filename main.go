@@ -105,6 +105,7 @@ type PageVars struct {
 	Rarities     []string
 	CardHashes   []string
 	CanBridge    bool
+	EditionsMap  map[string]EditionEntry
 
 	Sleepers [7]SleeperEntry
 
@@ -658,6 +659,12 @@ func render(w http.ResponseWriter, tmpl string, pageVars PageVars) {
 		},
 		"slice_has": func(s []string, p string) bool {
 			return SliceStringHas(s, p)
+		},
+		"triple_column_start": func(i int, length int) bool {
+			return i == 0 || i == length/3 || i == length*2/3
+		},
+		"triple_column_end": func(i int, length int) bool {
+			return i == length/3-1 || i == length*2/3-1 || i == length-1
 		},
 	}
 

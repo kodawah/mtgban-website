@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/kodabb/go-mtgban/mtgmatcher"
 )
 
 const (
@@ -535,6 +537,10 @@ var NewspaperPages = []NewspaperPage{
 			},
 		},
 	},
+	NewspaperPage{
+		Title:  "Newspaper Settings",
+		Option: "options",
+	},
 }
 
 var NewspaperAllRarities = []string{"", "M", "R", "U", "C", "S"}
@@ -589,6 +595,15 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 		render(w, "news.html", pageVars)
 
 		return
+	} else if page == "options" {
+		pageVars.Title = "Options"
+
+		pageVars.Editions = AllEditionsKeys
+		pageVars.EditionsMap = AllEditionsMap
+
+		render(w, "news.html", pageVars)
+
+		return
 	}
 
 	pageVars.SortOption = sort
@@ -596,6 +611,21 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	pageVars.FilterSet = filter
 	pageVars.FilterRarity = rarity
 	pageVars.Rarities = NewspaperAllRarities
+
+	var skipEditions string
+	skipEditionsOpt := readCookie(r, "NewspaperList")
+	if skipEditionsOpt != "" {
+		sets := mtgmatcher.GetSets()
+		filters := strings.Split(skipEditionsOpt, ",")
+		for _, code := range filters {
+			// XXX: is set code available on the db row?
+			set, found := sets[code]
+			if !found {
+				continue
+			}
+			skipEditions += " AND a.Set <> \"" + set.Name + "\""
+		}
+	}
 
 	for _, newspage := range NewspaperPages {
 		if newspage.Option == page {
@@ -626,6 +656,7 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 			if rarity != "" {
 				subQuery += " AND a.Rarity = \"" + rarity + "\""
 			}
+			subQuery += skipEditions
 
 			// Sub Go!
 			err := db.QueryRow(subQuery).Scan(&pages)
@@ -653,7 +684,7 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 			defSort = newspage.Sort
 
 			// Repeat as above to retrieve the possible editions
-			subQuery = "SELECT DISTINCT a.Set FROM" + qs[1] + " ORDER BY a.Set ASC"
+			subQuery = "SELECT DISTINCT a.Set FROM" + qs[1] + skipEditions + " ORDER BY a.Set ASC"
 			rows, err := db.Query(subQuery)
 			if err != nil {
 				log.Println("editions disabled", err)
@@ -683,6 +714,7 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	if rarity != "" {
 		query += " AND a.Rarity = \"" + rarity + "\""
 	}
+	query += skipEditions
 
 	// Set sorting options
 	if sort != "" {

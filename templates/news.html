@@ -5,6 +5,7 @@
     <link rel="stylesheet" type="text/css" href="../css/main.css">
     <link href="//cdn.jsdelivr.net/npm/keyrune@latest/css/keyrune.css" rel="stylesheet" type="text/css" />
     <title>BAN Newspaper - {{.Title}}</title>
+    <script type="text/javascript" src="../js/cookies.js"></script>
 </head>
 
 <body class="light-theme">
@@ -68,6 +69,7 @@
                         <a href="newspaper?force3day={{.IsOneDay}}">{{if .IsOneDay}}3-day{{else}}early edition{{end}} newspaper</a>.
                     {{end}}
                 </p>
+
                 <h3>Instructions</h3>
                 <ul class="indent">
                     <li>The Market Review provides an overall market health overview.</li>
@@ -75,6 +77,7 @@
                         These are the cards that <a href="https://mtgstocks.com">MTGStocks</a>, <a href="https://echomtg.com">echomtg</a>, and similar pages will pick up in about 5 days (usually - even if they don't, these are the cards that are actively churning on the market given a 3 week review across multiple vendor sites).</li>
                     <li>Pages 4 and 5 give you an overview of TCG vendor levels, how many vendors have listings of a specific card and how it is trending.</li>
                     <li>Pages 6 and 7 are the same deal as 4-5, just reviewing CK buylist and the strength and trends of their offers on cards.</li>
+                    <li>On page 8 you may select which sets to exclude and tailor your experience.</li>
                 </ul>
                 <br>
                 <ul class="indent">
@@ -100,6 +103,82 @@
                 <br>
 
             </div>
+        {{else if eq .Title "Options"}}
+            <br>
+
+            <div class="indent">
+                <h2>Edition list</h2>
+                Select which editions you <b>don't</b> want to display in your newspaper.
+                <br>
+
+                <script type="text/javascript">
+                    function clearform(){
+                        var checkboxes = document.querySelectorAll('input')
+                        for (var i = 0; i < checkboxes.length; i++) {
+                            if (checkboxes[i].checked) {
+                                checkboxes[i].checked = false;
+                            }
+                        }
+                    }
+
+                    function save(sort, name) {
+                        var list = "";
+                        var checkboxes = document.querySelectorAll('input');
+                        for (var i = 0; i < checkboxes.length; i++) {
+                            if (checkboxes[i].checked) {
+                                list += checkboxes[i].name + ',';
+                            }
+                        }
+
+                        setCookie("NewspaperList", list, 1000);
+
+                        window.location.href = "/newspaper"
+                    }
+
+                    window.onload = function(e) {
+                        list = getCookie("NewspaperList");
+                        if (list == "") {
+                            return;
+                        }
+
+                        const sets = list.split(",");
+                        var checkboxes = document.querySelectorAll('input');
+                        for (var i = 0; i < sets.length; i++) {
+                            for (var j = 0; j < checkboxes.length; j++) {
+                                if (checkboxes[j].name == sets[i]) {
+                                    checkboxes[j].checked = true;
+                                }
+                            }
+                        }
+                    }
+                </script>
+
+                <a class="btn warning" onclick="javascript:clearform();"><b>CLEAR</b></a>
+                <a class="btn success" onclick="javascript:save();"><b>SAVE</b></a>
+            </div>
+
+            <div class="indent row">
+                {{range $i, $key := .Editions}}
+                    {{if triple_column_start $i (len $.Editions)}}
+                        <div class="column">
+                    {{end}}
+
+                    {{$edition := index $.EditionsMap $key}}
+                    {{if $edition}}
+                    <input type="checkbox" id="{{$key}}" name="{{$key}}">
+                    <label for="{{$key}}">
+                        <i class="ss ss-{{$edition.Keyrune}} ss-2x ss-fw"></i>
+                        {{$edition.Name}}
+                    </label>
+                    <br>
+                    {{end}}
+
+                    {{if triple_column_end $i (len $.Editions)}}
+                        </div>
+                    {{end}}
+                {{end}}
+            </div>
+
         {{else}}
             <img id="hoverImage" src="" style="position:absolute; z-index: 2;"/>
 
