@@ -537,6 +537,8 @@ var NewspaperPages = []NewspaperPage{
 	},
 }
 
+var NewspaperAllRarities = []string{"", "M", "R", "U", "C", "S"}
+
 func Newspaper(w http.ResponseWriter, r *http.Request) {
 	sig := getSignatureFromCookies(r)
 
@@ -593,7 +595,7 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	pageVars.SortDir = dir
 	pageVars.FilterSet = filter
 	pageVars.FilterRarity = rarity
-	pageVars.Rarities = []string{"", "M", "R", "U", "C", "S"}
+	pageVars.Rarities = NewspaperAllRarities
 
 	for _, newspage := range NewspaperPages {
 		if newspage.Option == page {
