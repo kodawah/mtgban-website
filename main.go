@@ -314,6 +314,7 @@ var Config struct {
 	ArbitBlockVendors      []string          `json:"arbit_block_vendors"`
 	SearchRetailBlockList  []string          `json:"search_block_list"`
 	SearchBuylistBlockList []string          `json:"search_buylist_block_list"`
+	SleepersBlockList      []string          `json:"sleepers_block_list"`
 	GlobalAllowList        []string          `json:"global_allow_list"`
 	GlobalProbeList        []string          `json:"global_probe_list"`
 	Patreon                struct {

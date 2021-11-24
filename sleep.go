@@ -37,7 +37,14 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 
 	pageVars := genPageNav("Sleepers", sig)
 
+	// Load the defaul blocklist (same as Search)
 	blocklistRetail, blocklistBuylist := getDefaultBlocklists(sig)
+
+	// Expand with any custom list if necessary
+	if Config.SleepersBlockList != nil {
+		blocklistRetail = append(blocklistRetail, Config.SleepersBlockList...)
+		blocklistBuylist = append(blocklistBuylist, Config.SleepersBlockList...)
+	}
 
 	tiers := map[string]int{}
 
