@@ -267,12 +267,14 @@
                                     {{if not $head.IsHidden}}
                                         <td>
                                             <center>
+                                                <nobr>
                                                 {{if $head.IsDollar}}${{end}}
                                                 {{if $head.IsPerc}}
                                                     {{perc $row}} %
                                                 {{else}}
-                                                    <nobr>{{$row}}</nobr>
+                                                    {{$row}}
                                                 {{end}}
+                                                </nobr>
                                             </center>
                                         </td>
                                     {{end}}
