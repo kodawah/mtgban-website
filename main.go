@@ -640,6 +640,9 @@ func render(w http.ResponseWriter, tmpl string, pageVars PageVars) {
 		"inc": func(i, j int) int {
 			return i + j
 		},
+		"dec": func(i, j int) int {
+			return i - j
+		},
 		"perc": func(s string) string {
 			n, _ := strconv.ParseFloat(s, 64)
 			return fmt.Sprintf("%0.2f", n*100)

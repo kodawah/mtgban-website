@@ -563,6 +563,7 @@ pre {
 
 h3.storename {
     color: var(--ainfo);
+    display: inline;
 }
 .anchor{
     display: block;
@@ -707,6 +708,11 @@ input:checked + .slider {
 .up {
   transform: rotate(-135deg);
   -webkit-transform: rotate(-135deg);
+}
+
+.down {
+  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
 }
 
 /* Create three equal columns that floats next to each other */

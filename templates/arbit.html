@@ -143,10 +143,27 @@
                     window.location.href = "?&source={{$.ScraperShort}}&{{range $.ArbitOptKeys}}{{$val := index $.ArbitFilters .}}{{.}}={{$val}}&{{end}}sort=" + sort + "#" + name;
                 }
             </script>
-            {{range .Arb}}
+            {{range $i, $arb := .Arb}}
+                <span class="anchor" id="{{.Name}}"></span>
                 <div class="sticky" style="top: 48px; background-color: var(--background);">
-                    <span class="anchor" id="{{.Name}}"></span>
-                    <h3 class="storename">{{.Name}}</a></h3>
+                    <a href="#top">
+                        <h3 class="storename">{{.Name}}</h3>
+                    </a>
+                    &nbsp;
+                    {{if lt (inc $i 1) (len $.Arb)}}
+                        {{$nextIndex := inc $i 1}}
+                        {{$next := index $.Arb $nextIndex}}
+                        <a href="#{{$next.Name}}">
+                            <i class="arrow down"></i>
+                        </a>
+                    {{end}}
+                    {{if gt $i 0}}
+                        {{$prevIndex := dec $i 1}}
+                        {{$prev := index $.Arb $prevIndex}}
+                        <a href="#{{$prev.Name}}">
+                            <i class="arrow up"></i>
+                        </a>
+                    {{end}}
                     <hr width=20%>
                 </div>
 
@@ -282,7 +299,7 @@
                                 <i>Last update: {{.LastUpdate}}</i>
                             </p>
 
-                            <a class="btn default" style="float: right;" href="#top">back to top</a>
+                            <a class="btn default" style="float: right;" href="#top"><i class="arrow up"></i> back to top</a>
                             {{if eq .Name "ABU Games"}}
                                 <a class="btn {{if index $.ArbitFilters "credit"}}success{{else}}warning{{end}}" style="float: right;" href="?source={{$.ScraperShort}}&sort={{$.SortOption}}&{{range $.ArbitOptKeys}}{{$val := index $.ArbitFilters .}}{{.}}={{if eq . "credit"}}{{not $val}}{{else}}{{$val}}{{end}}&{{end}}">{{if index $.ArbitFilters "credit"}}Return to Cash Arbitrage{{else}}Check Credit Arbitrage{{end}}</a>
                             {{end}}
