@@ -310,11 +310,8 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 			Link:  link,
 		}
 
-		if scraper.Info().Name == TCG_MAIN {
-			nav.Short = "TCG"
-		}
-		if scraper.Info().Name == TCG_DIRECT {
-			nav.Short = "Direct"
+		if scraper.Info().SealedMode {
+			nav.Name += " Sealed"
 		}
 
 		v := url.Values{}
@@ -330,7 +327,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 			nav.Active = true
 			nav.Class = "selected"
 		}
-		pageVars.Nav = append(pageVars.Nav, nav)
+		pageVars.ExtraNav = append(pageVars.ExtraNav, nav)
 	}
 
 	if source == nil {

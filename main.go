@@ -47,7 +47,8 @@ type GenericCard struct {
 }
 
 type PageVars struct {
-	Nav []NavElem
+	Nav      []NavElem
+	ExtraNav []NavElem
 
 	PatreonId    string
 	PatreonURL   string

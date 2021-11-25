@@ -21,6 +21,18 @@
                 </a>
             </li>
         {{end}}
+        {{if .ExtraNav}}
+            <li>
+                <div class="dropdown">
+                    <button class="dropbtn">Select store</button>
+                    <div class="dropdown-content">
+                        {{range .ExtraNav}}
+                            <a href="{{.Link}}">{{.Name}}</a>
+                        {{end}}
+                    </div>
+                </div>
+            </li>
+        {{end}}
         <li>
             <label class="switch">
                 <div>
