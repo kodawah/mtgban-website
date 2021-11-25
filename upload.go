@@ -28,6 +28,8 @@ const (
 	TooManyEntriesMessage = "Note: you reached the maximum number of entries supported by this tool"
 )
 
+var UploadIndexKeys = []string{TCG_LOW, TCG_MARKET, TCG_DIRECT_LOW}
+
 type UploadEntry struct {
 	Card          mtgmatcher.Card
 	CardId        string
@@ -231,10 +233,9 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		results = getSellerPrices("", enabledStores, "", cardIds, false, false)
 	}
 
-	indexKeys := []string{TCG_LOW, TCG_MARKET, TCG_DIRECT_LOW}
-	indexResults := getSellerPrices("", indexKeys, "", cardIds, false, false)
+	indexResults := getSellerPrices("", UploadIndexKeys, "", cardIds, false, false)
 	pageVars.IndexEntries = indexResults
-	pageVars.IndexKeys = indexKeys
+	pageVars.IndexKeys = UploadIndexKeys
 
 	pageVars.Metadata = map[string]GenericCard{}
 	if len(hashes) != 0 {
