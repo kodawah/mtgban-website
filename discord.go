@@ -513,8 +513,9 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 					// try to find it and use it to decorate the title
 					productId := strings.TrimPrefix(u.Path, "/product/")
 
-					if strings.Contains(productId, "/") {
-						productId = strings.TrimSuffix(productId, "/"+path.Base(u.Path))
+					slashIndex := strings.Index(productId, "/")
+					if slashIndex != -1 {
+						productId = productId[:slashIndex]
 					}
 					productId = mtgmatcher.Tcg2UUID(productId)
 					co, err := mtgmatcher.GetUUID(productId)
