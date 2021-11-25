@@ -242,8 +242,8 @@
                                     {{.Title}}
                                     {{if or .CanSort (and (not (eq $.FilterSet "")) .ConditionalSort)}}
                                         <nobr>
-                                            <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=desc&filter={{$.FilterSet}}&rarity={{$.FilterRarity}}">▼</a>
-                                            <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=asc&filter={{$.FilterSet}}&rarity={{$.FilterRarity}}">▲</a>
+                                            <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=desc&filter={{$.FilterSet}}&rarity={{$.FilterRarity}}"><i class="arrow down"></i></a>
+                                            <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=asc&filter={{$.FilterSet}}&rarity={{$.FilterRarity}}"><i class="arrow up"></i></a>
                                         </nobr>
                                     {{end}}
                                 </th>
