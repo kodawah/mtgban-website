@@ -165,10 +165,14 @@ func Global(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		if anyEnabled {
+			// This is the list of allowed global sellers, minus the ones blocked from search
 			if SliceStringHas(Config.GlobalAllowList, seller.Info().Shorthand) {
 				if !anyExperiment && SliceStringHas(Config.SearchRetailBlockList, seller.Info().Shorthand) {
 					continue
 				}
+				allowlistSellers = append(allowlistSellers, seller.Info().Shorthand)
+			} else if anyExperiment && SliceStringHas(Config.DevSellers, seller.Info().Shorthand) {
+				// Append any experimental ones if enabled
 				allowlistSellers = append(allowlistSellers, seller.Info().Shorthand)
 			}
 		} else {
