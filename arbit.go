@@ -154,6 +154,9 @@ func Global(w http.ResponseWriter, r *http.Request) {
 	anyExperimentOpt := GetParamFromSig(sig, "AnyExperimentsEnabled")
 	anyExperiment, _ := strconv.ParseBool(anyExperimentOpt)
 
+	anyEnabled = anyEnabled || (DevMode && !SigCheck)
+	anyExperiment = anyExperiment || (DevMode && !SigCheck)
+
 	// The "menu" section, the reference
 	var allowlistSellers []string
 	for i, seller := range Sellers {
