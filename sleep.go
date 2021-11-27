@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -45,6 +46,50 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 
 	start := time.Now()
 
+	sleepers, err := getTiers(blocklistRetail, blocklistBuylist)
+	if err != nil {
+		pageVars.Title = "Errors have been made"
+		pageVars.ErrorMessage = err.Error()
+
+		render(w, "sleep.html", pageVars)
+		return
+	}
+
+	pageVars.Metadata = map[string]GenericCard{}
+	for _, cardIds := range sleepers {
+		for _, cardId := range cardIds {
+			_, found := pageVars.Metadata[cardId]
+			if !found {
+				pageVars.Metadata[cardId] = uuid2card(cardId, true)
+			}
+		}
+	}
+
+	pageVars.Sleepers = sleepers
+	pageVars.SleepersKeys = SleeperLetters
+	pageVars.SleepersColors = SleeperColors
+
+	pageVars.Title = "Sleeper cards"
+
+	// Log performance
+	user := GetParamFromSig(sig, "UserEmail")
+	msg := fmt.Sprintf("Sleepers call by %s with took %v", user, time.Since(start))
+	Notify("Sleepers", msg)
+	LogPages["Sleepers"].Println(msg)
+	if DevMode {
+		log.Println(msg)
+	}
+
+	if DevMode {
+		start = time.Now()
+	}
+	render(w, "sleep.html", pageVars)
+	if DevMode {
+		log.Println("Sleepers render took", time.Since(start))
+	}
+}
+
+func getTiers(blocklistRetail, blocklistBuylist []string) (map[string][]string, error) {
 	tiers := map[string]int{}
 
 	var tcgSeller mtgban.Seller
@@ -124,6 +169,11 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Avoid accessing the first element if empty
+	if len(tiers) == 0 {
+		return nil, errors.New("No Sleepers Available")
+	}
+
 	results := []Sleeper{}
 	for c := range tiers {
 		if tiers[c] > 1 {
@@ -138,12 +188,6 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 		return results[i].Level > results[j].Level
 	})
 
-	// Avoid accessing the first element if empty
-	if len(results) == 0 {
-		render(w, "sleep.html", pageVars)
-		return
-	}
-
 	maxrange := float64(SleeperSize - 1)
 	minrange := float64(0)
 	exp := float64(minrange - maxrange)
@@ -152,11 +196,7 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 
 	// Avoid a division by 0
 	if max == min {
-		pageVars.Title = "Errors have been made"
-		pageVars.ErrorMessage = ErrMsgDenied
-
-		render(w, "sleep.html", pageVars)
-		return
+		return nil, errors.New(ErrMsgDenied)
 	}
 
 	sleepers := map[string][]string{}
@@ -185,36 +225,5 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 		sleepers[letter] = append(sleepers[letter], res.CardId)
 	}
 
-	pageVars.Metadata = map[string]GenericCard{}
-	for _, cardIds := range sleepers {
-		for _, cardId := range cardIds {
-			_, found := pageVars.Metadata[cardId]
-			if !found {
-				pageVars.Metadata[cardId] = uuid2card(cardId, true)
-			}
-		}
-	}
-
-	pageVars.Sleepers = sleepers
-	pageVars.SleepersKeys = SleeperLetters
-	pageVars.SleepersColors = SleeperColors
-
-	pageVars.Title = "Sleeper cards"
-
-	// Log performance
-	user := GetParamFromSig(sig, "UserEmail")
-	msg := fmt.Sprintf("Sleepers call by %s took %v", user, time.Since(start))
-	Notify("Sleepers", msg)
-	LogPages["Sleepers"].Println(msg)
-	if DevMode {
-		log.Println(msg)
-	}
-
-	if DevMode {
-		start = time.Now()
-	}
-	render(w, "sleep.html", pageVars)
-	if DevMode {
-		log.Println("Sleepers render took", time.Since(start))
-	}
+	return sleepers, nil
 }
