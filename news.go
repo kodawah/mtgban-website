@@ -121,7 +121,20 @@ var NewspaperPages = []NewspaperPage{
 		Option: "stock_dec",
 		Query: `SELECT DISTINCT n.row_names, n.uuid,
                        a.Name, a.Set, a.Number, a.Rarity,
-                       n.Todays_Sellers, n.Week_Ago_Sellers, n.Month_Ago_Sellers, n.Week_Ago_Sellers_Chg
+                       n.Todays_Sellers, n.Week_Ago_Sellers, n.Month_Ago_Sellers, n.Week_Ago_Sellers_Chg,
+                       CASE
+                           WHEN n.Week_Ago_Sellers < n.Month_Ago_Sellers
+                           THEN CASE
+                               WHEN n.Todays_Sellers <= n.Week_Ago_Sellers / 3     THEN 'S'
+                               WHEN n.Todays_Sellers <= n.Week_Ago_Sellers / 2     THEN 'A'
+                               WHEN n.Todays_Sellers <= n.Week_Ago_Sellers * 2 / 3 THEN 'B'
+                               WHEN n.Todays_Sellers <= n.Week_Ago_Sellers * 3 / 4 THEN 'C'
+                               WHEN n.Todays_Sellers <= n.Week_Ago_Sellers * 4 / 5 THEN 'D'
+                               WHEN n.Todays_Sellers <  n.Week_Ago_Sellers         THEN 'E'
+                               ELSE ''
+                           END
+                           ELSE ''
+                       END AS 'Trending'
                 FROM vendor_levels n
                 LEFT JOIN mtgjson_portable a ON n.uuid = a.uuid
                 WHERE n.Week_Ago_Sellers_Chg is not NULL and n.Week_Ago_Sellers_Chg != 0`,
@@ -171,6 +184,11 @@ var NewspaperPages = []NewspaperPage{
 				CanSort: true,
 				Field:   "Week_Ago_Sellers_Chg",
 				IsPerc:  true,
+			},
+			Heading{
+				Title:   "Tier",
+				CanSort: true,
+				Field:   "Trending",
 			},
 		},
 	},
@@ -730,6 +748,19 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		if canSort {
+			// Define a custom order for our special scale
+			if sort == "Trending" {
+				sort = `CASE
+                            WHEN Trending = 'S' THEN '7'
+                            WHEN Trending = 'A' THEN '6'
+                            WHEN Trending = 'B' THEN '5'
+                            WHEN Trending = 'C' THEN '4'
+                            WHEN Trending = 'D' THEN '3'
+                            WHEN Trending = 'E' THEN '2'
+                            WHEN Trending = ''  THEN '1'
+                            ELSE Trending
+                        END`
+			}
 			query += " ORDER BY " + sort
 			if dir == "asc" {
 				query += " ASC"
