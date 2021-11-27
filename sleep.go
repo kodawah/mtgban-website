@@ -17,13 +17,8 @@ type Sleeper struct {
 	Level  int
 }
 
-type SleeperEntry struct {
-	Meta    []GenericCard
-	Letter  string
-	BGColor string
-}
-
 const (
+	SleeperSize = 7
 	MaxSleepers = 34
 )
 
@@ -149,7 +144,7 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	maxrange := float64(len(pageVars.Sleepers) - 1)
+	maxrange := float64(SleeperSize - 1)
 	minrange := float64(0)
 	exp := float64(minrange - maxrange)
 	max := float64(results[0].Level)
@@ -164,12 +159,7 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for i := range pageVars.Sleepers {
-		pageVars.Sleepers[i].Meta = []GenericCard{}
-		pageVars.Sleepers[i].Letter = SleeperLetters[i]
-		pageVars.Sleepers[i].BGColor = SleeperColors[i]
-	}
-
+	sleepers := map[string][]string{}
 	for _, res := range results {
 		value := float64(res.Level)
 		// Normalize between 0,1
@@ -182,16 +172,32 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 			log.Println(level, res.Level, cc)
 		}
 
-		if level >= len(pageVars.Sleepers) {
+		if level >= SleeperSize {
 			break
 		}
 
-		if len(pageVars.Sleepers[level].Meta) > MaxSleepers {
+		letter := SleeperLetters[level]
+
+		if len(sleepers[letter]) > MaxSleepers {
 			continue
 		}
 
-		pageVars.Sleepers[level].Meta = append(pageVars.Sleepers[level].Meta, uuid2card(res.CardId, true))
+		sleepers[letter] = append(sleepers[letter], res.CardId)
 	}
+
+	pageVars.Metadata = map[string]GenericCard{}
+	for _, cardIds := range sleepers {
+		for _, cardId := range cardIds {
+			_, found := pageVars.Metadata[cardId]
+			if !found {
+				pageVars.Metadata[cardId] = uuid2card(cardId, true)
+			}
+		}
+	}
+
+	pageVars.Sleepers = sleepers
+	pageVars.SleepersKeys = SleeperLetters
+	pageVars.SleepersColors = SleeperColors
 
 	pageVars.Title = "Sleeper cards"
 

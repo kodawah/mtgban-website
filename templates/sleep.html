@@ -44,15 +44,18 @@
             These cards have a higher buylist than the market price, or are priced below TCG rates, but the market has not noticed yet!
 
             <table class="tiers">
-                {{range .Sleepers}}
+                {{range $i, $letter := .SleepersKeys}}
+                    {{$bgColor := index $.SleepersColors $i}}
+                    {{$cardIds := index $.Sleepers $letter}}
                     <tr class="tiers">
-                        <td class="tiers" style="background-color: {{.BGColor}};">
-                                {{.Letter}}
+                        <td class="tiers" style="background-color: {{$bgColor}};">
+                            {{$letter}}
                         </td>
                         <td>
                             <div style="min-height: 50px;">
-                                {{range .Meta}}
-                                    <a href="{{.SearchURL}}"><img loading="lazy" style="margin: 5px;" src="{{.ImageURL}}" width=146 height=204></a>
+                                {{range $cardIds}}
+                                    {{$card := index $.Metadata .}}
+                                    <a href="{{$card.SearchURL}}"><img loading="lazy" style="margin: 5px;" src="{{$card.ImageURL}}" width=146 height=204></a>
                                 {{end}}
                             </div>
                         </td>

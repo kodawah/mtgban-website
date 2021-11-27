@@ -108,7 +108,9 @@ type PageVars struct {
 	CanBridge    bool
 	EditionsMap  map[string]EditionEntry
 
-	Sleepers [7]SleeperEntry
+	Sleepers       map[string][]string
+	SleepersKeys   []string
+	SleepersColors []string
 
 	HasStocks bool
 
