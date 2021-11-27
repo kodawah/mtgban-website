@@ -268,9 +268,10 @@
                                         <td>
                                             <center>
                                                 <nobr>
-                                                {{if $head.IsDollar}}${{end}}
-                                                {{if $head.IsPerc}}
-                                                    {{perc $row}} %
+                                                {{if $head.IsDollar}}
+                                                    {{print_price $row}}
+                                                {{else if $head.IsPerc}}
+                                                    {{print_perc $row}}
                                                 {{else}}
                                                     {{$row}}
                                                 {{end}}
