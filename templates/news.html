@@ -239,7 +239,14 @@
                         {{range .Headings}}
                             {{if not .IsHidden}}
                                 <th class="stickyHeaderShort">
+                                    {{if .ConditionalSort}}
+                                        <center>
+                                    {{end}}
                                     {{.Title}}
+                                    {{if .ConditionalSort}}
+                                        </center>
+                                    {{end}}
+
                                     {{if or .CanSort (and (not (eq $.FilterSet "")) .ConditionalSort)}}
                                         <nobr>
                                             <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=desc&filter={{$.FilterSet}}&rarity={{$.FilterRarity}}"><i class="arrow down"></i></a>
