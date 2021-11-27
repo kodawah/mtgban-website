@@ -53,20 +53,15 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 	tiers := map[string]int{}
 
 	var tcgSeller mtgban.Seller
-	for i, seller := range Sellers {
-		if seller == nil {
-			log.Println("nil seller at position", i)
-			continue
-		}
-		if seller.Info().Shorthand == TCG_LOW {
+	for _, seller := range Sellers {
+		if seller != nil && seller.Info().Shorthand == TCG_LOW {
 			tcgSeller = seller
 			break
 		}
 	}
 
-	for i, seller := range Sellers {
+	for _, seller := range Sellers {
 		if seller == nil {
-			log.Println("nil seller at position", i)
 			continue
 		}
 
@@ -84,9 +79,8 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		for j, vendor := range Vendors {
+		for _, vendor := range Vendors {
 			if vendor == nil {
-				log.Println("nil vendor at position", j)
 				continue
 			}
 			if vendor.Info().Shorthand == seller.Info().Shorthand {
