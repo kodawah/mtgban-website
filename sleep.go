@@ -177,8 +177,8 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 		// Scale to the size of the table
 		level := int(math.Floor(r*exp) + maxrange)
 
-		cc, _ := mtgmatcher.GetUUID(res.CardId)
 		if DevMode {
+			cc, _ := mtgmatcher.GetUUID(res.CardId)
 			log.Println(level, res.Level, cc)
 		}
 
