@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"math"
 	"net/http"
 	"sort"
+	"time"
 
 	"github.com/kodabb/go-mtgban/mtgban"
 	"github.com/kodabb/go-mtgban/mtgmatcher"
@@ -45,6 +47,8 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 		blocklistRetail = append(blocklistRetail, Config.SleepersBlockList...)
 		blocklistBuylist = append(blocklistBuylist, Config.SleepersBlockList...)
 	}
+
+	start := time.Now()
 
 	tiers := map[string]int{}
 
@@ -197,5 +201,20 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 
 	pageVars.Title = "Sleeper cards"
 
+	// Log performance
+	user := GetParamFromSig(sig, "UserEmail")
+	msg := fmt.Sprintf("Sleepers call by %s took %v", user, time.Since(start))
+	Notify("Sleepers", msg)
+	LogPages["Sleepers"].Println(msg)
+	if DevMode {
+		log.Println(msg)
+	}
+
+	if DevMode {
+		start = time.Now()
+	}
 	render(w, "sleep.html", pageVars)
+	if DevMode {
+		log.Println("Sleepers render took", time.Since(start))
+	}
 }
