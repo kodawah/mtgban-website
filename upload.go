@@ -283,7 +283,11 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Summary of the entries
-		pageVars.TotalEntries[TCG_LOW] += getPrice(indexResults[cardId][TCG_LOW])
+		tcgLowPrice := getPrice(indexResults[cardId][TCG_LOW])
+		if uploadedData[i].HasQuantity {
+			tcgLowPrice *= float64(uploadedData[i].Quantity)
+			pageVars.TotalEntries[TCG_LOW] += tcgLowPrice
+		}
 
 		// Run summaries for each vendor
 		for shorthand, banPrice := range results[cardId] {
