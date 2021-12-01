@@ -788,6 +788,40 @@ func shouldSkipCard(query, cardId string, options map[string]string) bool {
 	return false
 }
 
+func price4seller(cardId, shorthand string) float64 {
+	for _, seller := range Sellers {
+		if seller != nil && strings.ToLower(seller.Info().Shorthand) == strings.ToLower(shorthand) {
+			inv, err := seller.Inventory()
+			if err != nil {
+				continue
+			}
+			entries, found := inv[cardId]
+			if !found {
+				continue
+			}
+			return entries[0].Price
+		}
+	}
+	return 0
+}
+
+func price4vendor(cardId, shorthand string) float64 {
+	for _, vendor := range Vendors {
+		if vendor != nil && strings.ToLower(vendor.Info().Shorthand) == strings.ToLower(shorthand) {
+			bl, err := vendor.Buylist()
+			if err != nil {
+				continue
+			}
+			entries, found := bl[cardId]
+			if !found {
+				continue
+			}
+			return entries[0].BuyPrice
+		}
+	}
+	return 0
+}
+
 func shouldSkipSellPrice(cardId string, options map[string]string, refPrice float64) bool {
 	// No price no dice
 	if refPrice == 0 {
@@ -810,36 +844,10 @@ func shouldSkipSellPrice(cardId string, options map[string]string, refPrice floa
 			switch tag {
 			case "price_greater_than",
 				"price_less_than":
-				for _, seller := range Sellers {
-					if seller != nil && strings.ToLower(seller.Info().Shorthand) == strings.ToLower(code) {
-						inv, err := seller.Inventory()
-						if err != nil {
-							continue
-						}
-						entries, found := inv[cardId]
-						if !found {
-							continue
-						}
-						price = entries[0].Price
-						break
-					}
-				}
+				price = price4seller(cardId, code)
 			case "buy_price_greater_than",
 				"buy_price_less_than":
-				for _, vendor := range Vendors {
-					if vendor != nil && strings.ToLower(vendor.Info().Shorthand) == strings.ToLower(code) {
-						bl, err := vendor.Buylist()
-						if err != nil {
-							continue
-						}
-						entries, found := bl[cardId]
-						if !found {
-							continue
-						}
-						price = entries[0].BuyPrice
-						break
-					}
-				}
+				price = price4vendor(cardId, code)
 			}
 		}
 		if price == 0 {
