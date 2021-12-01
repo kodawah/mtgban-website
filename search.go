@@ -789,6 +789,11 @@ func shouldSkipCard(query, cardId string, options map[string]string) bool {
 }
 
 func shouldSkipSellPrice(cardId string, options map[string]string, refPrice float64) bool {
+	// No price no dice
+	if refPrice == 0 {
+		return true
+	}
+
 	for _, tag := range []string{
 		"price_greater_than",
 		"price_less_than",
@@ -994,11 +999,6 @@ func searchSellers(query string, blocklist []string, options map[string]string) 
 
 				// Skip cards that don't match desired pricing
 				if shouldSkipSellPrice(cardId, options, entry.Price) {
-					continue
-				}
-
-				// No price no dice
-				if entry.Price == 0 {
 					continue
 				}
 
