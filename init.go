@@ -349,6 +349,13 @@ var ScraperOptions = map[string]*scraperOption{
 			scraper.LogCallback = logger.Printf
 			return scraper, nil
 		},
+		StashBuylist: true,
+		RDBs: map[string]*redis.Client{
+			"buylist": redis.NewClient(&redis.Options{
+				Addr: "localhost:6379",
+				DB:   7,
+			}),
+		},
 	},
 	"cardkingdom": &scraperOption{
 		DevEnabled: true,
@@ -394,6 +401,13 @@ var ScraperOptions = map[string]*scraperOption{
 			}
 			scraper.LogCallback = logger.Printf
 			return scraper, nil
+		},
+		StashBuylist: true,
+		RDBs: map[string]*redis.Client{
+			"buylist": redis.NewClient(&redis.Options{
+				Addr: "localhost:6379",
+				DB:   6,
+			}),
 		},
 	},
 	"strikezone": &scraperOption{

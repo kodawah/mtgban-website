@@ -31,6 +31,7 @@ type scraperConfig struct {
 	blue: 'rgb(54, 162, 235)'
 	purple: 'rgb(153, 102, 255)'
 	grey: 'rgb(201, 203, 207)'
+	darkblue: 'rgb(23,42,72)'
 */
 
 var enabledDatasets = []scraperConfig{
@@ -74,6 +75,20 @@ var enabledDatasets = []scraperConfig{
 		ScraperName: "cardmarket",
 		KindName:    MKM_TREND,
 		Color:       "rgb(201, 203, 207)",
+		Hidden:      true,
+	},
+	{
+		PublicName:  "Star City Games Buylist",
+		ScraperName: "starcitygames",
+		KindName:    "buylist",
+		Color:       "rgb(23,42,72)",
+		Hidden:      true,
+	},
+	{
+		PublicName:  "ABU Games Buylist",
+		ScraperName: "starcitygames",
+		KindName:    "buylist",
+		Color:       "rgb(153, 102, 255)",
 		Hidden:      true,
 	},
 }
