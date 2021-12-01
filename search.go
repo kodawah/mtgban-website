@@ -823,6 +823,14 @@ func price4vendor(cardId, shorthand string) float64 {
 }
 
 func shouldSkipSellPrice(cardId string, options map[string]string, refPrice float64) bool {
+	return shouldSkipPrice(cardId, options, refPrice, "retail")
+}
+
+func shouldSkipBuyPrice(cardId string, options map[string]string, refPrice float64) bool {
+	return shouldSkipPrice(cardId, options, refPrice, "buylist")
+}
+
+func shouldSkipPrice(cardId string, options map[string]string, refPrice float64, mode string) bool {
 	// No price no dice
 	if refPrice == 0 {
 		return true
@@ -844,9 +852,15 @@ func shouldSkipSellPrice(cardId string, options map[string]string, refPrice floa
 			switch tag {
 			case "price_greater_than",
 				"price_less_than":
+				if mode == "buylist" {
+					continue
+				}
 				price = price4seller(cardId, code)
 			case "buy_price_greater_than",
 				"buy_price_less_than":
+				if mode == "retail" {
+					continue
+				}
 				price = price4vendor(cardId, code)
 			}
 		}
@@ -1092,6 +1106,10 @@ func searchVendors(query string, blocklist []string, options map[string]string) 
 				}
 			}
 			entry := blEntries[nmIndex]
+
+			if shouldSkipBuyPrice(cardId, options, entry.BuyPrice) {
+				continue
+			}
 
 			_, found := foundVendors[cardId]
 			if !found {
