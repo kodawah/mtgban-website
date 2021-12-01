@@ -41,7 +41,7 @@ type SearchEntry struct {
 	Secondary     float64
 }
 
-var re = regexp.MustCompile(`-?(c|f|m|r|s|t|cn|sm|date|skip|store|seller|vendor|region|price|buy_price)[:><](("([^"]+)"|\S+))+`)
+var re = regexp.MustCompile(`-?(c|f|m|r|s|t|cn|sm|date|skip|store|seller|vendor|region|price|buy_price|arb_price|rev_price)[:><](("([^"]+)"|\S+))+`)
 
 var AllConditions = []string{"INDEX", "NM", "SP", "MP", "HP", "PO"}
 
@@ -536,6 +536,14 @@ func parseSearchOptions(query string) (string, map[string]string) {
 			options["buy_price_greater_than"] = fixupStoreCode(code)
 		case strings.HasPrefix(field, "buy_price<"):
 			options["buy_price_less_than"] = fixupStoreCode(code)
+		case strings.HasPrefix(field, "arb_price>"):
+			options["arb_price_greater_than"] = fixupStoreCode(code)
+		case strings.HasPrefix(field, "arb_price<"):
+			options["arb_price_less_than"] = fixupStoreCode(code)
+		case strings.HasPrefix(field, "rev_price>"):
+			options["rev_price_greater_than"] = fixupStoreCode(code)
+		case strings.HasPrefix(field, "rev_price<"):
+			options["rev_price_less_than"] = fixupStoreCode(code)
 		case strings.HasPrefix(field, "cn>"):
 			_, err := strconv.Atoi(code)
 			if err == nil {
@@ -841,6 +849,10 @@ func shouldSkipPrice(cardId string, options map[string]string, refPrice float64,
 		"price_less_than",
 		"buy_price_greater_than",
 		"buy_price_less_than",
+		"arb_price_greater_than",
+		"arb_price_less_than",
+		"rev_price_greater_than",
+		"rev_price_less_than",
 	} {
 		code, found := options[tag]
 		if !found {
@@ -862,20 +874,29 @@ func shouldSkipPrice(cardId string, options map[string]string, refPrice float64,
 					continue
 				}
 				price = price4vendor(cardId, code)
+			case "arb_price_greater_than",
+				"arb_price_less_than":
+				if mode == "buylist" {
+					continue
+				}
+				price = price4vendor(cardId, code)
+			case "rev_price_greater_than",
+				"rev_price_less_than":
+				if mode == "retail" {
+					continue
+				}
+				price = price4seller(cardId, code)
 			}
 		}
 		if price == 0 {
 			return true
 		}
 
-		switch tag {
-		case "price_greater_than",
-			"buy_price_greater_than":
+		if strings.HasSuffix(tag, "greater_than") {
 			if price > refPrice {
 				return true
 			}
-		case "price_less_than",
-			"buy_price_less_than":
+		} else if strings.HasSuffix(tag, "less_than") {
 			if price < refPrice {
 				return true
 			}
