@@ -462,15 +462,16 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 			continue
 		}
 
-		maxResults := MaxArbitResults
+		// For Global, drop results before sorting, to add some extra variance
 		if pageVars.GlobalMode {
+			maxResults := MaxResultsGlobal
+			// Lower max number of results for the preview
 			if len(flags) > 0 && !flags[0] {
 				maxResults = MaxResultsGlobalLimit
 			}
-			maxResults = MaxResultsGlobal
-		}
-		if len(arbit) > maxResults {
-			arbit = arbit[:maxResults]
+			if len(arbit) > maxResults {
+				arbit = arbit[:maxResults]
+			}
 		}
 
 		// Sort as requested
@@ -507,6 +508,11 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 			})
 		}
 		pageVars.SortOption = sorting
+
+		// For Arbit, drop any excessive results after sorting
+		if !pageVars.GlobalMode && len(arbit) > MaxArbitResults {
+			arbit = arbit[:MaxArbitResults]
+		}
 
 		name := scraper.Info().Name
 		if name == "TCG Player Market" {
