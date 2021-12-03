@@ -79,7 +79,7 @@ var FilterOptNames = map[string]string{
 }
 
 // Arbit-only options
-var FilteOptNoGlobal = map[string]bool{
+var FilterOptNoGlobal = map[string]bool{
 	"nocond":     true,
 	"nononabu4h": true,
 	"nobuypenny": true,
@@ -388,7 +388,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	pageVars.ArbitFilters = arbitFilters
 	pageVars.ArbitOptKeys = FilterOptKeys
 	pageVars.ArbitOptNames = FilterOptNames
-	pageVars.ArbitOptNoGlob = FilteOptNoGlobal
+	pageVars.ArbitOptNoGlob = FilterOptNoGlobal
 
 	pageVars.Arb = []Arbitrage{}
 	pageVars.Metadata = map[string]GenericCard{}
