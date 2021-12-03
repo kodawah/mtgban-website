@@ -160,7 +160,7 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 
 	// Only filtered output can have csv encoding, and only for retail or buylist requests
 	if strings.HasSuffix(urlPath, ".csv") && ((filterByEdition == "" && filterByHash == nil) || strings.HasPrefix(urlPath, "all")) {
-		out.Error = "Not found"
+		out.Error = "Invalid request"
 		json.NewEncoder(w).Encode(&out)
 		return
 	}
