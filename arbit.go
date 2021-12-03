@@ -54,6 +54,7 @@ var FilterOptKeys = []string{
 	"nofoil",
 	"nocomm",
 	"nononrl",
+	"nononabu4h",
 	"noposi",
 	"nopenny",
 	"nobuypenny",
@@ -68,6 +69,7 @@ var FilterOptNames = map[string]string{
 	"nofoil":     "only non-Foil",
 	"nocomm":     "only Rare/Mythic",
 	"nononrl":    "only RL",
+	"nononabu4h": "only ABU4H",
 	"noposi":     "only Negative",
 	"nopenny":    "only Bucks+",
 	"nobuypenny": "only BuyBucks+",
@@ -79,6 +81,7 @@ var FilterOptNames = map[string]string{
 // Arbit-only options
 var FilteOptNoGlobal = map[string]bool{
 	"nocond":     true,
+	"nononabu4h": true,
 	"nobuypenny": true,
 	"noposi":     true,
 	"noqty":      true,
@@ -86,6 +89,16 @@ var FilteOptNoGlobal = map[string]bool{
 
 var BadConditions = []string{"MP", "HP", "PO"}
 var UCRarity = []string{"uncommon", "common"}
+
+var ABU4H = []string{
+	"Limited Edition Alpha",
+	"Limited Edition Beta",
+	"Unlimited Edition",
+	"Arabian Nights",
+	"Antiquities",
+	"Legends",
+	"The Dark",
+}
 
 type Arbitrage struct {
 	Name       string
@@ -426,6 +439,9 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	}
 	if arbitFilters["noqty"] {
 		opts.MinQuantity = 1
+	}
+	if arbitFilters["nononabu4h"] {
+		opts.OnlyEditions = ABU4H
 	}
 	if pageVars.GlobalMode {
 		opts.Editions = FilteredEditions
