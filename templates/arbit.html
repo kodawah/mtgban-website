@@ -51,6 +51,72 @@
         {{if .ShowPromo}}
             <img class="center" src="img/promo/global.jpg">
         {{end}}
+    {{else if len $.VendorKeys}}
+        <script type="text/javascript" src="../js/cookies.js"></script>
+        <br>
+
+        <div class="indent">
+            <h2>Vendors list</h2>
+            Select which vendors you <b>don't</b> want to display in your arbit.
+            <br>
+
+            <script type="text/javascript">
+                function clearform(){
+                    var checkboxes = document.querySelectorAll('input')
+                    for (var i = 0; i < checkboxes.length; i++) {
+                        if (checkboxes[i].checked) {
+                            checkboxes[i].checked = false;
+                        }
+                    }
+                }
+
+                function save(sort, name) {
+                    var list = "";
+                    var checkboxes = document.querySelectorAll('input');
+                    for (var i = 0; i < checkboxes.length; i++) {
+                        if (checkboxes[i].checked) {
+                            list += checkboxes[i].name + ',';
+                        }
+                    }
+
+                    setCookie("ArbitVendorsList", list, 1000);
+
+                    window.location.href = "/arbit"
+                }
+
+                window.onload = function(e) {
+                    list = getCookie("ArbitVendorsList");
+                    if (list == "") {
+                        return;
+                    }
+
+                    const sets = list.split(",");
+                    var checkboxes = document.querySelectorAll('input');
+                    for (var i = 0; i < sets.length; i++) {
+                        for (var j = 0; j < checkboxes.length; j++) {
+                            if (checkboxes[j].name == sets[i]) {
+                                checkboxes[j].checked = true;
+                            }
+                        }
+                    }
+                }
+            </script>
+
+            <a class="btn warning" onclick="javascript:clearform();"><b>CLEAR</b></a>
+            <a class="btn success" onclick="javascript:save();"><b>SAVE</b></a>
+        </div>
+
+        <br>
+        <div class="indent">
+            {{range $i, $key := .VendorKeys}}
+                <input type="checkbox" id="{{$key}}" name="{{$key}}">
+                <label for="{{$key}}">
+                    {{scraper_name $key}}
+                </label>
+                <br>
+            {{end}}
+        </div>
+
     {{else if eq .ScraperShort ""}}
         <h1>Welcome to {{.Title}}<a name="top">&nbsp;</a></h1>
         <div class="indent">
@@ -58,8 +124,10 @@
                 <p>Please use the top bar to choose the index to compare from.</p>
             {{else if .ReverseMode}}
                 <p>Please use the top bar to choose the vendor to sell to.</p>
+                <p><a href="?page=opt">Set options</a></p>
             {{else}}
                 <p>Please use the top bar to choose the seller to buy from.</p>
+                <p><a href="?page=opt">Set options</a></p>
             {{end}}
             <h2>Instructions</h2>
             <ul class="indent">

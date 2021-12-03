@@ -137,6 +137,28 @@ func arbit(w http.ResponseWriter, r *http.Request, reverse bool) {
 		blocklistVendors = strings.Split(blocklistVendorsOpt, ",")
 	}
 
+	if r.FormValue("page") == "opt" {
+		// Load all available vendors
+		vendorKeys := make([]string, 0, len(blocklistVendors))
+		for _, vendor := range Vendors {
+			if vendor == nil || SliceStringHas(blocklistVendors, vendor.Info().Shorthand) || vendor.Info().SealedMode {
+				continue
+			}
+			vendorKeys = append(vendorKeys, vendor.Info().Shorthand)
+		}
+		sort.Slice(vendorKeys, func(i, j int) bool {
+			return ScraperNames[vendorKeys[i]] < ScraperNames[vendorKeys[j]]
+		})
+		pageVars.VendorKeys = vendorKeys
+	} else {
+		filters := strings.Split(readCookie(r, "ArbitVendorsList"), ",")
+		for _, code := range filters {
+			if !SliceStringHas(blocklistVendors, code) {
+				blocklistVendors = append(blocklistVendors, code)
+			}
+		}
+	}
+
 	pageVars.ReverseMode = reverse
 
 	scraperCompare(w, r, pageVars, allowlistSellers, blocklistVendors)
