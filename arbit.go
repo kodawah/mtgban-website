@@ -87,6 +87,12 @@ var FilterOptNoGlobal = map[string]bool{
 	"noqty":      true,
 }
 
+// Experimental options
+var FilterOptTests = map[string]bool{
+	"nononrl":    true,
+	"nononabu4h": true,
+}
+
 var BadConditions = []string{"MP", "HP", "PO"}
 var UCRarity = []string{"uncommon", "common"}
 
@@ -176,7 +182,7 @@ func arbit(w http.ResponseWriter, r *http.Request, reverse bool) {
 
 	pageVars.ReverseMode = reverse
 
-	scraperCompare(w, r, pageVars, allowlistSellers, blocklistVendors)
+	scraperCompare(w, r, pageVars, allowlistSellers, blocklistVendors, false, allowlistSellersOpt == "ALL")
 }
 
 func Global(w http.ResponseWriter, r *http.Request) {
@@ -248,6 +254,8 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	var sorting string
 	arbitFilters := map[string]bool{}
 
+	anyEnabled := len(flags) > 1 && flags[1] || (DevMode && !SigCheck)
+
 	// Set these flags for global, since it's likely users will want them
 	if pageVars.GlobalMode {
 		arbitFilters["nopenny"] = !arbitFilters["nopenny"]
@@ -304,6 +312,10 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		default:
 			// Skip options reserved for arbit-only
 			if pageVars.GlobalMode && FilterOptNoGlobal[k] {
+				continue
+			}
+			// Skip experimental options
+			if !anyEnabled && FilterOptTests[k] {
 				continue
 			}
 			arbitFilters[k], _ = strconv.ParseBool(v[0])
@@ -393,6 +405,9 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	pageVars.ArbitOptKeys = FilterOptKeys
 	pageVars.ArbitOptNames = FilterOptNames
 	pageVars.ArbitOptNoGlob = FilterOptNoGlobal
+	if !anyEnabled {
+		pageVars.ArbitOptTests = FilterOptTests
+	}
 
 	pageVars.Arb = []Arbitrage{}
 	pageVars.Metadata = map[string]GenericCard{}
