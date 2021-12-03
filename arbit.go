@@ -53,6 +53,7 @@ var FilterOptKeys = []string{
 	"nocond",
 	"nofoil",
 	"nocomm",
+	"nononrl",
 	"noposi",
 	"nopenny",
 	"nobuypenny",
@@ -66,6 +67,7 @@ var FilterOptNames = map[string]string{
 	"nocond":     "only NM/SP",
 	"nofoil":     "only non-Foil",
 	"nocomm":     "only Rare/Mythic",
+	"nononrl":    "only RL",
 	"noposi":     "only Negative",
 	"nopenny":    "only Bucks+",
 	"nobuypenny": "only BuyBucks+",
@@ -379,10 +381,11 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	pageVars.Metadata = map[string]GenericCard{}
 
 	opts := &mtgban.ArbitOpts{
-		MinSpread:     MinSpread,
-		MaxSpread:     MaxSpread,
-		MaxPriceRatio: MaxPriceRatio,
-		NoFoil:        arbitFilters["nofoil"],
+		MinSpread:       MinSpread,
+		MaxSpread:       MaxSpread,
+		MaxPriceRatio:   MaxPriceRatio,
+		NoFoil:          arbitFilters["nofoil"],
+		OnlyReserveList: arbitFilters["nononrl"],
 	}
 	if pageVars.GlobalMode {
 		opts.MinSpread = MinSpreadGlobal
