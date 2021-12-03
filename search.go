@@ -623,6 +623,10 @@ func parseSearchOptions(query string) (string, map[string]string) {
 			} else {
 				options["finish"] = "nonfoil"
 			}
+
+			if co.Sealed {
+				options["mode"] = "sealed"
+			}
 		}
 	}
 

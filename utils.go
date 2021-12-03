@@ -247,7 +247,7 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 		query += " f:nonfoil"
 	}
 	if co.Sealed {
-		query = co.Name
+		query = co.Name + " m:sealed"
 	}
 
 	smallImg := false
