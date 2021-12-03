@@ -302,6 +302,10 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 
 		// Assume anything else is a boolean option
 		default:
+			// Skip options reserved for arbit-only
+			if pageVars.GlobalMode && FilterOptNoGlobal[k] {
+				continue
+			}
 			arbitFilters[k], _ = strconv.ParseBool(v[0])
 		}
 	}
