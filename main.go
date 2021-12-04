@@ -331,6 +331,7 @@ var Config struct {
 
 var DevMode bool
 var SigCheck bool
+var BenchMode bool
 var LogDir string
 var LastUpdate time.Time
 var DatabaseLoaded bool

@@ -761,6 +761,10 @@ func loadScrapers() {
 	}
 	loadVendors(newVendors)
 
+	if BenchMode {
+		return
+	}
+
 	SealedEditionsSorted, SealedEditionsList = getSealedEditions()
 	AllEditionsKeys, AllEditionsMap = getAllEditions()
 
