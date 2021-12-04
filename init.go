@@ -667,7 +667,7 @@ func loadScrapers() {
 				OldVersions: 1,
 			})
 			if err != nil {
-				log.Println("Failed to create logFile for %s: %s", key, err)
+				log.Printf("Failed to create logFile for %s: %s", key, err)
 				opt.Logger = log.New(os.Stderr, "", log.LstdFlags)
 				continue
 			}
