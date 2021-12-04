@@ -791,6 +791,10 @@ func shouldSkipCard(query, cardId string, options map[string]string) bool {
 		}
 	}
 
+	if query == "" {
+		return false
+	}
+
 	// Run the comparison function to use depending on the search syntax
 	cmpFunc := mode2func(options["search_mode"])
 	if !cmpFunc(co.Name, query) {
@@ -1011,6 +1015,155 @@ func shouldSkipScraper(scraper mtgban.Scraper, blocklist []string, options map[s
 	return false
 }
 
+func searchSellersNG(cardIds []string, blocklist []string, options map[string]string) (foundSellers map[string]map[string][]SearchEntry) {
+	// Allocate memory
+	foundSellers = map[string]map[string][]SearchEntry{}
+
+	// Search sellers
+	for _, seller := range Sellers {
+		if shouldSkipScraper(seller, blocklist, options) {
+			continue
+		}
+
+		// Get inventory
+		inventory, err := seller.Inventory()
+		if err != nil {
+			continue
+		}
+
+		for _, cardId := range cardIds {
+			entries, found := inventory[cardId]
+			if !found {
+				continue
+			}
+
+			// Loop thorugh available conditions
+			for _, entry := range entries {
+				// Skip cards that have not the desired condition
+				if options["condition"] != "" {
+					filters := strings.Split(options["condition"], ",")
+					if !SliceStringHas(filters, entry.Conditions) {
+						continue
+					}
+				}
+
+				// Skip cards that don't match desired pricing
+				if shouldSkipSellPrice(cardId, options, entry.Price) {
+					continue
+				}
+
+				// Check if card already has any entry
+				_, found := foundSellers[cardId]
+				if !found {
+					foundSellers[cardId] = map[string][]SearchEntry{}
+				}
+
+				// Set conditions - handle the special TCG one that appears
+				// at the top of the results
+				conditions := entry.Conditions
+				if seller.Info().MetadataOnly {
+					conditions = "INDEX"
+				}
+
+				// Only add Poor prices if there are no NM and SP entries
+				if conditions == "PO" && len(foundSellers[cardId]["NM"]) != 0 && len(foundSellers[cardId]["SP"]) != 0 {
+					continue
+				}
+
+				// Check if the current entry has any condition
+				_, found = foundSellers[cardId][conditions]
+				if !found {
+					foundSellers[cardId][conditions] = []SearchEntry{}
+				}
+
+				icon := ""
+				name := seller.Info().Name
+				switch name {
+				case TCG_DIRECT:
+					icon = "img/misc/direct.png"
+				case CT_ZERO:
+					icon = "img/misc/zero.png"
+				}
+
+				// Prepare all the deets
+				res := SearchEntry{
+					ScraperName: name,
+					Shorthand:   seller.Info().Shorthand,
+					Price:       entry.Price,
+					Quantity:    entry.Quantity,
+					URL:         entry.URL,
+					NoQuantity:  seller.Info().NoQuantityInventory || seller.Info().MetadataOnly,
+					BundleIcon:  icon,
+					Country:     Country2flag[seller.Info().CountryFlag],
+				}
+
+				// Touchdown
+				foundSellers[cardId][conditions] = append(foundSellers[cardId][conditions], res)
+			}
+		}
+	}
+
+	return
+}
+
+func searchVendorsNG(cardIds []string, blocklist []string, options map[string]string) (foundVendors map[string][]SearchEntry) {
+	foundVendors = map[string][]SearchEntry{}
+
+	for _, vendor := range Vendors {
+		if shouldSkipScraper(vendor, blocklist, options) {
+			continue
+		}
+
+		buylist, err := vendor.Buylist()
+		if err != nil {
+			continue
+		}
+
+		for _, cardId := range cardIds {
+			blEntries, found := buylist[cardId]
+			if !found {
+				continue
+			}
+
+			// Look up the NM printing
+			nmIndex := 0
+			if vendor.Info().MultiCondBuylist {
+				for nmIndex = range blEntries {
+					if blEntries[nmIndex].Conditions == "NM" {
+						break
+					}
+				}
+			}
+			entry := blEntries[nmIndex]
+
+			if shouldSkipBuyPrice(cardId, options, entry.BuyPrice) {
+				continue
+			}
+
+			_, found = foundVendors[cardId]
+			if !found {
+				foundVendors[cardId] = []SearchEntry{}
+			}
+			name := vendor.Info().Name
+			if name == "TCG Player Market" {
+				name = "TCG Trade-In"
+			}
+			res := SearchEntry{
+				ScraperName: name,
+				Shorthand:   vendor.Info().Shorthand,
+				Price:       entry.BuyPrice,
+				Ratio:       entry.PriceRatio,
+				Quantity:    entry.Quantity,
+				URL:         entry.URL,
+				Country:     Country2flag[vendor.Info().CountryFlag],
+			}
+			foundVendors[cardId] = append(foundVendors[cardId], res)
+		}
+	}
+
+	return
+}
+
 func searchSellers(query string, blocklist []string, options map[string]string) (foundSellers map[string]map[string][]SearchEntry) {
 	// Allocate memory
 	foundSellers = map[string]map[string][]SearchEntry{}
@@ -1156,6 +1309,55 @@ func searchVendors(query string, blocklist []string, options map[string]string) 
 			foundVendors[cardId] = append(foundVendors[cardId], res)
 		}
 	}
+
+	return
+}
+
+func searchParallelNG(query string, options map[string]string, blocklistRetail, blocklistBuylist []string, flags ...bool) (foundSellers map[string]map[string][]SearchEntry, foundVendors map[string][]SearchEntry) {
+	var uuids []string
+	var err error
+	switch options["search_mode"] {
+	case "exact":
+		uuids, err = mtgmatcher.SearchEquals(query)
+	case "any":
+		uuids, err = mtgmatcher.SearchContains(query)
+	case "prefix":
+		uuids, err = mtgmatcher.SearchHasPrefix(query)
+	default:
+		uuids, err = mtgmatcher.SearchEquals(query)
+		if err != nil {
+			uuids, err = mtgmatcher.SearchHasPrefix(query)
+		}
+	}
+	if err != nil {
+		return nil, nil
+	}
+
+	var selectedUUIDs []string
+	for _, uuid := range uuids {
+		if shouldSkipCard("", uuid, options) {
+			continue
+		}
+		selectedUUIDs = append(selectedUUIDs, uuid)
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		if options["skip"] != "retail" {
+			foundSellers = searchSellersNG(selectedUUIDs, blocklistRetail, options)
+		}
+		wg.Done()
+	}()
+	go func() {
+		if options["skip"] != "buylist" {
+			foundVendors = searchVendorsNG(selectedUUIDs, blocklistBuylist, options)
+		}
+		wg.Done()
+	}()
+
+	wg.Wait()
 
 	return
 }

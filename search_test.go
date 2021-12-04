@@ -124,3 +124,87 @@ func BenchmarkSearchOnlyBuylist(b *testing.B) {
 		searchParallel(NameToBeFound, options, nil, nil)
 	}
 }
+
+func BenchmarkSearchExactNG(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		searchParallelNG(NameToBeFound, nil, nil, nil)
+	}
+}
+
+func BenchmarkSearchPrefixNG(b *testing.B) {
+	options := map[string]string{
+		"search_mode": "prefix",
+	}
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		searchParallelNG(NameToBeFound, options, nil, nil)
+	}
+}
+
+func BenchmarkSearchAllFromEditionNG(b *testing.B) {
+	options := map[string]string{
+		"edition": EditionToBeFound,
+	}
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		searchParallelNG("", options, nil, nil)
+	}
+}
+
+func BenchmarkSearchWithEditionNG(b *testing.B) {
+	options := map[string]string{
+		"edition": EditionToBeFound,
+	}
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		searchParallelNG(NameToBeFound, options, nil, nil)
+	}
+}
+
+func BenchmarkSearchWithNumberNG(b *testing.B) {
+	options := map[string]string{
+		"number": NumberToBeFound,
+	}
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		searchParallelNG(NameToBeFound, options, nil, nil)
+	}
+}
+
+func BenchmarkSearchWithEditionPrefixNG(b *testing.B) {
+	options := map[string]string{
+		"edition":     EditionToBeFound,
+		"search_mode": "prefix",
+	}
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		searchParallelNG(NameToBeFound, options, nil, nil)
+	}
+}
+
+func BenchmarkSearchOnlyRetailNG(b *testing.B) {
+	options := map[string]string{
+		"skip": "buylist",
+	}
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		searchParallelNG(NameToBeFound, options, nil, nil)
+	}
+}
+
+func BenchmarkSearchOnlyBuylistNG(b *testing.B) {
+	options := map[string]string{
+		"skip": "retail",
+	}
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		searchParallelNG(NameToBeFound, options, nil, nil)
+	}
+}
