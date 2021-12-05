@@ -378,72 +378,15 @@ func rebuildSearchQuery(searchQuery string, options map[string]string) string {
 // list of codes or edition names. If no match is found, the input code
 // segment is returned as-is.
 func fixupEdition(code string) string {
-	var out []string
-
-	code = strings.TrimSpace(code)
-	for _, field := range strings.Split(code, ",") {
-		field = strings.TrimPrefix(field, "\"")
-		field = strings.TrimSuffix(field, "\"")
-
-		set, err := mtgmatcher.GetSet(field)
-		if err == nil {
-			out = append(out, set.Code)
-			continue
-		}
-		set, err = mtgmatcher.GetSetByName(field)
-		if err == nil {
-			out = append(out, set.Code)
-			continue
-		}
-		out = append(out, field)
-	}
-	return strings.Join(out, ",")
+	return strings.Join(fixupEditionNG(code), ",")
 }
 
 func fixupStoreCode(code string) string {
-	code = strings.ToUpper(code)
-	filters := strings.Split(code, ",")
-	for i := range filters {
-		switch filters[i] {
-		case "CT":
-			filters[i] = CT_STANDARD
-		case "CT0":
-			filters[i] = CT_ZERO
-		case "MKM_LOW":
-			filters[i] = MKM_LOW
-		case "MKM_TREND":
-			filters[i] = MKM_TREND
-		case "TCG_LOW":
-			filters[i] = TCG_LOW
-		case "TCG_MARKET":
-			filters[i] = TCG_MARKET
-		case "TCG_PLAYER":
-			filters[i] = TCG_MAIN
-		case "TCG_DIRECT":
-			filters[i] = TCG_DIRECT
-		}
-	}
-	return strings.ToLower(strings.Join(filters, ","))
+	return strings.Join(fixupStoreCodeNG(code), ",")
 }
 
 func fixupRarity(code string) string {
-	code = strings.ToLower(code)
-	filters := strings.Split(code, ",")
-	for i := range filters {
-		switch filters[i] {
-		case "c":
-			filters[i] = "common"
-		case "u":
-			filters[i] = "uncommon"
-		case "r":
-			filters[i] = "rare"
-		case "m":
-			filters[i] = "mythic"
-		case "s":
-			filters[i] = "special"
-		}
-	}
-	return strings.Join(filters, ",")
+	return strings.Join(fixupRarityNG(code), ",")
 }
 
 func fixupFinish(code string) string {
