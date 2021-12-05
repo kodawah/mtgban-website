@@ -89,15 +89,10 @@ func fixupRarityNG(code string) []string {
 }
 
 func fixupFinishNG(code string) []string {
-	code = strings.ToLower(code)
-	switch code {
-	case "nonfoil", "foil", "etched":
-	default:
-		code = ""
-	}
-	return []string{code}
+	return strings.Split(strings.ToLower(code), ",")
 }
 
+// TODO: build the regexp from these options
 var FilterOperations = map[string][]string{
 	"sm":        []string{":"},
 	"m":         []string{":"},
@@ -378,26 +373,23 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 		})
 	},
 	"finish": func(filters []string, co *mtgmatcher.CardObject) bool {
-		if filters == nil {
-			return false
-		}
-		value := filters[0]
-
-		switch value {
-		case "etched":
-			if !co.Etched {
-				return true
-			}
-		case "foil":
-			if !co.Foil {
-				return true
-			}
-		case "nonfoil":
-			if co.Foil || co.Etched {
-				return true
+		for _, value := range filters {
+			switch value {
+			case "etched":
+				if co.Etched {
+					return false
+				}
+			case "foil":
+				if co.Foil {
+					return false
+				}
+			case "nonfoil":
+				if !co.Foil && !co.Etched {
+					return false
+				}
 			}
 		}
-		return false
+		return true
 	},
 	"date": func(filters []string, co *mtgmatcher.CardObject) bool {
 		return compareReleaseDate(filters, co, func(a, b time.Time) bool {
