@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kodabb/go-mtgban/mtgban"
 	"github.com/kodabb/go-mtgban/mtgmatcher"
 )
 
@@ -23,12 +24,24 @@ type SearchConfig struct {
 
 	// Chain of filters to be applied to card filtering
 	CardFilters []FilterElem
+
+	// Chain of filters to be applied to scraper filtering
+	StoreFilters []FilterStoreElem
 }
 
 type FilterElem struct {
 	Name   string
 	Negate bool
 	Values []string
+}
+
+type FilterStoreElem struct {
+	Name   string
+	Negate bool
+	Values []string
+
+	OnlyForSeller bool
+	OnlyForVendor bool
 }
 
 // Return a comma-separated string of set codes, from a comma-separated
@@ -141,6 +154,7 @@ var FilterOperations = map[string][]string{
 
 func parseSearchOptionsNG(query string) (config SearchConfig) {
 	var filters []FilterElem
+	var filterStores []FilterStoreElem
 	options := map[string]string{}
 
 	// Support our UUID style when there are no options to parse
@@ -293,14 +307,20 @@ func parseSearchOptionsNG(query string) (config SearchConfig) {
 			})
 
 		// Options that modify the searched scrapers
-		case "store":
-			options["scraper"] = fixupStoreCode(code)
-		case "seller":
-			options["seller"] = fixupStoreCode(code)
-		case "vendor":
-			options["vendor"] = fixupStoreCode(code)
+		case "store", "seller", "vendor":
+			filterStores = append(filterStores, FilterStoreElem{
+				Name:          option,
+				Negate:        negate,
+				Values:        fixupStoreCodeNG(code),
+				OnlyForSeller: option == "seller",
+				OnlyForVendor: option == "vendor",
+			})
 		case "region":
-			options["region"] = strings.ToLower(code)
+			filterStores = append(filterStores, FilterStoreElem{
+				Name:   option,
+				Negate: negate,
+				Values: []string{strings.ToLower(code)},
+			})
 
 		// Pricing Options
 		case "c":
@@ -318,6 +338,7 @@ func parseSearchOptionsNG(query string) (config SearchConfig) {
 	config.CleanQuery = strings.TrimSpace(query)
 	config.Options = options
 	config.CardFilters = filters
+	config.StoreFilters = filterStores
 
 	return
 }
@@ -447,6 +468,69 @@ func shouldSkipCardNG(cardId string, filters []FilterElem) bool {
 
 	for i := range filters {
 		res := FilterCardFuncs[filters[i].Name](filters[i].Values, co)
+		if filters[i].Negate {
+			res = !res
+		}
+		if res {
+			return true
+		}
+	}
+
+	return false
+}
+
+var FilterStoreFuncs = map[string]func(filters []string, scraper mtgban.Scraper) bool{
+	"store": func(filters []string, scraper mtgban.Scraper) bool {
+		return !SliceStringHas(filters, strings.ToLower(scraper.Info().Shorthand))
+	},
+	"seller": func(filters []string, scraper mtgban.Scraper) bool {
+		_, ok := scraper.(mtgban.Seller)
+		return ok && !SliceStringHas(filters, strings.ToLower(scraper.Info().Shorthand))
+	},
+	"vendor": func(filters []string, scraper mtgban.Scraper) bool {
+		_, ok := scraper.(mtgban.Vendor)
+		return ok && !SliceStringHas(filters, strings.ToLower(scraper.Info().Shorthand))
+	},
+	"region": func(filters []string, scraper mtgban.Scraper) bool {
+		if filters == nil {
+			return false
+		}
+
+		switch filters[0] {
+		case "us":
+			if scraper.Info().CountryFlag != "" {
+				return true
+			}
+		case "eu":
+			if scraper.Info().CountryFlag != "EU" {
+				return true
+			}
+		case "jp":
+			if scraper.Info().CountryFlag != "JP" {
+				return true
+			}
+		}
+		return false
+	},
+}
+
+func shouldSkipStoreNG(scraper mtgban.Scraper, filters []FilterStoreElem) bool {
+	if scraper == nil {
+		return true
+	}
+
+	for i := range filters {
+		// Do not call functions that do not apply to certain elements,
+		// or the negate step might thwart results
+		_, isSeller := scraper.(mtgban.Seller)
+		_, isVendor := scraper.(mtgban.Vendor)
+		if filters[i].OnlyForSeller && !isSeller {
+			continue
+		} else if filters[i].OnlyForVendor && !isVendor {
+			continue
+		}
+
+		res := FilterStoreFuncs[filters[i].Name](filters[i].Values, scraper)
 		if filters[i].Negate {
 			res = !res
 		}
