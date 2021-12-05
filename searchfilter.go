@@ -9,6 +9,12 @@ import (
 )
 
 type SearchConfig struct {
+	// The search strategy to be used
+	SearchMode string
+
+	// Only for SearchMode == "hashing"
+	UUIDs []string
+
 	// Name of the card being searched (may be blank)
 	CleanQuery string
 
@@ -153,19 +159,18 @@ func parseSearchOptionsNG(query string) (config SearchConfig) {
 			}
 			// Save the last name found
 			query = co.Name
-			options["search_mode"] = "hashing"
-			options["uuids"] += field + ","
+			config.SearchMode = "hashing"
+			config.UUIDs = append(config.UUIDs, field)
 		}
 
 		// Early return if hash was found
-		if options["search_mode"] == "hashing" {
+		if config.SearchMode != "" {
 			// When multiple fields are requested it's impossible to rebuild
 			// the query, so just ignore it
 			if len(fields) != 1 {
 				query = ""
 			}
 			config.CleanQuery = query
-			config.Options = options
 			return
 		}
 	}
@@ -230,7 +235,7 @@ func parseSearchOptionsNG(query string) (config SearchConfig) {
 		switch option {
 		// Options that modify the search engine
 		case "sm":
-			options["search_mode"] = strings.ToLower(code)
+			config.SearchMode = strings.ToLower(code)
 		case "m":
 			options["mode"] = strings.ToLower(code)
 		case "skip":

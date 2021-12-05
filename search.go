@@ -128,7 +128,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	// Allow displaying the "search all" link only when something
 	// was searched and no options were specified for it
-	pageVars.CanShowAll = cleanQuery != "" && (len(options) != 0 || len(cardFilters) != 0)
+	pageVars.CanShowAll = cleanQuery != "" && (len(options) != 0 || len(cardFilters) != 0 || len(config.UUIDs) != 0)
 	pageVars.CleanSearchQuery = cleanQuery
 
 	// Make a cardId arrays so that they can be sorted later
@@ -1267,7 +1267,7 @@ func searchParallelNG(config SearchConfig, blocklistRetail, blocklistBuylist []s
 
 	var uuids []string
 	var err error
-	switch options["search_mode"] {
+	switch config.SearchMode {
 	case "exact":
 		uuids, err = mtgmatcher.SearchEquals(query)
 	case "any":
@@ -1275,7 +1275,7 @@ func searchParallelNG(config SearchConfig, blocklistRetail, blocklistBuylist []s
 	case "prefix":
 		uuids, err = mtgmatcher.SearchHasPrefix(query)
 	case "hashing":
-		uuids = strings.Split(options["uuids"], ",")
+		uuids = config.UUIDs
 	default:
 		uuids, err = mtgmatcher.SearchEquals(query)
 		if err != nil {
