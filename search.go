@@ -1266,6 +1266,8 @@ func searchParallelNG(query string, options map[string]string, blocklistRetail, 
 		uuids, err = mtgmatcher.SearchContains(query)
 	case "prefix":
 		uuids, err = mtgmatcher.SearchHasPrefix(query)
+	case "hashing":
+		uuids = strings.Split(options["uuids"], ",")
 	default:
 		uuids, err = mtgmatcher.SearchEquals(query)
 		if err != nil {

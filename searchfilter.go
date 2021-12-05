@@ -123,6 +123,62 @@ func parseSearchOptionsNG(query string) (string, map[string]string, []FilterElem
 	var filters []FilterElem
 	options := map[string]string{}
 
+	// Support our UUID style when there are no options to parse
+	if !strings.Contains(query, ":") {
+		fields := strings.Split(query, ",")
+		for _, field := range fields {
+			field = strings.TrimSpace(field)
+			co, err := mtgmatcher.GetUUID(field)
+			if err != nil {
+				// XXX: Scryfall id reports the first finish available
+				field = mtgmatcher.Scryfall2UUID(field)
+				co, err = mtgmatcher.GetUUID(field)
+				if err != nil {
+					continue
+				}
+			}
+			// Save the last name found
+			query = co.Name
+			options["search_mode"] = "hashing"
+			options["uuids"] += field + ","
+		}
+
+		// Early return if hash was found
+		if options["search_mode"] == "hashing" {
+			// When multiple fields are requested it's impossible to rebuild
+			// the query, so just ignore it
+			if len(fields) != 1 {
+				query = ""
+			}
+			return query, options, nil
+		}
+	}
+
+	// Support Scryfall bot syntax
+	ogQuery := query
+	if strings.Contains(query, "|") {
+		elements := strings.Split(query, "|")
+		query = elements[0]
+		if len(elements) > 1 {
+			query += " s:" + elements[1]
+		}
+		if len(elements) > 2 {
+			query += " cn:" + elements[2]
+		}
+	}
+
+	// Filter out the finish shortcut suffix
+	if strings.HasSuffix(ogQuery, "&") {
+		query = strings.TrimSuffix(query, "&")
+		query += " f:nonfoil"
+	} else if strings.HasSuffix(ogQuery, "*") {
+		query = strings.TrimSuffix(query, "*")
+		query += " f:foil"
+	} else if strings.HasSuffix(ogQuery, "~") {
+		query = strings.TrimSuffix(query, "~")
+		query += " f:etched"
+	}
+
 	// Iterate over the various possible filters
 	fields := re.FindAllString(query, -1)
 	for _, field := range fields {
