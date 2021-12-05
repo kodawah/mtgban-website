@@ -92,6 +92,14 @@ func fixupFinishNG(code string) []string {
 	return strings.Split(strings.ToLower(code), ",")
 }
 
+func fixupTypeNG(code string) []string {
+	filters := strings.Split(code, ",")
+	for i := range filters {
+		filters[i] = strings.Title(filters[i])
+	}
+	return filters
+}
+
 // TODO: build the regexp from these options
 var FilterOperations = map[string][]string{
 	"sm":        []string{":"},
@@ -250,7 +258,7 @@ func parseSearchOptionsNG(query string) (string, map[string]string, []FilterElem
 			filters = append(filters, FilterElem{
 				Name:   "type",
 				Negate: negate,
-				Values: []string{strings.Title(code)},
+				Values: fixupTypeNG(code),
 			})
 		case "date":
 			opt := "date"
@@ -351,13 +359,14 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 		return !SliceStringHas(filters, co.Rarity)
 	},
 	"type": func(filters []string, co *mtgmatcher.CardObject) bool {
-		if filters == nil {
-			return false
+		for _, value := range filters {
+			if SliceStringHas(co.Subtypes, value) ||
+				SliceStringHas(co.Types, value) ||
+				SliceStringHas(co.Supertypes, value) {
+				return false
+			}
 		}
-		value := filters[0]
-		return !SliceStringHas(co.Subtypes, value) &&
-			!SliceStringHas(co.Types, value) &&
-			!SliceStringHas(co.Supertypes, value)
+		return true
 	},
 	"number": func(filters []string, co *mtgmatcher.CardObject) bool {
 		return !SliceStringHas(filters, co.Number)
