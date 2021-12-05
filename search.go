@@ -110,8 +110,12 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	pageVars.Metadata = map[string]GenericCard{}
 
 	// SEARCH
-	cleanQuery, options := parseSearchOptions(query)
-	foundSellers, foundVendors := searchParallelNG(cleanQuery, options, blocklistRetail, blocklistBuylist)
+	config := parseSearchOptionsNG(query)
+	foundSellers, foundVendors := searchParallelNG(config, blocklistRetail, blocklistBuylist)
+
+	cleanQuery := config.CleanQuery
+	options := config.Options
+	cardFilters := config.CardFilters
 
 	pageVars.IsSealed = options["mode"] == "sealed"
 
@@ -124,7 +128,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	// Allow displaying the "search all" link only when something
 	// was searched and no options were specified for it
-	pageVars.CanShowAll = cleanQuery != "" && len(options) != 0
+	pageVars.CanShowAll = cleanQuery != "" && (len(options) != 0 || len(cardFilters) != 0)
 	pageVars.CleanSearchQuery = cleanQuery
 
 	// Make a cardId arrays so that they can be sorted later
@@ -1256,7 +1260,11 @@ func searchVendors(query string, blocklist []string, options map[string]string) 
 	return
 }
 
-func searchParallelNG(query string, options map[string]string, blocklistRetail, blocklistBuylist []string, flags ...bool) (foundSellers map[string]map[string][]SearchEntry, foundVendors map[string][]SearchEntry) {
+func searchParallelNG(config SearchConfig, blocklistRetail, blocklistBuylist []string, flags ...bool) (foundSellers map[string]map[string][]SearchEntry, foundVendors map[string][]SearchEntry) {
+	query := config.CleanQuery
+	options := config.Options
+	filters := config.CardFilters
+
 	var uuids []string
 	var err error
 	switch options["search_mode"] {
@@ -1278,38 +1286,10 @@ func searchParallelNG(query string, options map[string]string, blocklistRetail, 
 		return nil, nil
 	}
 
-	var filters []FilterElem
-
-	if flags != nil && flags[0] {
-		for key, val := range options {
-			neg := false
-			if strings.HasPrefix(key, "not_") {
-				neg = true
-				key = strings.TrimPrefix(key, "not_")
-			}
-
-			_, found := FilterCardFuncs[key]
-			if !found {
-				continue
-			}
-			filters = append(filters, FilterElem{
-				Name:   key,
-				Negate: neg,
-				Values: strings.Split(val, ","),
-			})
-		}
-	}
-
 	var selectedUUIDs []string
 	for _, uuid := range uuids {
-		if flags != nil && flags[0] {
-			if shouldSkipCardNG(uuid, filters) {
-				continue
-			}
-		} else {
-			if shouldSkipCard("", uuid, options) {
-				continue
-			}
+		if shouldSkipCardNG(uuid, filters) {
+			continue
 		}
 		selectedUUIDs = append(selectedUUIDs, uuid)
 	}

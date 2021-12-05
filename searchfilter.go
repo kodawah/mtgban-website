@@ -8,6 +8,17 @@ import (
 	"github.com/kodabb/go-mtgban/mtgmatcher"
 )
 
+type SearchConfig struct {
+	// Name of the card being searched (may be blank)
+	CleanQuery string
+
+	// Static options to be parsed during various steps
+	Options map[string]string
+
+	// Chain of filters to be applied to card filtering
+	CardFilters []FilterElem
+}
+
 type FilterElem struct {
 	Name   string
 	Negate bool
@@ -122,7 +133,7 @@ var FilterOperations = map[string][]string{
 	"region":    []string{":"},
 }
 
-func parseSearchOptionsNG(query string) (string, map[string]string, []FilterElem) {
+func parseSearchOptionsNG(query string) (config SearchConfig) {
 	var filters []FilterElem
 	options := map[string]string{}
 
@@ -153,7 +164,9 @@ func parseSearchOptionsNG(query string) (string, map[string]string, []FilterElem
 			if len(fields) != 1 {
 				query = ""
 			}
-			return query, options, nil
+			config.CleanQuery = query
+			config.Options = options
+			return
 		}
 	}
 
@@ -297,7 +310,11 @@ func parseSearchOptionsNG(query string) (string, map[string]string, []FilterElem
 		}
 	}
 
-	return strings.TrimSpace(query), options, filters
+	config.CleanQuery = strings.TrimSpace(query)
+	config.Options = options
+	config.CardFilters = filters
+
+	return
 }
 
 func compareCollectorNumber(filters []string, co *mtgmatcher.CardObject, cmpFunc func(a, b int) bool) bool {
