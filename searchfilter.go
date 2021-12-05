@@ -152,7 +152,7 @@ var FilterOperations = map[string][]string{
 	"region":    []string{":"},
 }
 
-func parseSearchOptionsNG(query string) (config SearchConfig) {
+func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []string) (config SearchConfig) {
 	var filters []FilterElem
 	var filterStores []FilterStoreElem
 	options := map[string]string{}
@@ -333,6 +333,25 @@ func parseSearchOptionsNG(query string) (config SearchConfig) {
 				options[option+"_less_than"] = fixupStoreCode(code)
 			}
 		}
+	}
+
+	// Apply blocklists as if they were options, need to pass them through
+	// the fixup due to upper/lower casing
+	if blocklistRetail != nil {
+		filterStores = append(filterStores, FilterStoreElem{
+			Name:          "seller",
+			Negate:        true,
+			Values:        fixupStoreCodeNG(strings.Join(blocklistRetail, ",")),
+			OnlyForSeller: true,
+		})
+	}
+	if blocklistBuylist != nil {
+		filterStores = append(filterStores, FilterStoreElem{
+			Name:          "vendor",
+			Negate:        true,
+			Values:        fixupStoreCodeNG(strings.Join(blocklistBuylist, ",")),
+			OnlyForVendor: true,
+		})
 	}
 
 	config.CleanQuery = strings.TrimSpace(query)

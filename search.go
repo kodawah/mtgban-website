@@ -110,8 +110,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	pageVars.Metadata = map[string]GenericCard{}
 
 	// SEARCH
-	config := parseSearchOptionsNG(query)
-	foundSellers, foundVendors := searchParallelNG(config, blocklistRetail, blocklistBuylist)
+	config := parseSearchOptionsNG(query, blocklistRetail, blocklistBuylist)
+	foundSellers, foundVendors := searchParallelNG(config)
 
 	cleanQuery := config.CleanQuery
 	options := config.Options
@@ -962,13 +962,13 @@ func shouldSkipScraper(scraper mtgban.Scraper, blocklist []string, options map[s
 	return false
 }
 
-func searchSellersNG(cardIds []string, blocklist []string, options map[string]string) (foundSellers map[string]map[string][]SearchEntry) {
+func searchSellersNG(cardIds []string, storeFilters []FilterStoreElem, options map[string]string) (foundSellers map[string]map[string][]SearchEntry) {
 	// Allocate memory
 	foundSellers = map[string]map[string][]SearchEntry{}
 
 	// Search sellers
 	for _, seller := range Sellers {
-		if shouldSkipScraper(seller, blocklist, options) {
+		if shouldSkipStoreNG(seller, storeFilters) {
 			continue
 		}
 
@@ -1053,11 +1053,11 @@ func searchSellersNG(cardIds []string, blocklist []string, options map[string]st
 	return
 }
 
-func searchVendorsNG(cardIds []string, blocklist []string, options map[string]string) (foundVendors map[string][]SearchEntry) {
+func searchVendorsNG(cardIds []string, storeFilters []FilterStoreElem, options map[string]string) (foundVendors map[string][]SearchEntry) {
 	foundVendors = map[string][]SearchEntry{}
 
 	for _, vendor := range Vendors {
-		if shouldSkipScraper(vendor, blocklist, options) {
+		if shouldSkipStoreNG(vendor, storeFilters) {
 			continue
 		}
 
@@ -1260,7 +1260,7 @@ func searchVendors(query string, blocklist []string, options map[string]string) 
 	return
 }
 
-func searchParallelNG(config SearchConfig, blocklistRetail, blocklistBuylist []string, flags ...bool) (foundSellers map[string]map[string][]SearchEntry, foundVendors map[string][]SearchEntry) {
+func searchParallelNG(config SearchConfig, flags ...bool) (foundSellers map[string]map[string][]SearchEntry, foundVendors map[string][]SearchEntry) {
 	query := config.CleanQuery
 	options := config.Options
 	filters := config.CardFilters
@@ -1299,13 +1299,13 @@ func searchParallelNG(config SearchConfig, blocklistRetail, blocklistBuylist []s
 
 	go func() {
 		if options["skip"] != "retail" {
-			foundSellers = searchSellersNG(selectedUUIDs, blocklistRetail, options)
+			foundSellers = searchSellersNG(selectedUUIDs, config.StoreFilters, options)
 		}
 		wg.Done()
 	}()
 	go func() {
 		if options["skip"] != "buylist" {
-			foundVendors = searchVendorsNG(selectedUUIDs, blocklistBuylist, options)
+			foundVendors = searchVendorsNG(selectedUUIDs, config.StoreFilters, options)
 		}
 		wg.Done()
 	}()
