@@ -111,7 +111,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	// SEARCH
 	cleanQuery, options := parseSearchOptions(query)
-	foundSellers, foundVendors := searchParallel(cleanQuery, options, blocklistRetail, blocklistBuylist)
+	foundSellers, foundVendors := searchParallelNG(cleanQuery, options, blocklistRetail, blocklistBuylist)
 
 	pageVars.IsSealed = options["mode"] == "sealed"
 
@@ -1333,10 +1333,38 @@ func searchParallelNG(query string, options map[string]string, blocklistRetail, 
 		return nil, nil
 	}
 
+	var filters []FilterElem
+
+	if flags != nil && flags[0] {
+		for key, val := range options {
+			neg := false
+			if strings.HasPrefix(key, "not_") {
+				neg = true
+				key = strings.TrimPrefix(key, "not_")
+			}
+
+			_, found := FilterCardFuncs[key]
+			if !found {
+				continue
+			}
+			filters = append(filters, FilterElem{
+				Name:   key,
+				Negate: neg,
+				Values: strings.Split(val, ","),
+			})
+		}
+	}
+
 	var selectedUUIDs []string
 	for _, uuid := range uuids {
-		if shouldSkipCard("", uuid, options) {
-			continue
+		if flags != nil && flags[0] {
+			if shouldSkipCardNG(uuid, filters) {
+				continue
+			}
+		} else {
+			if shouldSkipCard("", uuid, options) {
+				continue
+			}
 		}
 		selectedUUIDs = append(selectedUUIDs, uuid)
 	}
