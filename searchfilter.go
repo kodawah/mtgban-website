@@ -319,7 +319,7 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 			filterStores = append(filterStores, FilterStoreElem{
 				Name:   option,
 				Negate: negate,
-				Values: []string{strings.ToLower(code)},
+				Values: strings.Split(strings.ToLower(code), ","),
 			})
 
 		// Pricing Options
@@ -511,25 +511,23 @@ var FilterStoreFuncs = map[string]func(filters []string, scraper mtgban.Scraper)
 		return ok && !SliceStringHas(filters, strings.ToLower(scraper.Info().Shorthand))
 	},
 	"region": func(filters []string, scraper mtgban.Scraper) bool {
-		if filters == nil {
-			return false
-		}
-
-		switch filters[0] {
-		case "us":
-			if scraper.Info().CountryFlag != "" {
-				return true
-			}
-		case "eu":
-			if scraper.Info().CountryFlag != "EU" {
-				return true
-			}
-		case "jp":
-			if scraper.Info().CountryFlag != "JP" {
-				return true
+		for _, value := range filters {
+			switch value {
+			case "us":
+				if scraper.Info().CountryFlag == "" {
+					return false
+				}
+			case "eu":
+				if scraper.Info().CountryFlag == "EU" {
+					return false
+				}
+			case "jp":
+				if scraper.Info().CountryFlag == "JP" {
+					return false
+				}
 			}
 		}
-		return false
+		return true
 	},
 }
 
