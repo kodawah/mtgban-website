@@ -109,15 +109,18 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	pageVars.CondKeys = AllConditions
 	pageVars.Metadata = map[string]GenericCard{}
 
-	// SEARCH
 	config := parseSearchOptionsNG(query, blocklistRetail, blocklistBuylist)
+	pageVars.IsSealed = options["mode"] == "sealed"
+	if pageVars.IsSealed {
+		config.SearchMode = "sealed"
+	}
+
+	// SEARCH
 	foundSellers, foundVendors := searchParallelNG(config)
 
 	cleanQuery := config.CleanQuery
 	options := config.Options
 	cardFilters := config.CardFilters
-
-	pageVars.IsSealed = options["mode"] == "sealed"
 
 	// Early exit if there no matches are found
 	if len(foundSellers) == 0 && len(foundVendors) == 0 {
@@ -1276,6 +1279,11 @@ func searchParallelNG(config SearchConfig, flags ...bool) (foundSellers map[stri
 		uuids, err = mtgmatcher.SearchHasPrefix(query)
 	case "hashing":
 		uuids = config.UUIDs
+	case "sealed":
+		uuids, err = mtgmatcher.SearchSealedEquals(query)
+		if err != nil {
+			uuids, err = mtgmatcher.SearchSealedContains(query)
+		}
 	default:
 		uuids, err = mtgmatcher.SearchEquals(query)
 		if err != nil {
