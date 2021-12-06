@@ -133,7 +133,6 @@ func fixupTypeNG(code string) []string {
 // TODO: build the regexp from these options
 var FilterOperations = map[string][]string{
 	"sm":        []string{":"},
-	"m":         []string{":"},
 	"skip":      []string{":"},
 	"s":         []string{":"},
 	"cn":        []string{":", ">", "<"},
