@@ -499,6 +499,26 @@ func shouldSkipCardNG(cardId string, filters []FilterElem) bool {
 	return false
 }
 
+func localizeScraper(filters []string, scraper mtgban.Scraper) bool {
+	for _, value := range filters {
+		switch value {
+		case "us":
+			if scraper.Info().CountryFlag == "" {
+				return false
+			}
+		case "eu":
+			if scraper.Info().CountryFlag == "EU" {
+				return false
+			}
+		case "jp":
+			if scraper.Info().CountryFlag == "JP" {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 var FilterStoreFuncs = map[string]func(filters []string, scraper mtgban.Scraper) bool{
 	"store": func(filters []string, scraper mtgban.Scraper) bool {
 		return !SliceStringHas(filters, strings.ToLower(scraper.Info().Shorthand))
@@ -512,23 +532,13 @@ var FilterStoreFuncs = map[string]func(filters []string, scraper mtgban.Scraper)
 		return ok && !SliceStringHas(filters, strings.ToLower(scraper.Info().Shorthand))
 	},
 	"region": func(filters []string, scraper mtgban.Scraper) bool {
-		for _, value := range filters {
-			switch value {
-			case "us":
-				if scraper.Info().CountryFlag == "" {
-					return false
-				}
-			case "eu":
-				if scraper.Info().CountryFlag == "EU" {
-					return false
-				}
-			case "jp":
-				if scraper.Info().CountryFlag == "JP" {
-					return false
-				}
-			}
+		return localizeScraper(filters, scraper)
+	},
+	"region_keep_index": func(filters []string, scraper mtgban.Scraper) bool {
+		if scraper.Info().MetadataOnly {
+			return false
 		}
-		return true
+		return localizeScraper(filters, scraper)
 	},
 }
 
