@@ -199,6 +199,7 @@ var OptionalFields = []string{
 	"UserTier",
 	"SearchDisabled",
 	"SearchBuylistDisabled",
+	"SearchSuper",
 	"SearchChart",
 	"SearchSealed",
 	"ArbitEnabled",

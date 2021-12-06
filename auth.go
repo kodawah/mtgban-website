@@ -642,8 +642,10 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 		case "Root", "Admin":
 			v.Set("SearchDisabled", "NONE")
 			v.Set("SearchBuylistDisabled", "NONE")
+			v.Set("SearchSuper", "true")
 			v.Set("SearchSealed", "true")
 		case "Mods":
+			v.Set("SearchSuper", "true")
 			v.Set("SearchSealed", "true")
 			fallthrough
 		default:

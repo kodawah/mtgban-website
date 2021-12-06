@@ -57,6 +57,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	canSealed, _ := strconv.ParseBool(GetParamFromSig(sig, "SearchSealed"))
 	canSealed = canSealed || (DevMode && !SigCheck)
 
+	canSuperSearch, _ := strconv.ParseBool(GetParamFromSig(sig, "SearchSuper"))
+	canSuperSearch = canSuperSearch || (DevMode && !SigCheck)
+
 	pageVars.IsSealed = r.URL.Path == "/sealed"
 
 	if canSealed {
@@ -110,17 +113,29 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	pageVars.CondKeys = AllConditions
 	pageVars.Metadata = map[string]GenericCard{}
 
-	config := parseSearchOptionsNG(query, blocklistRetail, blocklistBuylist)
-	if pageVars.IsSealed {
-		config.SearchMode = "sealed"
+	var options map[string]string
+	var cleanQuery string
+	var canShowAll bool
+
+	var foundSellers map[string]map[string][]SearchEntry
+	var foundVendors map[string][]SearchEntry
+
+	if canSuperSearch {
+		config := parseSearchOptionsNG(query, blocklistRetail, blocklistBuylist)
+		if pageVars.IsSealed {
+			config.SearchMode = "sealed"
+		}
+
+		foundSellers, foundVendors = searchParallelNG(config)
+
+		cleanQuery = config.CleanQuery
+		options = config.Options
+		canShowAll = (len(options) != 0 || len(config.CardFilters) != 0 || len(config.UUIDs) != 0)
+	} else {
+		cleanQuery, options = parseSearchOptions(query)
+		foundSellers, foundVendors = searchParallel(cleanQuery, options, blocklistRetail, blocklistBuylist)
+		canShowAll = len(options) != 0
 	}
-
-	// SEARCH
-	foundSellers, foundVendors := searchParallelNG(config)
-
-	cleanQuery := config.CleanQuery
-	options := config.Options
-	cardFilters := config.CardFilters
 
 	// Early exit if there no matches are found
 	if len(foundSellers) == 0 && len(foundVendors) == 0 {
@@ -131,7 +146,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	// Allow displaying the "search all" link only when something
 	// was searched and no options were specified for it
-	pageVars.CanShowAll = cleanQuery != "" && (len(options) != 0 || len(cardFilters) != 0 || len(config.UUIDs) != 0)
+	pageVars.CanShowAll = cleanQuery != "" && canShowAll
 	pageVars.CleanSearchQuery = cleanQuery
 
 	// Make a cardId arrays so that they can be sorted later
