@@ -53,7 +53,7 @@
                 <label style="clear: both; float: left;" for="searchbox">
                     {{if eq .SearchQuery "" }}
                         Search for a card, or... <a class="btn info" href="/random">surprise me</a>
-                    {{else}}
+                    {{else if not .IsSealed}}
                         <a class="btn info" href="?q={{.SearchQuery}}&b={{not .SearchBest}}">
                             {{if .SearchBest}}
                                 Sort results alphabetically
@@ -63,7 +63,7 @@
                         </a>
                     {{end}}
                 </label>
-                <input id="searchbox" class="w3-input w3-border w3-round-small search-input" onFocus="this.setSelectionRange(0, this.value.length)" type="text" name="q" placeholder="Enter a card name" value="{{if ne .SearchQuery "random"}}{{.SearchQuery}}{{end}}" maxlength="200" autofocus>
+                <input id="searchbox" class="w3-input w3-border w3-round-small search-input" onFocus="this.setSelectionRange(0, this.value.length)" type="text" name="q" placeholder="Enter a card name" value="{{.SearchQuery}}" maxlength="200" autofocus>
             </form>
         </div>
 

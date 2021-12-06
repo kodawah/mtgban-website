@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math/rand"
 	"net/http"
 	"net/url"
 	"strings"
@@ -88,4 +89,25 @@ func Redirect(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.NotFound(w, r)
+}
+
+func RandomSearch(w http.ResponseWriter, r *http.Request) {
+	var uuid string
+
+	// Reuse the randomness of maps to our advantage
+	sets := mtgmatcher.GetSets()
+	for _, set := range sets {
+		if len(set.Cards) == 0 {
+			continue
+		}
+		index := rand.Intn(len(set.Cards))
+		uuid = set.Cards[index].UUID
+		break
+	}
+	v := r.URL.Query()
+	v.Set("q", uuid)
+	r.URL.RawQuery = v.Encode()
+	r.URL.Path = "/search"
+
+	http.Redirect(w, r, r.URL.String(), http.StatusFound)
 }
