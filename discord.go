@@ -116,6 +116,7 @@ var filteredEditions = []string{
 	"4BB",
 	"CHRJPN",
 	"PTC",
+	"SUM",
 	"WC00",
 	"WC01",
 	"WC02",
