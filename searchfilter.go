@@ -250,8 +250,6 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 		// Options that modify the search engine
 		case "sm":
 			config.SearchMode = strings.ToLower(code)
-		case "m":
-			options["mode"] = strings.ToLower(code)
 		case "skip":
 			options["skip"] = strings.ToLower(code)
 

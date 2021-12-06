@@ -246,9 +246,6 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 	} else if !co.Etched && !co.Foil {
 		query += " f:nonfoil"
 	}
-	if co.Sealed {
-		query = co.Name + " m:sealed"
-	}
 
 	smallImg := false
 	if len(flags) > 0 {
@@ -302,6 +299,11 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 		}
 	}
 
+	path := "search"
+	if co.Sealed {
+		path = "sealed"
+	}
+
 	return GenericCard{
 		Name:      co.Card.Name,
 		Edition:   co.Edition,
@@ -314,7 +316,7 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 		ImageURL:  scryfallImageURL(cardId, smallImg),
 		Title:     editionTitle(cardId),
 		Reserved:  co.Card.IsReserved,
-		SearchURL: fmt.Sprintf("/search?q=%s", url.QueryEscape(query)),
+		SearchURL: fmt.Sprintf("/%s?q=%s", path, url.QueryEscape(query)),
 		Stocks:    stocks,
 		StocksURL: stocksURL,
 		Printings: printings,

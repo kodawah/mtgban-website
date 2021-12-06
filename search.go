@@ -57,25 +57,18 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	canSealed, _ := strconv.ParseBool(GetParamFromSig(sig, "SearchSealed"))
 	canSealed = canSealed || (DevMode && !SigCheck)
 
-	if canSealed {
-		mode := r.FormValue("mode")
+	pageVars.IsSealed = r.URL.Path == "/sealed"
 
+	if canSealed {
 		pageVars.Nav = insertNavBar("Search", pageVars.Nav, []NavElem{
 			NavElem{
 				Name:   "Sealed",
 				Short:  "🧱",
-				Link:   "/search?mode=sealed",
-				Active: mode == "sealed" || strings.Contains(query, "m:sealed"),
+				Link:   "/sealed",
+				Active: pageVars.IsSealed,
 				Class:  "selected",
 			},
 		})
-
-		if mode == "sealed" {
-			pageVars.EditionSort = SealedEditionsSorted
-			pageVars.EditionList = SealedEditionsList
-			render(w, "product.html", pageVars)
-			return
-		}
 	}
 
 	if len(query) > MaxSearchQueryLen {
@@ -97,6 +90,14 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	// If query is empty there is nothing to do
 	if query == "" {
+		// Hijack sealed list
+		if pageVars.IsSealed {
+			pageVars.EditionSort = SealedEditionsSorted
+			pageVars.EditionList = SealedEditionsList
+			render(w, "product.html", pageVars)
+			return
+		}
+
 		render(w, "search.html", pageVars)
 		return
 	}
@@ -110,7 +111,6 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	pageVars.Metadata = map[string]GenericCard{}
 
 	config := parseSearchOptionsNG(query, blocklistRetail, blocklistBuylist)
-	pageVars.IsSealed = options["mode"] == "sealed"
 	if pageVars.IsSealed {
 		config.SearchMode = "sealed"
 	}

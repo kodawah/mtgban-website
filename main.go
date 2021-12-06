@@ -630,6 +630,7 @@ func main() {
 		// Set up the handler
 		http.Handle(nav.Link, enforceSigning(http.HandlerFunc(nav.Handle)))
 	}
+	http.Handle("/sealed", enforceSigning(http.HandlerFunc(Search)))
 
 	http.Handle("/api/mtgban/", enforceAPISigning(http.HandlerFunc(PriceAPI)))
 	http.Handle("/api/mtgjson/ck.json", enforceAPISigning(http.HandlerFunc(API)))

@@ -5,8 +5,10 @@
     <link rel="stylesheet" type="text/css" href="../css/main.css">
     <link href="//cdn.jsdelivr.net/npm/keyrune@latest/css/keyrune.css" rel="stylesheet" type="text/css" />
     <title>{{.Title}}</title>
-    <script type="text/javascript" src="../js/autocomplete.js"></script>
-    <script type="text/javascript" src="../js/fetchnames.js"></script>
+    {{if not .IsSealed}}
+        <script type="text/javascript" src="../js/autocomplete.js"></script>
+        <script type="text/javascript" src="../js/fetchnames.js"></script>
+    {{end}}
     {{if not (eq .ChartID "")}}
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js"></script>
         <script type="text/javascript" src="../js/chartopts.js"></script>
@@ -47,12 +49,12 @@
     {{else}}
         <h1>Welcome to BAN {{if not (eq .ChartID "")}}Chart{{end}} Search</h1>
         <div class="indent sticky" style="top:48px; background-color: var(--background); z-index: 3; width: min-content;">
-            <form class="search autocomplete" action="search" autocomplete="off" spellcheck="false" id="searchform">
+            <form class="search autocomplete" action="" autocomplete="off" spellcheck="false" id="searchform">
                 <label style="clear: both; float: left;" for="searchbox">
                     {{if eq .SearchQuery "" }}
-                        Search for a card, or... <a class="btn info" href="search?q=random">surprise me</a>
-                    {{else if not .IsSealed}}
-                        <a class="btn info" href="search?q={{.SearchQuery}}&b={{not .SearchBest}}">
+                        Search for a card, or... <a class="btn info" href="/random">surprise me</a>
+                    {{else}}
+                        <a class="btn info" href="?q={{.SearchQuery}}&b={{not .SearchBest}}">
                             {{if .SearchBest}}
                                 Sort results alphabetically
                             {{else}}
@@ -65,9 +67,11 @@
             </form>
         </div>
 
-        <script type="text/javascript">
-            autocomplete(document.getElementById("searchform"), document.getElementById("searchbox"));
-        </script>
+        {{if not .IsSealed}}
+            <script type="text/javascript">
+                autocomplete(document.getElementById("searchform"), document.getElementById("searchbox"));
+            </script>
+        {{end}}
         {{if eq .SearchQuery ""}}
             <div class="indent">
                 <h2>Instructions</h2>
@@ -247,7 +251,9 @@
                                 <table style="margin:0 0 0 18">
                                     <tr style="background-color:rgba(0, 0, 0, 0);">
                                         <td rowspan=2>
-                                            <i class="ss {{$card.Keyrune}} ss-2x ss-fw"></i>
+                                            <a href="search?q=s:{{$card.SetCode}}">
+                                                <i class="ss {{$card.Keyrune}} ss-2x ss-fw"></i>
+                                            </a>
                                         </td>
                                         <td width=100%>
                                             <a href="{{$card.SearchURL}}">
@@ -266,7 +272,7 @@
                                         {{if eq $.ChartID ""}}
                                             <td rowspan=2>
                                                 <span class="emoji">
-                                                    <a href="/search?chart={{$cardId}}" title="See historical data">📊</a>
+                                                    <a href="?chart={{$cardId}}" title="See historical data">📊</a>
                                                 </span>
                                             </td>
                                         {{end}}
@@ -274,9 +280,10 @@
                                     <tr style="background-color:rgba(0, 0, 0, 0); margin-bottom: 0px;">
                                         <td>
                                             <h6>
-                                                <a href="/search?q=s:{{$card.SetCode}}{{if $.IsSealed}} m:sealed{{end}}">{{$card.Title}}</a>
+                                                <a href="?q=s:{{$card.SetCode}}">{{$card.Title}}</a>
                                             </h6>
                                         </td>
+
                                     </tr>
                                 </table>
                             </th>
@@ -381,13 +388,13 @@
                             <td colspan="2" style="text-align: center; vertical-align: middle;">
                                 <p style="display: inline;">
                                     {{if ne .CurrentIndex 1}}
-                                        <a class="pagination" href="/search?q={{.SearchQuery}}&p=1">&lt;</a>
-                                        <a class="pagination" href="/search?q={{.SearchQuery}}&p={{.PrevIndex}}"><i class="arrow left"></i></a>
+                                        <a class="pagination" href="?q={{.SearchQuery}}&p=1">&lt;</a>
+                                        <a class="pagination" href="?q={{.SearchQuery}}&p={{.PrevIndex}}"><i class="arrow left"></i></a>
                                     {{end}}
                                     {{.CurrentIndex}} / {{.TotalIndex}}
                                     {{if ne .CurrentIndex .TotalIndex}}
-                                        <a class="pagination" href="/search?q={{.SearchQuery}}&p={{.NextIndex}}"><i class="arrow right"></i></a>
-                                        <a class="pagination" href="/search?q={{.SearchQuery}}&p={{.TotalIndex}}">&gt;</a>
+                                        <a class="pagination" href="?q={{.SearchQuery}}&p={{.NextIndex}}"><i class="arrow right"></i></a>
+                                        <a class="pagination" href="?q={{.SearchQuery}}&p={{.TotalIndex}}">&gt;</a>
                                     {{end}}
                                 </p>
                             </td>
