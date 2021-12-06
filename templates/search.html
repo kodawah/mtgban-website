@@ -122,6 +122,13 @@
                 </ul>
              </div>
         {{else}}
+            <script type="text/javascript">
+                function updateSidebar(src, printings) {
+                    document.getElementById('cardImage').src=src
+                    document.getElementById('printings').innerHTML=printings
+                }
+            </script>
+
             <div class="indent sticky" style="top: 128px;">
                 <table style="float: left; background-color: var(--background)">
                     <tr class="no-hover" style="background-color: var(--background)">
@@ -246,7 +253,7 @@
                             {{$firstPrint = $card.Printings}}
                         {{end}}
 
-                        <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};" title="{{$card.Title}}">
+                        <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}});" title="{{$card.Title}}">
                             <th colspan="2" class="wrap stickyHeader" style="text-align: left; vertical-align: middle;">
                                 <table style="margin:0 0 0 18">
                                     <tr style="background-color:rgba(0, 0, 0, 0);">
@@ -294,7 +301,7 @@
                             <td style="vertical-align: {{if not $condsEntry}}middle{{else}}top{{end}}; padding: 0; margin: 0;">
                                 <table class="searchResults" style="margin: 0 6px 0 12px;">
                                     {{if not $condsEntry}}
-                                        <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};" style="background-color:rgba(0, 0, 0, 0);">
+                                        <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}});" style="background-color:rgba(0, 0, 0, 0);">
                                             <td colspan="4">
                                                 <center>
                                                     <i>No offers</i>
@@ -306,13 +313,13 @@
                                         {{$entries := (index $condsEntry $conditions)}}
                                         {{if and (ne $conditions "INDEX") (not $.IsSealed)}}
                                             {{if $entries}}
-                                                <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};">
+                                                <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}});">
                                                     <td colspan="4" style="padding-top: 8px; padding-bottom: 8px"><i>Conditions: {{$conditions}}</i></td>
                                                 </tr>
                                             {{end}}
                                         {{end}}
                                         {{range $entries}}
-                                            <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};">
+                                            <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}});">
                                                 <td>
                                                     <a class="btn normal" href="{{.URL}}" target="_blank" rel="nofollow">
                                                         {{.ScraperName}}
@@ -352,7 +359,7 @@
                             <td style="vertical-align: {{if not $entries}}middle{{else}}top{{end}}; padding: 0; margin: 0;">
                                 <table class="searchResults" style="margin: 0 12px 0 6px">
                                     {{if not $entries}}
-                                        <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};" style="background-color:rgba(0, 0, 0, 0);">
+                                        <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}});" style="background-color:rgba(0, 0, 0, 0);">
                                             <td colspan="4">
                                                 <center>
                                                     <i>No offers</i>
@@ -362,7 +369,7 @@
                                     {{end}}
 
                                     {{range $entries}}
-                                        <tr onmouseover="document.getElementById('cardImage').src={{$card.ImageURL}}; document.getElementById('printings').innerHTML={{$card.Printings}};">
+                                        <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}});">
                                             <td>
                                                 <a class="btn normal" href="{{.URL}}" target="_blank" rel="nofollow">
                                                     {{.ScraperName}} {{.Country}}
@@ -412,8 +419,7 @@
                     {{$firstImg = "https://c1.scryfall.com/file/scryfall-card-backs/large/0a/0aeebaf5-8c7d-4636-9e82-8c27447861f7.jpg"}}
                 {{end}}
                 <script type="text/javascript">
-                    document.getElementById('cardImage').src = {{$firstImg}};
-                    document.getElementById('printings').innerHTML = {{$firstPrint}};
+                    updateSidebar({{$firstImg}}, {{$firstPrint}});
                 </script>
             </div>
         {{end}}
