@@ -10,7 +10,6 @@ import (
 	"regexp"
 	"sort"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -47,6 +46,8 @@ const (
 	ChatChannelID  = "736007847560609794"
 )
 
+var DiscordRetailBlocklist []string
+
 func setupDiscord() error {
 	// Create a new Discord session using the provided bot token.
 	dg, err := discordgo.New("Bot " + Config.DiscordToken)
@@ -62,6 +63,8 @@ func setupDiscord() error {
 
 	// In this example, we only care about receiving message events.
 	dg.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsGuilds | discordgo.IntentsGuildMessages)
+
+	DiscordRetailBlocklist = append(Config.SearchRetailBlockList, TCG_DIRECT_LOW)
 
 	// Open a websocket connection to Discord and begin listening.
 	err = dg.Open()
@@ -105,7 +108,6 @@ type searchResult struct {
 	ResultsSellers  []SearchEntry
 	ResultsVendors  []SearchEntry
 	EditionSearched string
-	SearchQuery     string
 }
 
 var filteredEditions = []string{
@@ -128,56 +130,60 @@ var filteredEditions = []string{
 }
 
 func parseMessage(content string) (*searchResult, error) {
-	// Clean up query and only search for NM
-	query, options := parseSearchOptions(content)
-
-	// Filter out any undersirable sets, unless explicitly requested
-	filterGoldOut := true
-	if options["edition"] != "" {
-		if SliceStringHas(filteredEditions, options["edition"]) {
-			filterGoldOut = false
-		}
-	}
-	if filterGoldOut {
-		options["not_edition"] = strings.Join(filteredEditions, ",")
-	}
+	// Clean up query, no blocklist because we only need keys
+	config := parseSearchOptionsNG(content, nil, nil)
+	query := config.CleanQuery
 
 	// Prevent useless invocations
 	if len(query) < 3 && query != "Ow" && query != "X" {
 		return &searchResult{Invalid: true}, nil
 	}
 
-	// We can be quite sure that one of the index will contain the card requested,
-	// so we translate the result into a new query to feed to the other searches
-	resultsIndex, cardId := searchSellersFirstResult(query, options, true)
-	if cardId == "" {
-		// Use a more relaxed search mode if nothing was found (similar to what is
-		// done in main search
-		options["search_mode"] = "prefix"
-		resultsIndex, cardId = searchSellersFirstResult(query, options, true)
-		if cardId == "" {
-			// Not found again, let's provide a meaningful error
-			if options["edition"] != "" {
-				code := strings.Split(options["edition"], ",")[0]
-				set, err := mtgmatcher.GetSet(code)
-				if err != nil {
-					return nil, fmt.Errorf("No edition found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", code)
-				}
-				msg := fmt.Sprintf("No card found named \"%s\" in %s 乁| ･ิ ∧ ･ิ |ㄏ", query, set.Name)
-				printings, err := mtgmatcher.Printings4Card(query)
-				if err == nil {
-					msg = fmt.Sprintf("%s\n\"%s\" is printed in %s.", msg, query, printings2line(printings))
-				}
-				return nil, fmt.Errorf("%s", msg)
-			}
-			return nil, fmt.Errorf("No card found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", query)
+	var editionSearched string
+	// Filter out any undersirable sets, unless explicitly requested
+	filterGoldOut := true
+	for _, filter := range config.CardFilters {
+		if filter.Name == "edition" {
+			filterGoldOut = false
+			editionSearched = filter.Values[0]
+			break
 		}
 	}
+	if filterGoldOut {
+		config.CardFilters = append(config.CardFilters, FilterElem{
+			Name:   "edition",
+			Negate: true,
+			Values: filteredEditions,
+		})
+	}
+
+	uuids, err := searchAndFilter(config)
+	if err != nil {
+		// Not found again, let's provide a meaningful error
+		if editionSearched != "" {
+			set, err := mtgmatcher.GetSet(editionSearched)
+			if err != nil {
+				return nil, fmt.Errorf("No edition found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", editionSearched)
+			}
+			msg := fmt.Sprintf("No card found named \"%s\" in %s 乁| ･ิ ∧ ･ิ |ㄏ", query, set.Name)
+			printings, err := mtgmatcher.Printings4Card(query)
+			if err == nil {
+				msg = fmt.Sprintf("%s\n\"%s\" is printed in %s.", msg, query, printings2line(printings))
+			}
+			return nil, fmt.Errorf("%s", msg)
+		}
+		return nil, fmt.Errorf("No card found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", query)
+	}
+
+	// Keep the first (most recent) result
+	sort.Slice(uuids, func(i, j int) bool {
+		return sortSets(uuids[i], uuids[j])
+	})
+	cardId := uuids[0]
 
 	return &searchResult{
 		CardId:          cardId,
-		ResultsIndex:    resultsIndex,
-		EditionSearched: options["edition"],
+		EditionSearched: editionSearched,
 	}, nil
 }
 
@@ -227,7 +233,6 @@ func search2fields(searchRes *searchResult) (fields []embedField) {
 			for i := len(entry.ScraperName); i < alignLength; i++ {
 				extraSpaces += " "
 			}
-
 			// Build url for our redirect
 			kind := strings.ToLower(string(fieldsNames[i][0]))
 			store := strings.Replace(entry.Shorthand, " ", "%20", -1)
@@ -568,25 +573,19 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	var channel chan *discordgo.MessageEmbed
 
 	if allBls {
-		query, options := parseSearchOptions(searchRes.CardId)
+		config := parseSearchOptionsNG(searchRes.CardId, DiscordRetailBlocklist, Config.SearchBuylistBlockList)
 
-		// Search both sellers and vendors
-		var wg sync.WaitGroup
-		wg.Add(2)
+		// Skip any store based outside of the US
+		config.StoreFilters = append(config.StoreFilters, FilterStoreElem{
+			Name:   "region_keep_index",
+			Values: []string{"us"},
+		})
 
-		go func() {
-			searchRes.ResultsSellers, _ = searchSellersFirstResult(query, options, false)
-			wg.Done()
-		}()
-		go func() {
-			searchRes.ResultsVendors = searchVendorsFirstResult(query, options)
-			wg.Done()
-		}()
+		foundSellers, foundVendors := searchParallelNG(config)
 
-		wg.Wait()
-
-		// Rebuild the search query
-		searchRes.SearchQuery = rebuildSearchQuery(co.Name, options)
+		searchRes.ResultsIndex = processSellersResults(foundSellers, true)
+		searchRes.ResultsSellers = processSellersResults(foundSellers, false)
+		searchRes.ResultsVendors = processVendorsResults(foundVendors)
 
 		ogFields = search2fields(searchRes)
 	} else if lastSold {
@@ -688,7 +687,7 @@ func prepareCard(searchRes *searchResult, ogFields []embedField, guildId string,
 		printings = fmt.Sprintf("%s. Variants in %s are %s", printings, searchRes.EditionSearched, strings.Join(cn, ", "))
 	}
 
-	link := "https://www.mtgban.com/search?q=" + url.QueryEscape(searchRes.SearchQuery) + "&utm_source=banbot&utm_affiliate=" + guildId
+	link := "https://www.mtgban.com/search?q=" + co.UUID + "&utm_source=banbot&utm_affiliate=" + guildId
 
 	// Set title of the main message
 	title := "Prices for " + card.Name
@@ -768,26 +767,7 @@ func longestName(results []SearchEntry) (out int) {
 }
 
 // Retrieve cards from Sellers using the very first result
-func searchSellersFirstResult(query string, options map[string]string, index bool) (results []SearchEntry, cardId string) {
-	// Load a safe default
-	skipped := Config.SearchRetailBlockList
-	if index {
-		// Skip the tcg direct low pricing, prices are too condition sensitive
-		skipped = append(skipped, TCG_DIRECT_LOW)
-	} else {
-		// Skip the tcg direct pricing, since we added it in the index
-		skipped = append(skipped, TCG_DIRECT)
-
-		// Skip any store based outside of the US, if it's not an index
-		for _, seller := range Sellers {
-			if seller != nil && seller.Info().CountryFlag != "" {
-				skipped = append(skipped, seller.Info().Shorthand)
-			}
-		}
-	}
-
-	// Search
-	foundSellers := searchSellers(query, skipped, options)
+func processSellersResults(foundSellers map[string]map[string][]SearchEntry, index bool) (results []SearchEntry) {
 	if len(foundSellers) == 0 {
 		return
 	}
@@ -802,7 +782,7 @@ func searchSellersFirstResult(query string, options map[string]string, index boo
 		})
 	}
 
-	cardId = sortedKeysSeller[0]
+	cardId := sortedKeysSeller[0]
 	if index {
 		results = foundSellers[cardId]["INDEX"]
 
@@ -858,18 +838,9 @@ func searchSellersFirstResult(query string, options map[string]string, index boo
 }
 
 // Retrieve cards from Vendors using the very first result
-func searchVendorsFirstResult(query string, options map[string]string) (results []SearchEntry) {
-	// Skip any store based outside of the US
-	skipped := Config.SearchBuylistBlockList
-	for _, vendor := range Vendors {
-		if vendor != nil && vendor.Info().CountryFlag != "" {
-			skipped = append(skipped, vendor.Info().Shorthand)
-		}
-	}
-
-	foundVendors := searchVendors(query, skipped, options)
+func processVendorsResults(foundVendors map[string][]SearchEntry) []SearchEntry {
 	if len(foundVendors) == 0 {
-		return
+		return nil
 	}
 
 	sortedKeysVendor := make([]string, 0, len(foundVendors))
@@ -882,6 +853,5 @@ func searchVendorsFirstResult(query string, options map[string]string) (results 
 		})
 	}
 
-	results = foundVendors[sortedKeysVendor[0]]
-	return
+	return foundVendors[sortedKeysVendor[0]]
 }
