@@ -1263,9 +1263,8 @@ func searchVendors(query string, blocklist []string, options map[string]string) 
 	return
 }
 
-func searchParallelNG(config SearchConfig, flags ...bool) (foundSellers map[string]map[string][]SearchEntry, foundVendors map[string][]SearchEntry) {
+func searchAndFilter(config SearchConfig) ([]string, error) {
 	query := config.CleanQuery
-	options := config.Options
 	filters := config.CardFilters
 
 	var uuids []string
@@ -1291,7 +1290,7 @@ func searchParallelNG(config SearchConfig, flags ...bool) (foundSellers map[stri
 		}
 	}
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
 	var selectedUUIDs []string
@@ -1300,6 +1299,16 @@ func searchParallelNG(config SearchConfig, flags ...bool) (foundSellers map[stri
 			continue
 		}
 		selectedUUIDs = append(selectedUUIDs, uuid)
+	}
+	return selectedUUIDs, nil
+}
+
+func searchParallelNG(config SearchConfig, flags ...bool) (foundSellers map[string]map[string][]SearchEntry, foundVendors map[string][]SearchEntry) {
+	options := config.Options
+
+	selectedUUIDs, err := searchAndFilter(config)
+	if err != nil {
+		return nil, nil
 	}
 
 	var wg sync.WaitGroup
