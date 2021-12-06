@@ -48,78 +48,51 @@ func BenchmarkSearchExact(b *testing.B) {
 	}
 
 	for n := 0; n < b.N; n++ {
-		searchParallelNG(config)
+		searchParallelNG(config, true)
 	}
 }
 
 func BenchmarkSearchPrefix(b *testing.B) {
-	config := SearchConfig{
-		CleanQuery: NameToBeFound,
-		Options: map[string]string{
-			"search_mode": "prefix",
-		},
-	}
-
+	config := parseSearchOptionsNG(fmt.Sprintf("%s sm:prefix", NameToBeFound), nil, nil)
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		searchParallelNG(config)
+		searchParallelNG(config, true)
 	}
 }
 
 func BenchmarkSearchAllFromEdition(b *testing.B) {
-	config := SearchConfig{
-		CleanQuery: "",
-		Options: map[string]string{
-			"edition": EditionToBeFound,
-		},
-	}
+	config := parseSearchOptionsNG(fmt.Sprintf("s:%s", EditionToBeFound), nil, nil)
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		searchParallelNG(config)
+		searchParallelNG(config, true)
 	}
 }
 
 func BenchmarkSearchWithEdition(b *testing.B) {
-	config := SearchConfig{
-		CleanQuery: NameToBeFound,
-		Options: map[string]string{
-			"edition": EditionToBeFound,
-		},
-	}
+	config := parseSearchOptionsNG(fmt.Sprintf("%s s:%s", NameToBeFound, EditionToBeFound), nil, nil)
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		searchParallelNG(config)
-	}
-}
-
-func BenchmarkSearchWithEditionPrefix(b *testing.B) {
-	config := SearchConfig{
-		CleanQuery: NameToBeFound,
-		Options: map[string]string{
-			"edition":     EditionToBeFound,
-			"search_mode": "prefix",
-		},
-	}
-
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		searchParallelNG(config)
+		searchParallelNG(config, true)
 	}
 }
 
 func BenchmarkSearchWithNumber(b *testing.B) {
-	config := SearchConfig{
-		CleanQuery: NameToBeFound,
-		Options: map[string]string{
-			"number": NumberToBeFound,
-		},
-	}
+	config := parseSearchOptionsNG(fmt.Sprintf("%s cn:%s", NameToBeFound, NumberToBeFound), nil, nil)
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		searchParallelNG(config)
+		searchParallelNG(config, true)
+	}
+}
+
+func BenchmarkSearchWithEditionPrefix(b *testing.B) {
+	config := parseSearchOptionsNG(fmt.Sprintf("%s s:%s sm:prefix", NameToBeFound, EditionToBeFound), nil, nil)
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		searchParallelNG(config, true)
 	}
 }
 
@@ -133,93 +106,11 @@ func BenchmarkSearchOnlyRetail(b *testing.B) {
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		searchParallelNG(config)
+		searchParallelNG(config, true)
 	}
 }
 
 func BenchmarkSearchOnlyBuylist(b *testing.B) {
-	config := SearchConfig{
-		CleanQuery: NameToBeFound,
-		Options: map[string]string{
-			"skip": "retail",
-		},
-	}
-
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		searchParallelNG(config)
-	}
-}
-
-func BenchmarkSearchExactNG(b *testing.B) {
-	config := SearchConfig{
-		CleanQuery: NameToBeFound,
-	}
-
-	for n := 0; n < b.N; n++ {
-		searchParallelNG(config, true)
-	}
-}
-
-func BenchmarkSearchPrefixNG(b *testing.B) {
-	config := parseSearchOptionsNG(fmt.Sprintf("%s sm:prefix", NameToBeFound), nil, nil)
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		searchParallelNG(config, true)
-	}
-}
-
-func BenchmarkSearchAllFromEditionNG(b *testing.B) {
-	config := parseSearchOptionsNG(fmt.Sprintf("s:%s", EditionToBeFound), nil, nil)
-
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		searchParallelNG(config, true)
-	}
-}
-
-func BenchmarkSearchWithEditionNG(b *testing.B) {
-	config := parseSearchOptionsNG(fmt.Sprintf("%s s:%s", NameToBeFound, EditionToBeFound), nil, nil)
-
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		searchParallelNG(config, true)
-	}
-}
-
-func BenchmarkSearchWithNumberNG(b *testing.B) {
-	config := parseSearchOptionsNG(fmt.Sprintf("%s cn:%s", NameToBeFound, NumberToBeFound), nil, nil)
-
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		searchParallelNG(config, true)
-	}
-}
-
-func BenchmarkSearchWithEditionPrefixNG(b *testing.B) {
-	config := parseSearchOptionsNG(fmt.Sprintf("%s s:%s sm:prefix", NameToBeFound, EditionToBeFound), nil, nil)
-
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		searchParallelNG(config, true)
-	}
-}
-
-func BenchmarkSearchOnlyRetailNG(b *testing.B) {
-	config := SearchConfig{
-		CleanQuery: NameToBeFound,
-		Options: map[string]string{
-			"skip": "buylist",
-		},
-	}
-
-	b.ResetTimer()
-	for n := 0; n < b.N; n++ {
-		searchParallelNG(config, true)
-	}
-}
-
-func BenchmarkSearchOnlyBuylistNG(b *testing.B) {
 	config := SearchConfig{
 		CleanQuery: NameToBeFound,
 		Options: map[string]string{
