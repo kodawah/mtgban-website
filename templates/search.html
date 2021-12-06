@@ -126,10 +126,37 @@
                 function updateSidebar(src, printings) {
                     {{if not .IsSealed}}
                         document.getElementById('cardImage').src=src
+                    {{else}}
+                        document.getElementById('hoverImage').src=src
                     {{end}}
                     document.getElementById('printings').innerHTML=printings
                 }
             </script>
+
+            {{$emptyImg := "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"}}
+            {{if .IsSealed}}
+                <img id="hoverImage" src="" style="position:absolute; z-index: 3;"/>
+
+                <script type="text/javascript">
+                    var hoverImage = document.getElementById("hoverImage");
+
+                    document.addEventListener("mousemove", getMouse);
+
+                    setInterval(followMouse, 10);
+
+                    var mouse = {x:0, y:0}; //mouse.x, mouse.y
+
+                    function getMouse(e){
+                        mouse.x = e.pageX+10;
+                        mouse.y = e.pageY+10;
+                    }
+
+                    function followMouse(){
+                        hoverImage.style.left = mouse.x + "px";
+                        hoverImage.style.top = mouse.y + "px";
+                    }
+                </script>
+            {{end}}
 
             <div class="indent sticky" style="top: 128px;">
                 <table style="float: left; background-color: var(--background)">
@@ -241,7 +268,7 @@
                     </script>
                 {{end}}
 
-                <table style="background-color: var(--background); float:left;">
+                <table style="background-color: var(--background); float:left;" {{if .IsSealed}}onmouseout="document.getElementById('hoverImage').src='{{$emptyImg}}';"{{end}}>
                     {{if .AllKeys}}
                         <tr>
                             <th class="stickyCategory"><h2 align=center>Sellers</h2></th>
@@ -420,6 +447,9 @@
                 </table>
                 {{if eq $firstImg ""}}
                     {{$firstImg = "https://c1.scryfall.com/file/scryfall-card-backs/large/0a/0aeebaf5-8c7d-4636-9e82-8c27447861f7.jpg"}}
+                {{end}}
+                {{if .IsSealed}}
+                    {{$firstImg = $emptyImg}}
                 {{end}}
                 <script type="text/javascript">
                     updateSidebar({{$firstImg}}, {{$firstPrint}});
