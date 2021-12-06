@@ -157,6 +157,27 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 	var filterStores []FilterStoreElem
 	options := map[string]string{}
 
+	// Apply blocklists as if they were options, need to pass them through
+	// the fixup due to upper/lower casing
+	// This needs to be the first element for performance and for supporting
+	// hashing searches
+	if blocklistRetail != nil {
+		filterStores = append(filterStores, FilterStoreElem{
+			Name:          "seller",
+			Negate:        true,
+			Values:        fixupStoreCodeNG(strings.Join(blocklistRetail, ",")),
+			OnlyForSeller: true,
+		})
+	}
+	if blocklistBuylist != nil {
+		filterStores = append(filterStores, FilterStoreElem{
+			Name:          "vendor",
+			Negate:        true,
+			Values:        fixupStoreCodeNG(strings.Join(blocklistBuylist, ",")),
+			OnlyForVendor: true,
+		})
+	}
+
 	// Support our UUID style when there are no options to parse
 	if !strings.Contains(query, ":") {
 		fields := strings.Split(query, ",")
@@ -185,6 +206,7 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 				query = ""
 			}
 			config.CleanQuery = query
+			config.StoreFilters = filterStores
 			return
 		}
 	}
@@ -331,25 +353,6 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 				options[option+"_less_than"] = fixupStoreCode(code)
 			}
 		}
-	}
-
-	// Apply blocklists as if they were options, need to pass them through
-	// the fixup due to upper/lower casing
-	if blocklistRetail != nil {
-		filterStores = append(filterStores, FilterStoreElem{
-			Name:          "seller",
-			Negate:        true,
-			Values:        fixupStoreCodeNG(strings.Join(blocklistRetail, ",")),
-			OnlyForSeller: true,
-		})
-	}
-	if blocklistBuylist != nil {
-		filterStores = append(filterStores, FilterStoreElem{
-			Name:          "vendor",
-			Negate:        true,
-			Values:        fixupStoreCodeNG(strings.Join(blocklistBuylist, ",")),
-			OnlyForVendor: true,
-		})
 	}
 
 	config.CleanQuery = strings.TrimSpace(query)
