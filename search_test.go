@@ -42,6 +42,15 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
+func BenchmarkRegexp(b *testing.B) {
+	input := fmt.Sprintf("%s sm:prefix cn:%s f:foil vendor:CK date>%s", NameToBeFound, NumberToBeFound, EditionToBeFound)
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		parseSearchOptionsNG(input, nil, nil)
+	}
+}
+
 func BenchmarkSearchExact(b *testing.B) {
 	config := SearchConfig{
 		CleanQuery: NameToBeFound,

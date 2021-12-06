@@ -6,7 +6,6 @@ import (
 	"math/rand"
 	"net/http"
 	"net/url"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -40,8 +39,6 @@ type SearchEntry struct {
 	IndexCombined bool
 	Secondary     float64
 }
-
-var re = regexp.MustCompile(`-?(c|f|m|r|s|t|cn|sm|date|skip|store|seller|vendor|region|price|buy_price|arb_price|rev_price)[:><](("([^"]+)"|\S+))+`)
 
 var AllConditions = []string{"INDEX", "NM", "SP", "MP", "HP", "PO"}
 

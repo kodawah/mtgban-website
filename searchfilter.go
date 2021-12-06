@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -130,7 +133,8 @@ func fixupTypeNG(code string) []string {
 	return filters
 }
 
-// TODO: build the regexp from these options
+var re *regexp.Regexp
+
 var FilterOperations = map[string][]string{
 	"sm":        []string{":"},
 	"skip":      []string{":"},
@@ -149,6 +153,26 @@ var FilterOperations = map[string][]string{
 	"seller":    []string{":"},
 	"vendor":    []string{":"},
 	"region":    []string{":"},
+}
+
+func init() {
+	var regexpOptions string
+	var opts []string
+
+	for key := range FilterOperations {
+		opts = append(opts, key)
+	}
+	// Sort keys by shorter and alphabetical (since they may be the more common)
+	sort.Slice(opts, func(i, j int) bool {
+		if len(opts[i]) == len(opts[j]) {
+			return opts[i] < opts[j]
+		}
+		return len(opts[i]) < len(opts[j])
+	})
+
+	regexpOptions = fmt.Sprintf(`-?(%s)[:<>](("([^"]+)"|\S+))+`, strings.Join(opts, "|"))
+
+	re = regexp.MustCompile(regexpOptions)
 }
 
 func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []string) (config SearchConfig) {
