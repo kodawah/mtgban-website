@@ -49,6 +49,7 @@ var categoryOverrides = map[string]string{
 var editionRenames = map[string]string{
 	"Duel Decks Anthology: Elves vs. Goblins": "Duel Decks Anthology",
 	"Media Inserts":                        "San Diego Comic-Con",
+	"Modern Horizons 1 Timeshifts":         "Modern Horizons",
 	"Mystery Booster Playtest Cards":       "Mystery Booster Convention Edition",
 	"Mystery Booster Retail Edition Foils": "Mystery Booster Retail Edition",
 	"World Championship Decks 1997":        "World Championship Decks",
@@ -59,6 +60,7 @@ var editionSkips = map[string]string{
 	"Legends Italian":        "",
 	"The Dark Italian":       "",
 	"Rivals Quick Start Set": "",
+	"Modern Horizons":        "",
 }
 
 func getAllEditions() ([]string, map[string]EditionEntry) {
