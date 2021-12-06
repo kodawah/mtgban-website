@@ -124,25 +124,28 @@
         {{else}}
             <script type="text/javascript">
                 function updateSidebar(src, printings) {
-                    document.getElementById('cardImage').src=src
+                    {{if not .IsSealed}}
+                        document.getElementById('cardImage').src=src
+                    {{end}}
                     document.getElementById('printings').innerHTML=printings
                 }
             </script>
 
             <div class="indent sticky" style="top: 128px;">
                 <table style="float: left; background-color: var(--background)">
-                    <tr class="no-hover" style="background-color: var(--background)">
-                        <td>
-                            <img id="cardImage" src="" width="354" height="493"/>
-                        </td>
-                    </tr>
                     {{if .IsSealed}}
-                        <tr>
+                        <br><br>
+                        <tr class="no-hover" style="background-color: var(--background)">
                             <td>
                                 <div id="printings" style="max-width:354px; display: block;"></div>
                             </td>
                         </tr>
                     {{else}}
+                        <tr class="no-hover" style="background-color: var(--background)">
+                            <td>
+                                <img id="cardImage" src="" width="354" height="493"/>
+                            </td>
+                        </tr>
                         <tr>
                             <td>
                                 <div id="printings" style="text-align: center; max-width:354px; display: block;"></div>
