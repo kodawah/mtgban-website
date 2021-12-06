@@ -1395,6 +1395,11 @@ func sortSets(uuidI, uuidJ string) bool {
 		// If they are part of the same edition, check for their collector number
 		// taking their foiling into consideration
 		if editionI == editionJ {
+			// Special case for sealed products
+			if cI.Sealed && cJ.Sealed {
+				return cI.Name < cJ.Name
+			}
+
 			// If their number is the same, check for foiling status
 			if cI.Card.Number == cJ.Card.Number {
 				if cI.Etched || cJ.Etched {
