@@ -78,7 +78,7 @@ type PageVars struct {
 
 	Arb            []Arbitrage
 	ArbitOptKeys   []string
-	ArbitOptNames  map[string]string
+	ArbitOptConfig map[string]FilterOpt
 	ArbitFilters   map[string]bool
 	ArbitOptNoGlob map[string]bool
 	ArbitOptTests  map[string]bool

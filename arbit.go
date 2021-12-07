@@ -65,21 +65,94 @@ var FilterOptKeys = []string{
 	"noqty",
 }
 
+type FilterOpt struct {
+	Title string
+	Func  func(*mtgban.ArbitOpts)
+}
+
 // User-readable option name (may be a subset of the options)
-var FilterOptNames = map[string]string{
-	"nocond":     "only NM/SP",
-	"nofoil":     "only non-Foil",
-	"onlyfoil":   "only Foil",
-	"nocomm":     "only Rare/Mythic",
-	"nononrl":    "only RL",
-	"nononabu4h": "only ABU4H",
-	"onlyshiny":  "only Shinies",
-	"noposi":     "only Negative",
-	"nopenny":    "only Bucks+",
-	"nobuypenny": "only BuyBucks+",
-	"nolow":      "only Yield+",
-	"nodiff":     "only Difference+",
-	"noqty":      "only Quantity+",
+var FilterOptConfig = map[string]FilterOpt{
+	"nocond": {
+		Title: "only NM/SP",
+		Func: func(opts *mtgban.ArbitOpts) {
+			opts.Conditions = BadConditions
+		},
+	},
+	"nofoil": {
+		Title: "only non-Foil",
+		Func: func(opts *mtgban.ArbitOpts) {
+			opts.NoFoil = true
+		},
+	},
+	"onlyfoil": {
+		Title: "only Foil",
+		Func: func(opts *mtgban.ArbitOpts) {
+			opts.OnlyFoil = true
+		},
+	},
+	"nocomm": {
+		Title: "only Rare/Mythic",
+		Func: func(opts *mtgban.ArbitOpts) {
+			opts.Rarities = UCRarity
+		},
+	},
+	"nononrl": {
+		Title: "only RL",
+		Func: func(opts *mtgban.ArbitOpts) {
+			opts.OnlyReserveList = true
+		},
+	},
+	"nononabu4h": {
+		Title: "only ABU4H",
+		Func: func(opts *mtgban.ArbitOpts) {
+			opts.OnlyEditions = ABU4H
+		},
+	},
+	"onlyshiny": {
+		Title: "only Shinies",
+		Func: func(opts *mtgban.ArbitOpts) {
+			opts.OnlyEditions = ShinyEditions
+			opts.OnlyCollectorNumberRanges = ShinyEditionRanges
+		},
+	},
+	"noposi": {
+		Title: "only Negative",
+		Func: func(opts *mtgban.ArbitOpts) {
+			opts.MinSpread = MinSpreadNegative
+			opts.MinDiff = MinDiffNegative
+			opts.MaxSpread = MinSpread
+		},
+	},
+	"nopenny": {
+		Title: "only Bucks+",
+		Func: func(opts *mtgban.ArbitOpts) {
+			opts.MinPrice = 1
+		},
+	},
+	"nobuypenny": {
+		Title: "only BuyBucks+",
+		Func: func(opts *mtgban.ArbitOpts) {
+			opts.MinBuyPrice = 1
+		},
+	},
+	"nolow": {
+		Title: "only Yield+",
+		Func: func(opts *mtgban.ArbitOpts) {
+			opts.MinSpread = MinSpreadHighYield
+		},
+	},
+	"nodiff": {
+		Title: "only Difference+",
+		Func: func(opts *mtgban.ArbitOpts) {
+			opts.MinBuyPrice = 1
+		},
+	},
+	"noqty": {
+		Title: "only Quantity+",
+		Func: func(opts *mtgban.ArbitOpts) {
+			opts.MinQuantity = 1
+		},
+	},
 }
 
 // Arbit-only options
@@ -440,7 +513,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	pageVars.QtyNotAvailable = source.Info().NoQuantityInventory
 	pageVars.ArbitFilters = arbitFilters
 	pageVars.ArbitOptKeys = FilterOptKeys
-	pageVars.ArbitOptNames = FilterOptNames
+	pageVars.ArbitOptConfig = FilterOptConfig
 	pageVars.ArbitOptNoGlob = FilterOptNoGlobal
 	if !anyEnabled {
 		pageVars.ArbitOptTests = FilterOptTests
@@ -450,61 +523,32 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	pageVars.Metadata = map[string]GenericCard{}
 
 	opts := &mtgban.ArbitOpts{
-		MinSpread:       MinSpread,
-		MaxSpread:       MaxSpread,
-		MaxPriceRatio:   MaxPriceRatio,
-		NoFoil:          arbitFilters["nofoil"],
-		OnlyFoil:        arbitFilters["onlyfoil"],
-		OnlyReserveList: arbitFilters["nononrl"],
+		MinSpread:     MinSpread,
+		MaxSpread:     MaxSpread,
+		MaxPriceRatio: MaxPriceRatio,
 	}
+
+	// Set options
+	for _, key := range FilterOptKeys {
+		if arbitFilters[key] {
+			FilterOptConfig[key].Func(opts)
+		}
+	}
+
+	// Customize opts for Globals
 	if pageVars.GlobalMode {
 		opts.MinSpread = MinSpreadGlobal
 		opts.MaxSpread = MaxSpreadGlobal
 
+		if arbitFilters["nolow"] {
+			opts.MinSpread = MinSpreadHighYieldGlobal
+		}
+		if arbitFilters["nodiff"] {
+			opts.MinDiff = 5
+		}
 		if source.Info().Shorthand == TCG_DIRECT {
 			opts.Conditions = BadConditions
 		}
-	}
-	if arbitFilters["noposi"] {
-		opts.MinSpread = MinSpreadNegative
-		opts.MinDiff = MinDiffNegative
-		opts.MaxSpread = MinSpread
-	}
-	if arbitFilters["nolow"] {
-		opts.MinSpread = MinSpreadHighYield
-		if pageVars.GlobalMode {
-			opts.MinSpread = MinSpreadHighYieldGlobal
-		}
-	}
-	if arbitFilters["nocond"] {
-		opts.Conditions = BadConditions
-	}
-	if arbitFilters["nocomm"] {
-		opts.Rarities = UCRarity
-	}
-	if arbitFilters["nopenny"] {
-		opts.MinPrice = 1
-	}
-	if arbitFilters["nobuypenny"] {
-		opts.MinBuyPrice = 1
-	}
-	if arbitFilters["nodiff"] {
-		opts.MinDiff = 1
-		if pageVars.GlobalMode {
-			opts.MinDiff = 5
-		}
-	}
-	if arbitFilters["noqty"] {
-		opts.MinQuantity = 1
-	}
-	if arbitFilters["nononabu4h"] {
-		opts.OnlyEditions = ABU4H
-	}
-	if arbitFilters["onlyshiny"] {
-		opts.OnlyEditions = ShinyEditions
-		opts.OnlyCollectorNumberRanges = ShinyEditionRanges
-	}
-	if pageVars.GlobalMode {
 		opts.Editions = FilteredEditions
 	}
 

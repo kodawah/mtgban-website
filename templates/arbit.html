@@ -194,8 +194,9 @@
                         {{$skipIfTesting := index $.ArbitOptTests .}}
                         {{$skipIfGlobal := index $.ArbitOptNoGlob .}}
                         {{if and (not $skipIfTesting) (not (and $.GlobalMode $skipIfGlobal))}}
-                            {{$name := index $.ArbitOptNames .}}
-                            {{if $name}}
+                            {{$cfg := index $.ArbitOptConfig .}}
+                            {{if $cfg}}
+                                {{$name := $cfg.Title}}
                                 <a class="btn {{if index $.ArbitFilters .}}success{{else}}normal{{end}}" href="?source={{$.ScraperShort}}&sort={{$.SortOption}}&{{range $.ArbitOptKeys}}{{$val := index $.ArbitFilters .}}{{.}}={{if eq . $key}}{{not $val}}{{else}}{{$val}}{{end}}&{{end}}">{{$name}}</a>
                             {{end}}
                         {{end}}
