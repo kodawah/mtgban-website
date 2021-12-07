@@ -52,6 +52,7 @@ var FilterOptKeys = []string{
 	"credit",
 	"nocond",
 	"nofoil",
+	"onlyfoil",
 	"nocomm",
 	"nononrl",
 	"nononabu4h",
@@ -68,6 +69,7 @@ var FilterOptKeys = []string{
 var FilterOptNames = map[string]string{
 	"nocond":     "only NM/SP",
 	"nofoil":     "only non-Foil",
+	"onlyfoil":   "only Foil",
 	"nocomm":     "only Rare/Mythic",
 	"nononrl":    "only RL",
 	"nononabu4h": "only ABU4H",
@@ -452,6 +454,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		MaxSpread:       MaxSpread,
 		MaxPriceRatio:   MaxPriceRatio,
 		NoFoil:          arbitFilters["nofoil"],
+		OnlyFoil:        arbitFilters["onlyfoil"],
 		OnlyReserveList: arbitFilters["nononrl"],
 	}
 	if pageVars.GlobalMode {
