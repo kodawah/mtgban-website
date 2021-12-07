@@ -55,6 +55,7 @@ var FilterOptKeys = []string{
 	"nocomm",
 	"nononrl",
 	"nononabu4h",
+	"onlyshiny",
 	"noposi",
 	"nopenny",
 	"nobuypenny",
@@ -70,6 +71,7 @@ var FilterOptNames = map[string]string{
 	"nocomm":     "only Rare/Mythic",
 	"nononrl":    "only RL",
 	"nononabu4h": "only ABU4H",
+	"onlyshiny":  "only Shinies",
 	"noposi":     "only Negative",
 	"nopenny":    "only Bucks+",
 	"nobuypenny": "only BuyBucks+",
@@ -91,6 +93,7 @@ var FilterOptNoGlobal = map[string]bool{
 var FilterOptTests = map[string]bool{
 	"nononrl":    true,
 	"nononabu4h": true,
+	"onlyshiny":  true,
 }
 
 var BadConditions = []string{"MP", "HP", "PO"}
@@ -104,6 +107,38 @@ var ABU4H = []string{
 	"Antiquities",
 	"Legends",
 	"The Dark",
+}
+
+var ShinyEditions = []string{
+	"Seventh Edition",
+	"Zendikar Expeditions",
+	"Kaladesh Inventions",
+	"Amonkhet Invocations",
+	"Mythic Edition",
+	"Ultimate Box Topper",
+	"Secret Lair Drop",
+	"Zendikar Rising Expeditions",
+	"Modern Horizons 1 Timeshifts",
+
+	// Filtered below
+	"Ikoria: Lair of Behemoths",
+	"Commander Legends",
+	"Double Masters",
+	"Time Spiral Remastered",
+	"Strixhaven Mystical Archive",
+}
+
+var ShinyEditionRanges = map[string][2]int{
+	// Godzilla series
+	"Ikoria: Lair of Behemoths": {370, 387},
+	// Etched commanders
+	"Commander Legends": {514, 614},
+	// Box toppers
+	"Double Masters": {333, 372},
+	// Timeshifts
+	"Time Spiral Remastered": {290, 411},
+	// JPN cards
+	"Strixhaven Mystical Archive": {64, 126},
 }
 
 type Arbitrage struct {
@@ -461,6 +496,10 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	}
 	if arbitFilters["nononabu4h"] {
 		opts.OnlyEditions = ABU4H
+	}
+	if arbitFilters["onlyshiny"] {
+		opts.OnlyEditions = ShinyEditions
+		opts.OnlyCollectorNumberRanges = ShinyEditionRanges
 	}
 	if pageVars.GlobalMode {
 		opts.Editions = FilteredEditions
