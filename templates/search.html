@@ -84,7 +84,7 @@
                             <li>You can filter by <b>collector number</b> using the Scryfall notation <pre>cn:NUMBER</pre>. For simple numbers (without any prefix or suffix) you may also filter with <pre>cn&gt;NUMBER</pre> and <pre>cn&lt;NUMBER</pre>.</li>
                             <li>You can filter by <b>condition</b> with <pre>c:COND</pre>, accepting <pre>NM</pre>, <pre>SP</pre>, <pre>MP</pre>, <pre>HP</pre>, and <pre>PO</pre>.</li>
                             <li>You can filter by <b>rarity</b> with <pre>r:RARITY</pre>, accepting <pre>mythic</pre>, <pre>rare</pre>, <pre>uncommon</pre>, <pre>common</pre>, and <pre>special</pre>. You can also use the first letter of the rarity as shorthand.</li>
-                            <li>You can filter by <b>finish</b> with <pre>f:VALUE</pre>, accepting <pre>nonfoil</pre>, <pre>foil</pre>, and <pre>etched</pre>
+                            <li>You can filter by <b>finish</b> with <pre>f:VALUE</pre>, accepting <pre>nonfoil</pre>, <pre>foil</pre>, and <pre>etched</pre>.</li>
                             <li>You can filter by <b>card type</b> with <pre>t:VALUE</pre>, accepting any valid supertype, subtype, or type.</li>
                             <li>You can filter by <b>release date</b> of the card or set <pre>date:VALUE</pre>, <pre>date&gt;VALUE</pre>, and <pre>date&lt;VALUE</pre>. The value may be a date in the ISO format (<pre>YYYY-MM-DD</pre>) or a set code.</li>
                             <li>You can change the <b>search mode</b> with <pre>sm:VALUE</pre>, accepting <pre>exact</pre> (default), <pre>prefix</pre>, or <pre>any</pre></li>
@@ -96,15 +96,16 @@
                                 <li>If you search in in <b>any</b> mode, you will get all the cards containing any of the text present in card names.
                                     <br>For example <pre>*Draco*</pre> will return the card named Draco and all the cards that have "draco" in their names.</li>
                             </ul>
-                            <li>Filtering by <b>edition</b>, <b>collector number</b>, <b>rarity</b>, and <b>condition</b> supports specifying multiple values, separated by a comma ",".</li>
-                            <li>You can invert some filter results by prepending a <pre>-</pre> to the option name.</li>
+                            <li>You can set any option in any order, in any amount. When filtering for a group of values you can use a comma <pre>,</pre> to separate values.</li>
+                            <li>You can invert filter results by prepending a <pre>-</pre> to the option name.</li>
                             <li>You can filter by <b>seller/vendor name</b> with <pre>store:shorthand</pre>, or specific types of store with <pre>seller:shorthand</pre> and <pre>vendor:shorthand</pre>.</li>
                             <ul>
                                 <li>For specific TCG prices, you may use the following self-describing tags: <pre>TCG_LOW</pre>, <pre>TCG_MARKET</pre>, <pre>TCG_PLAYER</pre>, <pre>TCG_DIRECT</pre>.</li>
                                 <li>You can filter results to include only retail or buylist prices with <pre>skip:retail</pre> and <pre>skip:buylist</pre>.
                                     You can skip results that do not have any retail offer (<pre>skip:nosales</pre>) or any buylist offer (<pre>skip:nobuys</pre>).</li>
-                                <li>You may filter by the store <b>region</b> with <pre>region:us</pre>, <pre>region:eu</pre>, or <pre>region:jp</pre>.</li>
+                                <li>You may filter by the store <b>region:VALUE</b> with <pre>us</pre>, <pre>eu</pre>, or <pre>jp</pre> options.</li>
                             </ul>
+                            <li>You can filter by <b>price</b> with <pre>price&gt;VALUE</pre>, or <pre>price&lt;:VALUE</pre> to exclude results above your range.</li>
                         </ul>
                     </li>
                     <br>
