@@ -128,6 +128,11 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		cleanQuery = config.CleanQuery
 		options = config.Options
 		canShowAll = (len(options) != 0 || len(config.CardFilters) != 0 || len(config.UUIDs) != 0)
+
+		// Only used in hashing searches, fill in data with what is available
+		if config.FullQuery != "" {
+			pageVars.SearchQuery = config.FullQuery
+		}
 	} else {
 		cleanQuery, options = parseSearchOptions(query)
 		foundSellers, foundVendors = searchParallel(cleanQuery, options, blocklistRetail, blocklistBuylist)

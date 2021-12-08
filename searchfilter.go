@@ -22,6 +22,9 @@ type SearchConfig struct {
 	// Name of the card being searched (may be blank)
 	CleanQuery string
 
+	// Full query searched (may be blank)
+	FullQuery string
+
 	// Static options to be parsed during various steps
 	Options map[string]string
 
@@ -238,7 +241,16 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 				}
 			}
 			// Save the last name found
-			query = co.Name
+			config.CleanQuery = co.Name
+			// Rebuild the full query for this card
+			config.FullQuery = co.Name + " s:" + co.SetCode + " cn:" + co.Number
+			if co.Etched {
+				config.FullQuery += " f:etched"
+			} else if co.Foil {
+				config.FullQuery += " f:foil"
+			}
+
+			// Set the special search mode and its data source
 			config.SearchMode = "hashing"
 			config.UUIDs = append(config.UUIDs, field)
 		}
@@ -248,9 +260,9 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 			// When multiple fields are requested it's impossible to rebuild
 			// the query, so just ignore it
 			if len(fields) != 1 {
-				query = ""
+				config.CleanQuery = ""
+				config.FullQuery = ""
 			}
-			config.CleanQuery = query
 			config.StoreFilters = filterStores
 			return
 		}
