@@ -164,14 +164,14 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	// Append keys to the main array
 	// Skip them when requested
 	for cardId := range foundSellers {
-		if skipEmptyRetail && len(foundVendors[cardId]) == 0 {
+		if skipEmptyBuylist && len(foundVendors[cardId]) == 0 {
 			continue
 		}
 		// Always append the card to the main list
 		allKeys = append(allKeys, cardId)
 	}
 	for cardId := range foundVendors {
-		if skipEmptyBuylist && len(foundSellers[cardId]) == 0 {
+		if skipEmptyRetail && len(foundSellers[cardId]) == 0 {
 			continue
 		}
 		// Append the card if it was not already added
