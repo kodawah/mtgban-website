@@ -302,8 +302,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	// CHART ALL THE THINGS
 	if chartId != "" {
-		// Rebuild the search query
-		pageVars.SearchQuery = rebuildSearchQuery(cleanQuery, options)
+		// Rebuild the search query by faking a uuid lookup
+		cfg := parseSearchOptionsNG(chartId, nil, nil)
+		pageVars.SearchQuery = cfg.FullQuery
 
 		// Retrieve data
 		labels, err := getDateAxisValues(chartId)
