@@ -977,7 +977,7 @@ func shouldSkipScraper(scraper mtgban.Scraper, blocklist []string, options map[s
 	return false
 }
 
-func searchSellersNG(cardIds []string, storeFilters []FilterStoreElem, options map[string]string) (foundSellers map[string]map[string][]SearchEntry) {
+func searchSellersNG(cardIds []string, storeFilters []FilterStoreElem, priceFilters []FilterPriceElem, options map[string]string) (foundSellers map[string]map[string][]SearchEntry) {
 	// Allocate memory
 	foundSellers = map[string]map[string][]SearchEntry{}
 
@@ -1010,7 +1010,7 @@ func searchSellersNG(cardIds []string, storeFilters []FilterStoreElem, options m
 				}
 
 				// Skip cards that don't match desired pricing
-				if shouldSkipSellPrice(cardId, options, entry.Price) {
+				if shouldSkipPriceNG(cardId, entry, priceFilters) {
 					continue
 				}
 
@@ -1068,8 +1068,11 @@ func searchSellersNG(cardIds []string, storeFilters []FilterStoreElem, options m
 	return
 }
 
-func searchVendorsNG(cardIds []string, storeFilters []FilterStoreElem, options map[string]string) (foundVendors map[string][]SearchEntry) {
+func searchVendorsNG(cardIds []string, config SearchConfig) (foundVendors map[string][]SearchEntry) {
 	foundVendors = map[string][]SearchEntry{}
+
+	storeFilters := config.StoreFilters
+	priceFilters := config.PriceFilters
 
 	for _, vendor := range Vendors {
 		if shouldSkipStoreNG(vendor, storeFilters) {
@@ -1098,7 +1101,7 @@ func searchVendorsNG(cardIds []string, storeFilters []FilterStoreElem, options m
 			}
 			entry := blEntries[nmIndex]
 
-			if shouldSkipBuyPrice(cardId, options, entry.BuyPrice) {
+			if shouldSkipPriceNG(cardId, entry, priceFilters) {
 				continue
 			}
 
@@ -1328,13 +1331,13 @@ func searchParallelNG(config SearchConfig, flags ...bool) (foundSellers map[stri
 
 	go func() {
 		if options["skip"] != "retail" {
-			foundSellers = searchSellersNG(selectedUUIDs, config.StoreFilters, options)
+			foundSellers = searchSellersNG(selectedUUIDs, config.StoreFilters, config.PriceFilters, options)
 		}
 		wg.Done()
 	}()
 	go func() {
 		if options["skip"] != "buylist" {
-			foundVendors = searchVendorsNG(selectedUUIDs, config.StoreFilters, options)
+			foundVendors = searchVendorsNG(selectedUUIDs, config)
 		}
 		wg.Done()
 	}()

@@ -30,6 +30,9 @@ type SearchConfig struct {
 
 	// Chain of filters to be applied to scraper filtering
 	StoreFilters []FilterStoreElem
+
+	// Chain of filters to be applied to single prices
+	PriceFilters []FilterPriceElem
 }
 
 type FilterElem struct {
@@ -42,6 +45,24 @@ type FilterStoreElem struct {
 	Name   string
 	Negate bool
 	Values []string
+
+	OnlyForSeller bool
+	OnlyForVendor bool
+}
+
+type FilterPriceElem struct {
+	Name   string
+	Negate bool
+	Value  float64
+
+	// Function used to derive a store price
+	Price4Store func(string, string) float64
+
+	// All stores sources present in the map
+	Stores []string
+
+	// Cache of cardId:prices used in the filter
+	PriceCache map[string][]float64
 
 	OnlyForSeller bool
 	OnlyForVendor bool
@@ -178,6 +199,7 @@ func init() {
 func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []string) (config SearchConfig) {
 	var filters []FilterElem
 	var filterStores []FilterStoreElem
+	var filterPrices []FilterPriceElem
 	options := map[string]string{}
 
 	// Apply blocklists as if they were options, need to pass them through
@@ -369,12 +391,49 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 		case "c":
 			options["condition"] = strings.ToUpper(code)
 		case "price", "buy_price", "arb_price", "rev_price":
+			var isSeller, isVendor bool
+			var price4store func(string, string) float64
+			// Each of these entries applies to either retail or buylist
+			// and needs different price sources for comparisons
+			switch option {
+			case "price":
+				isSeller = true
+				price4store = price4seller
+			case "buy_price":
+				isVendor = true
+				price4store = price4vendor
+			case "arb_price":
+				isSeller = true
+				price4store = price4vendor
+			case "rev_price":
+				isVendor = true
+				price4store = price4seller
+			}
+			var optName string
 			switch operation {
 			case ">":
-				options[option+"_greater_than"] = fixupStoreCode(code)
+				optName = option + "_greater_than"
 			case "<":
-				options[option+"_less_than"] = fixupStoreCode(code)
+				optName = option + "_less_than"
 			}
+			filter := FilterPriceElem{
+				Name:          optName,
+				Negate:        negate,
+				OnlyForSeller: isSeller,
+				OnlyForVendor: isVendor,
+				Price4Store:   price4store,
+			}
+
+			// If code is a price, just keep it, otherwise parse stores later
+			// (because this needs to know which card to compare against)
+			price, err := strconv.ParseFloat(code, 64)
+			if err == nil {
+				filter.Value = price
+			} else {
+				filter.Stores = fixupStoreCodeNG(code)
+			}
+			filter.PriceCache = map[string][]float64{}
+			filterPrices = append(filterPrices, filter)
 		}
 	}
 
@@ -382,6 +441,7 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 	config.Options = options
 	config.CardFilters = filters
 	config.StoreFilters = filterStores
+	config.PriceFilters = filterPrices
 
 	return
 }
@@ -582,6 +642,79 @@ func shouldSkipStoreNG(scraper mtgban.Scraper, filters []FilterStoreElem) bool {
 		}
 
 		res := FilterStoreFuncs[filters[i].Name](filters[i].Values, scraper)
+		if filters[i].Negate {
+			res = !res
+		}
+		if res {
+			return true
+		}
+	}
+
+	return false
+}
+
+// These functions include the referenced Price so that users can visualize it
+func priceGreaterThan(filters []float64, refPrice float64) bool {
+	for i := range filters {
+		if filters[i] <= refPrice {
+			return false
+		}
+	}
+	return true
+}
+
+func priceLessThan(filters []float64, refPrice float64) bool {
+	for i := range filters {
+		if filters[i] >= refPrice {
+			return false
+		}
+	}
+	return true
+}
+
+var FilterPriceFuncs = map[string]func(filters []float64, refPrice float64) bool{
+	"price_greater_than":     priceGreaterThan,
+	"price_less_than":        priceLessThan,
+	"buy_price_greater_than": priceGreaterThan,
+	"buy_price_less_than":    priceLessThan,
+	"arb_price_greater_than": priceGreaterThan,
+	"arb_price_less_than":    priceLessThan,
+	"rev_price_greater_than": priceGreaterThan,
+	"rev_price_less_than":    priceLessThan,
+}
+
+func shouldSkipPriceNG(cardId string, entry mtgban.GenericEntry, filters []FilterPriceElem) bool {
+	if entry.Pricing() == 0 {
+		return true
+	}
+
+	for i := range filters {
+		// Do not call functions that do not apply to certain elements
+		_, isSeller := entry.(mtgban.InventoryEntry)
+		_, isVendor := entry.(mtgban.BuylistEntry)
+		if filters[i].OnlyForSeller && !isSeller {
+			continue
+		} else if filters[i].OnlyForVendor && !isVendor {
+			continue
+		}
+
+		// Check if we already have prices for this card
+		_, found := filters[i].PriceCache[cardId]
+		if !found {
+			// If there is no set value, then look it up with the price4store function
+			if filters[i].Value == 0 {
+				filters[i].PriceCache[cardId] = make([]float64, 0, len(filters[i].Stores))
+				for j := range filters[i].Stores {
+					price := filters[i].Price4Store(cardId, filters[i].Stores[j])
+					filters[i].PriceCache[cardId] = append(filters[i].PriceCache[cardId], price)
+				}
+			} else {
+				// Else fill in the cache with the same price
+				filters[i].PriceCache[cardId] = []float64{filters[i].Value}
+			}
+		}
+
+		res := FilterPriceFuncs[filters[i].Name](filters[i].PriceCache[cardId], entry.Pricing())
 		if filters[i].Negate {
 			res = !res
 		}
