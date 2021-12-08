@@ -345,7 +345,7 @@ func putSignatureInCookies(w http.ResponseWriter, r *http.Request, sig string) {
 // and the signature from invite links
 func noSigning(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer recoverPanic(w)
+		defer recoverPanic(r, w)
 
 		if PatreonHost == "" {
 			PatreonHost = getBaseURL(r) + "/auth"
@@ -362,7 +362,7 @@ func noSigning(next http.Handler) http.Handler {
 
 func enforceAPISigning(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer recoverPanic(w)
+		defer recoverPanic(r, w)
 
 		w.Header().Add("RateLimit-Limit", fmt.Sprint(APIRequestsPerSec))
 
@@ -441,7 +441,7 @@ func enforceAPISigning(next http.Handler) http.Handler {
 
 func enforceSigning(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer recoverPanic(w)
+		defer recoverPanic(r, w)
 
 		if PatreonHost == "" {
 			PatreonHost = getBaseURL(r) + "/auth"
@@ -560,10 +560,11 @@ func enforceSigning(next http.Handler) http.Handler {
 	})
 }
 
-func recoverPanic(w http.ResponseWriter) {
+func recoverPanic(r *http.Request, w http.ResponseWriter) {
 	errPanic := recover()
 	if errPanic != nil {
 		log.Println("panic occurred:", errPanic)
+		log.Println("source request:", r.URL.String())
 
 		// Print full stack to stdout
 		buf := make([]byte, 1<<16)
@@ -584,6 +585,7 @@ func recoverPanic(w http.ResponseWriter) {
 		}
 		Notify("panic", "@here "+msg)
 		Notify("panic", string(buf))
+		Notify("panic", "source request: "+r.URL.String())
 
 		http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
 		return
