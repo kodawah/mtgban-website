@@ -342,6 +342,18 @@ type scraperOption struct {
 	Logger *log.Logger
 }
 
+// Map of indices for all scrapers stashed in the db
+var DBs = map[string]int{
+	"ck_retail":     0,
+	"ck_buylist":    1,
+	"tcg_low":       2,
+	"tcg_market":    3,
+	"mkm_low":       4,
+	"mkm_trend":     5,
+	"starcitygames": 6,
+	"abugames":      7,
+}
+
 var ScraperOptions = map[string]*scraperOption{
 	"abugames": &scraperOption{
 		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
@@ -353,7 +365,7 @@ var ScraperOptions = map[string]*scraperOption{
 		RDBs: map[string]*redis.Client{
 			"buylist": redis.NewClient(&redis.Options{
 				Addr: "localhost:6379",
-				DB:   7,
+				DB:   DBs["abugames"],
 			}),
 		},
 	},
@@ -370,11 +382,11 @@ var ScraperOptions = map[string]*scraperOption{
 		RDBs: map[string]*redis.Client{
 			"retail": redis.NewClient(&redis.Options{
 				Addr: "localhost:6379",
-				DB:   0,
+				DB:   DBs["ck_retail"],
 			}),
 			"buylist": redis.NewClient(&redis.Options{
 				Addr: "localhost:6379",
-				DB:   1,
+				DB:   DBs["ck_buylist"],
 			}),
 		},
 	},
@@ -406,7 +418,7 @@ var ScraperOptions = map[string]*scraperOption{
 		RDBs: map[string]*redis.Client{
 			"buylist": redis.NewClient(&redis.Options{
 				Addr: "localhost:6379",
-				DB:   6,
+				DB:   DBs["starcitygames"],
 			}),
 		},
 	},
@@ -455,11 +467,11 @@ var ScraperOptions = map[string]*scraperOption{
 		RDBs: map[string]*redis.Client{
 			TCG_LOW: redis.NewClient(&redis.Options{
 				Addr: "localhost:6379",
-				DB:   2,
+				DB:   DBs["tcg_low"],
 			}),
 			TCG_MARKET: redis.NewClient(&redis.Options{
 				Addr: "localhost:6379",
-				DB:   3,
+				DB:   DBs["tcg_market"],
 			}),
 		},
 	},
@@ -503,11 +515,11 @@ var ScraperOptions = map[string]*scraperOption{
 		RDBs: map[string]*redis.Client{
 			MKM_LOW: redis.NewClient(&redis.Options{
 				Addr: "localhost:6379",
-				DB:   4,
+				DB:   DBs["mkm_low"],
 			}),
 			MKM_TREND: redis.NewClient(&redis.Options{
 				Addr: "localhost:6379",
-				DB:   5,
+				DB:   DBs["mkm_trend"],
 			}),
 		},
 	},
