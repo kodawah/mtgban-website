@@ -982,9 +982,13 @@ func shouldSkipScraper(scraper mtgban.Scraper, blocklist []string, options map[s
 	return false
 }
 
-func searchSellersNG(cardIds []string, storeFilters []FilterStoreElem, priceFilters []FilterPriceElem, options map[string]string) (foundSellers map[string]map[string][]SearchEntry) {
+func searchSellersNG(cardIds []string, config SearchConfig) (foundSellers map[string]map[string][]SearchEntry) {
 	// Allocate memory
 	foundSellers = map[string]map[string][]SearchEntry{}
+
+	storeFilters := config.StoreFilters
+	priceFilters := config.PriceFilters
+	entryFilters := config.EntryFilters
 
 	// Search sellers
 	for _, seller := range Sellers {
@@ -1007,11 +1011,8 @@ func searchSellersNG(cardIds []string, storeFilters []FilterStoreElem, priceFilt
 			// Loop thorugh available conditions
 			for _, entry := range entries {
 				// Skip cards that have not the desired condition
-				if options["condition"] != "" {
-					filters := strings.Split(options["condition"], ",")
-					if !SliceStringHas(filters, entry.Conditions) {
-						continue
-					}
+				if !seller.Info().MetadataOnly && shouldSkipEntryNG(entry, entryFilters) {
+					continue
 				}
 
 				// Skip cards that don't match desired pricing
@@ -1336,7 +1337,7 @@ func searchParallelNG(config SearchConfig, flags ...bool) (foundSellers map[stri
 
 	go func() {
 		if options["skip"] != "retail" {
-			foundSellers = searchSellersNG(selectedUUIDs, config.StoreFilters, config.PriceFilters, options)
+			foundSellers = searchSellersNG(selectedUUIDs, config)
 		}
 		wg.Done()
 	}()

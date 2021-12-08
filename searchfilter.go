@@ -36,6 +36,9 @@ type SearchConfig struct {
 
 	// Chain of filters to be applied to single prices
 	PriceFilters []FilterPriceElem
+
+	// Chain of filters to be applied to entries
+	EntryFilters []FilterEntryElem
 }
 
 type FilterElem struct {
@@ -69,6 +72,12 @@ type FilterPriceElem struct {
 
 	OnlyForSeller bool
 	OnlyForVendor bool
+}
+
+type FilterEntryElem struct {
+	Name   string
+	Negate bool
+	Values []string
 }
 
 // Return a comma-separated string of set codes, from a comma-separated
@@ -203,6 +212,7 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 	var filters []FilterElem
 	var filterStores []FilterStoreElem
 	var filterPrices []FilterPriceElem
+	var filterEntries []FilterEntryElem
 	options := map[string]string{}
 
 	// Apply blocklists as if they were options, need to pass them through
@@ -401,7 +411,11 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 
 		// Pricing Options
 		case "c":
-			options["condition"] = strings.ToUpper(code)
+			filterEntries = append(filterEntries, FilterEntryElem{
+				Name:   "condition",
+				Negate: negate,
+				Values: strings.Split(strings.ToUpper(code), ","),
+			})
 		case "price", "buy_price", "arb_price", "rev_price":
 			var isSeller, isVendor bool
 			var price4store func(string, string) float64
@@ -454,6 +468,7 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 	config.CardFilters = filters
 	config.StoreFilters = filterStores
 	config.PriceFilters = filterPrices
+	config.EntryFilters = filterEntries
 
 	return
 }
@@ -727,6 +742,26 @@ func shouldSkipPriceNG(cardId string, entry mtgban.GenericEntry, filters []Filte
 		}
 
 		res := FilterPriceFuncs[filters[i].Name](filters[i].PriceCache[cardId], entry.Pricing())
+		if filters[i].Negate {
+			res = !res
+		}
+		if res {
+			return true
+		}
+	}
+
+	return false
+}
+
+var FilterEntryFuncs = map[string]func(filters []string, entry mtgban.GenericEntry) bool{
+	"condition": func(filters []string, entry mtgban.GenericEntry) bool {
+		return !SliceStringHas(filters, entry.Condition())
+	},
+}
+
+func shouldSkipEntryNG(entry mtgban.GenericEntry, filters []FilterEntryElem) bool {
+	for i := range filters {
+		res := FilterEntryFuncs[filters[i].Name](filters[i].Values, entry)
 		if filters[i].Negate {
 			res = !res
 		}
