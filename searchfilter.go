@@ -419,6 +419,13 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 				OnlyForSeller: option == "seller",
 				OnlyForVendor: option == "vendor",
 			})
+			// Skip empty result entries when filtering by either option
+			switch option {
+			case "seller":
+				config.SkipEmptyRetail = true
+			case "buylist":
+				config.SkipEmptyBuylist = true
+			}
 		case "region":
 			filterStores = append(filterStores, FilterStoreElem{
 				Name:   option,
