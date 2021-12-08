@@ -530,7 +530,9 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 
 	// Set options
 	for _, key := range FilterOptKeys {
-		if arbitFilters[key] {
+		isSet := arbitFilters[key]
+		_, hasFunc := FilterOptConfig[key]
+		if isSet && hasFunc {
 			FilterOptConfig[key].Func(opts)
 		}
 	}
