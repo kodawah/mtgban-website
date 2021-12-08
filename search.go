@@ -110,12 +110,13 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	pageVars.CondKeys = AllConditions
 	pageVars.Metadata = map[string]GenericCard{}
 
-	var options map[string]string
 	var cleanQuery string
 	var canShowAll bool
 
 	var foundSellers map[string]map[string][]SearchEntry
 	var foundVendors map[string][]SearchEntry
+
+	var skipEmptyRetail, skipEmptyBuylist bool
 
 	if canSuperSearch {
 		config := parseSearchOptionsNG(query, blocklistRetail, blocklistBuylist)
@@ -126,17 +127,22 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		foundSellers, foundVendors = searchParallelNG(config)
 
 		cleanQuery = config.CleanQuery
-		options = config.Options
-		canShowAll = (len(options) != 0 || len(config.CardFilters) != 0 || len(config.UUIDs) != 0)
+		canShowAll = (len(config.CardFilters) != 0 || len(config.UUIDs) != 0)
 
 		// Only used in hashing searches, fill in data with what is available
 		if config.FullQuery != "" {
 			pageVars.SearchQuery = config.FullQuery
 		}
+
+		skipEmptyRetail = config.SkipEmptyRetail
+		skipEmptyBuylist = config.SkipEmptyBuylist
 	} else {
+		var options map[string]string
 		cleanQuery, options = parseSearchOptions(query)
 		foundSellers, foundVendors = searchParallel(cleanQuery, options, blocklistRetail, blocklistBuylist)
 		canShowAll = len(options) != 0
+		skipEmptyRetail = options["skip"] == "nosales"
+		skipEmptyBuylist = options["skip"] == "nobuys"
 	}
 
 	// Early exit if there no matches are found
@@ -158,14 +164,14 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	// Append keys to the main array
 	// Skip them when requested
 	for cardId := range foundSellers {
-		if options["skip"] == "nobuys" && len(foundVendors[cardId]) == 0 {
+		if skipEmptyRetail && len(foundVendors[cardId]) == 0 {
 			continue
 		}
 		// Always append the card to the main list
 		allKeys = append(allKeys, cardId)
 	}
 	for cardId := range foundVendors {
-		if options["skip"] == "nosales" && len(foundSellers[cardId]) == 0 {
+		if skipEmptyBuylist && len(foundSellers[cardId]) == 0 {
 			continue
 		}
 		// Append the card if it was not already added
@@ -1326,8 +1332,6 @@ func searchAndFilter(config SearchConfig) ([]string, error) {
 }
 
 func searchParallelNG(config SearchConfig, flags ...bool) (foundSellers map[string]map[string][]SearchEntry, foundVendors map[string][]SearchEntry) {
-	options := config.Options
-
 	selectedUUIDs, err := searchAndFilter(config)
 	if err != nil {
 		return nil, nil
@@ -1337,13 +1341,13 @@ func searchParallelNG(config SearchConfig, flags ...bool) (foundSellers map[stri
 	wg.Add(2)
 
 	go func() {
-		if options["skip"] != "retail" {
+		if !config.SkipRetail {
 			foundSellers = searchSellersNG(selectedUUIDs, config)
 		}
 		wg.Done()
 	}()
 	go func() {
-		if options["skip"] != "buylist" {
+		if !config.SkipBuylist {
 			foundVendors = searchVendorsNG(selectedUUIDs, config)
 		}
 		wg.Done()

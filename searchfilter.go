@@ -25,9 +25,6 @@ type SearchConfig struct {
 	// Full query searched (may be blank)
 	FullQuery string
 
-	// Static options to be parsed during various steps
-	Options map[string]string
-
 	// Chain of filters to be applied to card filtering
 	CardFilters []FilterElem
 
@@ -39,6 +36,18 @@ type SearchConfig struct {
 
 	// Chain of filters to be applied to entries
 	EntryFilters []FilterEntryElem
+
+	// Skip retail searches entirely
+	SkipRetail bool
+
+	// Skip buylist searches entirely
+	SkipBuylist bool
+
+	// Skip card entry if no retail price was found
+	SkipEmptyRetail bool
+
+	// Skip card entry if no buylist price was found
+	SkipEmptyBuylist bool
 }
 
 type FilterElem struct {
@@ -213,7 +222,6 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 	var filterStores []FilterStoreElem
 	var filterPrices []FilterPriceElem
 	var filterEntries []FilterEntryElem
-	options := map[string]string{}
 
 	// Apply blocklists as if they were options, need to pass them through
 	// the fixup due to upper/lower casing
@@ -340,7 +348,16 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 		case "sm":
 			config.SearchMode = strings.ToLower(code)
 		case "skip":
-			options["skip"] = strings.ToLower(code)
+			switch strings.ToLower(code) {
+			case "retail":
+				config.SkipRetail = true
+			case "buylist":
+				config.SkipBuylist = true
+			case "nosales":
+				config.SkipEmptyRetail = true
+			case "nobuys":
+				config.SkipEmptyBuylist = true
+			}
 
 		// Options that modify the card searches
 		case "s":
@@ -464,7 +481,6 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 	}
 
 	config.CleanQuery = strings.TrimSpace(query)
-	config.Options = options
 	config.CardFilters = filters
 	config.StoreFilters = filterStores
 	config.PriceFilters = filterPrices
