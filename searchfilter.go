@@ -534,10 +534,8 @@ func compareReleaseDate(filters []string, co *mtgmatcher.CardObject, cmpFunc fun
 	if err != nil {
 		return false
 	}
-	if cmpFunc(cardDate, releaseDate) {
-		return true
-	}
-	return true
+
+	return cmpFunc(cardDate, releaseDate)
 }
 
 var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObject) bool{
