@@ -326,7 +326,7 @@
                             </th>
                         </tr>
 
-                        <tr class="no-hover" style="background-color:rgba(0,0,0,0);">
+                        <tr class="no-hover" style="background-color:rgba(0,0,0,0);" onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}});" style="background-color:rgba(0, 0, 0, 0);">
                             {{$condsEntry := (index $.FoundSellers $cardId)}}
                             <td style="vertical-align: {{if not $condsEntry}}middle{{else}}top{{end}}; padding: 0; margin: 0;">
                                 <table class="searchResults" style="margin: 0 6px 0 12px;">
