@@ -86,7 +86,7 @@ var enabledDatasets = []scraperConfig{
 	},
 	{
 		PublicName:  "ABU Games Buylist",
-		ScraperName: "starcitygames",
+		ScraperName: "abugames",
 		KindName:    "buylist",
 		Color:       "rgb(153, 102, 255)",
 		Hidden:      true,
