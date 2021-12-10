@@ -49,6 +49,8 @@ func main() {
 
 	start := time.Now()
 
+	alreadyAdded := map[string]bool{}
+
 	for {
 		record, err := csvReader.Read()
 		if err == io.EOF {
@@ -59,13 +61,11 @@ func main() {
 		}
 
 		cardId := record[0]
-		conditions := "NM"
-		priceStr := ""
-		if *modeOpt == "inv" {
-			conditions = record[6]
-			priceStr = record[7]
-		} else if *modeOpt == "bl" {
-			priceStr = record[6]
+		conditions := record[6]
+		priceStr := record[7]
+
+		if *modeOpt == "bl" && alreadyAdded[cardId] {
+			continue
 		}
 
 		price, err := strconv.ParseFloat(priceStr, 64)
@@ -78,6 +78,8 @@ func main() {
 		if err != nil {
 			log.Fatalf("redis error for %s: %s", cardId, err)
 		}
+
+		alreadyAdded[cardId] = true
 	}
 
 	log.Println("Took", time.Now().Sub(start))
