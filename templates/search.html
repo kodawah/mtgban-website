@@ -99,13 +99,12 @@
                             <li>You can set any option in any order, in any amount. When filtering for a group of values you can use a comma <pre>,</pre> to separate values.</li>
                             <li>You can invert filter results by prepending a <pre>-</pre> to the option name.</li>
                             <li>You can filter by <b>seller/vendor name</b> with <pre>store:shorthand</pre>, or specific types of store with <pre>seller:shorthand</pre> and <pre>vendor:shorthand</pre>.</li>
-                            <ul>
-                                <li>For specific TCG prices, you may use the following self-describing tags: <pre>TCG_LOW</pre>, <pre>TCG_MARKET</pre>, <pre>TCG_PLAYER</pre>, <pre>TCG_DIRECT</pre>.</li>
-                                <li>You can filter results to include only retail or buylist prices with <pre>skip:retail</pre> and <pre>skip:buylist</pre>.
-                                    You can skip results that do not have any retail offer (<pre>skip:nosales</pre>) or any buylist offer (<pre>skip:nobuys</pre>).</li>
-                                <li>You may filter by the store <b>region:VALUE</b> with <pre>us</pre>, <pre>eu</pre>, or <pre>jp</pre> options.</li>
+                            <ul class="indent">
+                                <li>For well known store names, you may use the following self-describing tags: <pre>TCG_LOW</pre>, <pre>TCG_MARKET</pre>, <pre>TCG_PLAYER</pre>, <pre>TCG_DIRECT</pre>, <pre>MKM_LOW</pre>, <pre>MKM_TREND</pre>, <pre>CT</pre> and so on.</li>
+                                <li>You can filter results to include only retail or buylist prices with <pre>skip:retail</pre> and <pre>skip:buylist</pre>.</li>
+                                <li>You may filter by the store <b>region</b> with <pre>region:VALUE</pre> using <pre>us</pre>, <pre>eu</pre>, or <pre>jp</pre> options.</li>
                             </ul>
-                            <li>You can filter by <b>price</b> with <pre>price&gt;VALUE</pre>, or <pre>price&lt;:VALUE</pre> to exclude results above your range.</li>
+                            <li>You can filter by <b>price</b> with <pre>price&gt;VALUE</pre>, or <pre>price&lt;VALUE</pre> to exclude results that are above or below your range.</li>
                         </ul>
                     </li>
                     <br>
