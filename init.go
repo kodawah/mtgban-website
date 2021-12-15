@@ -847,8 +847,9 @@ func loadSellers(newSellers []mtgban.Seller) {
 					continue
 				}
 
-				// Save seller in global array
-				Sellers[i] = newSellers[i]
+				// Save seller in global array, making sure it's _only_ a Seller
+				// and not anything esle, so that filtering works like expected
+				Sellers[i] = mtgban.NewSellerFromInventory(inv, newSellers[i].Info())
 			}
 
 			// Stash data to DB if requested
@@ -928,8 +929,9 @@ func loadVendors(newVendors []mtgban.Vendor) {
 					continue
 				}
 
-				// Save vendor in global array
-				Vendors[i] = newVendors[i]
+				// Save vendor in global array, making sure it's _only_ a Vendor
+				// and not anything esle, so that filtering works like expected
+				Vendors[i] = mtgban.NewVendorFromBuylist(bl, newVendors[i].Info())
 			}
 
 			// Stash data to DB if requested
