@@ -678,11 +678,12 @@ func shouldSkipStoreNG(scraper mtgban.Scraper, filters []FilterStoreElem) bool {
 		return true
 	}
 
+	_, isSeller := scraper.(mtgban.Seller)
+	_, isVendor := scraper.(mtgban.Vendor)
+
 	for i := range filters {
 		// Do not call functions that do not apply to certain elements,
 		// or the negate step might thwart results
-		_, isSeller := scraper.(mtgban.Seller)
-		_, isVendor := scraper.(mtgban.Vendor)
 		if filters[i].OnlyForSeller && !isSeller {
 			continue
 		} else if filters[i].OnlyForVendor && !isVendor {
