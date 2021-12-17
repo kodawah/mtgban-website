@@ -464,6 +464,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			// Check if the message contains potential links
 		} else if strings.Contains(m.Content, "cardkingdom.com/mtg") ||
 			strings.Contains(m.Content, "coolstuffinc.com/page") ||
+			strings.Contains(m.Content, "gatherer.wizards.com") ||
 			strings.Contains(m.Content, "www.tcgplayer.com/product") ||
 			(strings.Contains(m.Content, "shop.tcgplayer.com/") && !strings.Contains(m.Content, "shop.tcgplayer.com/seller")) {
 			// Iterate over each segment of the message and look for known links
@@ -471,6 +472,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			for _, field := range fields {
 				if !strings.Contains(field, "cardkingdom.com/mtg") &&
 					!strings.Contains(field, "coolstuffinc.com/page") &&
+					!strings.Contains(field, "gatherer.wizards.com") &&
 					!strings.Contains(field, "tcgplayer.com/") {
 					continue
 				}
@@ -488,11 +490,13 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				isCK := strings.Contains(field, "cardkingdom.com/mtg")
 				isCSI := strings.Contains(field, "coolstuffinc.com/page")
 				isTCG := strings.Contains(field, "tcgplayer.com/")
+				isWotC := strings.Contains(field, "gatherer.wizards.com")
 
 				// Add the MTGBAN affiliation
-				if isCSI {
+				switch {
+				case isCSI:
 					v.Set("utm_referrer", Config.Affiliate["CSI"])
-				} else if isCK || isTCG {
+				case isCK || isTCG:
 					commonTag := Config.Affiliate["CK"]
 					v.Set("partner", commonTag)
 					v.Set("utm_source", commonTag)
@@ -503,7 +507,21 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 						v.Set("utm_campaign", "affliate")
 						v.Set("utm_medium", commonTag)
 					}
+				case isWotC:
+					u2, err := url.Parse(field)
+					if err != nil {
+						continue
+					}
+					mid := u2.Query().Get("multiverseid")
+					for _, co := range mtgmatcher.GetUUIDs() {
+						if co.Identifiers["multiverseId"] == mid {
+							m.Content = fmt.Sprintf("!%s|%s|%s", co.Name, co.SetCode, co.Number)
+							messageCreate(s, m)
+							return
+						}
+					}
 				}
+
 				u.RawQuery = v.Encode()
 
 				// Extract a sensible link title
