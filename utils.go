@@ -76,7 +76,10 @@ func keyruneForCardSet(cardId string) string {
 	rarity := co.Card.Rarity
 	if rarity == "special" || co.Etched {
 		rarity = "timeshifted"
+	} else if rarity == "token" || rarity == "oversize" {
+		rarity = "common"
 	}
+
 	// Skip setting rarity for common, so that a color is not forcefully set
 	// on the symbol, and can become white on a dark theme
 	if rarity != "common" {

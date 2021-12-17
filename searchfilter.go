@@ -158,6 +158,10 @@ func fixupRarityNG(code string) []string {
 			filters[i] = "mythic"
 		case "s":
 			filters[i] = "special"
+		case "t":
+			filters[i] = "token"
+		case "o":
+			filters[i] = "oversize"
 		}
 	}
 	return filters
