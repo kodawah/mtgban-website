@@ -431,8 +431,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	// Ignore all messages created by a bot
-	if m.Author.Bot {
+	// Ignore all messages created by a bot (except the ones from Scryfall)
+	if m.Author.Bot && m.Author.Username != "Scryfall" {
 		return
 	}
 
@@ -465,6 +465,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		} else if strings.Contains(m.Content, "cardkingdom.com/mtg") ||
 			strings.Contains(m.Content, "coolstuffinc.com/page") ||
 			strings.Contains(m.Content, "gatherer.wizards.com") ||
+			strings.Contains(m.Content, "scryfall.com/card") ||
 			strings.Contains(m.Content, "www.tcgplayer.com/product") ||
 			(strings.Contains(m.Content, "shop.tcgplayer.com/") && !strings.Contains(m.Content, "shop.tcgplayer.com/seller")) {
 			// Iterate over each segment of the message and look for known links
@@ -473,6 +474,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				if !strings.Contains(field, "cardkingdom.com/mtg") &&
 					!strings.Contains(field, "coolstuffinc.com/page") &&
 					!strings.Contains(field, "gatherer.wizards.com") &&
+					!strings.Contains(field, "scryfall.com/card") &&
 					!strings.Contains(field, "tcgplayer.com/") {
 					continue
 				}
@@ -491,6 +493,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				isCSI := strings.Contains(field, "coolstuffinc.com/page")
 				isTCG := strings.Contains(field, "tcgplayer.com/")
 				isWotC := strings.Contains(field, "gatherer.wizards.com")
+				isScry := strings.Contains(field, "scryfall.com/card")
 
 				// Add the MTGBAN affiliation
 				switch {
@@ -519,6 +522,17 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 							messageCreate(s, m)
 							return
 						}
+					}
+				case isScry:
+					u2, err := url.Parse(field)
+					if err != nil {
+						continue
+					}
+					paths := strings.Split(u2.Path, "/")
+					if len(paths) > 4 {
+						m.Content = fmt.Sprintf("!%s|%s|%s", paths[4], paths[2], paths[3])
+						messageCreate(s, m)
+						return
 					}
 				}
 
