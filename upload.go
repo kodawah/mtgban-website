@@ -664,13 +664,15 @@ func loadSpreadsheet(link string, maxRows int) ([]UploadEntry, error) {
 		record[i] = sheet.Rows[0][i].Value
 	}
 
+	var i int
 	indexMap, err := parseHeader(record)
-	if err != nil {
+	if errors.Is(err, ErrUploadDecklist) {
+		i-- // Parse the first line again
+	} else if err != nil {
 		return nil, err
 	}
 
 	foundHashes := map[string]bool{}
-	var i int
 	var uploadEntries []UploadEntry
 	for {
 		i++
@@ -724,13 +726,15 @@ func loadOldXls(reader io.ReadSeeker, maxRows int) ([]UploadEntry, error) {
 		record[i] = sheet.Row(0).Col(i)
 	}
 
+	var i int
 	indexMap, err := parseHeader(record)
-	if err != nil {
+	if errors.Is(err, ErrUploadDecklist) {
+		i-- // Parse the first line again
+	} else if err != nil {
 		return nil, err
 	}
 
 	foundHashes := map[string]bool{}
-	var i int
 	var uploadEntries []UploadEntry
 	for {
 		i++
@@ -788,13 +792,15 @@ func loadXlsx(reader io.Reader, maxRows int) ([]UploadEntry, error) {
 		return nil, errors.New("empty sheet")
 	}
 
+	var i int
 	indexMap, err := parseHeader(rows[0])
-	if err != nil {
+	if errors.Is(err, ErrUploadDecklist) {
+		i-- // Parse the first line again
+	} else if err != nil {
 		return nil, err
 	}
 
 	foundHashes := map[string]bool{}
-	var i int
 	var uploadEntries []UploadEntry
 	for {
 		i++
