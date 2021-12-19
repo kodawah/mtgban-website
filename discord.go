@@ -9,6 +9,7 @@ import (
 	"path"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -16,6 +17,7 @@ import (
 	cleanhttp "github.com/hashicorp/go-cleanhttp"
 
 	"github.com/kodabb/go-mtgban/mtgmatcher"
+	"github.com/kodabb/go-mtgban/tcgplayer"
 )
 
 var poweredByFooter = discordgo.MessageEmbedFooter{
@@ -734,11 +736,12 @@ func prepareCard(searchRes *searchResult, ogFields []embedField, guildId string,
 			}
 		}
 
-		link = "https://shop.tcgplayer.com/product/productsearch?id=" + tcgId
-		affiliate := Config.Affiliate["TCG"]
-		if affiliate != "" {
-			link += fmt.Sprintf("&utm_campaign=affiliate&utm_medium=%s&utm_source=%s&partner=%s", UTM_BOT, affiliate, affiliate)
+		productId, _ := strconv.Atoi(tcgId)
+		printing := "Normal"
+		if co.Etched || co.Foil {
+			printing = "Foil"
 		}
+		link = tcgplayer.TCGPlayerProductURL(productId, printing, Config.Affiliate["TCG"])
 	}
 
 	// Add a tag for ease of debugging
