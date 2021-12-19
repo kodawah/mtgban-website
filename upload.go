@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -34,6 +35,7 @@ type UploadEntry struct {
 	Card          mtgmatcher.Card
 	CardId        string
 	MismatchError error
+	MismatchAlias bool
 	OriginalPrice float64
 
 	HasQuantity bool
@@ -548,12 +550,26 @@ func parseRow(indexMap map[string]int, record []string, foundHashes map[string]b
 		res.OriginalPrice, _ = mtgmatcher.ParsePrice(record[indexMap["price"]])
 	}
 
-	res.CardId, res.MismatchError = mtgmatcher.Match(&res.Card)
+	cardId, err := mtgmatcher.Match(&res.Card)
+
+	var alias *mtgmatcher.AliasingError
+	if errors.As(err, &alias) {
+		// Keep the most recent printing available in case of aliasing
+		aliases := alias.Probe()
+		sort.Slice(aliases, func(i, j int) bool {
+			return sortSets(aliases[i], aliases[j])
+		})
+		cardId = aliases[0]
+		res.MismatchAlias = true
+	} else {
+		res.MismatchError = err
+	}
+	res.CardId = cardId
 
 	if foundHashes[res.CardId] {
 		return res, errors.New("repeated")
 	}
-	if res.MismatchError == nil {
+	if res.MismatchError == nil && !res.MismatchAlias {
 		foundHashes[res.CardId] = true
 	}
 

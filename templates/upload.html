@@ -173,6 +173,7 @@
                         </ul>
                         <li>Data may be in any format, as long as the file contains a comma or tab separated header in the first row, with sensible indication on what the column contains (eg. <i>card name</i> and <i>edition</i> as a minimum).</li>
                         <li>For this reason, the most popular CSV files are supported out of the box, <b>TCG</b>, <b>Deckbox</b>, <b>BinderPOS</b>, and <b>Cardsphere</b> among others.</li>
+                        <li>In case of missing data identifying a card (such as a card with the same name with multiple art in the same set) the system will try to pick one for you, and warn you by using a different background.</li>
                         <li>No data is stored on the website, your exports are private to you only.</li>
                         <li>The file cannot be larger than 5MB, and it may contain up to 150 entries.</li>
                         <li>The conditions fields is used only to determine the foiling status.</li>
@@ -194,10 +195,10 @@
              </div>
         {{else}}
             <div class="indent sticky">
-                <table class="searchResults">
+                <table class="searchResults" >
                     {{range $.UploadEntries}}
                         {{$card := (index $.Metadata .CardId)}}
-                        <tr class="no-hover" >
+                        <tr class="no-hover" {{if .MismatchAlias}}style="background-color:var(--aliasing)"{{end}}>
                             <td class="fullAnchor" rowspan=2>
                                 <center>
                                     {{if .MismatchError}}
@@ -240,7 +241,12 @@
                                                 {{if $card.Stocks}}
                                                     •
                                                 {{end}}
-                                                <h6>{{$card.Title}}</h6>
+                                                <h6>
+                                                    {{$card.Title}}
+                                                    {{if .MismatchAlias}}
+                                                        (?)
+                                                    {{end}}
+                                                </h6>
                                             </a>
                                         </td>
                                         <td width=100%>
@@ -290,10 +296,10 @@
                                 {{end}}
                             </td>
                         </tr>
-                        <tr class="no-hover" >
+                        <tr class="no-hover" {{if .MismatchAlias}}style="background-color:var(--aliasing)"{{end}}>
                             <td>
                                 <table style="margin:0 0 0 0; width:100%; height:100%">
-                                    <tr class="no-hover" style="background-color:rgba(0, 0, 0, 0);">
+                                    <tr class="no-hover" {{if .MismatchAlias}}style="background-color:var(--antialiasing)"{{else}}style="background-color:rgba(0, 0, 0, 0);"{{end}}>
                                         {{$scraperEntries := (index $.CompactEntries .CardId)}}
                                         {{$cardId := .CardId}}
                                         {{$oPrice := .OriginalPrice}}
@@ -307,7 +313,7 @@
                                             </td>
                                         {{end}}
                                     </tr>
-                                    <tr class="no-hover"  style="background-color:rgba(0, 0, 0, 0);">
+                                    <tr class="no-hover" {{if .MismatchAlias}}style="background-color:var(--antialiasing)"{{else}}style="background-color:rgba(0, 0, 0, 0);"{{end}}>
                                         {{range $.ScraperKeys}}
                                             {{$entry := (index $scraperEntries .)}}
                                             <td style="border:1px solid black">

@@ -69,6 +69,10 @@ nearly black #292929
     --almostblue: #879ced;
 
     --yellow: yellow;
+    --lightyellow: #f2e9a2;
+    --darkyellow: #bf9b6b;
+    --lighteryellow: #e8e4c8;
+    --darkeryellow: #c7a44c;
 
     --mainImage: url("/img/misc/background.png");
     --darkImage: url("/img/misc/background-dark.png")
@@ -95,6 +99,8 @@ nearly black #292929
     --adanger: var(--red);
     --adefault: var(--black);
 
+    --aliasing: var(--lightyellow);
+    --antialiasing: var(--lighteryellow);
     --slider: var(--yellow);
     --backgroundImage: var(--mainImage);
 }
@@ -120,6 +126,8 @@ nearly black #292929
     --adanger: var(--red);
     --adefault: var(--white);
 
+    --aliasing: var(--darkyellow);
+    --antialiasing: var(--darkeryellow);
     --slider: var(--navbackground);
     --backgroundImage: var(--darkImage);
 }
