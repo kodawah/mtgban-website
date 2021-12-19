@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/360EntSecGroup-Skylar/excelize/v2"
 	"github.com/extrame/xls"
@@ -30,6 +31,8 @@ const (
 )
 
 var UploadIndexKeys = []string{TCG_LOW, TCG_MARKET, TCG_DIRECT_LOW}
+
+var ErrUploadDecklist = errors.New("decklist")
 
 type UploadEntry struct {
 	Card          mtgmatcher.Card
@@ -393,11 +396,17 @@ func getPrice(banPrice *BanPrice) float64 {
 }
 
 func parseHeader(first []string) (map[string]int, error) {
-	if len(first) < 2 {
+	if len(first) < 1 {
 		return nil, errors.New("too few fields")
 	}
 
 	indexMap := map[string]int{}
+
+	// If there is a single element, try using a different mode
+	if len(first) == 1 {
+		indexMap["cardName"] = 0
+		return indexMap, ErrUploadDecklist
+	}
 
 	// Parse the header to understand where these fields are
 	for i, field := range first {
@@ -491,6 +500,34 @@ func parseRow(indexMap map[string]int, record []string, foundHashes map[string]b
 		return res, errors.New("empty line")
 	}
 
+	// Decklist mode
+	if len(record) == 1 {
+		line := record[indexMap["cardName"]]
+		if unicode.IsDigit(rune(line[0])) {
+			// Parse both "4 x <name>" and "4x <name>"
+			fields := strings.Split(line, " ")
+			field := strings.TrimSuffix(fields[0], "x")
+			num, err := strconv.Atoi(field)
+			if err == nil {
+				// Cleanup and append
+				line = strings.TrimPrefix(line, field)
+				line = strings.TrimSpace(line)
+				line = strings.TrimPrefix(line, "x")
+				res.HasQuantity = true
+				res.Quantity = num
+			}
+		}
+
+		// Parse "Rift Bolt (TSP)"
+		vars := mtgmatcher.SplitVariants(line)
+		if len(vars) > 1 {
+			line = vars[0]
+			res.Card.Edition = strings.Join(vars[1:], " ")
+		}
+
+		record[indexMap["cardName"]] = line
+	}
+
 	// Load quantity, and skip it if it's present and zero
 	_, found = indexMap["quantity"]
 	if found {
@@ -511,7 +548,10 @@ func parseRow(indexMap map[string]int, record []string, foundHashes map[string]b
 	}
 
 	res.Card.Name = record[indexMap["cardName"]]
-	res.Card.Edition = record[indexMap["edition"]]
+	_, found = indexMap["edition"]
+	if found {
+		res.Card.Edition = record[indexMap["edition"]]
+	}
 
 	_, found = indexMap["variant"]
 	if found {
@@ -810,7 +850,14 @@ func loadCsv(reader io.ReadSeeker, comma rune, maxRows int) ([]UploadEntry, erro
 	}
 
 	indexMap, err := parseHeader(first)
-	if err != nil {
+	if errors.Is(err, ErrUploadDecklist) {
+		// Reload reader to catch the first name too
+		_, err = reader.Seek(0, io.SeekStart)
+		if err != nil {
+			return nil, err
+		}
+		csvReader = csv.NewReader(reader)
+	} else if err != nil {
 		return nil, err
 	}
 
