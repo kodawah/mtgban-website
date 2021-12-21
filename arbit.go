@@ -296,7 +296,7 @@ func arbit(w http.ResponseWriter, r *http.Request, reverse bool) {
 
 	pageVars.ReverseMode = reverse
 
-	scraperCompare(w, r, pageVars, allowlistSellers, blocklistVendors, false, anyOptionEnabled)
+	scraperCompare(w, r, pageVars, allowlistSellers, blocklistVendors, true, anyOptionEnabled)
 }
 
 func Global(w http.ResponseWriter, r *http.Request) {
