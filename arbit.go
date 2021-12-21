@@ -365,7 +365,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	arbitFilters := map[string]bool{}
 
 	limitedResults := len(flags) > 0 && !flags[0]
-	anyEnabled := len(flags) > 1 && flags[1] || (DevMode && !SigCheck)
+	anyOptionEnabled := len(flags) > 1 && flags[1] || (DevMode && !SigCheck)
 
 	// Set these flags for global, since it's likely users will want them
 	if pageVars.GlobalMode {
@@ -426,7 +426,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 				continue
 			}
 			// Skip experimental options
-			if !anyEnabled && FilterOptTests[k] {
+			if !anyOptionEnabled && FilterOptTests[k] {
 				continue
 			}
 			arbitFilters[k], _ = strconv.ParseBool(v[0])
@@ -516,7 +516,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	pageVars.ArbitOptKeys = FilterOptKeys
 	pageVars.ArbitOptConfig = FilterOptConfig
 	pageVars.ArbitOptNoGlob = FilterOptNoGlobal
-	if !anyEnabled {
+	if !anyOptionEnabled {
 		pageVars.ArbitOptTests = FilterOptTests
 	}
 
