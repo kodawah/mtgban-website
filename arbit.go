@@ -315,9 +315,8 @@ func Global(w http.ResponseWriter, r *http.Request) {
 
 	// The "menu" section, the reference
 	var allowlistSellers []string
-	for i, seller := range Sellers {
+	for _, seller := range Sellers {
 		if seller == nil {
-			log.Println("nil seller at position", i)
 			continue
 		}
 		if anyEnabled {
@@ -343,9 +342,8 @@ func Global(w http.ResponseWriter, r *http.Request) {
 
 	// The "Jump to" section, the probe
 	var blocklistVendors []string
-	for i, seller := range Sellers {
+	for _, seller := range Sellers {
 		if seller == nil {
-			log.Println("nil seller at position", i)
 			continue
 		}
 		if SliceStringHas(Config.GlobalProbeList, seller.Info().Shorthand) {
@@ -388,9 +386,8 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 					break
 				}
 
-				for i, vendor := range Vendors {
+				for _, vendor := range Vendors {
 					if vendor == nil {
-						log.Println("nil vendor at position", i)
 						continue
 					}
 					if vendor.Info().Shorthand == v[0] {
@@ -405,9 +402,8 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 					break
 				}
 
-				for i, seller := range Sellers {
+				for _, seller := range Sellers {
 					if seller == nil {
-						log.Println("nil seller at position", i)
 						continue
 					}
 					if seller.Info().Shorthand == v[0] {
@@ -562,17 +558,15 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	// The pool of scrapers that source will be compared against
 	var scrapers []mtgban.Scraper
 	if pageVars.GlobalMode || pageVars.ReverseMode {
-		for i, seller := range Sellers {
+		for _, seller := range Sellers {
 			if seller == nil {
-				log.Println("nil seller at position", i)
 				continue
 			}
 			scrapers = append(scrapers, seller)
 		}
 	} else {
-		for i, vendor := range Vendors {
+		for _, vendor := range Vendors {
 			if vendor == nil {
-				log.Println("nil vendor at position", i)
 				continue
 			}
 			scrapers = append(scrapers, vendor)
