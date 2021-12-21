@@ -364,6 +364,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	var sorting string
 	arbitFilters := map[string]bool{}
 
+	limitedResults := len(flags) > 0 && !flags[0]
 	anyEnabled := len(flags) > 1 && flags[1] || (DevMode && !SigCheck)
 
 	// Set these flags for global, since it's likely users will want them
@@ -500,7 +501,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	}
 
 	if source == nil {
-		if len(flags) > 0 && !flags[0] {
+		if limitedResults {
 			pageVars.InfoMessage = "Increase your tier to discover more cards and more markets!"
 		}
 
@@ -614,7 +615,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		if pageVars.GlobalMode {
 			maxResults := MaxResultsGlobal
 			// Lower max number of results for the preview
-			if len(flags) > 0 && !flags[0] {
+			if limitedResults {
 				maxResults = MaxResultsGlobalLimit
 			}
 			if len(arbit) > maxResults {
