@@ -242,16 +242,20 @@ func arbit(w http.ResponseWriter, r *http.Request, reverse bool) {
 	}
 	pageVars := genPageNav(pageName, sig)
 
+	var anyOptionEnabled bool
+
 	var allowlistSellers []string
 	allowlistSellersOpt := GetParamFromSig(sig, "ArbitEnabled")
 
-	if allowlistSellersOpt == "ALL" {
+	if allowlistSellersOpt == "ALL" || (DevMode && !SigCheck) {
 		for _, seller := range Sellers {
 			if seller == nil || seller.Info().SealedMode {
 				continue
 			}
 			allowlistSellers = append(allowlistSellers, seller.Info().Shorthand)
 		}
+		// Enable any option under FilterOptTests
+		anyOptionEnabled = true
 	} else if allowlistSellersOpt == "DEV" {
 		allowlistSellers = append(Config.ArbitDefaultSellers, Config.DevSellers...)
 	} else if allowlistSellersOpt == "DEFAULT" || allowlistSellersOpt == "" {
@@ -292,7 +296,7 @@ func arbit(w http.ResponseWriter, r *http.Request, reverse bool) {
 
 	pageVars.ReverseMode = reverse
 
-	scraperCompare(w, r, pageVars, allowlistSellers, blocklistVendors, false, allowlistSellersOpt == "ALL")
+	scraperCompare(w, r, pageVars, allowlistSellers, blocklistVendors, false, anyOptionEnabled)
 }
 
 func Global(w http.ResponseWriter, r *http.Request) {
@@ -365,7 +369,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	arbitFilters := map[string]bool{}
 
 	limitedResults := len(flags) > 0 && !flags[0]
-	anyOptionEnabled := len(flags) > 1 && flags[1] || (DevMode && !SigCheck)
+	anyOptionEnabled := len(flags) > 1 && flags[1]
 
 	// Set these flags for global, since it's likely users will want them
 	if pageVars.GlobalMode {
