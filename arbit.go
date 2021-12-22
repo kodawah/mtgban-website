@@ -144,7 +144,7 @@ var FilterOptConfig = map[string]FilterOpt{
 	"nodiff": {
 		Title: "only Difference+",
 		Func: func(opts *mtgban.ArbitOpts) {
-			opts.MinBuyPrice = 1
+			opts.MinDiff = 1
 		},
 	},
 	"noqty": {
