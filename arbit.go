@@ -62,6 +62,7 @@ var FilterOptKeys = []string{
 	"nobuypenny",
 	"nolow",
 	"nodiff",
+	"nodiffplus",
 	"noqty",
 }
 
@@ -145,6 +146,12 @@ var FilterOptConfig = map[string]FilterOpt{
 		Title: "only Difference+",
 		Func: func(opts *mtgban.ArbitOpts) {
 			opts.MinDiff = 1
+		},
+	},
+	"nodiffplus": {
+		Title: "only Difference++",
+		Func: func(opts *mtgban.ArbitOpts) {
+			opts.MinDiff = 5
 		},
 	},
 	"noqty": {
@@ -548,6 +555,9 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		}
 		if arbitFilters["nodiff"] {
 			opts.MinDiff = 5
+		}
+		if arbitFilters["nodiffplus"] {
+			opts.MinDiff = 10
 		}
 		if source.Info().Shorthand == TCG_DIRECT {
 			opts.Conditions = BadConditions
