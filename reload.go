@@ -82,7 +82,12 @@ func reloadMarket(name string) {
 		return
 	}
 
+	keepers := ScraperOptions[name].Keepers
 	for i := range multiSellers {
+		// Skip subsellers not explicitly enabled
+		if !SliceStringHas(keepers, multiSellers[i].Info().Shorthand) {
+			continue
+		}
 		updateSellers(multiSellers[i])
 	}
 
