@@ -453,15 +453,19 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 			case "price":
 				isSeller = true
 				price4store = price4seller
+				config.SkipEmptyRetail = true
 			case "buy_price":
 				isVendor = true
 				price4store = price4vendor
+				config.SkipEmptyBuylist = true
 			case "arb_price":
 				isSeller = true
 				price4store = price4vendor
+				config.SkipEmptyRetail = true
 			case "rev_price":
 				isVendor = true
 				price4store = price4seller
+				config.SkipEmptyBuylist = true
 			}
 			var optName string
 			switch operation {
