@@ -23,6 +23,7 @@ func reloadSingle(name string) {
 
 	log.Println("Reloading", name)
 
+	// Lock because we plan to load both sides of the scraper
 	ScraperOptions[name].Mutex.Lock()
 	ScraperOptions[name].Busy = true
 	defer func() {
@@ -63,6 +64,7 @@ func reloadMarket(name string) {
 
 	log.Println("Reloading", name)
 
+	// Lock because we plan to load both sides of the scraper
 	ScraperOptions[name].Mutex.Lock()
 	ScraperOptions[name].Busy = true
 	defer func() {
@@ -101,35 +103,73 @@ func reloadMarket(name string) {
 func updateSellers(scraper mtgban.Scraper) {
 	for i := range Sellers {
 		if Sellers[i] != nil && Sellers[i].Info().Shorthand == scraper.Info().Shorthand {
-			inv, err := scraper.(mtgban.Seller).Inventory()
-			if err != nil {
-				log.Println(Sellers[i].Info().Name, "error", err)
-				continue
-			}
-			if len(inv) == 0 {
-				log.Println(Sellers[i].Info().Name, "empty inventory")
-				continue
-			}
-			Sellers[i] = mtgban.NewSellerFromInventory(inv, scraper.Info())
-			log.Println(Sellers[i].Info().Shorthand, "inventory updated")
+			updateSellerAtPosition(scraper.(mtgban.Seller), i, false)
+			log.Println(scraper.Info().Shorthand, "inventory updated")
 		}
 	}
+}
+
+func updateSellerAtPosition(seller mtgban.Seller, i int, andLock bool) {
+	opts := ScraperOptions[ScraperMap[seller.Info().Shorthand]]
+
+	if andLock {
+		opts.Mutex.Lock()
+		opts.Busy = true
+		defer func() {
+			opts.Busy = false
+			opts.Mutex.Unlock()
+		}()
+	}
+
+	// Load inventory
+	inv, err := seller.Inventory()
+	if err != nil {
+		log.Println(seller.Info().Name, "error", err)
+		return
+	}
+	if len(inv) == 0 {
+		log.Println(seller.Info().Name, "empty inventory")
+		return
+	}
+
+	// Save seller in global array, making sure it's _only_ a Seller
+	// and not anything esle, so that filtering works like expected
+	Sellers[i] = mtgban.NewSellerFromInventory(inv, seller.Info())
 }
 
 func updateVendors(scraper mtgban.Scraper) {
 	for i := range Vendors {
 		if Vendors[i] != nil && Vendors[i].Info().Shorthand == scraper.Info().Shorthand {
-			bl, err := scraper.(mtgban.Vendor).Buylist()
-			if err != nil {
-				log.Println(Vendors[i].Info().Name, "error", err)
-				continue
-			}
-			if len(bl) == 0 {
-				log.Println(Vendors[i].Info().Name, "empty buylist")
-				continue
-			}
-			Vendors[i] = mtgban.NewVendorFromBuylist(bl, scraper.Info())
-			log.Println(Vendors[i].Info().Shorthand, "buylist updated")
+			updateVendorAtPosition(scraper.(mtgban.Vendor), i, false)
+			log.Println(scraper.Info().Shorthand, "buylist updated")
 		}
 	}
+}
+
+func updateVendorAtPosition(vendor mtgban.Vendor, i int, andLock bool) {
+	opts := ScraperOptions[ScraperMap[vendor.Info().Shorthand]]
+
+	if andLock {
+		opts.Mutex.Lock()
+		opts.Busy = true
+		defer func() {
+			opts.Busy = false
+			opts.Mutex.Unlock()
+		}()
+	}
+
+	// Load buylist
+	bl, err := vendor.Buylist()
+	if err != nil {
+		log.Println(vendor.Info().Name, "error", err)
+		return
+	}
+	if len(bl) == 0 {
+		log.Println(vendor.Info().Name, "empty buylist")
+		return
+	}
+
+	// Save vendor in global array, making sure it's _only_ a Vendor
+	// and not anything esle, so that filtering works like expected
+	Vendors[i] = mtgban.NewVendorFromBuylist(bl, vendor.Info())
 }

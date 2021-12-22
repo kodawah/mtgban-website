@@ -834,25 +834,7 @@ func loadSellers(newSellers []mtgban.Seller) {
 			// and update it in the global slice
 			if Sellers[i] == nil || time.Now().Sub(Sellers[i].Info().InventoryTimestamp) > SkipRefreshCooldown {
 				log.Println("Loading from scraper")
-
-				// Load inventory
-				opts.Mutex.Lock()
-				opts.Busy = true
-				inv, err := newSellers[i].Inventory()
-				opts.Busy = false
-				opts.Mutex.Unlock()
-				if err != nil {
-					log.Println(newSellers[i].Info().Name, newSellers[i].Info().Shorthand, "error", err)
-					continue
-				}
-				if len(inv) == 0 {
-					log.Println(newSellers[i].Info().Name, newSellers[i].Info().Shorthand, "empty inventory")
-					continue
-				}
-
-				// Save seller in global array, making sure it's _only_ a Seller
-				// and not anything esle, so that filtering works like expected
-				Sellers[i] = mtgban.NewSellerFromInventory(inv, newSellers[i].Info())
+				updateSellerAtPosition(newSellers[i], i, true)
 			}
 
 			// Stash data to DB if requested
@@ -918,25 +900,7 @@ func loadVendors(newVendors []mtgban.Vendor) {
 			// and update it in the global slice
 			if Vendors[i] == nil || time.Now().Sub(Vendors[i].Info().BuylistTimestamp) > SkipRefreshCooldown {
 				log.Println("Loading from scraper")
-
-				// Load buylist
-				opts.Mutex.Lock()
-				opts.Busy = true
-				bl, err := newVendors[i].Buylist()
-				opts.Busy = false
-				opts.Mutex.Unlock()
-				if err != nil {
-					log.Println(newVendors[i].Info().Name, newVendors[i].Info().Shorthand, "error", err)
-					continue
-				}
-				if len(bl) == 0 {
-					log.Println(newVendors[i].Info().Name, newVendors[i].Info().Shorthand, "empty buylist")
-					continue
-				}
-
-				// Save vendor in global array, making sure it's _only_ a Vendor
-				// and not anything esle, so that filtering works like expected
-				Vendors[i] = mtgban.NewVendorFromBuylist(bl, newVendors[i].Info())
+				updateVendorAtPosition(newVendors[i], i, true)
 			}
 
 			// Stash data to DB if requested
