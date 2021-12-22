@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"runtime"
 	"sort"
 	"sync"
 	"time"
@@ -799,6 +800,8 @@ func loadScrapers() {
 }
 
 func loadSellers(newSellers []mtgban.Seller) {
+	defer recoverPanicScraper()
+
 	init := !DatabaseLoaded
 	dirName := "cache_inv/"
 	currentDir := fmt.Sprintf("%s%03d", dirName, time.Now().YearDay())
@@ -887,6 +890,8 @@ func loadSellers(newSellers []mtgban.Seller) {
 }
 
 func loadVendors(newVendors []mtgban.Vendor) {
+	defer recoverPanicScraper()
+
 	init := !DatabaseLoaded
 	dirName := "cache_bl/"
 	currentDir := fmt.Sprintf("%s%03d", dirName, time.Now().YearDay())
@@ -979,4 +984,33 @@ func loadMtgstocks(seller mtgban.Seller) {
 		return
 	}
 	Infos[seller.Info().Shorthand] = inv
+}
+
+func recoverPanicScraper() {
+	errPanic := recover()
+	if errPanic != nil {
+		log.Println("panic occurred:", errPanic)
+
+		// Print full stack to stdout
+		buf := make([]byte, 1<<16)
+		runtime.Stack(buf, true)
+		log.Printf("%s", buf)
+
+		// Restrict size to fit into discord message
+		if len(buf) > 1024 {
+			buf = buf[:1024]
+		}
+
+		var msg string
+		err, ok := errPanic.(error)
+		if ok {
+			msg = err.Error()
+		} else {
+			msg = "unknown error"
+		}
+		Notify("panic", "@here "+msg)
+		Notify("panic", string(buf))
+
+		return
+	}
 }

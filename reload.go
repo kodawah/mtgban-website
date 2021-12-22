@@ -19,6 +19,8 @@ func reloadSCG() {
 }
 
 func reloadSingle(name string) {
+	defer recoverPanicScraper()
+
 	log.Println("Reloading", name)
 
 	ScraperOptions[name].Mutex.Lock()
@@ -57,6 +59,8 @@ func reloadMKM() {
 }
 
 func reloadMarket(name string) {
+	defer recoverPanicScraper()
+
 	log.Println("Reloading", name)
 
 	ScraperOptions[name].Mutex.Lock()
