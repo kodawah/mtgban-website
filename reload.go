@@ -101,7 +101,7 @@ func updateSellers(scraper mtgban.Scraper) {
 				log.Println(Sellers[i].Info().Name, "empty inventory")
 				continue
 			}
-			Sellers[i] = scraper.(mtgban.Seller)
+			Sellers[i] = mtgban.NewSellerFromInventory(inv, scraper.Info())
 			log.Println(Sellers[i].Info().Shorthand, "inventory updated")
 		}
 	}
@@ -119,7 +119,7 @@ func updateVendors(scraper mtgban.Scraper) {
 				log.Println(Vendors[i].Info().Name, "empty buylist")
 				continue
 			}
-			Vendors[i] = scraper.(mtgban.Vendor)
+			Vendors[i] = mtgban.NewVendorFromBuylist(bl, scraper.Info())
 			log.Println(Vendors[i].Info().Shorthand, "buylist updated")
 		}
 	}
