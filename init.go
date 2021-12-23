@@ -242,9 +242,13 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 		ScraperOptions[key].Busy = false
 		ScraperOptions[key].Mutex.Unlock()
 		if err != nil {
+			msg := fmt.Sprintf("market %s %s - error %s", scraper.Info().Name, scraper.Info().Shorthand, err.Error())
+			ServerNotify("reload", msg, true)
 			return err
 		}
 		if len(inv) == 0 {
+			msg := fmt.Sprintf("market %s %s - empty inventory", scraper.Info().Name, scraper.Info().Shorthand)
+			ServerNotify("reload", msg, true)
 			return errors.New("empty inventory")
 		}
 
@@ -685,9 +689,11 @@ func loadScrapers() {
 			opt.Logger = log.New(logFile, "", log.LstdFlags)
 		}
 
+		ServerNotify("init", "Initializing "+key)
 		scraper, err := opt.Init(opt.Logger)
 		if err != nil {
-			log.Println("error initializing", key, err)
+			msg := fmt.Sprintf("error initializing %s: %s", key, err.Error())
+			ServerNotify("init", msg, true)
 			continue
 		}
 
@@ -830,7 +836,7 @@ func loadSellers(newSellers []mtgban.Seller) {
 			// If the old scraper data is old enough, pull from the new scraper
 			// and update it in the global slice
 			if Sellers[i] == nil || time.Now().Sub(Sellers[i].Info().InventoryTimestamp) > SkipRefreshCooldown {
-				log.Println("Loading from scraper")
+				ServerNotify("reload", "Loading from seller "+Sellers[i].Info().Shorthand)
 				updateSellerAtPosition(newSellers[i], i, true)
 			}
 
@@ -896,7 +902,7 @@ func loadVendors(newVendors []mtgban.Vendor) {
 			// If the old scraper data is old enough, pull from the new scraper
 			// and update it in the global slice
 			if Vendors[i] == nil || time.Now().Sub(Vendors[i].Info().BuylistTimestamp) > SkipRefreshCooldown {
-				log.Println("Loading from scraper")
+				ServerNotify("reload", "Loading from vendor "+Vendors[i].Info().Shorthand)
 				updateVendorAtPosition(newVendors[i], i, true)
 			}
 

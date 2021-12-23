@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/kodabb/go-mtgban/mtgban"
 )
@@ -21,7 +21,7 @@ func reloadSCG() {
 func reloadSingle(name string) {
 	defer recoverPanicScraper()
 
-	log.Println("Reloading", name)
+	ServerNotify("refresh", "Reloading "+name)
 
 	// Lock because we plan to load both sides of the scraper
 	ScraperOptions[name].Mutex.Lock()
@@ -33,7 +33,8 @@ func reloadSingle(name string) {
 
 	scraper, err := ScraperOptions[name].Init(ScraperOptions[name].Logger)
 	if err != nil {
-		log.Println(err)
+		msg := fmt.Sprintf("error initializing %s: %s", name, err.Error())
+		ServerNotify("refresh", msg, true)
 		return
 	}
 
@@ -62,7 +63,7 @@ func reloadMKM() {
 func reloadMarket(name string) {
 	defer recoverPanicScraper()
 
-	log.Println("Reloading", name)
+	ServerNotify("refresh", "Reloading "+name)
 
 	// Lock because we plan to load both sides of the scraper
 	ScraperOptions[name].Mutex.Lock()
@@ -74,13 +75,15 @@ func reloadMarket(name string) {
 
 	scraper, err := ScraperOptions[name].Init(ScraperOptions[name].Logger)
 	if err != nil {
-		log.Println(err)
+		msg := fmt.Sprintf("error initializing %s: %s", name, err.Error())
+		ServerNotify("refresh", msg, true)
 		return
 	}
 
 	multiSellers, err := mtgban.Seller2Sellers(scraper.(mtgban.Market))
 	if err != nil {
-		log.Println(err)
+		msg := fmt.Sprintf("error separating %s: %s", name, err.Error())
+		ServerNotify("refresh", msg)
 		return
 	}
 
@@ -104,7 +107,7 @@ func updateSellers(scraper mtgban.Scraper) {
 	for i := range Sellers {
 		if Sellers[i] != nil && Sellers[i].Info().Shorthand == scraper.Info().Shorthand {
 			updateSellerAtPosition(scraper.(mtgban.Seller), i, false)
-			log.Println(scraper.Info().Shorthand, "inventory updated")
+			ServerNotify("refresh", scraper.Info().Shorthand+" inventory updated")
 		}
 	}
 }
@@ -124,11 +127,13 @@ func updateSellerAtPosition(seller mtgban.Seller, i int, andLock bool) {
 	// Load inventory
 	inv, err := seller.Inventory()
 	if err != nil {
-		log.Println(seller.Info().Name, "error", err)
+		msg := fmt.Sprintf("seller %s %s - error %s", seller.Info().Name, seller.Info().Shorthand, err.Error())
+		ServerNotify("refresh", msg, true)
 		return
 	}
 	if len(inv) == 0 {
-		log.Println(seller.Info().Name, "empty inventory")
+		msg := fmt.Sprintf("seller %s %s - empty inventory", seller.Info().Name, seller.Info().Shorthand)
+		ServerNotify("refresh", msg, true)
 		return
 	}
 
@@ -141,7 +146,7 @@ func updateVendors(scraper mtgban.Scraper) {
 	for i := range Vendors {
 		if Vendors[i] != nil && Vendors[i].Info().Shorthand == scraper.Info().Shorthand {
 			updateVendorAtPosition(scraper.(mtgban.Vendor), i, false)
-			log.Println(scraper.Info().Shorthand, "buylist updated")
+			ServerNotify("refresh", scraper.Info().Shorthand+" buylist updated")
 		}
 	}
 }
@@ -161,11 +166,13 @@ func updateVendorAtPosition(vendor mtgban.Vendor, i int, andLock bool) {
 	// Load buylist
 	bl, err := vendor.Buylist()
 	if err != nil {
-		log.Println(vendor.Info().Name, "error", err)
+		msg := fmt.Sprintf("vendor %s %s - error %s", vendor.Info().Name, vendor.Info().Shorthand, err.Error())
+		ServerNotify("refresh", msg, true)
 		return
 	}
 	if len(bl) == 0 {
-		log.Println(vendor.Info().Name, "empty buylist")
+		msg := fmt.Sprintf("vendor %s %s - empty buylist", vendor.Info().Name, vendor.Info().Shorthand)
+		ServerNotify("refresh", msg, true)
 		return
 	}
 
