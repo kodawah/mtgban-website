@@ -368,7 +368,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		msgMode = "buylist"
 	}
 	msg := fmt.Sprintf("%s uploaded %d %s entries from %s, took %v", user, len(cardIds), msgMode, pageVars.SearchQuery, time.Since(start))
-	Notify("upload", msg)
+	UserNotify("upload", msg)
 	LogPages["Upload"].Println(msg)
 	if DevMode {
 		log.Println(msg)

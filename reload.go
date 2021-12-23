@@ -43,20 +43,20 @@ func reloadSingle(name string) {
 	updateSellers(scraper)
 	updateVendors(scraper)
 
-	Notify("refresh", name+" refresh completed")
+	ServerNotify("refresh", name+" refresh completed")
 }
 
 func reloadTCG() {
 	reloadMarket("tcg_index")
 	reloadMarket("tcg_market")
 
-	Notify("refresh", "tcg fully refreshed")
+	ServerNotify("refresh", "tcg fully refreshed")
 }
 
 func reloadMKM() {
 	reloadMarket("cardmarket")
 
-	Notify("refresh", "mkm fully refreshed")
+	ServerNotify("refresh", "mkm fully refreshed")
 }
 
 func reloadMarket(name string) {
@@ -97,7 +97,7 @@ func reloadMarket(name string) {
 	// will be updated, no effect otherwise
 	updateVendors(scraper)
 
-	Notify("refresh", name+" market refresh completed")
+	ServerNotify("refresh", name+" market refresh completed")
 }
 
 func updateSellers(scraper mtgban.Scraper) {

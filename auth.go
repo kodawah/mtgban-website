@@ -564,14 +564,10 @@ func recoverPanic(r *http.Request, w http.ResponseWriter) {
 	errPanic := recover()
 	if errPanic != nil {
 		log.Println("panic occurred:", errPanic)
-		log.Println("source request:", r.URL.String())
 
-		// Print full stack to stdout
+		// Restrict stack size to fit into discord message
 		buf := make([]byte, 1<<16)
 		runtime.Stack(buf, true)
-		log.Printf("%s", buf)
-
-		// Restrict size to fit into discord message
 		if len(buf) > 1024 {
 			buf = buf[:1024]
 		}
@@ -583,9 +579,9 @@ func recoverPanic(r *http.Request, w http.ResponseWriter) {
 		} else {
 			msg = "unknown error"
 		}
-		Notify("panic", "@here "+msg)
-		Notify("panic", string(buf))
-		Notify("panic", "source request: "+r.URL.String())
+		ServerNotify("panic", msg, true)
+		ServerNotify("panic", string(buf))
+		ServerNotify("panic", "source request: "+r.URL.String())
 
 		http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
 		return

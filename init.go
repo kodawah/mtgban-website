@@ -644,11 +644,9 @@ var ScraperNames map[string]string
 func loadScrapers() {
 	init := !DatabaseLoaded
 	if init {
-		log.Println("Loading data")
-		Notify("init", "loading started")
+		ServerNotify("init", "loading started")
 	} else {
-		log.Println("Updating data")
-		Notify("refresh", "full refresh started")
+		ServerNotify("refresh", "full refresh started")
 	}
 
 	dirName := "cache_inv/"
@@ -791,11 +789,10 @@ func loadScrapers() {
 
 	LastUpdate = time.Now()
 
-	log.Println("Scrapers loaded")
 	if init {
-		Notify("init", "loading completed")
+		ServerNotify("init", "loading completed")
 	} else {
-		Notify("refresh", "full refresh completed")
+		ServerNotify("refresh", "full refresh completed")
 	}
 }
 
@@ -937,8 +934,7 @@ func loadInfos() {
 	} {
 		loadMtgstocks(seller)
 	}
-	log.Println("stocks refreshed")
-	Notify("refresh", "stocks refreshed")
+	ServerNotify("refresh", "stocks refreshed")
 }
 
 func loadMtgstocks(seller mtgban.Seller) {
@@ -955,12 +951,9 @@ func recoverPanicScraper() {
 	if errPanic != nil {
 		log.Println("panic occurred:", errPanic)
 
-		// Print full stack to stdout
+		// Restrict stack size to fit into discord message
 		buf := make([]byte, 1<<16)
 		runtime.Stack(buf, true)
-		log.Printf("%s", buf)
-
-		// Restrict size to fit into discord message
 		if len(buf) > 1024 {
 			buf = buf[:1024]
 		}
@@ -972,8 +965,8 @@ func recoverPanicScraper() {
 		} else {
 			msg = "unknown error"
 		}
-		Notify("panic", "@here "+msg)
-		Notify("panic", string(buf))
+		ServerNotify("panic", msg, true)
+		ServerNotify("panic", string(buf))
 
 		return
 	}

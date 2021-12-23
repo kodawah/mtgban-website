@@ -340,31 +340,49 @@ type Notification struct {
 	Content  string `json:"content"`
 }
 
-func Notify(kind, message string) {
+// Log and send the notification for a user action
+func ServerNotify(kind, message string, flags ...bool) {
+	log.Println(message)
+	if Config.DiscordNotifHook == "" {
+		return
+	}
+	if len(flags) > 0 && flags[0] {
+		message = "@here " + message
+	}
+	go notify(kind, message, Config.DiscordNotifHook)
+}
+
+// Only send the notification for a user action
+func UserNotify(kind, message string, flags ...bool) {
 	if Config.DiscordHook == "" {
 		return
 	}
-	go func() {
-		var payload Notification
-		payload.Username = kind
-		if DevMode {
-			payload.Content = "[DEV] "
-		}
-		payload.Content += message
+	if len(flags) > 0 && flags[0] {
+		message = "@here " + message
+	}
+	go notify(kind, message, Config.DiscordHook)
+}
 
-		reqBody, err := json.Marshal(&payload)
-		if err != nil {
-			log.Println(err)
-			return
-		}
+func notify(kind, message, hook string) {
+	var payload Notification
+	payload.Username = kind
+	if DevMode {
+		payload.Content = "[DEV] "
+	}
+	payload.Content += message
 
-		resp, err := cleanhttp.DefaultClient().Post(Config.DiscordHook, "application/json", bytes.NewReader(reqBody))
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		defer resp.Body.Close()
-	}()
+	reqBody, err := json.Marshal(&payload)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	resp, err := cleanhttp.DefaultClient().Post(hook, "application/json", bytes.NewReader(reqBody))
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	resp.Body.Close()
 }
 
 // Read the query parameter, if present set a cookie that will be

@@ -43,8 +43,7 @@ func CKMirrorAPI(w http.ResponseWriter, r *http.Request) {
 }
 
 func prepareCKAPI() error {
-	log.Println("Updating CK prices for API users")
-	Notify("api", "CK refresh started")
+	ServerNotify("api", "CK APIrefresh started")
 
 	list, err := cardkingdom.NewCKClient().GetPriceList()
 	if err != nil {
@@ -119,8 +118,7 @@ func prepareCKAPI() error {
 	CKAPIOutput = output
 	CKAPIMutex.Unlock()
 
-	log.Println("New CK API output ready")
-	Notify("api", "CK refresh completed")
+	ServerNotify("api", "CK API refresh completed")
 
 	return nil
 }

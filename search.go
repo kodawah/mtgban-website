@@ -375,7 +375,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		}
 		user := GetParamFromSig(sig, "UserEmail")
 		msg := fmt.Sprintf("[%s] from %s by %s (took %v)", query, source, user, time.Since(start))
-		Notify("search", msg)
+		UserNotify("search", msg)
 		LogPages["Search"].Println(msg)
 		if DevMode {
 			log.Println(msg)
