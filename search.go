@@ -163,15 +163,20 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	allKeys := make([]string, 0, len(foundSellers))
 
 	// Append keys to the main array
-	// Skip them when requested
 	for cardId := range foundSellers {
+		// Skip if skipEmptyBuylist and nothing was found in buylist
 		if skipEmptyBuylist && len(foundVendors[cardId]) == 0 {
+			continue
+		}
+		// Skip if skipEmptyRetail and only INDEX entries were found
+		if skipEmptyRetail && len(foundSellers[cardId]) == 1 && len(foundSellers[cardId]["INDEX"]) != 0 {
 			continue
 		}
 		// Always append the card to the main list
 		allKeys = append(allKeys, cardId)
 	}
 	for cardId := range foundVendors {
+		// Skip if skipEmptyRetail and nothing was found in retail
 		if skipEmptyRetail && len(foundSellers[cardId]) == 0 {
 			continue
 		}
