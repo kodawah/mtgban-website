@@ -255,7 +255,11 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Readjust array of INDEX entires
-	for cardId := range foundSellers {
+	for _, cardId := range allKeys {
+		_, found := foundSellers[cardId]
+		if !found {
+			continue
+		}
 		indexArray := foundSellers[cardId]["INDEX"]
 		tmp := indexArray[:0]
 		mkmIndex := -1
