@@ -416,20 +416,23 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 
 		// Options that modify the searched scrapers
 		case "store", "seller", "vendor":
-			filterStores = append(filterStores, FilterStoreElem{
-				Name:          option,
-				Negate:        negate,
-				Values:        fixupStoreCodeNG(code),
-				OnlyForSeller: option == "seller",
-				OnlyForVendor: option == "vendor",
-			})
+			var isSeller, isVendor bool
 			// Skip empty result entries when filtering by either option
 			switch option {
 			case "seller":
 				config.SkipEmptyRetail = true
+				isSeller = true
 			case "buylist":
 				config.SkipEmptyBuylist = true
+				isVendor = true
 			}
+			filterStores = append(filterStores, FilterStoreElem{
+				Name:          option,
+				Negate:        negate,
+				Values:        fixupStoreCodeNG(code),
+				OnlyForSeller: isSeller,
+				OnlyForVendor: isVendor,
+			})
 		case "region":
 			filterStores = append(filterStores, FilterStoreElem{
 				Name:   option,
