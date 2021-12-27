@@ -41,6 +41,7 @@ type SearchEntry struct {
 }
 
 var AllConditions = []string{"INDEX", "NM", "SP", "MP", "HP", "PO"}
+var AllNormalConditions = []string{"NM", "SP", "MP", "HP", "PO"}
 
 func Search(w http.ResponseWriter, r *http.Request) {
 	sig := getSignatureFromCookies(r)

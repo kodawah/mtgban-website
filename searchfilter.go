@@ -197,6 +197,7 @@ var FilterOperations = map[string][]string{
 	"rev_price": []string{">", "<"},
 	"store":     []string{":"},
 	"seller":    []string{":"},
+	"aseller":   []string{":"},
 	"vendor":    []string{":"},
 	"region":    []string{":"},
 }
@@ -415,13 +416,22 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 			})
 
 		// Options that modify the searched scrapers
-		case "store", "seller", "vendor":
+		case "store", "seller", "aseller", "vendor":
 			var isSeller, isVendor bool
 			// Skip empty result entries when filtering by either option
 			switch option {
+			case "aseller":
+				config.SkipEmptyRetail = true
+				isSeller = true
+				option = "seller"
 			case "seller":
 				config.SkipEmptyRetail = true
 				isSeller = true
+				option = "seller_keep_index"
+				// When filtering out, use the more generic function
+				if negate {
+					option = "seller"
+				}
 			case "buylist":
 				config.SkipEmptyBuylist = true
 				isVendor = true
@@ -664,6 +674,13 @@ func localizeScraper(filters []string, scraper mtgban.Scraper) bool {
 var FilterStoreFuncs = map[string]func(filters []string, scraper mtgban.Scraper) bool{
 	"store": func(filters []string, scraper mtgban.Scraper) bool {
 		return !SliceStringHas(filters, strings.ToLower(scraper.Info().Shorthand))
+	},
+	"seller_keep_index": func(filters []string, scraper mtgban.Scraper) bool {
+		if scraper.Info().MetadataOnly {
+			return false
+		}
+		_, ok := scraper.(mtgban.Seller)
+		return ok && !SliceStringHas(filters, strings.ToLower(scraper.Info().Shorthand))
 	},
 	"seller": func(filters []string, scraper mtgban.Scraper) bool {
 		_, ok := scraper.(mtgban.Seller)
