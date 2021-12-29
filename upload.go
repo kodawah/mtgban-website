@@ -870,6 +870,8 @@ func loadCsv(reader io.ReadSeeker, comma rune, maxRows int) ([]UploadEntry, erro
 			return nil, err
 		}
 		csvReader = csv.NewReader(reader)
+		csvReader.Comma = '§' // fake comma to parse the whole line
+		csvReader.LazyQuotes = true
 	} else if err != nil {
 		return nil, err
 	}
