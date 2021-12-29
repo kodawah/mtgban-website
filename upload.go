@@ -521,8 +521,15 @@ func parseRow(indexMap map[string]int, record []string, foundHashes map[string]b
 		// Parse "Rift Bolt (TSP)"
 		vars := mtgmatcher.SplitVariants(line)
 		if len(vars) > 1 {
-			line = vars[0]
-			res.Card.Edition = strings.Join(vars[1:], " ")
+			maybeEdition := vars[1]
+			// Only assign edition if it's a known set code
+			set, err := mtgmatcher.GetSetByName(maybeEdition)
+			if err == nil {
+				// Remove the parsed part, leaving any other detail available downstream
+				line = strings.Replace(line, "("+maybeEdition+")", "", 1)
+				line = strings.Replace(line, "  ", "", -1)
+				res.Card.Edition = set.Name
+			}
 		}
 
 		record[indexMap["cardName"]] = line
