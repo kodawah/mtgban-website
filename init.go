@@ -836,7 +836,7 @@ func loadSellers(newSellers []mtgban.Seller) {
 			// If the old scraper data is old enough, pull from the new scraper
 			// and update it in the global slice
 			if Sellers[i] == nil || time.Now().Sub(Sellers[i].Info().InventoryTimestamp) > SkipRefreshCooldown {
-				ServerNotify("reload", "Loading from seller "+Sellers[i].Info().Shorthand)
+				ServerNotify("reload", "Loading from seller "+newSellers[i].Info().Shorthand)
 				updateSellerAtPosition(newSellers[i], i, true)
 			}
 
@@ -902,7 +902,7 @@ func loadVendors(newVendors []mtgban.Vendor) {
 			// If the old scraper data is old enough, pull from the new scraper
 			// and update it in the global slice
 			if Vendors[i] == nil || time.Now().Sub(Vendors[i].Info().BuylistTimestamp) > SkipRefreshCooldown {
-				ServerNotify("reload", "Loading from vendor "+Vendors[i].Info().Shorthand)
+				ServerNotify("reload", "Loading from vendor "+newVendors[i].Info().Shorthand)
 				updateVendorAtPosition(newVendors[i], i, true)
 			}
 
