@@ -234,6 +234,7 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 
 	if needsLoading {
 		log.Println("Loading from Market scraper")
+		start := time.Now()
 
 		// Preload the market
 		ScraperOptions[key].Mutex.Lock()
@@ -247,6 +248,7 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 		if len(inv) == 0 {
 			return errors.New("empty inventory")
 		}
+		log.Println("Took", time.Now().Sub(start))
 
 		// Split subsellers
 		sellers, err := mtgban.Seller2Sellers(scraper)
@@ -840,12 +842,14 @@ func loadSellers(newSellers []mtgban.Seller) {
 			// and update it in the global slice
 			if Sellers[i] == nil || time.Now().Sub(Sellers[i].Info().InventoryTimestamp) > SkipRefreshCooldown {
 				ServerNotify("reload", "Loading from seller "+newSellers[i].Info().Shorthand)
+				start := time.Now()
 				err := updateSellerAtPosition(newSellers[i], i, true)
 				if err != nil {
 					msg := fmt.Sprintf("seller %s %s - %s", newSellers[i].Info().Name, newSellers[i].Info().Shorthand, err.Error())
 					ServerNotify("reload", msg, true)
 					continue
 				}
+				log.Println("Took", time.Now().Sub(start))
 			}
 
 			// Stash data to DB if requested
@@ -911,12 +915,14 @@ func loadVendors(newVendors []mtgban.Vendor) {
 			// and update it in the global slice
 			if Vendors[i] == nil || time.Now().Sub(Vendors[i].Info().BuylistTimestamp) > SkipRefreshCooldown {
 				ServerNotify("reload", "Loading from vendor "+newVendors[i].Info().Shorthand)
+				start := time.Now()
 				err := updateVendorAtPosition(newVendors[i], i, true)
 				if err != nil {
 					msg := fmt.Sprintf("vendor %s %s - %s", newVendors[i].Info().Name, newVendors[i].Info().Shorthand, err.Error())
 					ServerNotify("reload", msg, true)
 					continue
 				}
+				log.Println("Took", time.Now().Sub(start))
 			}
 
 			// Stash data to DB if requested
