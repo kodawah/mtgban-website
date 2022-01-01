@@ -689,7 +689,7 @@ func loadScrapers() {
 			opt.Logger = log.New(logFile, "", log.LstdFlags)
 		}
 
-		ServerNotify("init", "Initializing "+key)
+		log.Println("Initializing " + key)
 		scraper, err := opt.Init(opt.Logger)
 		if err != nil {
 			msg := fmt.Sprintf("error initializing %s: %s", key, err.Error())
@@ -701,7 +701,8 @@ func loadScrapers() {
 			if !opt.OnlyVendor {
 				err := untangleMarket(init, currentDir, newbc, scraper.(mtgban.Market), key)
 				if err != nil {
-					log.Println("failed to load", key, err)
+					msg := fmt.Sprintf("failed to load %s: %s", key, err.Error())
+					ServerNotify("init", msg, true)
 					// Use the old data instead of skipping it
 					if !init {
 						for _, seller := range Sellers {
@@ -759,23 +760,29 @@ func loadScrapers() {
 	}
 
 	log.Println("Sellers table")
+	var msgS string
 	for i := range newSellers {
+		msgS += fmt.Sprintf("%d ", i)
 		if newSellers[i] == nil {
-			log.Println(i, "<nil>")
+			msgS += "<nil>\n"
 			continue
 		}
-		log.Println(i, newSellers[i].Info().Name, newSellers[i].Info().Shorthand)
+		msgS += fmt.Sprintf("%s %s\n", newSellers[i].Info().Name, newSellers[i].Info().Shorthand)
 	}
+	ServerNotify("init", msgS)
 	loadSellers(newSellers)
 
 	log.Println("Vendors table")
+	var msgV string
 	for i := range newVendors {
+		msgV += fmt.Sprintf("%d ", i)
 		if newVendors[i] == nil {
-			log.Println(i, "<nil>")
+			msgV += "<nil>\n"
 			continue
 		}
-		log.Println(i, newVendors[i].Info().Name, newVendors[i].Info().Shorthand)
+		msgV += fmt.Sprintf("%s %s\n", newVendors[i].Info().Name, newVendors[i].Info().Shorthand)
 	}
+	ServerNotify("init", msgV)
 	loadVendors(newVendors)
 
 	if BenchMode {
