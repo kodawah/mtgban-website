@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/kodabb/go-mtgban/mtgban"
@@ -106,13 +107,18 @@ func reloadMarket(name string) {
 func updateSellers(scraper mtgban.Scraper) {
 	for i := range Sellers {
 		if Sellers[i] != nil && Sellers[i].Info().Shorthand == scraper.Info().Shorthand {
-			updateSellerAtPosition(scraper.(mtgban.Seller), i, false)
+			err := updateSellerAtPosition(scraper.(mtgban.Seller), i, false)
+			if err != nil {
+				msg := fmt.Sprintf("seller %s %s - %s", scraper.Info().Name, scraper.Info().Shorthand, err.Error())
+				ServerNotify("refresh", msg, true)
+				continue
+			}
 			ServerNotify("refresh", scraper.Info().Shorthand+" inventory updated")
 		}
 	}
 }
 
-func updateSellerAtPosition(seller mtgban.Seller, i int, andLock bool) {
+func updateSellerAtPosition(seller mtgban.Seller, i int, andLock bool) error {
 	opts := ScraperOptions[ScraperMap[seller.Info().Shorthand]]
 
 	if andLock {
@@ -127,31 +133,33 @@ func updateSellerAtPosition(seller mtgban.Seller, i int, andLock bool) {
 	// Load inventory
 	inv, err := seller.Inventory()
 	if err != nil {
-		msg := fmt.Sprintf("seller %s %s - error %s", seller.Info().Name, seller.Info().Shorthand, err.Error())
-		ServerNotify("refresh", msg, true)
-		return
+		return err
 	}
 	if len(inv) == 0 {
-		msg := fmt.Sprintf("seller %s %s - empty inventory", seller.Info().Name, seller.Info().Shorthand)
-		ServerNotify("refresh", msg, true)
-		return
+		return errors.New("empty inventory")
 	}
 
 	// Save seller in global array, making sure it's _only_ a Seller
 	// and not anything esle, so that filtering works like expected
 	Sellers[i] = mtgban.NewSellerFromInventory(inv, seller.Info())
+	return nil
 }
 
 func updateVendors(scraper mtgban.Scraper) {
 	for i := range Vendors {
 		if Vendors[i] != nil && Vendors[i].Info().Shorthand == scraper.Info().Shorthand {
-			updateVendorAtPosition(scraper.(mtgban.Vendor), i, false)
+			err := updateVendorAtPosition(scraper.(mtgban.Vendor), i, false)
+			if err != nil {
+				msg := fmt.Sprintf("vendor %s %s - %s", scraper.Info().Name, scraper.Info().Shorthand, err.Error())
+				ServerNotify("refresh", msg, true)
+				continue
+			}
 			ServerNotify("refresh", scraper.Info().Shorthand+" buylist updated")
 		}
 	}
 }
 
-func updateVendorAtPosition(vendor mtgban.Vendor, i int, andLock bool) {
+func updateVendorAtPosition(vendor mtgban.Vendor, i int, andLock bool) error {
 	opts := ScraperOptions[ScraperMap[vendor.Info().Shorthand]]
 
 	if andLock {
@@ -166,17 +174,14 @@ func updateVendorAtPosition(vendor mtgban.Vendor, i int, andLock bool) {
 	// Load buylist
 	bl, err := vendor.Buylist()
 	if err != nil {
-		msg := fmt.Sprintf("vendor %s %s - error %s", vendor.Info().Name, vendor.Info().Shorthand, err.Error())
-		ServerNotify("refresh", msg, true)
-		return
+		return err
 	}
 	if len(bl) == 0 {
-		msg := fmt.Sprintf("vendor %s %s - empty buylist", vendor.Info().Name, vendor.Info().Shorthand)
-		ServerNotify("refresh", msg, true)
-		return
+		return errors.New("empty buylist")
 	}
 
 	// Save vendor in global array, making sure it's _only_ a Vendor
 	// and not anything esle, so that filtering works like expected
 	Vendors[i] = mtgban.NewVendorFromBuylist(bl, vendor.Info())
+	return nil
 }

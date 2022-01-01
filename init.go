@@ -844,7 +844,12 @@ func loadSellers(newSellers []mtgban.Seller) {
 			// and update it in the global slice
 			if Sellers[i] == nil || time.Now().Sub(Sellers[i].Info().InventoryTimestamp) > SkipRefreshCooldown {
 				ServerNotify("reload", "Loading from seller "+newSellers[i].Info().Shorthand)
-				updateSellerAtPosition(newSellers[i], i, true)
+				err := updateSellerAtPosition(newSellers[i], i, true)
+				if err != nil {
+					msg := fmt.Sprintf("seller %s %s - %s", newSellers[i].Info().Name, newSellers[i].Info().Shorthand, err.Error())
+					ServerNotify("reload", msg, true)
+					continue
+				}
 			}
 
 			// Stash data to DB if requested
@@ -910,7 +915,12 @@ func loadVendors(newVendors []mtgban.Vendor) {
 			// and update it in the global slice
 			if Vendors[i] == nil || time.Now().Sub(Vendors[i].Info().BuylistTimestamp) > SkipRefreshCooldown {
 				ServerNotify("reload", "Loading from vendor "+newVendors[i].Info().Shorthand)
-				updateVendorAtPosition(newVendors[i], i, true)
+				err := updateVendorAtPosition(newVendors[i], i, true)
+				if err != nil {
+					msg := fmt.Sprintf("vendor %s %s - %s", newVendors[i].Info().Name, newVendors[i].Info().Shorthand, err.Error())
+					ServerNotify("reload", msg, true)
+					continue
+				}
 			}
 
 			// Stash data to DB if requested
