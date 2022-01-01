@@ -242,13 +242,9 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 		ScraperOptions[key].Busy = false
 		ScraperOptions[key].Mutex.Unlock()
 		if err != nil {
-			msg := fmt.Sprintf("market %s %s - error %s", scraper.Info().Name, scraper.Info().Shorthand, err.Error())
-			ServerNotify("reload", msg, true)
 			return err
 		}
 		if len(inv) == 0 {
-			msg := fmt.Sprintf("market %s %s - empty inventory", scraper.Info().Name, scraper.Info().Shorthand)
-			ServerNotify("reload", msg, true)
 			return errors.New("empty inventory")
 		}
 
