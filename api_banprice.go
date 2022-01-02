@@ -272,9 +272,8 @@ func getIdFunc(mode string) func(co *mtgmatcher.CardObject) string {
 func getSellerPrices(mode string, enabledStores []string, filterByEdition string, filterByHash []string, qty bool, conds bool) map[string]map[string]*BanPrice {
 	out := map[string]map[string]*BanPrice{}
 	idFunc := getIdFunc(mode)
-	for i, seller := range Sellers {
+	for _, seller := range Sellers {
 		if seller == nil {
-			log.Println("nil seller at position", i)
 			continue
 		}
 		sellerTag := seller.Info().Shorthand
@@ -385,9 +384,8 @@ func getSellerPrices(mode string, enabledStores []string, filterByEdition string
 func getVendorPrices(mode string, enabledStores []string, filterByEdition string, filterByHash []string, qty bool, conds bool) map[string]map[string]*BanPrice {
 	out := map[string]map[string]*BanPrice{}
 	idFunc := getIdFunc(mode)
-	for i, vendor := range Vendors {
+	for _, vendor := range Vendors {
 		if vendor == nil {
-			log.Println("nil vendor at position", i)
 			continue
 		}
 		vendorTag := vendor.Info().Shorthand
