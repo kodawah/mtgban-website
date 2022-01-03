@@ -10,6 +10,7 @@ import (
 
 	"github.com/kodabb/go-mtgban/mtgban"
 	"github.com/kodabb/go-mtgban/mtgmatcher"
+	"github.com/kodabb/go-mtgban/mtgmatcher/mtgjson"
 )
 
 type SearchConfig struct {
@@ -191,6 +192,7 @@ var FilterOperations = map[string][]string{
 	"t":         []string{":"},
 	"f":         []string{":"},
 	"c":         []string{":"},
+	"is":        []string{":"},
 	"price":     []string{">", "<"},
 	"buy_price": []string{">", "<"},
 	"arb_price": []string{">", "<"},
@@ -401,6 +403,12 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 				Negate: negate,
 				Values: fixupTypeNG(code),
 			})
+		case "is":
+			filters = append(filters, FilterElem{
+				Name:   "is",
+				Negate: negate,
+				Values: strings.Split(strings.ToLower(code), ","),
+			})
 		case "date":
 			opt := "date"
 			switch operation {
@@ -566,6 +574,21 @@ func compareReleaseDate(filters []string, co *mtgmatcher.CardObject, cmpFunc fun
 	return cmpFunc(cardDate, releaseDate)
 }
 
+// All promo types that have the same name of the option
+var classicPromoTypes = []string{
+	mtgjson.PromoTypeBundle,
+	mtgjson.PromoTypeBuyABox,
+	mtgjson.PromoTypeGameDay,
+	mtgjson.PromoTypeIntroPack,
+	mtgjson.PromoTypePrerelease,
+	mtgjson.PromoTypePromoPack,
+	mtgjson.PromoTypeRelease,
+	mtgjson.PromoTypeBoosterfun,
+	mtgjson.PromoTypeGodzilla,
+	mtgjson.PromoTypeDracula,
+	mtgjson.PromoTypePlayPromo,
+}
+
 var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObject) bool{
 	"edition": func(filters []string, co *mtgmatcher.CardObject) bool {
 		return !SliceStringHas(filters, co.SetCode)
@@ -629,6 +652,79 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 		return compareReleaseDate(filters, co, func(a, b time.Time) bool {
 			return a.After(b)
 		})
+	},
+	"is": func(filters []string, co *mtgmatcher.CardObject) bool {
+		for _, value := range filters {
+			switch value {
+			case "reserved":
+				if co.IsReserved {
+					return false
+				}
+			case "token":
+				if co.Layout == "token" {
+					return false
+				}
+			case "oversize", "oversized":
+				if co.IsOversized {
+					return false
+				}
+			case "funny":
+				if co.IsFunny {
+					return false
+				}
+			case "wcd", "gold":
+				if co.BorderColor == "gold" {
+					return false
+				}
+			case "fullart":
+				if co.IsFullArt {
+					return false
+				}
+			case "promo":
+				if co.IsPromo {
+					return false
+				}
+			case "extendedart":
+				if co.HasFrameEffect(mtgjson.FrameEffectExtendedArt) {
+					return false
+				}
+			case "showcase":
+				if co.HasFrameEffect(mtgjson.FrameEffectShowcase) {
+					return false
+				}
+			case "borderless":
+				if co.BorderColor == mtgjson.BorderColorBorderless {
+					return false
+				}
+			case "retro":
+				if co.FrameVersion == "1993" || co.FrameVersion == "1997" {
+					return false
+				}
+			case "reskin":
+				if co.FlavorName != "" {
+					return false
+				}
+			case "judge", "judgegift":
+				if co.HasPromoType(mtgjson.PromoTypeJudgeGift) {
+					return false
+				}
+			case "arena", "arenaleague":
+				if co.HasPromoType(mtgjson.PromoTypeArenaLeague) {
+					return false
+				}
+			case "rewards", "playerrewards":
+				if co.HasPromoType(mtgjson.PromoTypeArenaLeague) {
+					return false
+				}
+			default:
+				for SliceStringHas(classicPromoTypes, value) {
+					if co.HasPromoType(value) {
+						return false
+					}
+				}
+			}
+		}
+		return true
 	},
 }
 

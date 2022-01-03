@@ -87,6 +87,14 @@
                             <li>You can filter by <b>finish</b> with <pre>f:VALUE</pre>, accepting <pre>nonfoil</pre>, <pre>foil</pre>, and <pre>etched</pre>.</li>
                             <li>You can filter by <b>card type</b> with <pre>t:VALUE</pre>, accepting any valid supertype, subtype, or type.</li>
                             <li>You can filter by <b>release date</b> of the card or set <pre>date:VALUE</pre>, <pre>date&gt;VALUE</pre>, and <pre>date&lt;VALUE</pre>. The value may be a date in the ISO format (<pre>YYYY-MM-DD</pre>) or a set code.</li>
+                            <li>
+                                You can filter by card properties using <pre>is:VALUE</pre>, accepting these self describing options:
+                                <ul class="indent">
+                                    <li>Generic propeties: <i>reserved, token, oversize, funny, wcd promo</i></li>
+                                    <li>Frame properties: <i>fullart, extendedart, showcase, reskin, borderless, gold, retro</i></li>
+                                    <li>Promo properties: <i>judge, arena, rewards, bundle, buyabox, gameday, intropack, prerelease, promopack, release, boosterfun, godzillaseries, draculaseries, playpromo</i></li>
+                                </ul>
+                            </li>
                             <li>You can change the <b>search mode</b> with <pre>sm:VALUE</pre>, accepting <pre>exact</pre> (default), <pre>prefix</pre>, or <pre>any</pre></li>
                             <ul class="indent">
                                 <li>Normally a card is searched with an <b>exact</b> strategy, you will get only cards with exactly the same name as searched.
