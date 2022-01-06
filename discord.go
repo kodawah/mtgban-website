@@ -178,6 +178,10 @@ func parseMessage(content string) (*searchResult, error) {
 		return nil, fmt.Errorf("No card found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", query)
 	}
 
+	if len(uuids) == 0 {
+		return nil, fmt.Errorf("No results found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", query)
+	}
+
 	// Keep the first (most recent) result
 	sort.Slice(uuids, func(i, j int) bool {
 		return sortSets(uuids[i], uuids[j])
