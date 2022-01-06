@@ -588,10 +588,7 @@ func recoverPanic(r *http.Request, w http.ResponseWriter) {
 	}
 }
 
-func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string, string) {
-	expires := time.Now().Add(DefaultSignatureDuration)
-	tierTitle := userData.TierTitle
-
+func getValuesForTier(tierTitle string) url.Values {
 	v := url.Values{}
 	// Enable option according to tier
 	switch tierTitle {
@@ -703,7 +700,11 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 			v.Set("UploadChangeStoresEnabled", "true")
 		}
 	}
+	return v
+}
 
+func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string, string) {
+	v := getValuesForTier(userData.TierTitle)
 	v.Set("UserName", userData.FullName)
 	v.Set("UserEmail", userData.Email)
 	v.Set("UserTier", userData.TierTitle)
@@ -712,6 +713,7 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 	sourceURL.Scheme = bu.Scheme
 	sourceURL.Host = bu.Host
 
+	expires := time.Now().Add(DefaultSignatureDuration)
 	data := fmt.Sprintf("GET%d%s%s", expires.Unix(), sourceURL.Scheme+"://"+sourceURL.Host, v.Encode())
 	key := os.Getenv("BAN_SECRET")
 	sig := signHMACSHA1Base64([]byte(key), []byte(data))
