@@ -282,11 +282,20 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 
 	userData.TierTitle = tierTitle
 	LogPages["Admin"].Println(userData)
-	targetURL, sig := sign(userData, r.URL, baseURL)
 
+	// Sign our base URL with our tier and other data
+	sig := sign(userData, baseURL)
+
+	// Keep it secret. Keep it safe.
 	putSignatureInCookies(w, r, sig)
 
-	http.Redirect(w, r, targetURL, http.StatusFound)
+	// Reset path to be redirected to home page (it should just be /auth)
+	r.URL.Path = ""
+	// Clean up anything else (in particular remove "code")
+	r.URL.RawQuery = ""
+
+	// Redirect, we're done here
+	http.Redirect(w, r, r.URL.String(), http.StatusFound)
 }
 
 func signHMACSHA1Base64(key []byte, data []byte) string {
@@ -703,18 +712,14 @@ func getValuesForTier(tierTitle string) url.Values {
 	return v
 }
 
-func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string, string) {
+func sign(userData *PatreonUserData, link string) string {
 	v := getValuesForTier(userData.TierTitle)
 	v.Set("UserName", userData.FullName)
 	v.Set("UserEmail", userData.Email)
 	v.Set("UserTier", userData.TierTitle)
 
-	bu, _ := url.Parse(baseURL)
-	sourceURL.Scheme = bu.Scheme
-	sourceURL.Host = bu.Host
-
 	expires := time.Now().Add(DefaultSignatureDuration)
-	data := fmt.Sprintf("GET%d%s%s", expires.Unix(), sourceURL.Scheme+"://"+sourceURL.Host, v.Encode())
+	data := fmt.Sprintf("GET%d%s%s", expires.Unix(), link, v.Encode())
 	key := os.Getenv("BAN_SECRET")
 	sig := signHMACSHA1Base64([]byte(key), []byte(data))
 
@@ -722,12 +727,7 @@ func sign(userData *PatreonUserData, sourceURL *url.URL, baseURL string) (string
 	v.Set("Signature", sig)
 	str := base64.StdEncoding.EncodeToString([]byte(v.Encode()))
 
-	q := sourceURL.Query()
-	q.Del("code")
-	sourceURL.RawQuery = q.Encode()
-	sourceURL.Path = ""
-
-	return sourceURL.String(), str
+	return str
 }
 
 func GetParamFromSig(sig, param string) string {
