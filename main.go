@@ -418,7 +418,7 @@ func genPageNav(activeTab, sig string) PageVars {
 		for _, feat := range OrderNav {
 			param := GetParamFromSig(sig, feat)
 			allowed, _ := strconv.ParseBool(param)
-			if allowed || DevMode {
+			if allowed || (DevMode && !SigCheck) {
 				pageVars.Nav = append(pageVars.Nav, ExtraNavs[feat])
 			}
 		}
