@@ -123,6 +123,7 @@ type PageVars struct {
 	MemoryStatus string
 	LatestHash   string
 	CacheSize    int
+	Tiers        []string
 
 	AxisLabels  []string
 	Datasets    []*Dataset

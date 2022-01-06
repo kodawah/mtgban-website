@@ -596,6 +596,19 @@ func recoverPanic(r *http.Request, w http.ResponseWriter) {
 	}
 }
 
+var AllPatreonTiers = []string{
+	"Root",
+	"Admin",
+	"Developer",
+	"Mods",
+	"Test Role",
+	"Beta User",
+	"Legacy",
+	"Lost Boys",
+	"Modern",
+	"Pioneer",
+}
+
 func getValuesForTier(tierTitle string) url.Values {
 	v := url.Values{}
 	// Enable option according to tier

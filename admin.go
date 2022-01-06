@@ -78,6 +78,18 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	spoof := r.FormValue("spoof")
+	if spoof != "" {
+		baseURL := getBaseURL(r)
+		sig := sign(baseURL, spoof, nil)
+
+		// Overwrite the current signature
+		putSignatureInCookies(w, r, sig)
+
+		http.Redirect(w, r, baseURL, http.StatusFound)
+		return
+	}
+
 	reboot := r.FormValue("reboot")
 	doReboot := false
 	var v url.Values
@@ -275,6 +287,7 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 		pageVars.OtherTable = append(pageVars.OtherTable, row)
 	}
 
+	pageVars.Tiers = AllPatreonTiers
 	pageVars.Uptime = uptime()
 	pageVars.DiskStatus = disk()
 	pageVars.MemoryStatus = mem()

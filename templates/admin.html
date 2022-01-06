@@ -135,6 +135,21 @@
             </ul>
         </div>
 
+        <div class="indent" style="float: left;">
+            <ul class="indent">
+                <li>
+                    Spoof User Tier
+                    <form action="admin" method="GET">
+                        <select name="spoof" onchange="this.form.submit()" class="select-css">
+                            {{range .Tiers}}
+                                <option value="{{.}}">{{.}}</option>
+                            {{end}}
+                        </select>
+                    </form>
+                </li>
+            </ul>
+        </div>
+
         <div style="clear:both;"></div>
         <br>
         <br>
