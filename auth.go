@@ -84,10 +84,9 @@ func getUserToken(code, baseURL, ref string) (string, error) {
 }
 
 type PatreonUserData struct {
-	UserIds   []string
-	FullName  string
-	Email     string
-	TierTitle string
+	UserIds  []string
+	FullName string
+	Email    string
 }
 
 // Retrieve a user id for each membership of the current user
@@ -280,11 +279,11 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userData.TierTitle = tierTitle
 	LogPages["Admin"].Println(userData)
+	LogPages["Admin"].Println(tierTitle)
 
 	// Sign our base URL with our tier and other data
-	sig := sign(userData, baseURL)
+	sig := sign(baseURL, tierTitle, userData)
 
 	// Keep it secret. Keep it safe.
 	putSignatureInCookies(w, r, sig)
@@ -712,11 +711,13 @@ func getValuesForTier(tierTitle string) url.Values {
 	return v
 }
 
-func sign(userData *PatreonUserData, link string) string {
-	v := getValuesForTier(userData.TierTitle)
-	v.Set("UserName", userData.FullName)
-	v.Set("UserEmail", userData.Email)
-	v.Set("UserTier", userData.TierTitle)
+func sign(link string, tierTitle string, userData *PatreonUserData) string {
+	v := getValuesForTier(tierTitle)
+	if userData != nil {
+		v.Set("UserName", userData.FullName)
+		v.Set("UserEmail", userData.Email)
+		v.Set("UserTier", tierTitle)
+	}
 
 	expires := time.Now().Add(DefaultSignatureDuration)
 	data := fmt.Sprintf("GET%d%s%s", expires.Unix(), link, v.Encode())
