@@ -537,7 +537,15 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 					}
 					paths := strings.Split(u2.Path, "/")
 					if len(paths) > 4 {
-						m.Content = fmt.Sprintf("!%s|%s|%s", paths[4], paths[2], paths[3])
+						cardName := paths[4]
+						setCode := paths[2]
+						number := paths[3]
+
+						m.Content = "!" + cardName
+						_, err := mtgmatcher.GetSet(setCode)
+						if err == nil {
+							m.Content += "|" + setCode + "|" + number
+						}
 						messageCreate(s, m)
 						return
 					}
