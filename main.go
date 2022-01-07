@@ -124,6 +124,7 @@ type PageVars struct {
 	LatestHash   string
 	CacheSize    int
 	Tiers        []string
+	DemoKey      string
 
 	AxisLabels  []string
 	Datasets    []*Dataset

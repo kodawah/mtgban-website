@@ -622,6 +622,17 @@ td.tiers {
     margin: auto;
 }
 
+.input-css {
+    display: inline;
+    border: 1px solid #aaa;
+    border-radius: .2em;
+    color: var(--headingtext);
+    background-color: var(--tralternate);
+    font-size: 16px;
+    font-weight: 700;
+    padding: .6em 0em .5em 1em;
+}
+
 .select-css {
     display: inline;
     font-size: 16px;

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"net/http"
@@ -293,6 +294,7 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 	pageVars.MemoryStatus = mem()
 	pageVars.LatestHash, _ = latestHash()
 	pageVars.CurrentTime = time.Now()
+	pageVars.DemoKey = getDemoKey(getBaseURL(r))
 
 	render(w, "admin.html", pageVars)
 }
@@ -444,4 +446,22 @@ func mem() string {
 		return "N/A"
 	}
 	return fmt.Sprintf("%.2f%% of %.2fGB", float64(memData.Used)/float64(memData.Total)*100, float64(memData.Total)/1024/1024/1024)
+}
+
+const DefaultAPIDemoKeyDuration = 30 * 24 * time.Hour
+
+func getDemoKey(link string) string {
+	v := url.Values{}
+	v.Set("API", "ALL_ACCESS")
+	v.Set("APImode", "all")
+	v.Set("UserEmail", Config.ApiUserSecrets["demo@mtgban.com"])
+
+	expires := time.Now().Add(DefaultAPIDemoKeyDuration)
+	data := fmt.Sprintf("GET%d%s%s", expires.Unix(), link, v.Encode())
+	key := os.Getenv("BAN_SECRET")
+	sig := signHMACSHA1Base64([]byte(key), []byte(data))
+
+	v.Set("Expires", fmt.Sprintf("%d", expires.Unix()))
+	v.Set("Signature", sig)
+	return base64.StdEncoding.EncodeToString([]byte(v.Encode()))
 }
