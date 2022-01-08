@@ -92,7 +92,7 @@ func loadInventoryFromFile(info mtgban.ScraperInfo, fname string) (mtgban.Seller
 	}
 
 	// Create seller using the properties of the scraper
-	info.InventoryTimestamp = fileDate(link)
+	info.InventoryTimestamp = fileDate(fname)
 
 	return mtgban.NewSellerFromInventory(inv, info), nil
 }
@@ -139,7 +139,7 @@ func loadBuylistFromFile(info mtgban.ScraperInfo, fname string) (mtgban.Vendor, 
 	}
 
 	// Create seller using the properties of the scraper
-	info.BuylistTimestamp = fileDate(link)
+	info.BuylistTimestamp = fileDate(fname)
 
 	return mtgban.NewVendorFromBuylist(bl, info), nil
 }
