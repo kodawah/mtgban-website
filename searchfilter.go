@@ -717,7 +717,7 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 					return false
 				}
 			default:
-				for SliceStringHas(classicPromoTypes, value) {
+				if SliceStringHas(classicPromoTypes, value) {
 					if co.HasPromoType(value) {
 						return false
 					}
