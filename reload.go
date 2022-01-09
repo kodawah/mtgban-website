@@ -11,10 +11,6 @@ func reloadCK() {
 	reloadSingle("cardkingdom")
 }
 
-func reloadCSI() {
-	reloadSingle("coolstuffinc")
-}
-
 func reloadSCG() {
 	reloadSingle("starcitygames")
 }
