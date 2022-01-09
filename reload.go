@@ -57,6 +57,12 @@ func reloadMKM() {
 	ServerNotify("refresh", "mkm fully refreshed")
 }
 
+func reloadCT() {
+	reloadMarket("cardtrader")
+
+	ServerNotify("refresh", "ct fully refreshed")
+}
+
 func reloadMarket(name string) {
 	defer recoverPanicScraper()
 

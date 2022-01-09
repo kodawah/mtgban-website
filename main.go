@@ -576,6 +576,8 @@ func main() {
 		c.AddFunc("15 */6 * * *", reloadTCG)
 		// Refresh SCG every day at 2:15pm (twice in total)
 		c.AddFunc("15 14 * * *", reloadSCG)
+		// Refresh CT every day at 3:15pm (twice in total, at 2.10am and 3.15pm)
+		c.AddFunc("15 15 * * *", reloadCT)
 
 		// MTGJSON builds go live 9pm EST, pull the update 30 minutes after
 		c.AddFunc("30 2 * * *", func() {
