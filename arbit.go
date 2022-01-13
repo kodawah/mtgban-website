@@ -559,9 +559,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		if arbitFilters["nodiffplus"] {
 			opts.MinDiff = 10
 		}
-		if source.Info().Shorthand == TCG_DIRECT {
-			opts.Conditions = BadConditions
-		}
+
 		opts.Editions = FilteredEditions
 	}
 
@@ -597,6 +595,10 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 			}
 		}
 
+		// Set custom scraper options
+		if pageVars.GlobalMode && scraper.Info().Shorthand == TCG_DIRECT {
+			opts.Conditions = BadConditions
+		}
 		if scraper.Info().Shorthand == "ABU" {
 			opts.UseTrades = arbitFilters["credit"]
 		}
