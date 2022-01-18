@@ -716,6 +716,10 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 				if co.HasPromoType(mtgjson.PromoTypeArenaLeague) {
 					return false
 				}
+			case "jpn":
+				if co.HasUniqueLanguage(mtgjson.LanguageJapanese) {
+					return false
+				}
 			default:
 				if SliceStringHas(classicPromoTypes, value) {
 					if co.HasPromoType(value) {
