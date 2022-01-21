@@ -205,7 +205,8 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 				// Register so that it will be added to the main Sellers array
 				newbc.Register(seller)
 
-				log.Println("Loaded from file")
+				inv, _ := seller.Inventory()
+				log.Printf("Loaded from file with %d entries", len(inv))
 			}
 
 			log.Println("-- OK")
@@ -828,7 +829,8 @@ func loadSellers(newSellers []mtgban.Seller) {
 			}
 			Sellers[i] = seller
 
-			log.Println("Loaded from file")
+			inv, _ := seller.Inventory()
+			log.Printf("Loaded from file with %d entries", len(inv))
 		} else {
 			_, ok := newSellers[i].(mtgban.Scraper).(mtgban.Market)
 			if ok {
@@ -907,7 +909,8 @@ func loadVendors(newVendors []mtgban.Vendor) {
 			}
 			Vendors[i] = vendor
 
-			log.Println("Loaded from file")
+			bl, _ := vendor.Buylist()
+			log.Printf("Loaded from file with %d entries", len(bl))
 		} else {
 			opts := ScraperOptions[ScraperMap[newVendors[i].Info().Shorthand]]
 
