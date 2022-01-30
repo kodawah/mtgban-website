@@ -28,24 +28,6 @@ import (
 	"github.com/kodabb/go-mtgban/mtgban"
 )
 
-type GenericCard struct {
-	Name      string
-	Edition   string
-	SetCode   string
-	Number    string
-	Variant   string
-	Keyrune   string
-	ImageURL  string
-	Foil      bool
-	Etched    bool
-	Reserved  bool
-	Title     string
-	SearchURL string
-	Stocks    bool
-	StocksURL string
-	Printings string
-}
-
 type PageVars struct {
 	Nav      []NavElem
 	ExtraNav []NavElem

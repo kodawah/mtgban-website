@@ -24,6 +24,24 @@ var Country2flag = map[string]string{
 	"JP": "🇯🇵",
 }
 
+type GenericCard struct {
+	Name      string
+	Edition   string
+	SetCode   string
+	Number    string
+	Variant   string
+	Keyrune   string
+	ImageURL  string
+	Foil      bool
+	Etched    bool
+	Reserved  bool
+	Title     string
+	SearchURL string
+	Stocks    bool
+	StocksURL string
+	Printings string
+}
+
 func fileExists(filename string) bool {
 	fi, err := os.Lstat(filename)
 	if errors.Is(err, os.ErrNotExist) {
