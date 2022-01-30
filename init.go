@@ -960,12 +960,12 @@ func loadInfos() {
 	for _, seller := range []mtgban.Seller{
 		mtgstocks.NewScraper(), mtgstocks.NewScraperIndex(),
 	} {
-		loadMtgstocks(seller)
+		loadInfoScraper(seller)
 	}
-	ServerNotify("refresh", "stocks refreshed")
+	ServerNotify("refresh", "infos refreshed")
 }
 
-func loadMtgstocks(seller mtgban.Seller) {
+func loadInfoScraper(seller mtgban.Seller) {
 	inv, err := seller.Inventory()
 	if err != nil {
 		log.Println(err)
