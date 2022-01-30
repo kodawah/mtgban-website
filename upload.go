@@ -359,6 +359,9 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		if pageVars.Metadata[data.CardId].Stocks {
 			pageVars.HasStocks = true
 		}
+		if pageVars.Metadata[data.CardId].SypList {
+			pageVars.HasSypList = true
+		}
 	}
 
 	// Logs

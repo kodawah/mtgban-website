@@ -74,6 +74,8 @@ type PageVars struct {
 	Cards        []GenericCard
 	Table        [][]string
 	HasReserved  bool
+	HasStocks    bool
+	HasSypList   bool
 	IsOneDay     bool
 	CanSwitchDay bool
 	TotalIndex   int
@@ -94,8 +96,6 @@ type PageVars struct {
 	Sleepers       map[string][]string
 	SleepersKeys   []string
 	SleepersColors []string
-
-	HasStocks bool
 
 	Headers      []string
 	OtherTable   [][]string

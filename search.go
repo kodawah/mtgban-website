@@ -236,6 +236,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		if pageVars.Metadata[cardId].Stocks {
 			pageVars.HasStocks = true
 		}
+		if pageVars.Metadata[cardId].SypList {
+			pageVars.HasSypList = true
+		}
 	}
 
 	// Optionally sort according to price

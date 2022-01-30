@@ -846,6 +846,9 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 		if c.Stocks {
 			pageVars.HasStocks = true
 		}
+		if c.SypList {
+			pageVars.HasSypList = true
+		}
 	}
 
 	if len(pageVars.Cards) == 0 {

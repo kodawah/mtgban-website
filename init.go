@@ -957,8 +957,11 @@ func loadVendors(newVendors []mtgban.Vendor) {
 
 func loadInfos() {
 	log.Println("Loading infos")
+
 	for _, seller := range []mtgban.Seller{
-		mtgstocks.NewScraper(), mtgstocks.NewScraperIndex(),
+		mtgstocks.NewScraper(),
+		mtgstocks.NewScraperIndex(),
+		tcgplayer.NewScraperSYP(),
 	} {
 		loadInfoScraper(seller)
 	}

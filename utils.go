@@ -37,6 +37,7 @@ type GenericCard struct {
 	Reserved  bool
 	Title     string
 	SearchURL string
+	SypList   bool
 	Stocks    bool
 	StocksURL string
 	Printings string
@@ -193,6 +194,7 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 	}
 
 	var stocksURL string
+	_, sypList := Infos["TCGSYPList"][cardId]
 	_, stocks := Infos["STKS"][cardId]
 	entries, found := Infos["STKSIndex"][cardId]
 	if found {
@@ -339,6 +341,7 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 		Title:     editionTitle(cardId),
 		Reserved:  co.Card.IsReserved,
 		SearchURL: fmt.Sprintf("/%s?q=%s", path, url.QueryEscape(query)),
+		SypList:   sypList,
 		Stocks:    stocks,
 		StocksURL: stocksURL,
 		Printings: printings,

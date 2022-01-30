@@ -704,6 +704,9 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 			if pageVars.Metadata[cardId].Stocks {
 				pageVars.HasStocks = true
 			}
+			if pageVars.Metadata[cardId].SypList {
+				pageVars.HasSypList = true
+			}
 		}
 	}
 

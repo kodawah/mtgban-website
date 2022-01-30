@@ -237,6 +237,13 @@
                                     {{if not (eq .ChartID "")}}</center>{{end}}
                                 </h4>
                             {{end}}
+                            {{if .HasSypList}}
+                                <h4>
+                                    {{if not (eq .ChartID "")}}<center>{{else}}† ={{end}}
+                                    Found in the <a href="https://help.tcgplayer.com/hc/en-us/articles/360054178934-Store-Your-Products-SYP-Pull-Sheet">SYP Pull Sheet</a>
+                                    {{if not (eq .ChartID "")}}</center>{{end}}
+                                </h4>
+                            {{end}}
                         </td>
                     </tr>
                 </table>
@@ -314,6 +321,9 @@
                                             {{end}}
                                             {{if $card.Stocks}}
                                                 •
+                                            {{end}}
+                                            {{if $card.SypList}}
+                                                †
                                             {{end}}
                                         </td>
                                         {{if $card.TCGId}}

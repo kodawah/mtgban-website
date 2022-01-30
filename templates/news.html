@@ -263,7 +263,10 @@
                             {{range $i, $row := $table}}
                                 {{if eq $i $.OffsetCards}}
                                     <td {{if $.LargeTable}}style="min-width: 15%;"{{end}}>
-                                        <a href="search?q={{$card.Name}} s:{{$card.SetCode}} cn:{{$card.Number}}">{{$row}}</a>{{if $card.Reserved}} *{{end}}{{if $card.Stocks}} •{{end}}
+                                        <a href="search?q={{$card.Name}} s:{{$card.SetCode}} cn:{{$card.Number}}">{{$row}}</a>
+                                        {{if $card.Reserved}} *{{end}}
+                                        {{if $card.Stocks}} •{{end}}
+                                        {{if $card.SypList}} †{{end}}
                                     </td>
                                 {{else if eq $i (inc $.OffsetCards 1)}}
                                     <td {{if $.LargeTable}}style="min-width: 15%;"{{end}}>
@@ -330,6 +333,9 @@
                     {{end}}
                     {{if .HasStocks}}
                         <p>• = On <a href="https://mtgstocks.com/interests">MTGStocks Interests</a> page</p>
+                    {{end}}
+                    {{if .HasSypList}}
+                        <p>† = Found in the <a href="https://help.tcgplayer.com/hc/en-us/articles/360054178934-Store-Your-Products-SYP-Pull-Sheet">SYP Pull Sheet</a></p>
                     {{end}}
                 </h4>
                 <br><br><br>

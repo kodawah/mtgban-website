@@ -242,6 +242,9 @@
                                                 {{if $card.Stocks}}
                                                     •
                                                 {{end}}
+                                                {{if $card.SypList}}
+                                                    †
+                                                {{end}}
                                                 <h6>
                                                     {{$card.Title}}
                                                     {{if .MismatchAlias}}
@@ -473,7 +476,10 @@
                                             {{$card := (index $.Metadata .)}}
                                             <tr onmouseover="document.getElementById('hoverImage').src={{$card.ImageURL}};">
                                                 <td>
-                                                    <a href="{{$card.SearchURL}}">{{$card.Name}}</a>{{if $card.Reserved}} *{{end}}{{if $card.Stocks}} •{{end}}
+                                                    <a href="{{$card.SearchURL}}">{{$card.Name}}</a>
+                                                    {{if $card.Reserved}} *{{end}}
+                                                    {{if $card.Stocks}} •{{end}}
+                                                    {{if $card.SypList}} †{{end}}
                                                 </td>
                                                 <td>
                                                     <i class="ss {{$card.Keyrune}} ss-1x ss-fw"></i> {{$card.Edition}}
@@ -514,6 +520,9 @@
         {{end}}
         {{if .HasStocks}}
             <h4>• = On <a href="https://mtgstocks.com/interests">MTGStocks Interests</a> page</h4>
+        {{end}}
+        {{if .HasSypList}}
+            <h4>† = Found in the <a href="https://help.tcgplayer.com/hc/en-us/articles/360054178934-Store-Your-Products-SYP-Pull-Sheet">SYP Pull Sheet</a></h4>
         {{end}}
     </div>
 
