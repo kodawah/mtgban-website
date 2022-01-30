@@ -40,6 +40,7 @@ type GenericCard struct {
 	Stocks    bool
 	StocksURL string
 	Printings string
+	TCGId     string
 }
 
 func fileExists(filename string) bool {
@@ -341,6 +342,7 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 		Stocks:    stocks,
 		StocksURL: stocksURL,
 		Printings: printings,
+		TCGId:     co.Card.Identifiers["tcgplayerProductId"],
 	}
 }
 

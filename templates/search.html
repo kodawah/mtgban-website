@@ -316,6 +316,11 @@
                                                 •
                                             {{end}}
                                         </td>
+                                        {{if $card.TCGId}}
+                                            <td rowspan=2>
+                                                    <a href="https://store.tcgplayer.com/admin/product/manage/{{$card.TCGId}}" title="Manage your TCGplayer inventory" target=_blank><img width=22 src="img/logo/tcgapp.png"></a>
+                                            </td>
+                                        {{end}}
                                         {{if eq $.ChartID ""}}
                                             <td rowspan=2>
                                                 <span class="emoji">
