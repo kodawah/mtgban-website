@@ -1,9 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/url"
 	"path"
@@ -14,7 +12,6 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-	cleanhttp "github.com/hashicorp/go-cleanhttp"
 
 	"github.com/kodabb/go-mtgban/mtgmatcher"
 	"github.com/kodabb/go-mtgban/tcgplayer"
@@ -365,22 +362,8 @@ func grabLastSold(cardId string, lang string) ([]embedField, error) {
 		}
 	}
 
-	link := "https://mpapi.tcgplayer.com/v2/product/" + tcgId + "/latestsales?offset=0&limit=25"
-	resp, err := cleanhttp.DefaultClient().Post(link, "application/json", strings.NewReader("{}"))
+	tcgLastSoldResp, err := tcgplayer.TCGLatestSales(tcgId)
 	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var tcgLastSoldResp TCGLastSold
-	err = json.Unmarshal(data, &tcgLastSoldResp)
-	if err != nil {
-		log.Println(string(data))
 		return nil, err
 	}
 
