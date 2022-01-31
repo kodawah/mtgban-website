@@ -49,6 +49,8 @@ type NewspaperPage struct {
 	Large bool
 	// How many elements are present before the card triplet
 	Offset int
+	// Which field to use for price comparison
+	Priced string
 }
 
 var NewspaperPages = []NewspaperPage{
@@ -56,6 +58,7 @@ var NewspaperPages = []NewspaperPage{
 		Title:  "Top 25 Singles (3 Week Market Review)",
 		Desc:   "Rankings are weighted via prior 21, 15, and 7 days via Retail, Buylist, and several other criteria to arrive at an overall ranking",
 		Offset: 3,
+		Priced: "n.Buylist",
 		Option: "review",
 		Query: `SELECT DISTINCT n.row_names, n.uuid,
                        n.Ranking,
@@ -256,6 +259,7 @@ var NewspaperPages = []NewspaperPage{
 		Title:  "Greatest Increase in Buylist Offer",
 		Desc:   "Information Sourced from CK: buylist increases indicate a higher sales rate (eg. higher demand). These may be fleeting, do not base a purchase solely off this metric unless dropshipping",
 		Offset: 2,
+		Priced: "n.Todays_BL",
 		Option: "buylist_inc",
 		Query: `SELECT DISTINCT n.row_names, n.uuid,
                        a.Name, a.Set, a.Number, a.Rarity,
@@ -325,6 +329,7 @@ var NewspaperPages = []NewspaperPage{
 		Title:  "Greatest Decrease in Buylist Offer",
 		Desc:   "Information Sourced from CK: Buylist Decreases indicate a declining sales rate (eg, Less demand). These may be fleeting, do not base a purchase solely off this metric unless dropshipping",
 		Offset: 2,
+		Priced: "n.Todays_BL",
 		Option: "buylist_dec",
 		Query: `SELECT DISTINCT n.row_names, n.uuid,
                        a.Name, a.Set, a.Number, a.Rarity,
@@ -394,6 +399,7 @@ var NewspaperPages = []NewspaperPage{
 		Title:  "Buylist Growth Forecast",
 		Desc:   "Forecasting Card Kingdom's Buylist Offers on Cards",
 		Offset: 2,
+		Priced: "n.Recent_BL",
 		Option: "ensemble_forecast",
 		Query: `SELECT DISTINCT n.row_names, n.uuid,
                        a.Name, a.Set, a.Number, a.Rarity,
@@ -531,6 +537,8 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	dir := r.FormValue("dir")
 	filter := r.FormValue("filter")
 	rarity := r.FormValue("rarity")
+	minPrice, _ := strconv.ParseFloat(r.FormValue("min_price"), 64)
+	maxPrice, _ := strconv.ParseFloat(r.FormValue("max_price"), 64)
 	pageIndexStr := r.FormValue("index")
 	pageIndex, _ := strconv.Atoi(pageIndexStr)
 	var query, defSort string
@@ -557,6 +565,8 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	pageVars.SortDir = dir
 	pageVars.FilterSet = filter
 	pageVars.FilterRarity = rarity
+	pageVars.FilterMinPrice = minPrice
+	pageVars.FilterMaxPrice = maxPrice
 	pageVars.Rarities = NewspaperAllRarities
 
 	var skipEditions string
@@ -603,7 +613,18 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 			if rarity != "" {
 				subQuery += " AND a.Rarity = \"" + rarity + "\""
 			}
+			if newspage.Priced != "" && minPrice != 0 {
+				subQuery += " AND " + newspage.Priced + " > " + fmt.Sprintf("%.2f", minPrice)
+			}
+			if newspage.Priced != "" && maxPrice != 0 {
+				subQuery += " AND " + newspage.Priced + " < " + fmt.Sprintf("%.2f", maxPrice)
+			}
+
 			subQuery += skipEditions
+
+			if newspage.Priced != "" {
+				pageVars.CanFilterByPrice = true
+			}
 
 			// Sub Go!
 			err := db.QueryRow(subQuery).Scan(&pages)
@@ -661,6 +682,21 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	if rarity != "" {
 		query += " AND a.Rarity = \"" + rarity + "\""
 	}
+
+	// Check for price limits
+	if minPrice != 0 || maxPrice != 0 {
+		for _, newspage := range NewspaperPages {
+			if newspage.Option == page && newspage.Priced != "" {
+				if minPrice != 0 {
+					query += " AND " + newspage.Priced + " > " + fmt.Sprintf("%.2f", minPrice)
+				}
+				if maxPrice != 0 {
+					query += " AND " + newspage.Priced + " < " + fmt.Sprintf("%.2f", maxPrice)
+				}
+			}
+		}
+	}
+
 	query += skipEditions
 
 	// Set sorting options

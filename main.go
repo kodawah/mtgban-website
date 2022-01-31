@@ -93,6 +93,10 @@ type PageVars struct {
 	CanBridge    bool
 	EditionsMap  map[string]EditionEntry
 
+	CanFilterByPrice bool
+	FilterMinPrice   float64
+	FilterMaxPrice   float64
+
 	Sleepers       map[string][]string
 	SleepersKeys   []string
 	SleepersColors []string
