@@ -55,9 +55,6 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	canSealed, _ := strconv.ParseBool(GetParamFromSig(sig, "SearchSealed"))
 	canSealed = canSealed || (DevMode && !SigCheck)
 
-	canSuperSearch, _ := strconv.ParseBool(GetParamFromSig(sig, "SearchSuper"))
-	canSuperSearch = canSuperSearch || (DevMode && !SigCheck)
-
 	pageVars.IsSealed = r.URL.Path == "/sealed"
 
 	if canSealed {
@@ -111,40 +108,23 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	pageVars.CondKeys = AllConditions
 	pageVars.Metadata = map[string]GenericCard{}
 
-	var cleanQuery string
-	var canShowAll bool
-
-	var foundSellers map[string]map[string][]SearchEntry
-	var foundVendors map[string][]SearchEntry
-
-	var skipEmptyRetail, skipEmptyBuylist bool
-
-	if canSuperSearch {
-		config := parseSearchOptionsNG(query, blocklistRetail, blocklistBuylist)
-		if pageVars.IsSealed {
-			config.SearchMode = "sealed"
-		}
-
-		foundSellers, foundVendors = searchParallelNG(config)
-
-		cleanQuery = config.CleanQuery
-		canShowAll = (len(config.CardFilters) != 0 || len(config.UUIDs) != 0)
-
-		// Only used in hashing searches, fill in data with what is available
-		if config.FullQuery != "" {
-			pageVars.SearchQuery = config.FullQuery
-		}
-
-		skipEmptyRetail = config.SkipEmptyRetail
-		skipEmptyBuylist = config.SkipEmptyBuylist
-	} else {
-		var options map[string]string
-		cleanQuery, options = parseSearchOptions(query)
-		foundSellers, foundVendors = searchParallel(cleanQuery, options, blocklistRetail, blocklistBuylist)
-		canShowAll = len(options) != 0
-		skipEmptyRetail = options["skip"] == "nosales"
-		skipEmptyBuylist = options["skip"] == "nobuys"
+	config := parseSearchOptionsNG(query, blocklistRetail, blocklistBuylist)
+	if pageVars.IsSealed {
+		config.SearchMode = "sealed"
 	}
+
+	foundSellers, foundVendors := searchParallelNG(config)
+
+	cleanQuery := config.CleanQuery
+	canShowAll := (len(config.CardFilters) != 0 || len(config.UUIDs) != 0)
+
+	// Only used in hashing searches, fill in data with what is available
+	if config.FullQuery != "" {
+		pageVars.SearchQuery = config.FullQuery
+	}
+
+	skipEmptyRetail := config.SkipEmptyRetail
+	skipEmptyBuylist := config.SkipEmptyBuylist
 
 	// Early exit if there no matches are found
 	if len(foundSellers) == 0 && len(foundVendors) == 0 {
@@ -1155,155 +1135,6 @@ func searchVendorsNG(cardIds []string, config SearchConfig) (foundVendors map[st
 	return
 }
 
-func searchSellers(query string, blocklist []string, options map[string]string) (foundSellers map[string]map[string][]SearchEntry) {
-	// Allocate memory
-	foundSellers = map[string]map[string][]SearchEntry{}
-
-	// Search sellers
-	for _, seller := range Sellers {
-		if shouldSkipScraper(seller, blocklist, options) {
-			continue
-		}
-
-		// Get inventory
-		inventory, err := seller.Inventory()
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-
-		// Loop through cards
-		for cardId, entries := range inventory {
-			if shouldSkipCard(query, cardId, options) {
-				continue
-			}
-
-			// Loop thorugh available conditions
-			for _, entry := range entries {
-				// Skip cards that have not the desired condition
-				if options["condition"] != "" {
-					filters := strings.Split(options["condition"], ",")
-					if !SliceStringHas(filters, entry.Conditions) {
-						continue
-					}
-				}
-
-				// Skip cards that don't match desired pricing
-				if shouldSkipSellPrice(cardId, options, entry.Price) {
-					continue
-				}
-
-				// Check if card already has any entry
-				_, found := foundSellers[cardId]
-				if !found {
-					foundSellers[cardId] = map[string][]SearchEntry{}
-				}
-
-				// Set conditions - handle the special TCG one that appears
-				// at the top of the results
-				conditions := entry.Conditions
-				if seller.Info().MetadataOnly {
-					conditions = "INDEX"
-				}
-
-				// Only add Poor prices if there are no NM and SP entries
-				if conditions == "PO" && len(foundSellers[cardId]["NM"]) != 0 && len(foundSellers[cardId]["SP"]) != 0 {
-					continue
-				}
-
-				// Check if the current entry has any condition
-				_, found = foundSellers[cardId][conditions]
-				if !found {
-					foundSellers[cardId][conditions] = []SearchEntry{}
-				}
-
-				icon := ""
-				name := seller.Info().Name
-				switch name {
-				case TCG_DIRECT:
-					icon = "img/misc/direct.png"
-				case CT_ZERO:
-					icon = "img/misc/zero.png"
-				}
-
-				// Prepare all the deets
-				res := SearchEntry{
-					ScraperName: name,
-					Shorthand:   seller.Info().Shorthand,
-					Price:       entry.Price,
-					Quantity:    entry.Quantity,
-					URL:         entry.URL,
-					NoQuantity:  seller.Info().NoQuantityInventory || seller.Info().MetadataOnly,
-					BundleIcon:  icon,
-					Country:     Country2flag[seller.Info().CountryFlag],
-				}
-
-				// Touchdown
-				foundSellers[cardId][conditions] = append(foundSellers[cardId][conditions], res)
-			}
-		}
-	}
-
-	return
-}
-
-func searchVendors(query string, blocklist []string, options map[string]string) (foundVendors map[string][]SearchEntry) {
-	foundVendors = map[string][]SearchEntry{}
-
-	for _, vendor := range Vendors {
-		if shouldSkipScraper(vendor, blocklist, options) {
-			continue
-		}
-
-		buylist, err := vendor.Buylist()
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		for cardId, blEntries := range buylist {
-			if shouldSkipCard(query, cardId, options) {
-				continue
-			}
-
-			// Look up the NM printing
-			nmIndex := 0
-			if vendor.Info().MultiCondBuylist {
-				for nmIndex = range blEntries {
-					if blEntries[nmIndex].Conditions == "NM" {
-						break
-					}
-				}
-			}
-			entry := blEntries[nmIndex]
-
-			if shouldSkipBuyPrice(cardId, options, entry.BuyPrice) {
-				continue
-			}
-
-			_, found := foundVendors[cardId]
-			if !found {
-				foundVendors[cardId] = []SearchEntry{}
-			}
-			name := vendor.Info().Name
-			if name == "TCG Player Market" {
-				name = "TCG Trade-In"
-			}
-			res := SearchEntry{
-				ScraperName: name,
-				Shorthand:   vendor.Info().Shorthand,
-				Price:       entry.BuyPrice,
-				Ratio:       entry.PriceRatio,
-				Quantity:    entry.Quantity,
-				URL:         entry.URL,
-				Country:     Country2flag[vendor.Info().CountryFlag],
-			}
-			foundVendors[cardId] = append(foundVendors[cardId], res)
-		}
-	}
-
-	return
-}
-
 func searchAndFilter(config SearchConfig) ([]string, error) {
 	query := config.CleanQuery
 	filters := config.CardFilters
@@ -1369,36 +1200,6 @@ func searchParallelNG(config SearchConfig, flags ...bool) (foundSellers map[stri
 	wg.Wait()
 
 	return
-}
-
-func searchParallel(query string, options map[string]string, blocklistRetail, blocklistBuylist []string) (foundSellers map[string]map[string][]SearchEntry, foundVendors map[string][]SearchEntry) {
-	var wg sync.WaitGroup
-	wg.Add(2)
-
-	go func() {
-		if options["skip"] != "retail" {
-			foundSellers = searchSellers(query, blocklistRetail, options)
-		}
-		wg.Done()
-	}()
-	go func() {
-		if options["skip"] != "buylist" {
-			foundVendors = searchVendors(query, blocklistBuylist, options)
-		}
-		wg.Done()
-	}()
-
-	wg.Wait()
-
-	// No results with exact? Let's try again with prefix
-	// Not any because it's too imprescise, also we catch results with odd layouts
-	if len(foundSellers) == 0 && len(foundVendors) == 0 &&
-		(options["search_mode"] == "exact" || options["search_mode"] == "") {
-		options["search_mode"] = "prefix"
-		return searchParallel(query, options, blocklistRetail, blocklistBuylist)
-	}
-
-	return foundSellers, foundVendors
 }
 
 func sortSets(uuidI, uuidJ string) bool {
