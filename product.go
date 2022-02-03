@@ -19,6 +19,7 @@ type EditionEntry struct {
 
 var categoryEdition = map[string]string{
 	"archenemy":        "Boxed Sets",
+	"arsenal":          "Commander Supplements",
 	"box":              "Boxed Sets",
 	"commander":        "Commander Decks",
 	"core":             "Core Sets",
@@ -39,10 +40,8 @@ var categoryEdition = map[string]string{
 }
 
 var categoryOverrides = map[string]string{
-	"CC1":  "spellbook",
-	"CC2":  "spellbook",
-	"CM1":  "box",
 	"CMB1": "masters",
+	"CMB2": "masters",
 	"PTG":  "box",
 }
 
@@ -50,7 +49,8 @@ var editionRenames = map[string]string{
 	"Duel Decks Anthology: Elves vs. Goblins": "Duel Decks Anthology",
 	"Media Inserts":                        "San Diego Comic-Con",
 	"Modern Horizons 1 Timeshifts":         "Modern Horizons",
-	"Mystery Booster Playtest Cards":       "Mystery Booster Convention Edition",
+	"Mystery Booster Playtest Cards 2019":  "Mystery Booster Convention Edition 2019",
+	"Mystery Booster Playtest Cards 2021":  "Mystery Booster Convention Edition 2021",
 	"Mystery Booster Retail Edition Foils": "Mystery Booster Retail Edition",
 	"World Championship Decks 1997":        "World Championship Decks",
 }
