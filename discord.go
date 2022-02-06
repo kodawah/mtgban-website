@@ -712,6 +712,13 @@ func prepareCard(searchRes *searchResult, ogFields []embedField, guildId string,
 			cn = append(cn, co.Number)
 		}
 		sort.Slice(cn, func(i, j int) bool {
+			// Try integer comparison first
+			cInum, errI := strconv.Atoi(cn[i])
+			cJnum, errJ := strconv.Atoi(cn[j])
+			if errI == nil && errJ == nil {
+				return cInum < cJnum
+			}
+			// Else do a string comparison
 			return cn[i] < cn[j]
 		})
 		printings = fmt.Sprintf("%s. Variants in %s are %s", printings, searchRes.EditionSearched, strings.Join(cn, ", "))
