@@ -8,6 +8,7 @@ import (
 
 	"github.com/kodabb/go-mtgban/mtgban"
 	"github.com/kodabb/go-mtgban/mtgmatcher"
+	"github.com/kodabb/go-mtgban/mtgmatcher/mtgjson"
 )
 
 type EditionEntry struct {
@@ -63,6 +64,16 @@ var editionSkips = map[string]string{
 	"Modern Horizons":        "",
 }
 
+func makeEditionEntry(set *mtgjson.Set) EditionEntry {
+	date, _ := time.Parse("2006-01-02", set.ReleaseDate)
+	return EditionEntry{
+		Name:    set.Name,
+		Code:    set.Code,
+		Date:    date,
+		Keyrune: strings.ToLower(set.KeyruneCode),
+	}
+}
+
 func getAllEditions() ([]string, map[string]EditionEntry) {
 	sets := mtgmatcher.GetSets()
 
@@ -74,19 +85,9 @@ func getAllEditions() ([]string, map[string]EditionEntry) {
 			continue
 		}
 
-		date, err := time.Parse("2006-01-02", set.ReleaseDate)
-		if err != nil {
-			continue
-		}
-
 		sortedEditions = append(sortedEditions, set.Code)
 
-		listEditions[set.Code] = EditionEntry{
-			Name:    set.Name,
-			Code:    set.Code,
-			Date:    date,
-			Keyrune: strings.ToLower(set.KeyruneCode),
-		}
+		listEditions[set.Code] = makeEditionEntry(set)
 	}
 
 	sort.Slice(sortedEditions, func(i, j int) bool {
@@ -111,11 +112,6 @@ func getSealedEditions() ([]string, map[string][]EditionEntry) {
 			continue
 		}
 
-		date, err := time.Parse("2006-01-02", set.ReleaseDate)
-		if err != nil {
-			continue
-		}
-
 		setType := set.Type
 		rename, found := categoryOverrides[set.Code]
 		if found {
@@ -132,12 +128,8 @@ func getSealedEditions() ([]string, map[string][]EditionEntry) {
 			name = rename
 		}
 
-		listEditions[category] = append(listEditions[category], EditionEntry{
-			Name:    name,
-			Code:    set.Code,
-			Date:    date,
-			Keyrune: strings.ToLower(set.KeyruneCode),
-		})
+		entry := makeEditionEntry(set)
+		listEditions[category] = append(listEditions[category], entry)
 	}
 
 	for key := range listEditions {
