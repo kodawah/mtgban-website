@@ -52,13 +52,25 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	query := r.FormValue("q")
 
+	pageVars.IsSets = r.URL.Path == "/sets"
+
+	pageVars.Nav = insertNavBar("Search", pageVars.Nav, []NavElem{
+		NavElem{
+			Name:   "Sets",
+			Short:  "📦",
+			Link:   "/sets",
+			Active: pageVars.IsSets,
+			Class:  "selected",
+		},
+	})
+
 	canSealed, _ := strconv.ParseBool(GetParamFromSig(sig, "SearchSealed"))
 	canSealed = canSealed || (DevMode && !SigCheck)
 
 	pageVars.IsSealed = r.URL.Path == "/sealed"
 
 	if canSealed {
-		pageVars.Nav = insertNavBar("Search", pageVars.Nav, []NavElem{
+		pageVars.Nav = insertNavBar("Sets", pageVars.Nav, []NavElem{
 			NavElem{
 				Name:   "Sealed",
 				Short:  "🧱",
@@ -93,6 +105,36 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			pageVars.EditionSort = SealedEditionsSorted
 			pageVars.EditionList = SealedEditionsList
 			render(w, "product.html", pageVars)
+			return
+		} else if pageVars.IsSets {
+			pageVars.EditionSort = TreeEditionsKeys
+			pageVars.EditionList = TreeEditionsMap
+			pageVars.TotalSets = TotalSets
+			pageVars.TotalCards = TotalCards
+			pageVars.TotalUnique = TotalUnique
+
+			sortOpt := r.FormValue("sort")
+
+			if sortOpt == "name" {
+				namedSort := make([]string, len(TreeEditionsKeys))
+				copy(namedSort, TreeEditionsKeys)
+				sort.Slice(namedSort, func(i, j int) bool {
+					return TreeEditionsMap[namedSort[i]][0].Name < TreeEditionsMap[namedSort[j]][0].Name
+				})
+				pageVars.EditionSort = namedSort
+			} else if sortOpt == "size" {
+				sizeSort := make([]string, len(TreeEditionsKeys))
+				copy(sizeSort, TreeEditionsKeys)
+				sort.Slice(sizeSort, func(i, j int) bool {
+					if TreeEditionsMap[sizeSort[i]][0].Size == TreeEditionsMap[sizeSort[j]][0].Size {
+						return TreeEditionsMap[sizeSort[i]][0].Name < TreeEditionsMap[sizeSort[j]][0].Name
+					}
+					return TreeEditionsMap[sizeSort[i]][0].Size > TreeEditionsMap[sizeSort[j]][0].Size
+				})
+				pageVars.EditionSort = sizeSort
+			}
+
+			render(w, "editions.html", pageVars)
 			return
 		}
 

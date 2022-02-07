@@ -122,6 +122,10 @@ type PageVars struct {
 	EditionSort []string
 	EditionList map[string][]EditionEntry
 	IsSealed    bool
+	IsSets      bool
+	TotalSets   int
+	TotalCards  int
+	TotalUnique int
 
 	CompactEntries  map[string]map[string]*BanPrice
 	IndexEntries    map[string]map[string]*BanPrice
@@ -333,6 +337,9 @@ var SealedEditionsSorted []string
 var SealedEditionsList map[string][]EditionEntry
 var AllEditionsKeys []string
 var AllEditionsMap map[string]EditionEntry
+var TreeEditionsKeys []string
+var TreeEditionsMap map[string][]EditionEntry
+var TotalSets, TotalCards, TotalUnique int
 
 var Newspaper3dayDB *sql.DB
 var Newspaper1dayDB *sql.DB
@@ -625,6 +632,8 @@ func main() {
 		// Set up the handler
 		http.Handle(nav.Link, enforceSigning(http.HandlerFunc(nav.Handle)))
 	}
+
+	http.Handle("/sets", enforceSigning(http.HandlerFunc(Search)))
 	http.Handle("/sealed", enforceSigning(http.HandlerFunc(Search)))
 
 	http.Handle("/api/mtgban/", enforceAPISigning(http.HandlerFunc(PriceAPI)))

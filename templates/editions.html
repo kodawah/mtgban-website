@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Rosario:400' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../css/main.css">
+    <link href="//cdn.jsdelivr.net/npm/keyrune@latest/css/keyrune.css" rel="stylesheet" type="text/css" />
+    <title>{{.Title}}</title>
+</head>
+
+<body class="light-theme">
+<script type="text/javascript" src="../js/themechecker.js"></script>
+<nav>
+    <ul>
+        <li><a href="https://www.patreon.com/ban_community"><img src="img/misc/patreon.png" width=48></a></li>
+        <li><a href="/discord"><img src="img/misc/discord.png" width=48></a></li>
+        {{range .Nav}}
+            <li>
+                <a {{if .Active}}class="{{.Class}}"{{end}} href="{{.Link}}">
+                    <span>{{.Short}} {{.Name}}</span>
+                </a>
+            </li>
+        {{end}}
+        <li>
+            <label class="switch">
+                <div>
+                    <input type="checkbox"/>
+                    <span class="slider"></span>
+                </div>
+                <script type="text/javascript" src="../js/nightmode.js"></script>
+            </label>
+        </li>
+    </ul>
+</nav>
+
+<div class="mainbody">
+    {{if ne .ErrorMessage ""}}
+        <h1>{{.ErrorMessage}}</h1>
+        {{if .ShowPromo}}
+            <img class="center" src="img/promo/search.jpg">
+        {{end}}
+    {{else}}
+        <h1>Welcome to BAN Editions</h1>
+        <div class="indent" style="max-width: 85%">
+            <div class="indent" style="max-width: 85%">
+                Tracking {{.TotalSets}} editions, for {{.TotalCards}} cards over {{.TotalUnique}} printings.
+            </div>
+            <br>
+
+            <table style="float: left; background-color: var(--background); width:60%">
+                <tr>
+                    <th><a class="btn default" style="padding: 0 0 0 0" href="/sets?sort=name" title="Sort by edition name"> Name</a></th>
+                    <th><a class="btn default" style="padding: 0 0 0 0" href="/sets?sort=size" title="Sort by number of cards">Size</a></th>
+                    <th><a class="btn default" style="padding: 0 0 0 0" href="/sets" title="Sort by date">Release Date</a></th>
+                </tr>
+                {{range $key := .EditionSort}}
+                    {{$editionList := index $.EditionList $key }}
+                    {{range $i, $edition := $editionList}}
+                        <tr>
+                            <td>
+                                <nobr>
+                                    {{if gt $i 0}}
+                                    <h4 style="display:inline; padding: 0px 10px 0px 10px">&nbsp;</h6>
+                                    {{end}}
+
+                                    <i class="ss ss-{{$edition.Keyrune}} ss-1x ss-fw"></i>
+                                    <a class="btn normal" href="/search?q=s:{{$edition.Code}}">
+                                        {{.Name}}
+                                    </a>
+                                    <h6 style="display:inline">{{$edition.Code}}</h6>
+                                </nobr>
+                            </td>
+                            <td>
+                                {{$edition.Size}}
+                            </td>
+                            <td>
+                                {{$edition.FmtDate}}
+                            </td>
+                        </tr>
+                    {{end}}
+                {{end}}
+            </table>
+        </div>
+        <div style="clear:both;"></div>
+        <br><br>
+        <div class="indent" style="max-width: 85%">
+            <h6>This page is modeled after the <a href="https://scryfall.com/sets">All Sets</a> page.<br>Please consider <a href="https://scryfall.com/donate">supporting</a> the Scryfall project.</h6>
+        </div>
+        <br>
+    {{end}}
+    <br>
+</div>
+</body>
+</html>

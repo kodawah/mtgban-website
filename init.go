@@ -790,6 +790,15 @@ func loadScrapers() {
 
 	SealedEditionsSorted, SealedEditionsList = getSealedEditions()
 	AllEditionsKeys, AllEditionsMap = getAllEditions()
+	TreeEditionsKeys, TreeEditionsMap = getTreeEditions()
+
+	TotalSets = len(AllEditionsKeys)
+	TotalUnique = len(mtgmatcher.GetUUIDs())
+	var totalCards int
+	for _, key := range AllEditionsKeys {
+		totalCards += AllEditionsMap[key].Size
+	}
+	TotalCards = totalCards
 
 	go loadInfos()
 	go runSealedAnalysis()

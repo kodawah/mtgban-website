@@ -16,6 +16,8 @@ type EditionEntry struct {
 	Code    string
 	Date    time.Time
 	Keyrune string
+	Size    int
+	FmtDate string
 }
 
 var categoryEdition = map[string]string{
@@ -71,6 +73,8 @@ func makeEditionEntry(set *mtgjson.Set) EditionEntry {
 		Code:    set.Code,
 		Date:    date,
 		Keyrune: strings.ToLower(set.KeyruneCode),
+		Size:    len(set.Cards),
+		FmtDate: set.ReleaseDate,
 	}
 }
 
@@ -93,6 +97,70 @@ func getAllEditions() ([]string, map[string]EditionEntry) {
 	sort.Slice(sortedEditions, func(i, j int) bool {
 		return listEditions[sortedEditions[i]].Date.After(listEditions[sortedEditions[j]].Date)
 	})
+
+	return sortedEditions, listEditions
+}
+
+func getTreeEditions() ([]string, map[string][]EditionEntry) {
+	sets := mtgmatcher.GetSets()
+
+	sortedEditions := make([]string, 0, len(sets))
+	listEditions := map[string][]EditionEntry{}
+	for _, set := range sets {
+		entry := makeEditionEntry(set)
+
+		if set.ParentCode == "" {
+			// Skip if it was already added from the other case
+			_, found := listEditions[set.Code]
+			if found {
+				continue
+			}
+			// Create the head, list in the slice to be sorted
+			listEditions[set.Code] = []EditionEntry{entry}
+			sortedEditions = append(sortedEditions, set.Code)
+		} else {
+			// Find the very fist parent
+			topParentCode := set.ParentCode
+			for sets[topParentCode].ParentCode != "" {
+				topParentCode = sets[topParentCode].ParentCode
+			}
+
+			// Check if the head of the tree is already present
+			_, found := listEditions[topParentCode]
+			if !found {
+				// If not, create it
+				headEntry := makeEditionEntry(sets[topParentCode])
+				listEditions[topParentCode] = []EditionEntry{headEntry}
+				sortedEditions = append(sortedEditions, topParentCode)
+			}
+			// Append the new entry
+			listEditions[topParentCode] = append(listEditions[topParentCode], entry)
+		}
+	}
+
+	// Sort main list by date
+	sort.Slice(sortedEditions, func(i, j int) bool {
+		// Sort by name in case date is the same
+		if listEditions[sortedEditions[i]][0].Date == listEditions[sortedEditions[j]][0].Date {
+			return listEditions[sortedEditions[i]][0].Name < listEditions[sortedEditions[j]][0].Name
+		}
+		return listEditions[sortedEditions[i]][0].Date.After(listEditions[sortedEditions[j]][0].Date)
+	})
+
+	// Sort sublists by date
+	for _, key := range sortedEditions {
+		sort.Slice(listEditions[key], func(i, j int) bool {
+			// Keep the first element always first
+			if j == 0 {
+				return false
+			}
+			// Sort by name in case date is the same
+			if listEditions[key][i].Date == listEditions[key][j].Date {
+				return listEditions[key][i].Name < listEditions[key][j].Name
+			}
+			return listEditions[key][i].Date.After(listEditions[key][j].Date)
+		})
+	}
 
 	return sortedEditions, listEditions
 }
