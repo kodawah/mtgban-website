@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	MaxUploadEntries    = 150
+	MaxUploadEntries    = 250
 	MaxUploadProEntries = 2000
 	MaxUploadFileSize   = 5 << 20
 
