@@ -47,7 +47,7 @@
             <img class="center" src="img/promo/search.jpg">
         {{end}}
     {{else}}
-        <h1>Welcome to BAN {{if not (eq .ChartID "")}}Chart{{end}} Search</h1>
+        <h1>Welcome to BAN {{if .IsSealed}}Sealed{{else}}{{if not (eq .ChartID "")}}Chart{{end}} Search{{end}}</h1>
         <div class="indent sticky" style="top:48px; background-color: var(--background); z-index: 3; width: min-content;">
             <form class="search autocomplete" action="" autocomplete="off" spellcheck="false" id="searchform">
                 <label style="clear: both; float: left;" for="searchbox">
