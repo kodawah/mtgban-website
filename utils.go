@@ -444,6 +444,8 @@ func setCookie(w http.ResponseWriter, r *http.Request, cookieName, value string)
 		// No expiration
 		Expires: time.Now().Add(10 * 365 * 24 * 60 * 60 * time.Second),
 		Value:   value,
+		// Enforce first party cookies only
+		SameSite: http.SameSiteStrictMode,
 	})
 	return
 }
