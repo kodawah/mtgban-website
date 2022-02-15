@@ -193,6 +193,7 @@ var FilterOperations = map[string][]string{
 	"f":         []string{":"},
 	"c":         []string{":"},
 	"is":        []string{":"},
+	"on":        []string{":"},
 	"price":     []string{">", "<"},
 	"buy_price": []string{">", "<"},
 	"arb_price": []string{">", "<"},
@@ -406,6 +407,12 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 		case "is":
 			filters = append(filters, FilterElem{
 				Name:   "is",
+				Negate: negate,
+				Values: strings.Split(strings.ToLower(code), ","),
+			})
+		case "on":
+			filters = append(filters, FilterElem{
+				Name:   "on",
 				Negate: negate,
 				Values: strings.Split(strings.ToLower(code), ","),
 			})
@@ -652,6 +659,23 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 		return compareReleaseDate(filters, co, func(a, b time.Time) bool {
 			return a.After(b)
 		})
+	},
+	"on": func(filters []string, co *mtgmatcher.CardObject) bool {
+		for _, value := range filters {
+			switch value {
+			case "mtgstocks":
+				_, found := Infos["STKS"][co.UUID]
+				if found {
+					return false
+				}
+			case "tcgsyp", "syp":
+				_, found := Infos["TCGSYPList"][co.UUID]
+				if found {
+					return false
+				}
+			}
+		}
+		return true
 	},
 	"is": func(filters []string, co *mtgmatcher.CardObject) bool {
 		for _, value := range filters {
