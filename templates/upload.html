@@ -88,7 +88,19 @@
                         </a>
                     {{end}}
                     <br><br>
-                    <input type="submit" id="submit" value="&nbsp;&nbsp;Upload&nbsp;&nbsp;" {{if and (not .RemoteLinkURL) (not .CardHashes)}}disabled{{end}}>
+
+                    <script type="text/javascript">
+                        function downloadResults(val) {
+                            var download = document.getElementById('download');
+                            download.value = val;
+                            var btn = document.getElementById('submit');
+                            btn.submit();
+                        }
+                    </script>
+
+                    <input type="hidden" id="download" name="download" value="false"/>
+                    <input type="submit" id="submit" value="&nbsp;&nbsp;Upload&nbsp;&nbsp;" onclick="javascript:downloadResults('false');" {{if and (not .RemoteLinkURL) (not .CardHashes)}}disabled{{end}}>
+                    <input type="submit" id="submit_download" value="&nbsp;&nbsp;Get CSV&nbsp;&nbsp;" onclick="javascript:downloadResults('true');" {{if and (not .RemoteLinkURL) (not .CardHashes)}}disabled{{end}}>
                 </form>
             </center>
         </div>
@@ -191,6 +203,7 @@
                         <li>Below that row, you will find a summary of how many cards were not found in any given store, and an estimation (using TCG Low) of the value missing.</li>
                         <li>If price or quantity data is found in your entries, it will be displayed above the results.</li>
                     </ul>
+                    <li>If you prefer to download a CSV of your results, instead of browsing them on BAN, you may hit the "Get CSV" button.</li>
                     <li>If anything doesn't work, post your file on Discord and we'll take a look.</li>
                 </ul>
              </div>

@@ -238,6 +238,22 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		results = getSellerPrices("", enabledStores, "", cardIds, false, false)
 	}
 
+	download, _ := strconv.ParseBool(r.FormValue("download"))
+	if download {
+		w.Header().Set("Content-Type", "text/csv")
+		w.Header().Set("Content-Disposition", "attachment; filename=\"mtgban_prices.csv\"")
+		csvWriter := csv.NewWriter(w)
+
+		err = BanPrice2CSV(csvWriter, results, false, false, true)
+		if err != nil {
+			w.Header().Del("Content-Type")
+			UserNotify("upload", err.Error())
+			pageVars.InfoMessage = "Unable to download CSV right now"
+			render(w, "upload.html", pageVars)
+		}
+		return
+	}
+
 	indexResults := getSellerPrices("", UploadIndexKeys, "", cardIds, false, false)
 	pageVars.IndexEntries = indexResults
 	pageVars.IndexKeys = UploadIndexKeys
