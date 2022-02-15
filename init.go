@@ -984,6 +984,7 @@ func loadInfoScraper(seller mtgban.Seller) {
 		return
 	}
 	Infos[seller.Info().Shorthand] = inv
+	log.Println("Infos loaded:", seller.Info().Name)
 }
 
 func recoverPanicScraper() {
