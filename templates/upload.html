@@ -99,8 +99,10 @@
                     </script>
 
                     <input type="hidden" id="download" name="download" value="false"/>
-                    <input type="submit" id="submit" value="&nbsp;&nbsp;Upload&nbsp;&nbsp;" onclick="javascript:downloadResults('false');" {{if and (not .RemoteLinkURL) (not .CardHashes)}}disabled{{end}}>
-                    <input type="submit" id="submit_download" value="&nbsp;&nbsp;Get CSV&nbsp;&nbsp;" onclick="javascript:downloadResults('true');" {{if and (not .RemoteLinkURL) (not .CardHashes)}}disabled{{end}}>
+                    <input type="submit" id="submit" value="&nbsp;&nbsp;Upload&nbsp;&nbsp;" onclick="javascript:downloadResults('false');" {{if and (not .RemoteLinkURL) (not .CardHashes)}}disabled{{end}} style="display:inline">
+                    {{if .CanBuylist}}
+                        <input type="submit" id="submit_download" value="&nbsp;&nbsp;Get CSV&nbsp;&nbsp;" onclick="javascript:downloadResults('true');" {{if and (not .RemoteLinkURL) (not .CardHashes)}}disabled{{end}} style="display:none">
+                    {{end}}
                 </form>
             </center>
         </div>
@@ -114,12 +116,20 @@
                                 <option value='{{.}}' {{if slice_has $.EnabledVendors .}}selected{{end}}>{{scraper_name .}}</option> \
                             {{end}} \
                         ";
+                        var submitButton = document.getElementById('submit_download');
+                        if (submitButton) {
+                            submitButton.style.display = "none"
+                        }
                     } else if (mode == "retail") {
                         selectBox.innerHTML = " \
                             {{range .SellerKeys}} \
                                 <option value='{{.}}' {{if slice_has $.EnabledSellers .}}selected{{end}}>{{scraper_name .}}</option> \
                             {{end}} \
                         ";
+                        var submitButton = document.getElementById('submit_download');
+                        if (submitButton) {
+                            submitButton.style.display = "inline"
+                        }
                     }
                 }
             };
@@ -137,6 +147,11 @@
 
                     var btn = document.getElementById('submit');
                     btn.disabled = false;
+
+                    var btn2 = document.getElementById('submit_download');
+                    if (btn2) {
+                        btn2.disabled = false;
+                    }
                }
             };
             window.askForURL = function(){
@@ -151,6 +166,11 @@
 
                     var btn = document.getElementById('submit');
                     btn.disabled = false;
+
+                    var btn2 = document.getElementById('submit_download');
+                    if (btn2) {
+                        btn2.disabled = false;
+                    }
                 } else if (url != null && url != "") {
                     alert("Invalid URL");
                 }

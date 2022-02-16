@@ -238,8 +238,9 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		results = getSellerPrices("", enabledStores, "", cardIds, false, false)
 	}
 
+	// Enable download if buylist page is accessible but only for retail
 	download, _ := strconv.ParseBool(r.FormValue("download"))
-	if download {
+	if download && canBuylist && !blMode {
 		w.Header().Set("Content-Type", "text/csv")
 		w.Header().Set("Content-Disposition", "attachment; filename=\"mtgban_prices.csv\"")
 		csvWriter := csv.NewWriter(w)
