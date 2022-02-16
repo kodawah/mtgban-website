@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"path"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -569,6 +570,74 @@ func BanPrice2CSV(w *csv.Writer, pm map[string]map[string]*BanPrice, shouldQty, 
 				return err
 			}
 		}
+		w.Flush()
+	}
+	return nil
+}
+
+func SimplePrice2CSV(w *csv.Writer, pm map[string]map[string]*BanPrice) error {
+	allScrapersMap := map[string]int{}
+	for id := range pm {
+		for scraper := range pm[id] {
+			allScrapersMap[scraper] = 0
+		}
+	}
+	allScrapers := make([]string, 0, len(allScrapersMap))
+	for scraper := range allScrapersMap {
+		allScrapers = append(allScrapers, scraper)
+	}
+	sort.Slice(allScrapers, func(i, j int) bool {
+		return allScrapers[i] < allScrapers[j]
+	})
+
+	header := []string{"UUID", "Card Name", "Edition", "Number", "Finish"}
+	header = append(header, allScrapers...)
+	err := w.Write(header)
+	if err != nil {
+		return err
+	}
+
+	for id := range pm {
+		var cardName, edition, number string
+		co, err := mtgmatcher.GetUUID(id)
+		if err != nil {
+			continue
+		}
+		cardName = co.Name
+		edition = co.Edition
+		number = co.Number
+
+		prices := make([]string, len(allScrapers))
+
+		for i, scraper := range allScrapers {
+			entry, found := pm[id][scraper]
+			if !found {
+				continue
+			}
+			price := entry.Regular
+			if co.Etched {
+				price = entry.Etched
+			} else if co.Foil {
+				price = entry.Foil
+			}
+			prices[i] = fmt.Sprintf("%0.2f", price)
+		}
+
+		record := []string{id, cardName, edition, number}
+		if co.Etched {
+			record = append(record, "etched")
+		} else if co.Foil {
+			record = append(record, "foil")
+		} else {
+			record = append(record, "nonfoil")
+		}
+		record = append(record, prices...)
+
+		err = w.Write(record)
+		if err != nil {
+			return err
+		}
+
 		w.Flush()
 	}
 	return nil
