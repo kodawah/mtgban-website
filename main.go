@@ -90,7 +90,6 @@ type PageVars struct {
 	FilterRarity string
 	Rarities     []string
 	CardHashes   []string
-	CanBridge    bool
 	EditionsMap  map[string]EditionEntry
 
 	CanFilterByPrice bool
@@ -198,7 +197,6 @@ var OptionalFields = []string{
 	"ArbitDisabledVendors",
 	"ExpEnabled",
 	"NewsEnabled",
-	"NewsBridgeEnabled",
 	"UploadBuylistEnabled",
 	"UploadChangeStoresEnabled",
 	"UploadOptimizer",

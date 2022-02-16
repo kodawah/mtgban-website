@@ -527,8 +527,6 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	enabledBridge, _ := strconv.ParseBool(GetParamFromSig(sig, "NewsBridgeEnabled"))
-
 	pageVars.ToC = NewspaperPages
 
 	r.ParseForm()
@@ -823,8 +821,6 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 			pageVars.InfoMessage = "No results for the current filter options"
 		}
 	}
-
-	pageVars.CanBridge = enabledBridge || (DevMode && !SigCheck)
 
 	render(w, "news.html", pageVars)
 }
