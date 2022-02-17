@@ -256,19 +256,22 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 		variant = "JPN" + variant
 	}
 
-	query := fmt.Sprintf("%s s:%s cn:%s", co.Name, co.SetCode, co.Number)
-	if co.Etched {
-		query += " f:etched"
+	query := co.Name
+	if !co.Sealed {
+		query = fmt.Sprintf("%s s:%s cn:%s", co.Name, co.SetCode, co.Number)
+		if co.Etched {
+			query += " f:etched"
 
-		// Append Etched information to the tag
-		if variant != "" {
-			variant += " "
+			// Append Etched information to the tag
+			if variant != "" {
+				variant += " "
+			}
+			variant += "Etched"
+		} else if co.Foil {
+			query += " f:foil"
+		} else if !co.Etched && !co.Foil {
+			query += " f:nonfoil"
 		}
-		variant += "Etched"
-	} else if co.Foil {
-		query += " f:foil"
-	} else if !co.Etched && !co.Foil {
-		query += " f:nonfoil"
 	}
 
 	smallImg := false
