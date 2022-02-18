@@ -424,52 +424,6 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func fixupDate(code string) string {
-	set, err := mtgmatcher.GetSet(strings.ToUpper(code))
-	if err == nil {
-		code = set.ReleaseDate
-	}
-	_, err = time.Parse("2006-01-02", code)
-	if err == nil {
-		return code
-	}
-	return ""
-}
-
-func price4seller(cardId, shorthand string) float64 {
-	for _, seller := range Sellers {
-		if seller != nil && strings.ToLower(seller.Info().Shorthand) == strings.ToLower(shorthand) {
-			inv, err := seller.Inventory()
-			if err != nil {
-				continue
-			}
-			entries, found := inv[cardId]
-			if !found {
-				continue
-			}
-			return entries[0].Price
-		}
-	}
-	return 0
-}
-
-func price4vendor(cardId, shorthand string) float64 {
-	for _, vendor := range Vendors {
-		if vendor != nil && strings.ToLower(vendor.Info().Shorthand) == strings.ToLower(shorthand) {
-			bl, err := vendor.Buylist()
-			if err != nil {
-				continue
-			}
-			entries, found := bl[cardId]
-			if !found {
-				continue
-			}
-			return entries[0].BuyPrice
-		}
-	}
-	return 0
-}
-
 func searchSellersNG(cardIds []string, config SearchConfig) (foundSellers map[string]map[string][]SearchEntry) {
 	// Allocate memory
 	foundSellers = map[string]map[string][]SearchEntry{}
