@@ -128,6 +128,7 @@
                     <li>Inventory prices refer to the stated conditions (and their accuracy depends on the data provider).</li>
                     <li>Buylist prices are always referring to NM conditions.</li>
                     <li>TCG Low is a special value referring to TCG algorithms that may differ from quantity and quality of listings.</li>
+                    <li>If you hover on a buylist price, a small tooltip will appear displaying the corresponding trade-in price, if available.</li>
                     <li>In case of mistakes or incongruities, please notify the devs in the BAN Discord.</li>
                     <li>Should you find this content useful, consider clicking on one of the provided links to make a purchase on the website, and directly support BAN.</li>
                 </ul>
@@ -431,7 +432,7 @@
                                                     {{.ScraperName}} {{.Country}}
                                                 </a>
                                             </td>
-                                            <td>
+                                            <td {{if .Credit}}title="Credit: $ {{printf "%.2f" .Credit}}"{{end}}>
                                                 $ {{printf "%.2f" .Price}}
                                             </td>
                                             <td style="text-align: center; vertical-align: middle;">
