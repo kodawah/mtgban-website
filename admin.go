@@ -294,7 +294,7 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 	pageVars.MemoryStatus = mem()
 	pageVars.LatestHash, _ = latestHash()
 	pageVars.CurrentTime = time.Now()
-	pageVars.DemoKey = getDemoKey(getBaseURL(r))
+	pageVars.DemoKey = url.QueryEscape(getDemoKey(getBaseURL(r)))
 
 	render(w, "admin.html", pageVars)
 }
