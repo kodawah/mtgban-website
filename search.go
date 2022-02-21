@@ -646,48 +646,53 @@ func searchParallelNG(config SearchConfig, flags ...bool) (foundSellers map[stri
 	return
 }
 
-func sortSets(uuidI, uuidJ string) bool {
-	cI, err := mtgmatcher.GetUUID(uuidI)
-	if err != nil {
-		return false
-	}
-	setI, err := mtgmatcher.GetSet(cI.Card.SetCode)
-	if err != nil {
-		return false
-	}
-	dateI := setI.ReleaseDate
-	if cI.Card.OriginalReleaseDate != "" {
-		dateI = cI.Card.OriginalReleaseDate
-	}
-	setDateI, err := time.Parse("2006-01-02", dateI)
-	if err != nil {
-		return false
-	}
-	editionI := setI.Name
+type SortingData struct {
+	co          *mtgmatcher.CardObject
+	releaseDate time.Time
+	parentCode  string
+}
 
-	cJ, err := mtgmatcher.GetUUID(uuidJ)
+func getSortingData(uuid string) (*SortingData, error) {
+	co, err := mtgmatcher.GetUUID(uuid)
+	if err != nil {
+		return nil, err
+	}
+	set, err := mtgmatcher.GetSet(co.SetCode)
+	if err != nil {
+		return nil, err
+	}
+	releaseDate := set.ReleaseDate
+	if co.OriginalReleaseDate != "" {
+		releaseDate = co.OriginalReleaseDate
+	}
+	setDate, err := time.Parse("2006-01-02", releaseDate)
+	if err != nil {
+		return nil, err
+	}
+	return &SortingData{
+		co:          co,
+		releaseDate: setDate,
+		parentCode:  set.ParentCode,
+	}, nil
+}
+
+func sortSets(uuidI, uuidJ string) bool {
+	sortingI, err := getSortingData(uuidI)
 	if err != nil {
 		return false
 	}
-	setJ, err := mtgmatcher.GetSet(cJ.Card.SetCode)
+	sortingJ, err := getSortingData(uuidJ)
 	if err != nil {
 		return false
 	}
-	dateJ := setJ.ReleaseDate
-	if cJ.Card.OriginalReleaseDate != "" {
-		dateJ = cJ.Card.OriginalReleaseDate
-	}
-	setDateJ, err := time.Parse("2006-01-02", dateJ)
-	if err != nil {
-		return false
-	}
-	editionJ := setJ.Name
+	cI, setDateI := sortingI.co, sortingI.releaseDate
+	cJ, setDateJ := sortingJ.co, sortingJ.releaseDate
 
 	// If the two sets have the same release date, let's dig more
 	if setDateI.Equal(setDateJ) {
 		// If they are part of the same edition, check for their collector number
 		// taking their foiling into consideration
-		if editionI == editionJ {
+		if cI.Edition == cJ.Edition {
 			// Special case for sealed products
 			if cI.Sealed && cJ.Sealed {
 				return cI.Name < cJ.Name
@@ -721,12 +726,12 @@ func sortSets(uuidI, uuidJ string) bool {
 			return cI.Card.Number < cJ.Card.Number
 
 			// For the special case of set promos, always keeps them after
-		} else if setI.ParentCode == "" && setJ.ParentCode != "" {
+		} else if sortingI.parentCode == "" && sortingJ.parentCode != "" {
 			return true
-		} else if setJ.ParentCode == "" && setI.ParentCode != "" {
+		} else if sortingJ.parentCode == "" && sortingI.parentCode != "" {
 			return false
 		} else {
-			return editionI < editionJ
+			return cI.Edition < cJ.Edition
 		}
 	}
 
