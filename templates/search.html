@@ -55,7 +55,7 @@
                         Search for a card, or... <a class="btn info" href="/random">surprise me</a>
                     {{else}}
                         Sort by
-                        <a class="btn info" href="?q={{.SearchQuery}}&b={{.SearchBest}}&sort=" title="Sort by chronological order (default)">
+                        <a class="btn info" href="?q={{.SearchQuery}}&b={{.SearchBest}}&sort=" title="Sort by chronological order">
                             {{if not .SearchSort}}<b>{{end}}chrono{{if not .SearchSort}}</b>{{end}}
                         </a>
                         <a class="btn info" href="?q={{.SearchQuery}}&b={{.SearchBest}}&sort=alpha" title="Sort by alphabetical order">
