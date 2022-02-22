@@ -46,6 +46,7 @@ type PageVars struct {
 	AllKeys      []string
 	SearchQuery  string
 	SearchBest   bool
+	SearchSort   string
 	CondKeys     []string
 	FoundSellers map[string]map[string][]SearchEntry
 	FoundVendors map[string][]SearchEntry

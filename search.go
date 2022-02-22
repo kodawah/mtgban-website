@@ -146,6 +146,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	// Keep track of what was searched
 	pageVars.SearchQuery = query
 	pageVars.SearchBest = readSetFlag(w, r, "b", "MTGBANSearchPref")
+	pageVars.SearchSort = r.FormValue("sort")
 	pageVars.CondKeys = AllConditions
 	pageVars.Metadata = map[string]GenericCard{}
 
@@ -208,10 +209,25 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Sort keys according to the sortSets() function, chronologically
-	sort.Slice(allKeys, func(i, j int) bool {
-		return sortSets(allKeys[i], allKeys[j])
-	})
+	// Sort sets as requested, default to chronological
+	switch pageVars.SearchSort {
+	case "alpha":
+		sort.Slice(allKeys, func(i, j int) bool {
+			return sortSetsAlphabetical(allKeys[i], allKeys[j])
+		})
+	case "retail":
+		sort.Slice(allKeys, func(i, j int) bool {
+			return sortSetsByRetail(allKeys[i], allKeys[j])
+		})
+	case "buylist":
+		sort.Slice(allKeys, func(i, j int) bool {
+			return sortSetsByBuylist(allKeys[i], allKeys[j])
+		})
+	default:
+		sort.Slice(allKeys, func(i, j int) bool {
+			return sortSets(allKeys[i], allKeys[j])
+		})
+	}
 
 	// If results can't fit in one page, chunk response and enable pagination
 	if len(allKeys) > MaxSearchResults {
@@ -736,4 +752,86 @@ func sortSets(uuidI, uuidJ string) bool {
 	}
 
 	return setDateI.After(setDateJ)
+}
+
+// Sort card by their names, trying to keep cards grouped by edition, following
+// the same rules as sortSets
+func sortSetsAlphabetical(uuidI, uuidJ string) bool {
+	sortingI, err := getSortingData(uuidI)
+	if err != nil {
+		return false
+	}
+	sortingJ, err := getSortingData(uuidJ)
+	if err != nil {
+		return false
+	}
+	cI, setDateI := sortingI.co, sortingI.releaseDate
+	cJ, setDateJ := sortingJ.co, sortingJ.releaseDate
+
+	if cI.Name == cJ.Name {
+		if setDateI.Equal(setDateJ) {
+			// If their number is the same, check for foiling status
+			if cI.Card.Number == cJ.Card.Number {
+				if cI.Etched || cJ.Etched {
+					if cI.Etched == true && cJ.Etched == false {
+						return false
+					} else if cI.Etched == false && cJ.Etched == true {
+						return true
+					}
+				} else if cI.Foil || cJ.Foil {
+					if cI.Foil == true && cJ.Foil == false {
+						return false
+					} else if cI.Foil == false && cJ.Foil == true {
+						return true
+					}
+				}
+			}
+
+			// If both are foil or both are non-foil, check their number
+			cInum, errI := strconv.Atoi(cI.Card.Number)
+			cJnum, errJ := strconv.Atoi(cJ.Card.Number)
+			if errI == nil && errJ == nil {
+				return cInum < cJnum
+			}
+			// If either one is not a number (due to extra letters) just
+			// do a normal string comparison
+			return cI.Card.Number < cJ.Card.Number
+		}
+
+		return setDateI.After(setDateJ)
+	}
+
+	return cI.Name < cJ.Name
+}
+
+// Sort cards by their prices according to TCG MARKET, fallbacking to TCG LOW
+// If same price is found, sort as normal
+func sortSetsByRetail(uuidI, uuidJ string) bool {
+	priceI := price4seller(uuidI, TCG_MARKET)
+	if priceI == 0 {
+		priceI = price4seller(uuidI, TCG_LOW)
+	}
+	priceJ := price4seller(uuidJ, TCG_MARKET)
+	if priceJ == 0 {
+		priceJ = price4seller(uuidJ, TCG_LOW)
+	}
+
+	if priceI == priceJ {
+		return sortSets(uuidI, uuidJ)
+	}
+
+	return priceI > priceJ
+}
+
+// Sort cards by their prices according to CK
+// If same price is found, sort by retail price
+func sortSetsByBuylist(uuidI, uuidJ string) bool {
+	priceI := price4vendor(uuidI, "CK")
+	priceJ := price4vendor(uuidJ, "CK")
+
+	if priceI == priceJ {
+		return sortSetsByRetail(uuidI, uuidJ)
+	}
+
+	return priceI > priceJ
 }

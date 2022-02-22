@@ -50,17 +50,32 @@
         <h1>Welcome to BAN {{if .IsSealed}}Sealed{{else}}{{if not (eq .ChartID "")}}Chart{{end}} Search{{end}}</h1>
         <div class="indent sticky" style="top:48px; background-color: var(--background); z-index: 3; width: min-content;">
             <form class="search autocomplete" action="" autocomplete="off" spellcheck="false" id="searchform">
-                <label style="clear: both; float: left;" for="searchbox">
-                    {{if eq .SearchQuery "" }}
+                <label style="clear: both; float: left; width: 110%" for="searchbox">
+                    {{if not .SearchQuery}}
                         Search for a card, or... <a class="btn info" href="/random">surprise me</a>
-                    {{else if not .IsSealed}}
-                        <a class="btn info" href="?q={{.SearchQuery}}&b={{not .SearchBest}}">
-                            {{if .SearchBest}}
-                                Sort results alphabetically
-                            {{else}}
-                                Sort results by best price
-                            {{end}}
+                    {{else}}
+                        Sort by
+                        <a class="btn info" href="?q={{.SearchQuery}}&b={{.SearchBest}}&sort=" title="Sort by chronological order (default)">
+                            {{if not .SearchSort}}<b>{{end}}chrono{{if not .SearchSort}}</b>{{end}}
                         </a>
+                        <a class="btn info" href="?q={{.SearchQuery}}&b={{.SearchBest}}&sort=alpha" title="Sort by alphabetical order">
+                            {{if eq .SearchSort "alpha"}}<b>{{end}}alpha{{if eq .SearchSort "alpha"}}</b>{{end}}
+                        </a>
+                        <a class="btn info" href="?q={{.SearchQuery}}&b={{.SearchBest}}&sort=retail" title="Sort by best retail price (off TCGplayer)">
+                            {{if eq .SearchSort "retail"}}<b>{{end}}retail{{if eq .SearchSort "retail"}}</b>{{end}}
+                        </a>
+                        <a class="btn info" href="?q={{.SearchQuery}}&b={{.SearchBest}}&sort=buylist" title="Sort by best buylits price (off Card Kingdom)">
+                            {{if eq .SearchSort "buylist"}}<b>{{end}}buylist{{if eq .SearchSort "buylist"}}</b>{{end}}
+                        </a>
+                        {{if not .IsSealed}}
+                            <a class="btn info" href="?q={{.SearchQuery}}&b={{not .SearchBest}}&sort={{.SearchSort}}" title="Listing priority">
+                                {{if .SearchBest}}
+                                    [stores]
+                                {{else}}
+                                    [prices]
+                                {{end}}
+                            </a>
+                        {{end}}
                     {{end}}
                 </label>
                 <input id="searchbox" class="w3-input w3-border w3-round-small search-input" onFocus="this.setSelectionRange(0, this.value.length)" type="text" name="q" placeholder="Enter a card name" value="{{.SearchQuery}}" maxlength="200" autofocus>
