@@ -51,6 +51,8 @@ type NewspaperPage struct {
 	Offset int
 	// Which field to use for price comparison
 	Priced string
+	// Which field to use for percentage change comparison
+	PercChanged string
 }
 
 var NewspaperPages = []NewspaperPage{
@@ -122,6 +124,8 @@ var NewspaperPages = []NewspaperPage{
 		Desc:   "Information Sourced from TCG: Stock decreases indicate that there is not enough supply to meet current demand across the reviewed time period (tl:dr - Seek these out)",
 		Offset: 2,
 		Option: "stock_dec",
+
+		PercChanged: "n.Week_Ago_Sellers_Chg",
 		Query: `SELECT DISTINCT n.row_names, n.uuid,
                        a.Name, a.Set, a.Number, a.Rarity,
                        n.Todays_Sellers, n.Week_Ago_Sellers, n.Month_Ago_Sellers, n.Week_Ago_Sellers_Chg,
@@ -200,6 +204,8 @@ var NewspaperPages = []NewspaperPage{
 		Desc:   "Information Sourced from TCG: Stock Increases indicate that there is more than enough supply to meet current demand across the reviewed time period (tl:dr - Avoid These)",
 		Offset: 2,
 		Option: "stock_inc",
+
+		PercChanged: "n.Week_Ago_Sellers_Chg",
 		Query: `SELECT DISTINCT n.row_names, n.uuid,
                        a.Name, a.Set, a.Number, a.Rarity,
                        n.Todays_Sellers, n.Week_Ago_Sellers, n.Month_Ago_Sellers, n.Week_Ago_Sellers_Chg
@@ -537,6 +543,8 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	rarity := r.FormValue("rarity")
 	minPrice, _ := strconv.ParseFloat(r.FormValue("min_price"), 64)
 	maxPrice, _ := strconv.ParseFloat(r.FormValue("max_price"), 64)
+	minPercChange, _ := strconv.ParseFloat(r.FormValue("min_change"), 64)
+	maxPercChange, _ := strconv.ParseFloat(r.FormValue("max_change"), 64)
 	pageIndexStr := r.FormValue("index")
 	pageIndex, _ := strconv.Atoi(pageIndexStr)
 	var query, defSort string
@@ -565,6 +573,8 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	pageVars.FilterRarity = rarity
 	pageVars.FilterMinPrice = minPrice
 	pageVars.FilterMaxPrice = maxPrice
+	pageVars.FilterMinPercChange = minPercChange
+	pageVars.FilterMaxPercChange = maxPercChange
 	pageVars.Rarities = NewspaperAllRarities
 
 	var skipEditions string
@@ -617,11 +627,20 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 			if newspage.Priced != "" && maxPrice != 0 {
 				subQuery += " AND " + newspage.Priced + " < " + fmt.Sprintf("%.2f", maxPrice)
 			}
+			if newspage.PercChanged != "" && minPercChange != 0 {
+				subQuery += " AND " + newspage.PercChanged + " > " + fmt.Sprintf("%.2f", minPercChange/100)
+			}
+			if newspage.PercChanged != "" && maxPercChange != 0 {
+				subQuery += " AND " + newspage.PercChanged + " < " + fmt.Sprintf("%.2f", maxPercChange/100)
+			}
 
 			subQuery += skipEditions
 
 			if newspage.Priced != "" {
 				pageVars.CanFilterByPrice = true
+			}
+			if newspage.PercChanged != "" {
+				pageVars.CanFilterByPercentage = true
 			}
 
 			// Sub Go!
@@ -690,6 +709,19 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 				}
 				if maxPrice != 0 {
 					query += " AND " + newspage.Priced + " < " + fmt.Sprintf("%.2f", maxPrice)
+				}
+			}
+		}
+	}
+
+	if minPercChange != 0 || maxPercChange != 0 {
+		for _, newspage := range NewspaperPages {
+			if newspage.Option == page && newspage.PercChanged != "" {
+				if minPercChange != 0 {
+					query += " AND " + newspage.PercChanged + " > " + fmt.Sprintf("%.2f", minPercChange/100)
+				}
+				if maxPercChange != 0 {
+					query += " AND " + newspage.PercChanged + " < " + fmt.Sprintf("%.2f", maxPercChange/100)
 				}
 			}
 		}

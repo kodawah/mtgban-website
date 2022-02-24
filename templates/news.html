@@ -216,6 +216,10 @@
                             <input name="min_price" {{if $.FilterMinPrice}}value="{{$.FilterMinPrice}}"{{end}} placeholder="Min $" class="input-css" style="width:42px; padding: .6em .5em .5em .5em">
                             <input name="max_price" {{if $.FilterMaxPrice}}value="{{$.FilterMaxPrice}}"{{end}} placeholder="Max $" class="input-css" style="width:42px; padding: .6em .5em .5em .5em">
                         {{end}}
+                        {{if $.CanFilterByPercentage}}
+                            <input name="min_change" {{if $.FilterMinPercChange}}value="{{$.FilterMinPercChange}}"{{end}} placeholder="Min %" class="input-css" style="width:48px; padding: .6em .5em .5em .5em">
+                            <input name="max_change" {{if $.FilterMaxPercChange}}value="{{$.FilterMaxPercChange}}"{{end}} placeholder="Max %" class="input-css" style="width:48px; padding: .6em .5em .5em .5em">
+                        {{end}}
                         <select name="filter" onchange="this.form.submit()" class="select-css" style="width:300px">
                             {{if eq "" $.FilterSet}}
                                 <option value="" disabled selected hidden>Filter by Edition</option>
@@ -254,8 +258,8 @@
 
                                     {{if or .CanSort (and (not (eq $.FilterSet "")) .ConditionalSort)}}
                                         <nobr>
-                                            <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=desc&filter={{$.FilterSet}}&rarity={{$.FilterRarity}}&min_price={{$.FilterMinPrice}}&max_price={{$.FilterMaxPrice}}"><i class="arrow down"></i></a>
-                                            <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=asc&filter={{$.FilterSet}}&rarity={{$.FilterRarity}}&min_price={{$.FilterMinPrice}}&max_price={{$.FilterMaxPrice}}"><i class="arrow up"></i></a>
+                                            <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=desc&filter={{$.FilterSet}}&rarity={{$.FilterRarity}}&min_price={{$.FilterMinPrice}}&max_price={{$.FilterMaxPrice}}&min_change={{$.FilterMinPercChange}}&max_change={{$.FilterMaxPercChange}}"><i class="arrow down"></i></a>
+                                            <a href="newspaper?page={{$.Page}}&sort={{.Field}}&dir=asc&filter={{$.FilterSet}}&rarity={{$.FilterRarity}}&min_price={{$.FilterMinPrice}}&max_price={{$.FilterMaxPrice}}&min_change={{$.FilterMinPercChange}}&max_change={{$.FilterMaxPercChange}}"><i class="arrow up"></i></a>
                                         </nobr>
                                     {{end}}
                                 </th>
@@ -302,13 +306,13 @@
                         <td colspan="{{len .Headings}}">
                             <p style="text-align: center; vertical-align: middle;">
                             {{if ne .CurrentIndex 0}}
-                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index=&filter={{.FilterSet}}&rarity={{$.FilterRarity}}&min_price={{$.FilterMinPrice}}&max_price={{$.FilterMaxPrice}}">&lt;</a>
-                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index={{.PrevIndex}}&filter={{.FilterSet}}&rarity={{$.FilterRarity}}&min_price={{$.FilterMinPrice}}&max_price={{$.FilterMaxPrice}}"><i class="arrow left"></i></a>
+                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index=&filter={{.FilterSet}}&rarity={{$.FilterRarity}}&min_price={{$.FilterMinPrice}}&max_price={{$.FilterMaxPrice}}&min_change={{$.FilterMinPercChange}}&max_change={{$.FilterMaxPercChange}}">&lt;</a>
+                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index={{.PrevIndex}}&filter={{.FilterSet}}&rarity={{$.FilterRarity}}&min_price={{$.FilterMinPrice}}&max_price={{$.FilterMaxPrice}}&min_change={{$.FilterMinPercChange}}&max_change={{$.FilterMaxPercChange}}"><i class="arrow left"></i></a>
                             {{end}}
                             {{inc .CurrentIndex 1}} / {{inc .TotalIndex 1}}
                             {{if ne .CurrentIndex .TotalIndex}}
-                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index={{.NextIndex}}&filter={{.FilterSet}}&rarity={{$.FilterRarity}}&min_price={{$.FilterMinPrice}}&max_price={{$.FilterMaxPrice}}"><i class="arrow right"></i></a>
-                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index={{.TotalIndex}}&filter={{.FilterSet}}&rarity={{$.FilterRarity}}&min_price={{$.FilterMinPrice}}&max_price={{$.FilterMaxPrice}}">&gt;</a>
+                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index={{.NextIndex}}&filter={{.FilterSet}}&rarity={{$.FilterRarity}}&min_price={{$.FilterMinPrice}}&max_price={{$.FilterMaxPrice}}&min_change={{$.FilterMinPercChange}}&max_change={{$.FilterMaxPercChange}}"><i class="arrow right"></i></a>
+                                <a class="pagination" href="/newspaper?page={{.Page}}&sort={{.SortOption}}&dir={{.SortDir}}&index={{.TotalIndex}}&filter={{.FilterSet}}&rarity={{$.FilterRarity}}&min_price={{$.FilterMinPrice}}&max_price={{$.FilterMaxPrice}}&min_change={{$.FilterMinPercChange}}&max_change={{$.FilterMaxPercChange}}">&gt;</a>
                             {{end}}
                             </p>
 

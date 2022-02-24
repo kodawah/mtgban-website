@@ -97,6 +97,10 @@ type PageVars struct {
 	FilterMinPrice   float64
 	FilterMaxPrice   float64
 
+	CanFilterByPercentage bool
+	FilterMinPercChange   float64
+	FilterMaxPercChange   float64
+
 	Sleepers       map[string][]string
 	SleepersKeys   []string
 	SleepersColors []string
