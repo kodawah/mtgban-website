@@ -13,7 +13,7 @@ require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2
-	github.com/kodabb/go-mtgban v0.0.0-20220222145521-394f8bbc236b
+	github.com/kodabb/go-mtgban v0.0.0-20220224105824-d28e14c4c546
 	github.com/leemcloughlin/logfile v0.0.0-20201123203928-cff1c8a30a10
 	github.com/mackerelio/go-osstat v0.1.0
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
