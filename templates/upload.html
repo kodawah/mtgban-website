@@ -542,7 +542,10 @@
                                                     {{$subEntry := (index $scraperEntries $scraperKey)}}
                                                     {{$price := (banprice2price $subEntry)}}
 
-                                                    $ {{printf "%.2f" $price}}
+                                                    $
+                                                    <a href="/go/b/{{$scraperKey}}/{{.}}" target="_blank">
+                                                        {{printf "%.2f" $price}}
+                                                    </a>
                                                     {{if $tcgLow}}
                                                         / $ {{printf "%.2f" $tcgLow}}
                                                         {{if lt $tcgLow $price}}⚠️{{end}}
