@@ -103,6 +103,9 @@
                     {{if .CanBuylist}}
                         <input type="submit" id="submit_download" value="&nbsp;&nbsp;Get CSV&nbsp;&nbsp;" onclick="javascript:downloadResults('true');" {{if and (not .RemoteLinkURL) (not .CardHashes)}}disabled{{end}} style="display:none">
                     {{end}}
+                    {{if .Optimized}}
+                        <input type="button" value="&nbsp;&nbsp;Optimizer&nbsp;&nbsp;" onclick="window.location.href = '#top';" style="display:inline">
+                    {{end}}
                 </form>
             </center>
         </div>
