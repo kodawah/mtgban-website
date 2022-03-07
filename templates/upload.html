@@ -511,6 +511,13 @@
                                         {{range $entries}}
                                             {{$card := (index $.Metadata .)}}
                                             <tr onmouseover="document.getElementById('hoverImage').src={{$card.ImageURL}};">
+                                                {{$tcgLow := 0.0}}
+                                                {{$indexEntries := (index $.IndexEntries .)}}
+                                                {{if $indexEntries}}
+                                                    {{$entry := (index $indexEntries "TCG Low")}}
+                                                    {{$tcgLow = (banprice2price $entry)}}
+                                                {{end}}
+
                                                 <td>
                                                     <a href="{{$card.SearchURL}}">{{$card.Name}}</a>
                                                     {{if $card.Reserved}} *{{end}}
@@ -533,7 +540,13 @@
                                                 <td>
                                                     {{$scraperEntries := (index $.CompactEntries .)}}
                                                     {{$subEntry := (index $scraperEntries $scraperKey)}}
-                                                    $ {{printf "%.2f" (banprice2price $subEntry)}}
+                                                    {{$price := (banprice2price $subEntry)}}
+
+                                                    $ {{printf "%.2f" $price}}
+                                                    {{if $tcgLow}}
+                                                        / $ {{printf "%.2f" $tcgLow}}
+                                                        {{if lt $tcgLow $price}}⚠️{{end}}
+                                                    {{end}}
                                                 </td>
                                             </tr>
                                         {{end}}
