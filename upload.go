@@ -352,6 +352,13 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if canOptimize {
+		// Keep cards sorted by edition, following the same rules of search
+		for store := range optimizedResults {
+			sort.Slice(optimizedResults[store], func(i, j int) bool {
+				return sortSets(optimizedResults[store][i], optimizedResults[store][j])
+			})
+		}
+
 		pageVars.Optimized = optimizedResults
 		pageVars.OptimizedTotals = optimizedTotals
 		pageVars.HighestTotal = highestTotal
