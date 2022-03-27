@@ -350,6 +350,10 @@ var ExploreDB *sql.DB
 
 var GoogleDocsClient *http.Client
 
+const (
+	DefaultConfigPort = 8080
+)
+
 func Favicon(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "img/misc/favicon.ico")
 }
@@ -446,6 +450,10 @@ func loadVars(cfg string) error {
 	err = d.Decode(&Config)
 	if err != nil {
 		return err
+	}
+
+	if Config.Port == 0 {
+		Config.Port = DefaultConfigPort
 	}
 
 	// Load from env
