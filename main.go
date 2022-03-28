@@ -352,6 +352,7 @@ var GoogleDocsClient *http.Client
 
 const (
 	DefaultConfigPort = 8080
+	DefaultSecret     = "NotVerySecret!"
 )
 
 func Favicon(w http.ResponseWriter, r *http.Request) {
@@ -457,14 +458,10 @@ func loadVars(cfg string) error {
 	}
 
 	// Load from env
-	keyVars := []string{
-		"BAN_SECRET",
-	}
-	for _, key := range keyVars {
-		v := os.Getenv(key)
-		if v == "" {
-			return fmt.Errorf("%s variable not set", key)
-		}
+	v := os.Getenv("BAN_SECRET")
+	if v == "" {
+		log.Printf("BAN_SECRET not set, using a default one")
+		os.Setenv("BAN_SECRET", DefaultSecret)
 	}
 
 	return nil
