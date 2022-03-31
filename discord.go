@@ -472,11 +472,6 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				if err != nil {
 					continue
 				}
-				// Check if there is not an affiliate already
-				v := u.Query()
-				if v.Get("partner") != "" || v.Get("tag") != "" {
-					continue
-				}
 
 				// Flags for later use
 				isCK := strings.Contains(field, "cardkingdom.com/mtg")
@@ -486,6 +481,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				isScry := strings.Contains(field, "scryfall.com/card")
 
 				// Add the MTGBAN affiliation
+				v := u.Query()
 				switch {
 				case isCSI:
 					v.Set("utm_referrer", Config.Affiliate["CSI"])
