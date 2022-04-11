@@ -151,6 +151,8 @@ type PageVars struct {
 	HighestTotal    float64
 	MissingCounts   map[string]int
 	MissingPrices   map[string]float64
+
+	OptimizedEditions map[string][]OptimizedUploadEntry
 }
 
 type NavElem struct {

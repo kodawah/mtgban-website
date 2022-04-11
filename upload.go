@@ -45,6 +45,11 @@ type UploadEntry struct {
 	Quantity    int
 }
 
+type OptimizedUploadEntry struct {
+	CardId string
+	Store  string
+}
+
 func Upload(w http.ResponseWriter, r *http.Request) {
 	sig := getSignatureFromCookies(r)
 
@@ -272,13 +277,36 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	pageVars.UploadEntries = uploadedData
 	pageVars.TotalEntries = map[string]float64{}
 
+	// Load up image links
+	for _, data := range uploadedData {
+		if data.MismatchError != nil {
+			continue
+		}
+
+		_, found := pageVars.Metadata[data.CardId]
+		if !found {
+			pageVars.Metadata[data.CardId] = uuid2card(data.CardId, true, false)
+		}
+		if pageVars.Metadata[data.CardId].Reserved {
+			pageVars.HasReserved = true
+		}
+		if pageVars.Metadata[data.CardId].Stocks {
+			pageVars.HasStocks = true
+		}
+		if pageVars.Metadata[data.CardId].SypList {
+			pageVars.HasSypList = true
+		}
+	}
+
 	var optimizedResults map[string][]string
 	var optimizedTotals map[string]float64
+	var optimizedEditions map[string][]OptimizedUploadEntry
 	var highestTotal float64
 
 	if canOptimize {
 		optimizedResults = map[string][]string{}
 		optimizedTotals = map[string]float64{}
+		optimizedEditions = map[string][]OptimizedUploadEntry{}
 	}
 
 	missingCounts := map[string]int{}
@@ -346,9 +374,19 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if canOptimize && bestPrice != 0 {
-			optimizedResults[bestStore] = append(optimizedResults[bestStore], uploadedData[i].CardId)
+			cardId := uploadedData[i].CardId
+
+			// Break down by store
+			optimizedResults[bestStore] = append(optimizedResults[bestStore], cardId)
 			optimizedTotals[bestStore] += bestPrice
 			highestTotal += bestPrice
+
+			// Break down by edition
+			edition := pageVars.Metadata[cardId].SetCode
+			optimizedEditions[edition] = append(optimizedEditions[edition], OptimizedUploadEntry{
+				CardId: cardId,
+				Store:  bestStore,
+			})
 		}
 	}
 	if canOptimize {
@@ -359,34 +397,23 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 
+		// Keep edition list sorted in the same way
+		for code := range optimizedEditions {
+			sort.Slice(optimizedEditions[code], func(i, j int) bool {
+				return sortSets(optimizedEditions[code][i].CardId, optimizedEditions[code][j].CardId)
+			})
+		}
+
 		pageVars.Optimized = optimizedResults
+		pageVars.OptimizedEditions = optimizedEditions
 		pageVars.OptimizedTotals = optimizedTotals
 		pageVars.HighestTotal = highestTotal
+		pageVars.Editions = AllEditionsKeys
+		pageVars.EditionsMap = AllEditionsMap
 	}
 
 	pageVars.MissingCounts = missingCounts
 	pageVars.MissingPrices = missingPrices
-
-	// Load up image links
-	for _, data := range uploadedData {
-		if data.MismatchError != nil {
-			continue
-		}
-
-		_, found := pageVars.Metadata[data.CardId]
-		if !found {
-			pageVars.Metadata[data.CardId] = uuid2card(data.CardId, true, false)
-		}
-		if pageVars.Metadata[data.CardId].Reserved {
-			pageVars.HasReserved = true
-		}
-		if pageVars.Metadata[data.CardId].Stocks {
-			pageVars.HasStocks = true
-		}
-		if pageVars.Metadata[data.CardId].SypList {
-			pageVars.HasSypList = true
-		}
-	}
 
 	// Logs
 	user := GetParamFromSig(sig, "UserEmail")

@@ -497,6 +497,13 @@
                             {{end}}
                         {{end}}
                     </p>
+                    <p>
+                        See the
+                        <a class="btn default" href="#editions">
+                            <b>Editions Breakdown</b>
+                        </a>
+                    </p>
+
                     <table>
                         {{range .ScraperKeys}}
                             {{$scraperKey := .}}
@@ -544,6 +551,86 @@
 
                                                     $
                                                     <a href="/go/b/{{$scraperKey}}/{{.}}" target="_blank">
+                                                        {{printf "%.2f" $price}}
+                                                    </a>
+                                                    {{if $tcgLow}}
+                                                        / $ {{printf "%.2f" $tcgLow}}
+                                                        {{if lt $tcgLow $price}}⚠️{{end}}
+                                                    {{end}}
+                                                </td>
+                                            </tr>
+                                        {{end}}
+                                    </table>
+                                    <br>
+                                </tr>
+                            {{end}}
+                        {{end}}
+                    </table>
+
+                    <span class="anchor" id="editions"></span>
+                    <h2>Editions breakdown</h2>
+                    <br>
+                    <div class="indent" style="max-width:85%">
+                        {{range $.Editions}}
+                            {{$entries := index $.OptimizedEditions .}}
+                            {{if $entries}}
+                                {{$edition := index $.EditionsMap .}}
+                                <nobr>
+                                    <i class="ss ss-{{$edition.Keyrune}} ss-1x ss-fw"></i>
+                                    <a class="btn default" href="#{{.}}">{{$edition.Name}}</a>
+                                </nobr>
+                            {{end}}
+                        {{end}}
+                    </div>
+                    <br>
+
+                    <table>
+                        {{range $.Editions}}
+                            {{$entries := index $.OptimizedEditions .}}
+                            {{if $entries}}
+                                {{$edition := index $.EditionsMap .}}
+                                <tr>
+                                    <span class="anchor" id="{{.}}"></span>
+                                    <a class="btn default" href="#editions">
+                                        <i class="ss ss-{{$edition.Keyrune}} ss-1x ss-fw"></i>
+                                        <b>{{$edition.Name}}</b>
+                                    </a>
+                                    <table onmouseout="document.getElementById('hoverImage').src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';">
+                                        {{range $entries}}
+                                            {{$card := (index $.Metadata .CardId)}}
+                                            <tr onmouseover="document.getElementById('hoverImage').src={{$card.ImageURL}};">
+                                                {{$tcgLow := 0.0}}
+                                                {{$indexEntries := (index $.IndexEntries .CardId)}}
+                                                {{if $indexEntries}}
+                                                    {{$entry := (index $indexEntries "TCG Low")}}
+                                                    {{$tcgLow = (banprice2price $entry)}}
+                                                {{end}}
+
+                                                <td>
+                                                    <a href="{{$card.SearchURL}}" target="_blank">{{$card.Name}}</a>
+                                                    {{if $card.Reserved}} *{{end}}
+                                                    {{if $card.Stocks}} •{{end}}
+                                                    {{if $card.SypList}} †{{end}}
+                                                </td>
+                                                <td>
+                                                    {{$card.Number}}
+                                                </td>
+                                                <td>
+                                                    {{if $card.Etched}}
+                                                        <span title="Etched">💫</span>
+                                                    {{else if $card.Foil}}
+                                                        <span title="Foil">✨</span>
+                                                    {{end}}
+                                                </td>
+                                                <td>
+                                                    {{scraper_name .Store}}
+                                                <td>
+                                                    {{$scraperEntries := (index $.CompactEntries .CardId)}}
+                                                    {{$subEntry := (index $scraperEntries .Store)}}
+                                                    {{$price := (banprice2price $subEntry)}}
+
+                                                    $
+                                                    <a href="/go/b/{{.Store}}/{{.CardId}}" target="_blank">
                                                         {{printf "%.2f" $price}}
                                                     </a>
                                                     {{if $tcgLow}}
