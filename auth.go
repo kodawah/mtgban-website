@@ -614,7 +614,6 @@ func getValuesForTier(tierTitle string) url.Values {
 	// Enable option according to tier
 	switch tierTitle {
 	case "Root":
-		v.Set("Explore", "true")
 		fallthrough
 	case "Admin":
 		v.Set("Reverse", "true")
@@ -665,20 +664,6 @@ func getValuesForTier(tierTitle string) url.Values {
 		default:
 			v.Set("SearchDisabled", "DEFAULT")
 			v.Set("SearchBuylistDisabled", "DEFAULT")
-		}
-	}
-	if v.Get("Explore") == "true" {
-		switch tierTitle {
-		case "Root":
-			v.Set("ExpEnabled", "ALL")
-		case "Admin":
-			v.Set("ExpEnabled", "FULL")
-		case "Test Role":
-			v.Set("ExpEnabled", "MOST")
-		case "Modern":
-			v.Set("ExpEnabled", "ENTRY")
-		case "Pioneer":
-			v.Set("ExpEnabled", "DEMO")
 		}
 	}
 	if v.Get("Newspaper") == "true" {

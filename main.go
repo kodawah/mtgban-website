@@ -218,7 +218,6 @@ var OptionalFields = []string{
 var OrderNav = []string{
 	"Search",
 	"Newspaper",
-	"Explore",
 	"Sleepers",
 	"Upload",
 	"Global",
@@ -248,13 +247,6 @@ func init() {
 			Link:   "/newspaper",
 			Handle: Newspaper,
 			Page:   "news.html",
-		},
-		"Explore": NavElem{
-			Name:   "Explore",
-			Short:  "🚠",
-			Link:   "/explore",
-			Handle: Explore,
-			Page:   "explore.html",
 		},
 		"Sleepers": NavElem{
 			Name:   "Sleepers",
@@ -348,7 +340,6 @@ var TotalSets, TotalCards, TotalUnique int
 
 var Newspaper3dayDB *sql.DB
 var Newspaper1dayDB *sql.DB
-var ExploreDB *sql.DB
 
 var GoogleDocsClient *http.Client
 
@@ -478,11 +469,6 @@ func openDBs() (err error) {
 	if err != nil {
 		return err
 	}
-	ExploreDB, err = sql.Open("mysql", Config.DBAddress+"/sites")
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
