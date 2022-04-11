@@ -585,11 +585,7 @@ func main() {
 
 	err = setupDiscord()
 	if err != nil {
-		if DevMode {
-			log.Println("No connection to Discord due to", err)
-		} else {
-			log.Println("Error connecting to discord", err)
-		}
+		log.Println("Error connecting to discord", err)
 	}
 
 	// Set seed in case we need to do random operations
