@@ -25,6 +25,9 @@ var poweredByFooter = discordgo.MessageEmbedFooter{
 // Scryfall-compatible mode
 var squareBracketsRE = regexp.MustCompile(`\[\[.*?\]\]?`)
 
+// Pricefall-only mode
+var curlyBracketsRE = regexp.MustCompile(`\{\{.*?\}\}?`)
+
 const (
 	// Avoid making messages overly long
 	MaxPrintings = 12
@@ -449,6 +452,13 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			fields := squareBracketsRE.FindAllString(m.Content, -1)
 			for _, field := range fields {
 				m.Content = "!" + strings.TrimRight(strings.TrimLeft(field, "["), "]")
+				messageCreate(s, m)
+			}
+		// Check if the message uses the Pricefall syntax
+		case strings.Contains(m.Content, "{{"):
+			fields := curlyBracketsRE.FindAllString(m.Content, -1)
+			for _, field := range fields {
+				m.Content = "!" + strings.TrimRight(strings.TrimLeft(field, "{"), "}")
 				messageCreate(s, m)
 			}
 		// Check if the message contains potential links
