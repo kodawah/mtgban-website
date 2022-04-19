@@ -506,7 +506,7 @@ func parseHeader(first []string) (map[string]int, error) {
 			if !found {
 				indexMap["price"] = i
 			}
-		case (strings.Contains(field, "quantity") || strings.Contains(field, "qty") || strings.Contains(field, "stock") || strings.Contains(field, "count") || strings.Contains(field, "have")) && !strings.HasPrefix(field, "add") && !strings.HasPrefix(field, "set"):
+		case (strings.Contains(field, "quantity") || strings.Contains(field, "qty") || strings.Contains(field, "stock") || strings.Contains(field, "count") || strings.Contains(field, "have")) && !strings.HasPrefix(field, "add") && !strings.HasPrefix(field, "set") && !strings.Contains(field, "pending"):
 			_, found := indexMap["quantity"]
 			if !found {
 				indexMap["quantity"] = i
