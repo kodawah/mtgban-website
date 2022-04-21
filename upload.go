@@ -360,13 +360,15 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 
+			// Save the lowest or highest price depending on mode
+			// If price is tied, pick the value of the store that alphabetically comes first
 			if blMode {
-				if bestPrice < price {
+				if bestPrice < price || (bestPrice == price && shorthand < bestStore) {
 					bestPrice = price
 					bestStore = shorthand
 				}
 			} else {
-				if bestPrice == 0 || bestPrice > price {
+				if bestPrice == 0 || bestPrice > price || (bestPrice == price && shorthand < bestStore) {
 					bestPrice = price
 					bestStore = shorthand
 				}
