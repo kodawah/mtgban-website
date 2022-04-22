@@ -32,6 +32,7 @@ import (
 	"github.com/kodabb/go-mtgban/starcitygames"
 	"github.com/kodabb/go-mtgban/strikezone"
 	"github.com/kodabb/go-mtgban/tcgplayer"
+	"github.com/kodabb/go-mtgban/toamagic"
 	"github.com/kodabb/go-mtgban/trollandtoad"
 
 	"github.com/kodabb/go-mtgban/mtgban"
@@ -639,6 +640,14 @@ var ScraperOptions = map[string]*scraperOption{
 				Addr: "localhost:6379",
 				DB:   4,
 			}),
+		},
+	},
+	"toamagic": &scraperOption{
+		OnlyVendor: true,
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
+			scraper := toamagic.NewScraper()
+			scraper.LogCallback = logger.Printf
+			return scraper, nil
 		},
 	},
 }
