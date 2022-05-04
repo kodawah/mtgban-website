@@ -23,8 +23,8 @@ import (
 )
 
 const (
-	MaxUploadEntries    = 250
-	MaxUploadProEntries = 2000
+	MaxUploadEntries    = 350
+	MaxUploadProEntries = 1800
 	MaxUploadFileSize   = 5 << 20
 
 	TooManyEntriesMessage = "Note: you reached the maximum number of entries supported by this tool"
