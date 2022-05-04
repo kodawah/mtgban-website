@@ -7,6 +7,7 @@ import (
 	"math"
 	"net/http"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/kodabb/go-mtgban/mtgban"
@@ -42,6 +43,31 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 	if Config.SleepersBlockList != nil {
 		blocklistRetail = append(blocklistRetail, Config.SleepersBlockList...)
 		blocklistBuylist = append(blocklistBuylist, Config.SleepersBlockList...)
+	}
+
+	page := r.FormValue("page")
+	if page == "options" {
+		pageVars.Title = "Options"
+
+		for _, vendor := range Vendors {
+			if vendor == nil ||
+				vendor.Info().CountryFlag != "" ||
+				vendor.Info().SealedMode ||
+				SliceStringHas(blocklistBuylist, vendor.Info().Shorthand) {
+				continue
+			}
+
+			pageVars.VendorKeys = append(pageVars.VendorKeys, vendor.Info().Shorthand)
+		}
+
+		render(w, "sleep.html", pageVars)
+
+		return
+	}
+
+	skipVendorsOpt := readCookie(r, "SleepersVendorsList")
+	if skipVendorsOpt != "" {
+		blocklistBuylist = append(blocklistBuylist, strings.Split(skipVendorsOpt, ",")...)
 	}
 
 	start := time.Now()

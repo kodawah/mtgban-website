@@ -38,10 +38,79 @@
         {{if .ShowPromo}}
             <img class="center" src="img/promo/arbit.jpg">
         {{end}}
+
+    {{else if eq .Title "Options"}}
+        <script type="text/javascript" src="../js/cookies.js"></script>
+        <br>
+
+        <div class="indent">
+            <h2>Vendors list</h2>
+            Select which vendors you <b>don't</b> want to display in your sleep(ers).
+            <br>
+
+            <script type="text/javascript">
+                function clearform(){
+                    var checkboxes = document.querySelectorAll('input')
+                    for (var i = 0; i < checkboxes.length; i++) {
+                        if (checkboxes[i].checked) {
+                            checkboxes[i].checked = false;
+                        }
+                    }
+                }
+
+                function save() {
+                    var list = "";
+                    var checkboxes = document.querySelectorAll('input');
+                    for (var i = 0; i < checkboxes.length; i++) {
+                        if (checkboxes[i].checked) {
+                            list += checkboxes[i].name + ',';
+                        }
+                    }
+
+                    setCookie("SleepersVendorsList", list, 1000);
+
+                    window.location.href = "/sleepers"
+                }
+
+                window.onload = function(e) {
+                    list = getCookie("SleepersVendorsList");
+                    if (list == "") {
+                        return;
+                    }
+
+                    const sets = list.split(",");
+                    var checkboxes = document.querySelectorAll('input');
+                    for (var i = 0; i < sets.length; i++) {
+                        for (var j = 0; j < checkboxes.length; j++) {
+                            if (checkboxes[j].name == sets[i]) {
+                                checkboxes[j].checked = true;
+                            }
+                        }
+                    }
+                }
+            </script>
+
+            <a class="btn warning" onclick="javascript:clearform();"><b>CLEAR</b></a>
+            <a class="btn success" onclick="javascript:save();"><b>SAVE</b></a>
+        </div>
+
+        <br>
+        <div class="indent">
+            {{range $i, $key := .VendorKeys}}
+                <input type="checkbox" id="{{$key}}" name="{{$key}}">
+                <label for="{{$key}}">
+                    {{scraper_name $key}}
+                </label>
+                <br>
+            {{end}}
+        </div>
+
     {{else}}
         <h1>Welcome to BAN Sleepers</h1>
         <div class="indent" style="max-width: 85%;">
-            These cards have a higher buylist than the market price, or are priced below TCG rates, but the market has not noticed yet!
+            These cards have a higher buylist than the market price, or are priced below TCG rates, but the market has not noticed yet! <br>
+            You can also tweak <a href="?page=options">vendor options</a> for more customized results. <br>
+            <br>
 
             <table class="tiers">
                 {{range $i, $letter := .SleepersKeys}}
