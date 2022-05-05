@@ -49,6 +49,18 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 	if page == "options" {
 		pageVars.Title = "Options"
 
+		for _, seller := range Sellers {
+			if seller == nil ||
+				seller.Info().CountryFlag != "" ||
+				seller.Info().SealedMode ||
+				seller.Info().MetadataOnly ||
+				SliceStringHas(blocklistRetail, seller.Info().Shorthand) {
+				continue
+			}
+
+			pageVars.SellerKeys = append(pageVars.SellerKeys, seller.Info().Shorthand)
+		}
+
 		for _, vendor := range Vendors {
 			if vendor == nil ||
 				vendor.Info().CountryFlag != "" ||
@@ -65,6 +77,10 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	skipSellersOpt := readCookie(r, "SleepersSellersList")
+	if skipSellersOpt != "" {
+		blocklistRetail = append(blocklistRetail, strings.Split(skipSellersOpt, ",")...)
+	}
 	skipVendorsOpt := readCookie(r, "SleepersVendorsList")
 	if skipVendorsOpt != "" {
 		blocklistBuylist = append(blocklistBuylist, strings.Split(skipVendorsOpt, ",")...)

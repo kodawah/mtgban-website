@@ -45,7 +45,7 @@
 
         <div class="indent">
             <h2>Vendors list</h2>
-            Select which vendors you <b>don't</b> want to display in your sleep(ers).
+            Select which sellers or vendors you <b>don't</b> want to display in your sleep(ers).
             <br>
 
             <script type="text/javascript">
@@ -60,7 +60,19 @@
 
                 function save() {
                     var list = "";
-                    var checkboxes = document.querySelectorAll('input');
+                    const sellers = document.querySelector("#sellers");
+                    var checkboxes = sellers.querySelectorAll('input');
+                    for (var i = 0; i < checkboxes.length; i++) {
+                        if (checkboxes[i].checked) {
+                            list += checkboxes[i].name + ',';
+                        }
+                    }
+
+                    setCookie("SleepersSellersList", list, 1000);
+
+                    list = "";
+                    const vendors = document.querySelector("#vendors");
+                    var checkboxes = vendors.querySelectorAll('input');
                     for (var i = 0; i < checkboxes.length; i++) {
                         if (checkboxes[i].checked) {
                             list += checkboxes[i].name + ',';
@@ -73,17 +85,30 @@
                 }
 
                 window.onload = function(e) {
-                    list = getCookie("SleepersVendorsList");
-                    if (list == "") {
-                        return;
+                    var list = getCookie("SleepersSellersList");
+                    if (list != "") {
+                        const sets = list.split(",");
+                        const container = document.querySelector('#sellers');
+                        var checkboxes = container.querySelectorAll('input');
+                        for (var i = 0; i < sets.length; i++) {
+                            for (var j = 0; j < checkboxes.length; j++) {
+                                if (checkboxes[j].name == sets[i]) {
+                                    checkboxes[j].checked = true;
+                                }
+                            }
+                        }
                     }
 
-                    const sets = list.split(",");
-                    var checkboxes = document.querySelectorAll('input');
-                    for (var i = 0; i < sets.length; i++) {
-                        for (var j = 0; j < checkboxes.length; j++) {
-                            if (checkboxes[j].name == sets[i]) {
-                                checkboxes[j].checked = true;
+                    list = getCookie("SleepersVendorsList");
+                    if (list != "") {
+                        const sets = list.split(",");
+                        const container = document.querySelector('#vendors');
+                        var checkboxes = container.querySelectorAll('input');
+                        for (var i = 0; i < sets.length; i++) {
+                            for (var j = 0; j < checkboxes.length; j++) {
+                                if (checkboxes[j].name == sets[i]) {
+                                    checkboxes[j].checked = true;
+                                }
                             }
                         }
                     }
@@ -95,21 +120,32 @@
         </div>
 
         <br>
-        <div class="indent">
-            {{range $i, $key := .VendorKeys}}
-                <input type="checkbox" id="{{$key}}" name="{{$key}}">
-                <label for="{{$key}}">
-                    {{scraper_name $key}}
-                </label>
-                <br>
-            {{end}}
+        <div class="indent row">
+            <div class="column" id="sellers">
+                {{range $i, $key := .SellerKeys}}
+                    <input type="checkbox" id="{{$key}}" name="{{$key}}">
+                    <label for="{{$key}}">
+                        {{scraper_name $key}}
+                    </label>
+                    <br>
+                {{end}}
+            </div>
+            <div class="column" id="vendors">
+                {{range $i, $key := .VendorKeys}}
+                    <input type="checkbox" id="{{$key}}" name="{{$key}}">
+                    <label for="{{$key}}">
+                        {{scraper_name $key}}
+                    </label>
+                    <br>
+                {{end}}
+            </div>
         </div>
 
     {{else}}
         <h1>Welcome to BAN Sleepers</h1>
         <div class="indent" style="max-width: 85%;">
             These cards have a higher buylist than the market price, or are priced below TCG rates, but the market has not noticed yet! <br>
-            You can also tweak <a href="?page=options">vendor options</a> for more customized results. <br>
+            You can also <a href="?page=options">tweak options</a> for more customized results. <br>
             <br>
 
             <table class="tiers">
