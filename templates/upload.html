@@ -436,16 +436,18 @@
                             <br>
                         </td>
                         <td>
-                            {{$price := (index $.TotalEntries "TCG Low")}}
-                            {{if $price}}
-                                <b>Index total</b>
+                            <b>Index totals</b>
+                            {{range $.IndexKeys}}
                                 <br>
-                                <a class="btn info">
-                                    {{scraper_name "TCG Low"}}:
-                                </a>
-                                <nobr>$ {{printf "%.2f" $price}}</nobr>
-                                    <hr>
+                                <a class="btn info">{{scraper_name .}}:</a>
+                                {{$price := (index $.TotalEntries .)}}
+                                {{if $price}}
+                                    <nobr>$ {{printf "%.2f" $price}}</nobr>
+                                    {{else}}
+                                    N/A
+                                {{end}}
                             {{end}}
+                            <hr>
                         </td>
                     </tr>
                 </table>

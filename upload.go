@@ -332,12 +332,14 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		// Summary of the entries
-		tcgLowPrice := getPrice(indexResults[cardId][TCG_LOW])
-		if uploadedData[i].HasQuantity {
-			tcgLowPrice *= float64(uploadedData[i].Quantity)
+		// Summary of the index entries
+		for indexKey, indexResult := range indexResults[cardId] {
+			indexPrice := getPrice(indexResult)
+			if uploadedData[i].HasQuantity {
+				indexPrice *= float64(uploadedData[i].Quantity)
+			}
+			pageVars.TotalEntries[indexKey] += indexPrice
 		}
-		pageVars.TotalEntries[TCG_LOW] += tcgLowPrice
 
 		// Run summaries for each vendor
 		for shorthand, banPrice := range results[cardId] {
