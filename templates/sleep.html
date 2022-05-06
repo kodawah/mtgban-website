@@ -170,6 +170,9 @@
         </div>
         <br>
     {{end}}
+    {{if ne .InfoMessage ""}}
+        <h2><p class=indent>{{.InfoMessage}}</p></h2>
+    {{end}}
 </div>
 </body>
 </html>

@@ -91,7 +91,7 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 	sleepers, err := getTiers(blocklistRetail, blocklistBuylist)
 	if err != nil {
 		pageVars.Title = "Errors have been made"
-		pageVars.ErrorMessage = err.Error()
+		pageVars.InfoMessage = err.Error()
 
 		render(w, "sleep.html", pageVars)
 		return
@@ -224,6 +224,10 @@ func getTiers(blocklistRetail, blocklistBuylist []string) (map[string][]string, 
 				Level:  tiers[c],
 			})
 		}
+	}
+
+	if len(results) == 0 {
+		return nil, errors.New("No Sleepers Available")
 	}
 
 	sort.Slice(results, func(i, j int) bool {
