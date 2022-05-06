@@ -38,6 +38,13 @@
         {{if .ShowPromo}}
             <img class="center" src="img/promo/news.jpg">
         {{end}}
+
+    {{else if .IsSealed}}
+        <iframe width="100%" height="600" src="https://datastudio.google.com/embed/reporting/84ce09bd-fa05-4c3f-80ad-f1ba4e9089b3/page/sydrC" frameborder="0" style="border:0" allowfullscreen></iframe>
+
+        <h6 class=indent>
+            <a href="https://datastudio.google.com/embed/reporting/84ce09bd-fa05-4c3f-80ad-f1ba4e9089b3/page/sydrC" target="_blank">Click here</a> in case the page is not loading.
+        </h6>
     {{else}}
         <h1>Welcome to BAN Newspaper{{if .IsOneDay}}, <i>early edition</i>{{end}}</h1>
         <div class="indent" style="max-width: 1000px;">

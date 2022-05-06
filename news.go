@@ -550,17 +550,38 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	var query, defSort string
 	var pages int
 
-	if page == "" {
+	pageVars.Nav = insertNavBar("Newspaper", pageVars.Nav, []NavElem{
+		NavElem{
+			Name:   "Lairs",
+			Short:  "🤫",
+			Link:   "/newspaper?page=secret",
+			Active: page == "secret",
+			Class:  "selected",
+		},
+	})
+
+	switch page {
+	default:
 		pageVars.Title = "Index"
 
 		render(w, "news.html", pageVars)
 
 		return
-	} else if page == "options" {
+	case "options":
 		pageVars.Title = "Options"
 
 		pageVars.Editions = AllEditionsKeys
 		pageVars.EditionsMap = AllEditionsMap
+
+		render(w, "news.html", pageVars)
+
+		return
+	case "secret":
+		pageVars.Title = "Secret Lair Data"
+
+		pageVars.IsSealed = true
+
+		w.Header().Add("Content-Security-Policy", "frame-ancestors 'self' https://datastudio.google.com;")
 
 		render(w, "news.html", pageVars)
 
