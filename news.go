@@ -561,7 +561,7 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 	})
 
 	switch page {
-	default:
+	case "":
 		pageVars.Title = "Index"
 
 		render(w, "news.html", pageVars)
