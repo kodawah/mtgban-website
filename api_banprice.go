@@ -590,7 +590,7 @@ func SimplePrice2CSV(w *csv.Writer, pm map[string]map[string]*BanPrice) error {
 		return allScrapers[i] < allScrapers[j]
 	})
 
-	header := []string{"UUID", "Card Name", "Edition", "Number", "Finish"}
+	header := []string{"UUID", "Card Name", "Set Code", "Number", "Finish"}
 	header = append(header, allScrapers...)
 	err := w.Write(header)
 	if err != nil {
@@ -598,13 +598,13 @@ func SimplePrice2CSV(w *csv.Writer, pm map[string]map[string]*BanPrice) error {
 	}
 
 	for id := range pm {
-		var cardName, edition, number string
+		var cardName, code, number string
 		co, err := mtgmatcher.GetUUID(id)
 		if err != nil {
 			continue
 		}
 		cardName = co.Name
-		edition = co.Edition
+		code = co.SetCode
 		number = co.Number
 
 		prices := make([]string, len(allScrapers))
@@ -623,7 +623,7 @@ func SimplePrice2CSV(w *csv.Writer, pm map[string]map[string]*BanPrice) error {
 			prices[i] = fmt.Sprintf("%0.2f", price)
 		}
 
-		record := []string{id, cardName, edition, number}
+		record := []string{id, cardName, code, number}
 		if co.Etched {
 			record = append(record, "etched")
 		} else if co.Foil {
