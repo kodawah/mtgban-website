@@ -470,10 +470,17 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			// Iterate over each segment of the message and look for known links
 			fields := strings.Fields(m.Content)
 			for _, field := range fields {
-				if !strings.Contains(field, "cardkingdom.com/mtg") &&
-					!strings.Contains(field, "coolstuffinc.com/page") &&
-					!strings.Contains(field, "gatherer.wizards.com") &&
-					!strings.Contains(field, "tcgplayer.com/") {
+				store := ""
+				switch {
+				case strings.Contains(field, "cardkingdom.com/mtg"):
+					store = "CK"
+				case strings.Contains(field, "coolstuffinc.com/page"):
+					store = "CSI"
+				case strings.Contains(field, "tcgplayer.com/"):
+					store = "TCG"
+				case strings.Contains(field, "gatherer.wizards.com"):
+					store = "WotC"
+				default:
 					continue
 				}
 				u, err := url.Parse(field)
@@ -481,29 +488,49 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 					continue
 				}
 
-				// Flags for later use
-				isCK := strings.Contains(field, "cardkingdom.com/mtg")
-				isCSI := strings.Contains(field, "coolstuffinc.com/page")
-				isTCG := strings.Contains(field, "tcgplayer.com/")
-				isWotC := strings.Contains(field, "gatherer.wizards.com")
+				// Extract a sensible link title
+				title := strings.Title(strings.Replace(path.Base(u.Path), "-", " ", -1))
 
 				// Add the MTGBAN affiliation
 				v := u.Query()
-				switch {
-				case isCSI:
+				switch store {
+				case "CSI":
 					v.Set("utm_referrer", Config.Affiliate["CSI"])
-				case isCK || isTCG:
+				case "CK", "TCG":
 					commonTag := Config.Affiliate["CK"]
 					v.Set("partner", commonTag)
 					v.Set("utm_source", commonTag)
-					if isCK {
+
+					// Adjust title
+					if store == "CK" {
 						v.Set("utm_campaign", commonTag)
 						v.Set("utm_medium", "affiliate")
-					} else if isTCG {
+						title += " at Card Kingdom"
+					} else {
 						v.Set("utm_campaign", "affliate")
 						v.Set("utm_medium", commonTag)
+
+						// The old style links do not have the product id and have an extra element
+						if strings.HasSuffix(u.Path, "/listing") {
+							title = strings.Title(strings.Replace(path.Base(strings.TrimSuffix(u.Path, "/listing")), "-", " ", -1))
+						}
+						// Sometimes there is the product id embedded in the URL,
+						// try to find it and use it to decorate the title
+						productId := strings.TrimPrefix(u.Path, "/product/")
+
+						slashIndex := strings.Index(productId, "/")
+						if slashIndex != -1 {
+							productId = productId[:slashIndex]
+						}
+						productId = mtgmatcher.Tcg2UUID(productId)
+						co, err := mtgmatcher.GetUUID(productId)
+						if err == nil {
+							// Keep the edition first to mimic the normal style
+							title = fmt.Sprintf("Magic %s %s", co.Edition, co.Name)
+						}
+						title += " at TCGplayer"
 					}
-				case isWotC:
+				case "WotC":
 					u2, err := url.Parse(field)
 					if err != nil {
 						continue
@@ -517,34 +544,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 						}
 					}
 				}
-
 				u.RawQuery = v.Encode()
 
-				// Extract a sensible link title
-				title := strings.Title(strings.Replace(path.Base(u.Path), "-", " ", -1))
-				if isCK {
-					title += " at Card Kingdom"
-				} else if isTCG {
-					// The old style links do not have the product id and have an extra element
-					if strings.HasSuffix(u.Path, "/listing") {
-						title = strings.Title(strings.Replace(path.Base(strings.TrimSuffix(u.Path, "/listing")), "-", " ", -1))
-					}
-					// Sometimes there is the product id embedded in the URL,
-					// try to find it and use it to decorate the title
-					productId := strings.TrimPrefix(u.Path, "/product/")
-
-					slashIndex := strings.Index(productId, "/")
-					if slashIndex != -1 {
-						productId = productId[:slashIndex]
-					}
-					productId = mtgmatcher.Tcg2UUID(productId)
-					co, err := mtgmatcher.GetUUID(productId)
-					if err == nil {
-						// Keep the edition first to mimic the normal style
-						title = fmt.Sprintf("Magic %s %s", co.Edition, co.Name)
-					}
-					title += " at TCGplayer"
-				}
 				// Spam time!
 				_, err = s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
 					Title:       title,
