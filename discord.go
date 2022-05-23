@@ -466,6 +466,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			strings.Contains(m.Content, "coolstuffinc.com/page") ||
 			strings.Contains(m.Content, "gatherer.wizards.com") ||
 			strings.Contains(m.Content, "www.tcgplayer.com/product") ||
+			(strings.Contains(m.Content, "amazon.com/") && !strings.Contains(m.Content, "images-amazon.com/images")) ||
 			(strings.Contains(m.Content, "shop.tcgplayer.com/") && !strings.Contains(m.Content, "shop.tcgplayer.com/seller")):
 			// Iterate over each segment of the message and look for known links
 			fields := strings.Fields(m.Content)
@@ -480,6 +481,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 					store = "TCG"
 				case strings.Contains(field, "gatherer.wizards.com"):
 					store = "WotC"
+				case strings.Contains(field, "amazon.com/"):
+					store = "AMZN"
 				default:
 					continue
 				}
@@ -543,6 +546,9 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 							return
 						}
 					}
+				case "AMZN":
+					v.Set("tag", Config.Affiliate["AMZN"])
+					title = "Your search at Amazon"
 				}
 				u.RawQuery = v.Encode()
 
