@@ -558,7 +558,7 @@ func main() {
 		// Times are in UTC
 
 		// Refresh everything daily at 2am (after MTGJSON update)
-		c.AddFunc("35 2 * * *", loadScrapers)
+		c.AddFunc("35 11 * * *", loadScrapers)
 		// Refresh CK at every 6th hour, 10 minutes past the hour (four times in total)
 		c.AddFunc("10 */6 * * *", reloadCK)
 		// Refresh TCG at every 6th hour, 15 minutes past the hour (four times in total)
@@ -566,8 +566,8 @@ func main() {
 		// Refresh SCG every day at 2:15pm (twice in total)
 		c.AddFunc("15 14 * * *", reloadSCG)
 
-		// MTGJSON builds go live 9pm EST, pull the update 30 minutes after
-		c.AddFunc("30 2 * * *", func() {
+		// MTGJSON builds go live 7am EST, pull the update 30 minutes after
+		c.AddFunc("30 11 * * *", func() {
 			log.Println("Reloading MTGJSONv5")
 			err := loadDatastore()
 			if err != nil {
