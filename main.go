@@ -559,10 +559,10 @@ func main() {
 
 		// Refresh everything daily at 2am (after MTGJSON update)
 		c.AddFunc("35 11 * * *", loadScrapers)
-		// Refresh CK at every 6th hour, 10 minutes past the hour (four times in total)
-		c.AddFunc("10 */6 * * *", reloadCK)
-		// Refresh TCG at every 6th hour, 15 minutes past the hour (four times in total)
-		c.AddFunc("15 */6 * * *", reloadTCG)
+		// Refresh CK at every 4th hour, 40 minutes past the hour (six times in total)
+		c.AddFunc("40 */4 * * *", reloadCK)
+		// Refresh TCG at every 4th hour, 45 minutes past the hour (six times in total)
+		c.AddFunc("45 */4 * * *", reloadTCG)
 		// Refresh SCG every day at 2:15pm (twice in total)
 		c.AddFunc("15 14 * * *", reloadSCG)
 
