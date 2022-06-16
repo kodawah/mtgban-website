@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -14,7 +15,6 @@ import (
 	"time"
 
 	cleanhttp "github.com/hashicorp/go-cleanhttp"
-	"github.com/kodabb/go-mtgban/mtgmatcher"
 
 	git "github.com/go-git/go-git/v5"
 	githttp "github.com/go-git/go-git/v5/plumbing/transport/http"
@@ -107,6 +107,7 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 		doReboot = true
 
 		go func() {
+			// Load Allprintings.json remotely
 			log.Println("Retrieving the latest version of mtgjson")
 			resp, err := cleanhttp.DefaultClient().Get(mtgjsonURL)
 			if err != nil {
@@ -115,8 +116,31 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 			}
 			defer resp.Body.Close()
 
+			// Create a new file, copy contents over then move new file over the old one
 			log.Println("Installing the new mtgjson version")
-			err = mtgmatcher.LoadDatastore(resp.Body)
+			fo, err := os.Create(AllPrintingsFileName + "new")
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			defer fo.Close()
+
+			_, err = io.Copy(fo, resp.Body)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			fo.Close()
+
+			err = os.Rename(AllPrintingsFileName+"new", AllPrintingsFileName)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			// Reload the newly created file
+			log.Println("Loading the new mtgjson version")
+			err = loadDatastore()
 			if err != nil {
 				log.Println(err)
 				return

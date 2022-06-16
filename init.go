@@ -59,10 +59,12 @@ const (
 	CT_ZERO     = "Card Trader Zero"
 
 	SkipRefreshCooldown = 2 * time.Hour
+
+	AllPrintingsFileName = "allprintings5.json"
 )
 
 func loadDatastore() error {
-	allPrintingsReader, err := os.Open("allprintings5.json")
+	allPrintingsReader, err := os.Open(AllPrintingsFileName)
 	if err != nil {
 		return err
 	}
