@@ -23,3 +23,6 @@ cache_*
 
 # Configuration files
 *.json
+
+# Logs directory
+logs/
