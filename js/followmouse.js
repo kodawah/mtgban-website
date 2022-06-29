@@ -12,6 +12,14 @@ function getMouse(e){
 }
 
 function followMouse(){
-    hoverImage.style.left = mouseLoc.x + "px";
-    hoverImage.style.top = mouseLoc.y + "px";
+    if (mouseLoc.x + hoverImage.width > window.innerWidth + window.pageXOffset) {
+        hoverImage.style.left = (mouseLoc.x - hoverImage.width - 20) + "px";
+    } else {
+        hoverImage.style.left = mouseLoc.x + "px";
+    }
+    if (mouseLoc.y + hoverImage.height > window.innerHeight + window.pageYOffset) {
+        hoverImage.style.top = (mouseLoc.y - hoverImage.height - 20) + "px";
+    } else {
+        hoverImage.style.top = mouseLoc.y + "px";
+    }
 }
