@@ -459,26 +459,7 @@
                 <hr style="margin-left:20px;" width=58%> <br>
 
                 <img id="hoverImage" src="" style="position:absolute; z-index: 3;"/>
-
-                <script type="text/javascript">
-                    var hoverImage = document.getElementById("hoverImage");
-
-                    document.addEventListener("mousemove", getMouse);
-
-                    setInterval(followMouse, 10);
-
-                    var mouse = {x:0, y:0}; //mouse.x, mouse.y
-
-                    function getMouse(e){
-                        mouse.x = e.pageX+10;
-                        mouse.y = e.pageY+10;
-                    }
-
-                    function followMouse(){
-                        hoverImage.style.left = mouse.x + "px";
-                        hoverImage.style.top = mouse.y + "px";
-                    }
-                </script>
+                <script type="text/javascript" src="../js/followmouse.js"></script>
 
                 <div class="indent sticky">
                     <span class="anchor" id="top"></span>
