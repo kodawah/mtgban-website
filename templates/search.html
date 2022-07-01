@@ -324,6 +324,9 @@
                                                 †
                                             {{end}}
                                         </td>
+                                        <td rowspan=2>
+                                            <a href="https://scryfall.com/card/{{tolower $card.SetCode}}/{{$card.Number}}" title="Check this card on Scryfall.com" target=_blank><img width=28 src="img/logo/scryfall.svg"></a>
+                                        </td>
                                         {{if $card.TCGId}}
                                             <td rowspan=2>
                                                     <a href="https://store.tcgplayer.com/admin/product/manage/{{$card.TCGId}}" title="Manage your TCGplayer inventory" target=_blank><img width=22 src="img/logo/tcgapp.png"></a>
