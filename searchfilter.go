@@ -627,21 +627,6 @@ func compareReleaseDate(filters []string, co *mtgmatcher.CardObject, cmpFunc fun
 	return cmpFunc(cardDate, releaseDate)
 }
 
-// All promo types that have the same name of the option
-var classicPromoTypes = []string{
-	mtgjson.PromoTypeBundle,
-	mtgjson.PromoTypeBuyABox,
-	mtgjson.PromoTypeGameDay,
-	mtgjson.PromoTypeIntroPack,
-	mtgjson.PromoTypePrerelease,
-	mtgjson.PromoTypePromoPack,
-	mtgjson.PromoTypeRelease,
-	mtgjson.PromoTypeBoosterfun,
-	mtgjson.PromoTypeGodzilla,
-	mtgjson.PromoTypeDracula,
-	mtgjson.PromoTypePlayPromo,
-}
-
 var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObject) bool{
 	"edition": func(filters []string, co *mtgmatcher.CardObject) bool {
 		return !SliceStringHas(filters, co.SetCode)
@@ -743,7 +728,7 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 					return false
 				}
 			case "wcd", "gold":
-				if co.BorderColor == "gold" {
+				if co.BorderColor == mtgjson.BorderColorGold {
 					return false
 				}
 			case "fullart":
@@ -786,12 +771,21 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 				if co.HasPromoType(mtgjson.PromoTypeArenaLeague) {
 					return false
 				}
+			case "bab", "buyabox":
+				if co.HasPromoType(mtgjson.PromoTypeBuyABox) {
+					return false
+				}
 			case "jpn":
 				if co.HasUniqueLanguage(mtgjson.LanguageJapanese) {
 					return false
 				}
+			case "phyrexian":
+				if co.HasUniqueLanguage(mtgjson.LanguagePhyrexian) {
+					return false
+				}
 			default:
-				if SliceStringHas(classicPromoTypes, value) {
+				// Fall back to any promo type currently supported
+				if SliceStringHas(mtgjson.AllPromoTypes, value) {
 					if co.HasPromoType(value) {
 						return false
 					}
