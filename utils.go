@@ -202,31 +202,23 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 	}
 
 	variant := ""
-	switch {
-	case co.HasPromoType(mtgjson.PromoTypePrerelease):
-		variant = "Prerelease"
-	case co.HasPromoType(mtgjson.PromoTypePromoPack):
-		variant = "Promo Pack"
-	case co.HasPromoType(mtgjson.PromoTypeBundle):
-		variant = "Bundle"
-	case co.HasPromoType(mtgjson.PromoTypeRelease):
-		variant = "Release"
-	case co.HasPromoType(mtgjson.PromoTypeGameDay):
-		variant = "Game Day"
-	case co.HasPromoType(mtgjson.PromoTypeBuyABox):
-		variant = "Buy-a-Box"
-	case co.HasPromoType(mtgjson.PromoTypeGodzilla):
-		variant = "Godzilla"
-	case co.HasPromoType(mtgjson.PromoTypeBoosterfun):
+	if co.HasPromoType(mtgjson.PromoTypeBoosterfun) {
 		switch {
 		case co.HasFrameEffect(mtgjson.FrameEffectShowcase):
-			variant = "Showcase"
+			variant = "Showcase "
 		case co.HasFrameEffect(mtgjson.FrameEffectExtendedArt):
-			variant = "Extended Art"
+			variant = "Extended Art "
 		case co.BorderColor == mtgjson.BorderColorBorderless:
-			variant = "Borderless"
+			variant = "Borderless "
 		}
 	}
+	// Loop through the supported promo types, skipping Boosterfun already processed above
+	for _, promoType := range co.PromoTypes {
+		if SliceStringHas(mtgjson.AllPromoTypes, promoType) && promoType != mtgjson.PromoTypeBoosterfun {
+			variant += strings.Title(promoType) + " "
+		}
+	}
+	variant = strings.TrimSpace(variant)
 
 	isJPN := false
 	switch co.SetCode {
