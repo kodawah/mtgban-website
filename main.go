@@ -575,8 +575,8 @@ func main() {
 			}
 		})
 
-		// Every seven days in a month, clean up the csv cache
-		c.AddFunc("0 0 */7 * *", deleteOldCache)
+		// Slean up the csv cache every 3 days
+		c.AddFunc("0 0 */3 * *", deleteOldCache)
 
 		c.Start()
 	}()
