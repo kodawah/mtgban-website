@@ -695,7 +695,7 @@ func getValuesForTier(tierTitle string) url.Values {
 		case "Modern":
 			v.Set("UploadBuylistEnabled", "false")
 			v.Set("UploadChangeStoresEnabled", "true")
-		case "Root", "Admin", "Mods":
+		case "Root", "Admin", "Mods", "Beta User":
 			v.Set("UploadOptimizer", "true")
 			fallthrough
 		default:
