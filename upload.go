@@ -78,11 +78,12 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	// Enable optimizer calculation if allowed for buylists
 	optimizerOpt, _ := strconv.ParseBool(GetParamFromSig(sig, "UploadOptimizer"))
-	canOptimize := (optimizerOpt || (DevMode && !SigCheck)) && blMode
+	canOptimize := (optimizerOpt || (DevMode && !SigCheck))
 
 	// Set flags needed to show elements on the page ui
 	pageVars.IsBuylist = blMode
 	pageVars.CanBuylist = canBuylist
+	pageVars.CanOptimize = canOptimize
 	pageVars.CanChangeStores = canChangeStores
 
 	blocklistRetail, blocklistBuylist := getDefaultBlocklists(sig)
@@ -201,7 +202,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 
 	maxRows := MaxUploadEntries
-	if canOptimize {
+	if canOptimize && blMode {
 		maxRows = MaxUploadProEntries
 	}
 
@@ -243,9 +244,9 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		results = getSellerPrices("", enabledStores, "", cardIds, false, false)
 	}
 
-	// Enable download if buylist page is accessible but only for retail
+	// Allow downloading data as CSV
 	download, _ := strconv.ParseBool(r.FormValue("download"))
-	if download && canBuylist && !blMode {
+	if download && ((canBuylist && !blMode) || canOptimize) {
 		w.Header().Set("Content-Type", "text/csv")
 		w.Header().Set("Content-Disposition", "attachment; filename=\"mtgban_prices.csv\"")
 		csvWriter := csv.NewWriter(w)
@@ -303,7 +304,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	var optimizedEditions map[string][]OptimizedUploadEntry
 	var highestTotal float64
 
-	if canOptimize {
+	if canOptimize && blMode {
 		optimizedResults = map[string][]string{}
 		optimizedTotals = map[string]float64{}
 		optimizedEditions = map[string][]OptimizedUploadEntry{}
@@ -358,7 +359,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			// Add to totals
 			pageVars.TotalEntries[shorthand] += price
 
-			if !canOptimize {
+			if !(canOptimize && blMode) {
 				continue
 			}
 
@@ -377,7 +378,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		if canOptimize && bestPrice != 0 {
+		if canOptimize && blMode && bestPrice != 0 {
 			cardId := uploadedData[i].CardId
 
 			// Break down by store
@@ -393,7 +394,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 	}
-	if canOptimize {
+	if canOptimize && blMode {
 		// Keep cards sorted by edition, following the same rules of search
 		for store := range optimizedResults {
 			sort.Slice(optimizedResults[store], func(i, j int) bool {

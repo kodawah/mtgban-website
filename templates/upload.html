@@ -121,7 +121,11 @@
                         ";
                         var submitButton = document.getElementById('submit_download');
                         if (submitButton) {
-                            submitButton.style.display = "none"
+                            {{if .CanOptimize}}
+                                submitButton.style.display = "inline"
+                            {{else}}
+                                submitButton.style.display = "none"
+                            {{end}}
                         }
                     } else if (mode == "retail") {
                         selectBox.innerHTML = " \
