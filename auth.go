@@ -267,6 +267,8 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 				tierTitle = "Modern"
 			case "LEGACY", "LEGACY (Early Adopters)":
 				tierTitle = "Legacy"
+			case "VINTAGE", "VINTAGE (Early Adopters)":
+				tierTitle = "Vintage"
 			case "Test Role":
 				tierTitle = "Test Role"
 			}
@@ -607,6 +609,7 @@ var AllPatreonTiers = []string{
 	"Mods",
 	"Test Role",
 	"Beta User",
+	"Vintage",
 	"Legacy",
 	"Lost Boys",
 	"Modern",
@@ -699,7 +702,9 @@ func getValuesForTier(tierTitle string) url.Values {
 		case "Modern":
 			v.Set("UploadBuylistEnabled", "false")
 			v.Set("UploadChangeStoresEnabled", "true")
-		case "Root", "Admin", "Mods", "Beta User":
+		case "Root", "Admin", "Mods":
+			fallthrough
+		case "Vintage":
 			v.Set("UploadOptimizer", "true")
 			fallthrough
 		default:
