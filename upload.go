@@ -251,7 +251,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Disposition", "attachment; filename=\"mtgban_prices.csv\"")
 		csvWriter := csv.NewWriter(w)
 
-		err = SimplePrice2CSV(csvWriter, results)
+		err = SimplePrice2CSV(csvWriter, results, uploadedData)
 		if err != nil {
 			w.Header().Del("Content-Type")
 			UserNotify("upload", err.Error())

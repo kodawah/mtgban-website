@@ -575,7 +575,7 @@ func BanPrice2CSV(w *csv.Writer, pm map[string]map[string]*BanPrice, shouldQty, 
 	return nil
 }
 
-func SimplePrice2CSV(w *csv.Writer, pm map[string]map[string]*BanPrice) error {
+func SimplePrice2CSV(w *csv.Writer, pm map[string]map[string]*BanPrice, uploadedDada []UploadEntry) error {
 	allScrapersMap := map[string]int{}
 	for id := range pm {
 		for scraper := range pm[id] {
@@ -592,12 +592,23 @@ func SimplePrice2CSV(w *csv.Writer, pm map[string]map[string]*BanPrice) error {
 
 	header := []string{"UUID", "Card Name", "Set Code", "Number", "Finish"}
 	header = append(header, allScrapers...)
+	header = append(header, "Loaded Price")
 	err := w.Write(header)
 	if err != nil {
 		return err
 	}
 
-	for id := range pm {
+	for j := range uploadedDada {
+		if uploadedDada[j].MismatchError != nil {
+			continue
+		}
+
+		id := uploadedDada[j].CardId
+		_, found := pm[id]
+		if !found {
+			continue
+		}
+
 		var cardName, code, number string
 		co, err := mtgmatcher.GetUUID(id)
 		if err != nil {
@@ -621,6 +632,9 @@ func SimplePrice2CSV(w *csv.Writer, pm map[string]map[string]*BanPrice) error {
 				price = entry.Foil
 			}
 			prices[i] = fmt.Sprintf("%0.2f", price)
+		}
+		if uploadedDada[j].OriginalPrice != 0 {
+			prices = append(prices, fmt.Sprintf("%0.2f", uploadedDada[j].OriginalPrice))
 		}
 
 		record := []string{id, cardName, code, number}
