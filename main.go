@@ -315,6 +315,8 @@ var Config struct {
 	} `json:"patreon"`
 	ApiUserSecrets    map[string]string `json:"api_user_secrets"`
 	GoogleCredentials string            `json:"google_credentials"`
+
+	ACL map[string]map[string]map[string]string `json:"acl"`
 }
 
 var DevMode bool

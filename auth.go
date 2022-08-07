@@ -618,100 +618,23 @@ var AllPatreonTiers = []string{
 
 func getValuesForTier(tierTitle string) url.Values {
 	v := url.Values{}
-	// Enable option according to tier
-	switch tierTitle {
-	case "Root":
-		fallthrough
-	case "Admin":
-		v.Set("Reverse", "true")
-		v.Set("Admin", "true")
-		fallthrough
-	case "Developer", "Mods":
-		fallthrough
-	case "Test Role":
-		v.Set("Arbit", "true")
-		fallthrough
-	case "Beta User":
-		fallthrough
-	case "Vintage":
-		fallthrough
-	case "Legacy":
-		v.Set("Sleepers", "true")
-		fallthrough
-	case "Lost Boys":
-		fallthrough
-	case "Modern":
-		v.Set("Newspaper", "true")
-		v.Set("Global", "true")
-		fallthrough
-	case "Pioneer":
-		v.Set("Upload", "true")
-		v.Set("Search", "true")
+	tier, found := Config.ACL[tierTitle]
+	if !found {
+		return v
 	}
-	if v.Get("Arbit") == "true" {
-		switch tierTitle {
-		case "Root":
-			v.Set("ArbitEnabled", "ALL")
-			v.Set("ArbitDisabledVendors", "NONE")
-		case "Developer":
-			v.Set("ArbitEnabled", "DEV")
-			v.Set("ArbitDisabledVendors", "NONE")
-		default:
-			v.Set("ArbitEnabled", "DEFAULT")
-			v.Set("ArbitDisabledVendors", "DEFAULT")
+	for _, page := range OrderNav {
+		options, found := tier[page]
+		if !found {
+			continue
 		}
-	}
-	if v.Get("Search") == "true" {
-		switch tierTitle {
-		case "Root", "Admin":
-			v.Set("SearchDisabled", "NONE")
-			v.Set("SearchBuylistDisabled", "NONE")
-			v.Set("SearchSealed", "true")
-		case "Mods":
-			v.Set("SearchSealed", "true")
-			fallthrough
-		default:
-			v.Set("SearchDisabled", "DEFAULT")
-			v.Set("SearchBuylistDisabled", "DEFAULT")
-		}
-	}
-	if v.Get("Newspaper") == "true" {
-		switch tierTitle {
-		case "Modern":
-			v.Set("NewsEnabled", "3day")
-		case "Root", "Admin":
-			v.Set("NewsEnabled", "0day")
-		default:
-			v.Set("NewsEnabled", "1day")
-		}
-	}
-	if v.Get("Global") == "true" {
-		switch tierTitle {
-		case "Modern":
-			v.Set("AnyEnabled", "false")
-		case "Root":
-			v.Set("AnyExperimentsEnabled", "true")
-			v.Set("AnyEnabled", "true")
-		default:
-			v.Set("AnyEnabled", "true")
-		}
-	}
-	if v.Get("Upload") == "true" {
-		switch tierTitle {
-		case "Pioneer":
-			v.Set("UploadBuylistEnabled", "false")
-			v.Set("UploadChangeStoresEnabled", "false")
-		case "Modern":
-			v.Set("UploadBuylistEnabled", "false")
-			v.Set("UploadChangeStoresEnabled", "true")
-		case "Root", "Admin", "Mods":
-			fallthrough
-		case "Vintage":
-			v.Set("UploadOptimizer", "true")
-			fallthrough
-		default:
-			v.Set("UploadBuylistEnabled", "true")
-			v.Set("UploadChangeStoresEnabled", "true")
+		v.Set(page, "true")
+
+		for _, key := range OptionalFields {
+			val, found := options[key]
+			if !found {
+				continue
+			}
+			v.Set(key, val)
 		}
 	}
 	return v
