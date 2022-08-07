@@ -633,6 +633,8 @@ func getValuesForTier(tierTitle string) url.Values {
 		fallthrough
 	case "Beta User":
 		fallthrough
+	case "Vintage":
+		fallthrough
 	case "Legacy":
 		v.Set("Sleepers", "true")
 		fallthrough
