@@ -418,7 +418,7 @@ func enforceAPISigning(next http.Handler) http.Handler {
 		q := url.Values{}
 		q.Set("API", v.Get("API"))
 
-		for _, optional := range append(OrderNav, OptionalFields...) {
+		for _, optional := range OptionalFields {
 			val := v.Get(optional)
 			if val != "" {
 				q.Set(optional, val)

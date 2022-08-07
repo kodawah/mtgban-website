@@ -207,7 +207,6 @@ var OptionalFields = []string{
 	"UploadOptimizer",
 	"AnyEnabled",
 	"AnyExperimentsEnabled",
-	"API",
 	"APImode",
 }
 
