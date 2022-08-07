@@ -602,20 +602,6 @@ func recoverPanic(r *http.Request, w http.ResponseWriter) {
 	}
 }
 
-var AllPatreonTiers = []string{
-	"Root",
-	"Admin",
-	"Developer",
-	"Mods",
-	"Test Role",
-	"Beta User",
-	"Vintage",
-	"Legacy",
-	"Lost Boys",
-	"Modern",
-	"Pioneer",
-}
-
 func getValuesForTier(tierTitle string) url.Values {
 	v := url.Values{}
 	tier, found := Config.ACL[tierTitle]

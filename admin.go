@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"sort"
 	"strings"
 	"time"
 
@@ -312,7 +313,15 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 		pageVars.OtherTable = append(pageVars.OtherTable, row)
 	}
 
-	pageVars.Tiers = AllPatreonTiers
+	var tiers []string
+	for tierName := range Config.ACL {
+		tiers = append(tiers, tierName)
+	}
+	sort.Slice(tiers, func(i, j int) bool {
+		return tiers[i] < tiers[j]
+	})
+
+	pageVars.Tiers = tiers
 	pageVars.Uptime = uptime()
 	pageVars.DiskStatus = disk()
 	pageVars.MemoryStatus = mem()
