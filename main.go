@@ -147,7 +147,7 @@ type PageVars struct {
 	CanChangeStores bool
 	RemoteLinkURL   string
 	TotalQuantity   int
-	Optimized       map[string][]string
+	Optimized       map[string][]OptimizedUploadEntry
 	OptimizedTotals map[string]float64
 	HighestTotal    float64
 	MissingCounts   map[string]int

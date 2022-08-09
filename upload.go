@@ -48,6 +48,7 @@ type UploadEntry struct {
 type OptimizedUploadEntry struct {
 	CardId string
 	Store  string
+	Price  float64
 }
 
 func Upload(w http.ResponseWriter, r *http.Request) {
@@ -299,13 +300,13 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var optimizedResults map[string][]string
+	var optimizedResults map[string][]OptimizedUploadEntry
 	var optimizedTotals map[string]float64
 	var optimizedEditions map[string][]OptimizedUploadEntry
 	var highestTotal float64
 
 	if canOptimize && blMode {
-		optimizedResults = map[string][]string{}
+		optimizedResults = map[string][]OptimizedUploadEntry{}
 		optimizedTotals = map[string]float64{}
 		optimizedEditions = map[string][]OptimizedUploadEntry{}
 	}
@@ -381,8 +382,17 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		if canOptimize && blMode && bestPrice != 0 {
 			cardId := uploadedData[i].CardId
 
+			// Load comparison price, either the loaded one or tcg low
+			comparePrice := uploadedData[i].OriginalPrice
+			if comparePrice == 0 {
+				comparePrice = getPrice(indexResults[cardId][TCG_LOW])
+			}
+
 			// Break down by store
-			optimizedResults[bestStore] = append(optimizedResults[bestStore], cardId)
+			optimizedResults[bestStore] = append(optimizedResults[bestStore], OptimizedUploadEntry{
+				CardId: cardId,
+				Price:  comparePrice,
+			})
 			optimizedTotals[bestStore] += bestPrice
 			highestTotal += bestPrice
 
@@ -391,6 +401,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			optimizedEditions[edition] = append(optimizedEditions[edition], OptimizedUploadEntry{
 				CardId: cardId,
 				Store:  bestStore,
+				Price:  comparePrice,
 			})
 		}
 	}
@@ -398,7 +409,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		// Keep cards sorted by edition, following the same rules of search
 		for store := range optimizedResults {
 			sort.Slice(optimizedResults[store], func(i, j int) bool {
-				return sortSets(optimizedResults[store][i], optimizedResults[store][j])
+				return sortSets(optimizedResults[store][i].CardId, optimizedResults[store][j].CardId)
 			})
 		}
 

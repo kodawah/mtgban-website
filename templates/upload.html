@@ -503,15 +503,8 @@
                                     </a>
                                     <table onmouseout="document.getElementById('hoverImage').src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';">
                                         {{range $entries}}
-                                            {{$card := (index $.Metadata .)}}
+                                            {{$card := (index $.Metadata .CardId)}}
                                             <tr onmouseover="document.getElementById('hoverImage').src={{$card.ImageURL}};">
-                                                {{$tcgLow := 0.0}}
-                                                {{$indexEntries := (index $.IndexEntries .)}}
-                                                {{if $indexEntries}}
-                                                    {{$entry := (index $indexEntries "TCG Low")}}
-                                                    {{$tcgLow = (banprice2price $entry)}}
-                                                {{end}}
-
                                                 <td>
                                                     <a href="{{$card.SearchURL}}" target="_blank">{{$card.Name}}</a>
                                                     {{if $card.Reserved}} *{{end}}
@@ -532,7 +525,7 @@
                                                     {{end}}
                                                 </td>
                                                 <td>
-                                                    {{$scraperEntries := (index $.CompactEntries .)}}
+                                                    {{$scraperEntries := (index $.CompactEntries .CardId)}}
                                                     {{$subEntry := (index $scraperEntries $scraperKey)}}
                                                     {{$price := (banprice2price $subEntry)}}
 
@@ -540,9 +533,9 @@
                                                     <a href="/go/b/{{$scraperKey}}/{{.}}" target="_blank">
                                                         {{printf "%.2f" $price}}
                                                     </a>
-                                                    {{if $tcgLow}}
-                                                        / $ {{printf "%.2f" $tcgLow}}
-                                                        {{if lt $tcgLow $price}}⚠️{{end}}
+                                                    {{if .Price}}
+                                                        / $ {{printf "%.2f" .Price}}
+                                                        {{if lt .Price $price}}⚠️{{end}}
                                                     {{end}}
                                                 </td>
                                             </tr>
@@ -586,13 +579,6 @@
                                         {{range $entries}}
                                             {{$card := (index $.Metadata .CardId)}}
                                             <tr onmouseover="document.getElementById('hoverImage').src={{$card.ImageURL}};">
-                                                {{$tcgLow := 0.0}}
-                                                {{$indexEntries := (index $.IndexEntries .CardId)}}
-                                                {{if $indexEntries}}
-                                                    {{$entry := (index $indexEntries "TCG Low")}}
-                                                    {{$tcgLow = (banprice2price $entry)}}
-                                                {{end}}
-
                                                 <td>
                                                     <a href="{{$card.SearchURL}}" target="_blank">{{$card.Name}}</a>
                                                     {{if $card.Reserved}} *{{end}}
@@ -620,9 +606,9 @@
                                                     <a href="/go/b/{{.Store}}/{{.CardId}}" target="_blank">
                                                         {{printf "%.2f" $price}}
                                                     </a>
-                                                    {{if $tcgLow}}
-                                                        / $ {{printf "%.2f" $tcgLow}}
-                                                        {{if lt $tcgLow $price}}⚠️{{end}}
+                                                    {{if .Price}}
+                                                        / $ {{printf "%.2f" .Price}}
+                                                        {{if lt .Price $price}}⚠️{{end}}
                                                     {{end}}
                                                 </td>
                                             </tr>
