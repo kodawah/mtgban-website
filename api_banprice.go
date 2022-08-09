@@ -638,12 +638,7 @@ func SimplePrice2CSV(w *csv.Writer, pm map[string]map[string]*BanPrice, uploaded
 			if !found {
 				continue
 			}
-			price := entry.Regular
-			if co.Etched {
-				price = entry.Etched
-			} else if co.Foil {
-				price = entry.Foil
-			}
+			price := getPrice(entry)
 			prices[i] = fmt.Sprintf("%0.2f", price)
 		}
 		if uploadedDada[j].OriginalPrice != 0 {
