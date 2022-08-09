@@ -228,10 +228,17 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var shouldCheckForConditions bool
+
 	// Extract card Ids
 	cardIds := make([]string, 0, len(uploadedData))
 	for i := range uploadedData {
 		cardIds = append(cardIds, uploadedData[i].CardId)
+
+		// Check if conditions should be retrieved
+		if uploadedData[i].OriginalCondition != "" {
+			shouldCheckForConditions = true
+		}
 	}
 
 	// Check not too many entries got uploaded
@@ -242,7 +249,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	// Search
 	var results map[string]map[string]*BanPrice
 	if blMode {
-		results = getVendorPrices("", enabledStores, "", cardIds, false, false)
+		results = getVendorPrices("", enabledStores, "", cardIds, false, shouldCheckForConditions)
 	} else {
 		results = getSellerPrices("", enabledStores, "", cardIds, false, false)
 	}
@@ -331,13 +338,13 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			_, found := results[cardId][shorthand]
 			if !found {
 				missingCounts[shorthand]++
-				missingPrices[shorthand] += getPrice(indexResults[cardId][TCG_LOW])
+				missingPrices[shorthand] += getPrice(indexResults[cardId][TCG_LOW], "")
 			}
 		}
 
 		// Summary of the index entries
 		for indexKey, indexResult := range indexResults[cardId] {
-			indexPrice := getPrice(indexResult)
+			indexPrice := getPrice(indexResult, "")
 			if uploadedData[i].HasQuantity {
 				indexPrice *= float64(uploadedData[i].Quantity)
 			}
@@ -351,7 +358,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 		// Run summaries for each vendor
 		for shorthand, banPrice := range results[cardId] {
-			price := getPrice(banPrice)
+			price := getPrice(banPrice, uploadedData[i].OriginalCondition)
 
 			// Store computed price
 			if resultPrices[cardId] == nil {
@@ -398,7 +405,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			// Load comparison price, either the loaded one or tcg low
 			comparePrice := uploadedData[i].OriginalPrice
 			if comparePrice == 0 {
-				comparePrice = getPrice(indexResults[cardId][TCG_LOW])
+				comparePrice = getPrice(indexResults[cardId][TCG_LOW], "")
 			}
 
 			// Break down by store
@@ -462,17 +469,29 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	render(w, "upload.html", pageVars)
 }
 
-func getPrice(banPrice *BanPrice) float64 {
+func getPrice(banPrice *BanPrice, conds string) float64 {
 	if banPrice == nil {
 		return 0
 	}
 
+	var price float64
+
 	// Grab the correct Price
-	price := banPrice.Regular
-	if price == 0 {
-		price = banPrice.Foil
+	if conds == "" || conds == "NM" {
+		price = banPrice.Regular
 		if price == 0 {
-			price = banPrice.Etched
+			price = banPrice.Foil
+			if price == 0 {
+				price = banPrice.Etched
+			}
+		}
+	} else {
+		price = banPrice.Conditions[conds]
+		if price == 0 {
+			price = banPrice.Conditions[conds+"_foil"]
+			if price == 0 {
+				price = banPrice.Conditions[conds+"_etched"]
+			}
 		}
 	}
 
