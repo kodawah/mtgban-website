@@ -41,6 +41,8 @@ type UploadEntry struct {
 	MismatchAlias bool
 	OriginalPrice float64
 
+	OriginalCondition string
+
 	HasQuantity bool
 	Quantity    int
 }
@@ -667,6 +669,20 @@ func parseRow(indexMap map[string]int, record []string, foundHashes map[string]b
 		res.OriginalPrice, _ = mtgmatcher.ParsePrice(record[indexMap["price"]])
 	}
 
+	switch {
+	case strings.Contains(conditions, "mint"), strings.Contains(conditions, "nm"):
+		res.OriginalCondition = "NM"
+	case strings.Contains(conditions, "light"), strings.Contains(conditions, "lp"), strings.Contains(conditions, "sp"):
+		res.OriginalCondition = "SP"
+	case strings.Contains(conditions, "moderately"), strings.Contains(conditions, "mp"):
+		res.OriginalCondition = "MP"
+	case strings.Contains(conditions, "heav"), strings.Contains(conditions, "hp"):
+		res.OriginalCondition = "HP"
+	case strings.Contains(conditions, "poor"), strings.Contains(conditions, "damage"),
+		strings.Contains(conditions, "po"), strings.Contains(conditions, "dmg"):
+		res.OriginalCondition = "PO"
+	}
+
 	cardId, err := mtgmatcher.Match(&res.Card)
 
 	var alias *mtgmatcher.AliasingError
@@ -683,11 +699,12 @@ func parseRow(indexMap map[string]int, record []string, foundHashes map[string]b
 	}
 	res.CardId = cardId
 
-	if foundHashes[res.CardId] {
+	// Use id + condition to mimic a "sku"
+	if foundHashes[res.CardId+res.OriginalCondition] {
 		return res, errors.New("repeated")
 	}
 	if res.MismatchError == nil && !res.MismatchAlias {
-		foundHashes[res.CardId] = true
+		foundHashes[res.CardId+res.OriginalCondition] = true
 	}
 
 	return res, nil

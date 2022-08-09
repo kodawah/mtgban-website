@@ -299,6 +299,11 @@
                                                 <nobr>Your price: $ {{printf "%.2f" .OriginalPrice}}</nobr>
                                             </h6>
                                         {{end}}
+                                        {{if .OriginalCondition}}
+                                            <h6>
+                                                <nobr>Condition: {{.OriginalCondition}}</nobr>
+                                            </h6>
+                                        {{end}}
                                         {{if .HasQuantity}}
                                              <h6>
                                                  <nobr>Quantity: {{.Quantity}}</nobr>
