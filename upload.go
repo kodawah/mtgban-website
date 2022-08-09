@@ -645,6 +645,10 @@ func parseRow(indexMap map[string]int, record []string, foundHashes map[string]b
 			}
 		}
 
+		// Parse "10 Swamp <462> [CLB]"
+		line = strings.Replace(line, "<", "(", 1)
+		line = strings.Replace(line, ">", ")", 1)
+
 		record[indexMap["cardName"]] = line
 	}
 
