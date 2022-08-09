@@ -86,6 +86,11 @@
                                 Load spreadsheet
                             {{end}}
                         </a>
+                        or
+                        <a class="btn default" href="javascript:displayTextArea()">
+                            Paste freeform text
+                        </a>
+                        <textarea style="display:none" id="textArea" name="textArea" rows="4" cols="40"></textarea>
                     {{end}}
                     <br><br>
 
@@ -168,6 +173,11 @@
                         urlLabel.innerHTML = "Load spreadsheet";
                     } else {
                         urlLabel.innerHTML = "Cloud URL loaded";
+
+                        var textArea = document.getElementById('textArea');
+                        if (textArea) {
+                            textArea.value = "";
+                        }
                     }
                     urlLabel.title = url
                     fileLabel.innerHTML = "Select local csv/xls";
@@ -186,8 +196,24 @@
                     alert("Invalid URL");
                 }
             };
+            window.displayTextArea = function(){
+                var textArea = document.getElementById('textArea');
+                textArea.style.display = "block";
+
+                var btn = document.getElementById('submit');
+                btn.disabled = false;
+
+                var btn2 = document.getElementById('submit_download');
+                if (btn2) {
+                    btn2.disabled = false;
+                }
+            }
 
             window.onload = (event) => {
+                var textArea = document.getElementById('textArea');
+                if (textArea) {
+                    textArea.value = "";
+                }
                 reloadSelect({{if $.IsBuylist}}"buylist"{{else}}"retail"{{end}});
             }
         </script>
@@ -208,11 +234,12 @@
                 <ul class="indent">
                     <li>Upload a file and let the <i>Magic</i> begin!</li>
                     <ul class="indent">
-                        <li>This tool can read data from <b>CSV</b>, <b>Excel</b> files, or from a remote <b>Google Spreadsheets</b>.</li>
+                        <li>This tool can read data from <b>CSV</b>, <b>Excel</b> files, from a remote <b>Google Spreadsheets</b> or by <b>pasting text</b> directly on the page.</li>
                         <ul class="indent">
                             <li>The Excel sheet can be in any location as long as it contains the <pre>mtgban</pre> indication. Otherwise the system will use the first sheet found.</li>
                             <li>The Google Spreadsheet needs to be publicly accessible from the internet, and there needs to be a sheet named with <pre>mtgban</pre>, or the first sheet found will be used.</li>
                             <li>The URL used will be saved as a preference and you'll be able to use it later.</li>
+                            <li>The text area may support a number of decklist formats used in the industry.</li>
                         </ul>
                         <li>Data may be in any format, as long as the file contains a comma or tab separated header in the first row, with sensible indication on what the column contains (eg. <i>card name</i> and <i>edition</i> as a minimum).</li>
                         <li>For this reason, the most popular CSV files are supported out of the box, <b>TCG</b>, <b>Deckbox</b>, <b>BinderPOS</b>, and <b>Cardsphere</b> among others.</li>

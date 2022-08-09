@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/csv"
 	"errors"
 	"fmt"
@@ -163,11 +164,14 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	// Load spreadsheet cloud url if present
 	gdocURL := r.FormValue("gdocURL")
 
+	// Load from the freeform text area
+	textArea := r.FormValue("textArea")
+
 	// FormFile returns the first file for the given key `cardListFile`
 	// it also returns the FileHeader so we can get the Filename,
 	// the Header and the size of the file
 	file, handler, err := r.FormFile("cardListFile")
-	if err != nil && gdocURL == "" && len(hashes) == 0 {
+	if err != nil && gdocURL == "" && textArea == "" && len(hashes) == 0 {
 		render(w, "upload.html", pageVars)
 		return
 	} else if err == nil {
@@ -179,6 +183,8 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		pageVars.CardHashes = hashes
 	} else if gdocURL != "" {
 		log.Printf("Loading spreadsheet: %+v", gdocURL)
+	} else if textArea != "" {
+		log.Printf("Loading freeform text area (%d bytes)", len(textArea))
 	} else {
 		log.Printf("Uploaded File: %+v", handler.Filename)
 		log.Printf("File Size: %+v bytes", handler.Size)
@@ -215,6 +221,8 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		uploadedData, err = loadHashes(hashes)
 	} else if gdocURL != "" {
 		uploadedData, err = loadSpreadsheet(gdocURL, maxRows)
+	} else if textArea != "" {
+		uploadedData, err = loadFreeform(strings.NewReader(textArea), maxRows)
 	} else if strings.HasSuffix(handler.Filename, ".xls") {
 		uploadedData, err = loadOldXls(file, maxRows)
 	} else if strings.HasSuffix(handler.Filename, ".xlsx") {
@@ -279,6 +287,8 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		pageVars.SearchQuery = "hashes"
 	} else if gdocURL != "" {
 		pageVars.SearchQuery = gdocURL
+	} else if textArea != "" {
+		pageVars.SearchQuery = "pasted text"
 	} else {
 		pageVars.SearchQuery = handler.Filename
 	}
@@ -815,6 +825,52 @@ func loadSpreadsheet(link string, maxRows int) ([]UploadEntry, error) {
 		}
 
 		res, err := parseRow(indexMap, record, foundHashes)
+		if err != nil {
+			continue
+		}
+
+		uploadEntries = append(uploadEntries, res)
+	}
+
+	return uploadEntries, nil
+}
+
+func loadFreeform(reader io.Reader, maxRows int) ([]UploadEntry, error) {
+	scanner := bufio.NewScanner(reader)
+	scanner.Split(bufio.ScanLines)
+
+	var rows int
+	var record []string
+	for scanner.Scan() && rows < maxRows {
+		record = append(record, scanner.Text())
+		rows++
+	}
+
+	err := scanner.Err()
+	if err != nil {
+		return nil, err
+	}
+	if len(record) == 0 {
+		return nil, errors.New("empty form")
+	}
+
+	var i int
+	indexMap, err := parseHeader([]string{record[0]})
+	if errors.Is(err, ErrUploadDecklist) {
+		i-- // Parse the first line again
+	} else if err != nil {
+		return nil, err
+	}
+
+	foundHashes := map[string]bool{}
+	var uploadEntries []UploadEntry
+	for _, line := range record {
+		i++
+		if i > maxRows {
+			break
+		}
+
+		res, err := parseRow(indexMap, []string{line}, foundHashes)
 		if err != nil {
 			continue
 		}
