@@ -131,8 +131,6 @@ type PageVars struct {
 	TotalCards  int
 	TotalUnique int
 
-	CompactEntries  map[string]map[string]*BanPrice
-	IndexEntries    map[string]map[string]*BanPrice
 	ScraperKeys     []string
 	IndexKeys       []string
 	SellerKeys      []string
@@ -152,6 +150,7 @@ type PageVars struct {
 	HighestTotal    float64
 	MissingCounts   map[string]int
 	MissingPrices   map[string]float64
+	ResultPrices    map[string]map[string]float64
 
 	OptimizedEditions map[string][]OptimizedUploadEntry
 }
@@ -651,18 +650,6 @@ func render(w http.ResponseWriter, tmpl string, pageVars PageVars) {
 		},
 		"scraper_name": func(s string) string {
 			return ScraperNames[s]
-		},
-		"banprice2price": func(p *BanPrice) float64 {
-			if p == nil {
-				return 0
-			}
-			if p.Regular != 0 {
-				return p.Regular
-			}
-			if p.Foil != 0 {
-				return p.Foil
-			}
-			return p.Etched
 		},
 		"slice_has": func(s []string, p string) bool {
 			return SliceStringHas(s, p)

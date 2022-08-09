@@ -321,42 +321,37 @@
                             </td>
                             <td rowspan=2>
                                 {{$cardId := .CardId}}
-                                {{$indexEntries := (index $.IndexEntries $cardId)}}
-                                {{if $indexEntries}}
-                                    <b>Index overview</b>
-                                    <br>
-                                    {{range $.IndexKeys}}
-                                        {{if $indexEntries}}
-                                            {{$entry := (index $indexEntries .)}}
-                                            <nobr>
-                                                <a class="btn normal" {{if $entry}}href="https://mtgban.com/go/{{.}}/{{$cardId}}"{{end}} target="_blank">
-                                                    {{.}}:
-                                                </a>
-                                                {{if not $entry}}
-                                                    n/a
-                                                {{else}}
-                                                    $ {{printf "%.2f" (banprice2price $entry)}}
-                                                {{end}}
-                                            </nobr>
+                                {{$indexEntries := (index $.ResultPrices $cardId)}}
+                                <b>Index overview</b>
+                                <br>
+                                {{range $.IndexKeys}}
+                                    {{$price := (index $indexEntries .)}}
+                                    <nobr>
+                                        <a class="btn normal" {{if $price}}href="https://mtgban.com/go/{{.}}/{{$cardId}}"{{end}} target="_blank">
+                                            {{.}}:
+                                        </a>
+                                        {{if not $price}}
+                                            n/a
+                                        {{else}}
+                                            $ {{printf "%.2f" $price}}
                                         {{end}}
-                                        <br>
-                                    {{end}}
-                                    <hr>
+                                    </nobr>
+                                    <br>
                                 {{end}}
+                                <hr>
                             </td>
                         </tr>
                         <tr class="no-hover" {{if .MismatchAlias}}style="background-color:var(--aliasing)"{{end}}>
                             <td>
                                 <table style="margin:0 0 0 0; width:100%; height:100%">
                                     <tr class="no-hover" {{if .MismatchAlias}}style="background-color:var(--antialiasing)"{{else}}style="background-color:rgba(0, 0, 0, 0);"{{end}}>
-                                        {{$scraperEntries := (index $.CompactEntries .CardId)}}
+                                        {{$scraperEntries := (index $.ResultPrices .CardId)}}
                                         {{$cardId := .CardId}}
                                         {{$oPrice := .OriginalPrice}}
                                         {{range $.ScraperKeys}}
-                                            {{$entry := (index $scraperEntries .)}}
-                                            {{$price := banprice2price $entry}}
+                                            {{$price := (index $scraperEntries .)}}
                                             <td class="fullAnchor" style="border:1px solid black;min-width:50px">
-                                                <a class="btn {{if $entry}}{{if and $.IsBuylist (and (ne $oPrice 0.0) (lt $oPrice $price))}}success{{else}}normal{{end}}{{else}}default{{end}}" {{if $entry}}href="https://mtgban.com/go/{{if $.IsBuylist}}b/{{end}}{{.}}/{{$cardId}}"{{end}} target="_blank">
+                                                <a class="btn {{if $price}}{{if and $.IsBuylist (and (ne $oPrice 0.0) (lt $oPrice $price))}}success{{else}}normal{{end}}{{else}}default{{end}}" {{if $price}}href="https://mtgban.com/go/{{if $.IsBuylist}}b/{{end}}{{.}}/{{$cardId}}"{{end}} target="_blank">
                                                     {{scraper_name .}}
                                                 </a>
                                             </td>
@@ -364,13 +359,13 @@
                                     </tr>
                                     <tr class="no-hover" {{if .MismatchAlias}}style="background-color:var(--antialiasing)"{{else}}style="background-color:rgba(0, 0, 0, 0);"{{end}}>
                                         {{range $.ScraperKeys}}
-                                            {{$entry := (index $scraperEntries .)}}
+                                            {{$price := (index $scraperEntries .)}}
                                             <td style="border:1px solid black">
                                                 <h4 style="text-align:center">
-                                                    {{if not $entry}}
+                                                    {{if not $price}}
                                                         -
                                                     {{else}}
-                                                        <nobr>$ {{printf "%.2f" (banprice2price $entry)}}</nobr>
+                                                        <nobr>$ {{printf "%.2f" $price}}</nobr>
                                                     {{end}}
                                                 </h4>
                                             </td>
@@ -385,7 +380,7 @@
                             <center>
                                 <h3>Totals</h3>
                                 <div style="height: 2px">&nbsp;</div>
-                                <h6>Matches: {{len .CompactEntries}}/{{len .UploadEntries}}</h6>
+                                <h6>Matches: {{len .ResultPrices}}/{{len .UploadEntries}}</h6>
                                 <h6>
                                     {{if ne .TotalQuantity 0}}
                                         Count: {{.TotalQuantity}}
@@ -530,9 +525,8 @@
                                                     {{end}}
                                                 </td>
                                                 <td>
-                                                    {{$scraperEntries := (index $.CompactEntries .CardId)}}
-                                                    {{$subEntry := (index $scraperEntries $scraperKey)}}
-                                                    {{$price := (banprice2price $subEntry)}}
+                                                    {{$scraperEntries := (index $.ResultPrices .CardId)}}
+                                                    {{$price := (index $scraperEntries $scraperKey)}}
 
                                                     $
                                                     <a href="/go/b/{{$scraperKey}}/{{.}}" target="_blank">
@@ -603,9 +597,8 @@
                                                 <td>
                                                     {{scraper_name .Store}}
                                                 <td>
-                                                    {{$scraperEntries := (index $.CompactEntries .CardId)}}
-                                                    {{$subEntry := (index $scraperEntries .Store)}}
-                                                    {{$price := (banprice2price $subEntry)}}
+                                                    {{$scraperEntries := (index $.ResultPrices .CardId)}}
+                                                    {{$price := (index $scraperEntries .Store)}}
 
                                                     $
                                                     <a href="/go/b/{{.Store}}/{{.CardId}}" target="_blank">

@@ -265,7 +265,6 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	indexResults := getSellerPrices("", UploadIndexKeys, "", cardIds, false, false)
-	pageVars.IndexEntries = indexResults
 	pageVars.IndexKeys = UploadIndexKeys
 
 	pageVars.Metadata = map[string]GenericCard{}
@@ -277,7 +276,6 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		pageVars.SearchQuery = handler.Filename
 	}
 	pageVars.ScraperKeys = enabledStores
-	pageVars.CompactEntries = results
 	pageVars.UploadEntries = uploadedData
 	pageVars.TotalEntries = map[string]float64{}
 
@@ -315,6 +313,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	missingCounts := map[string]int{}
 	missingPrices := map[string]float64{}
+	resultPrices := map[string]map[string]float64{}
 
 	for i := range uploadedData {
 		// Skip unmatched cards
@@ -343,11 +342,23 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 				indexPrice *= float64(uploadedData[i].Quantity)
 			}
 			pageVars.TotalEntries[indexKey] += indexPrice
+
+			if resultPrices[cardId] == nil {
+				resultPrices[cardId] = map[string]float64{}
+			}
+			resultPrices[cardId][indexKey] = indexPrice
 		}
 
 		// Run summaries for each vendor
 		for shorthand, banPrice := range results[cardId] {
 			price := getPrice(banPrice)
+
+			// Store computed price
+			if resultPrices[cardId] == nil {
+				resultPrices[cardId] = map[string]float64{}
+			}
+			resultPrices[cardId][shorthand] = price
+
 			// Skip empty results
 			if price == 0 {
 				continue
@@ -432,6 +443,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	pageVars.MissingCounts = missingCounts
 	pageVars.MissingPrices = missingPrices
+	pageVars.ResultPrices = resultPrices
 
 	// Logs
 	user := GetParamFromSig(sig, "UserEmail")
