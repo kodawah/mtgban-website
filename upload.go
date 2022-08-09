@@ -179,12 +179,6 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		pageVars.CardHashes = hashes
 	} else if gdocURL != "" {
 		log.Printf("Loading spreadsheet: %+v", gdocURL)
-
-		// Reset the cookie for this preference
-		if cachedGdocURL != gdocURL {
-			setCookie(w, r, "gdocURL", gdocURL)
-			pageVars.RemoteLinkURL = gdocURL
-		}
 	} else {
 		log.Printf("Uploaded File: %+v", handler.Filename)
 		log.Printf("File Size: %+v bytes", handler.Size)
@@ -192,6 +186,12 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Printf("Buylist mode: %+v", blMode)
 	log.Printf("Enabled stores: %+v", enabledStores)
+
+	// Reset the cookie for this preference
+	if cachedGdocURL != gdocURL {
+		setCookie(w, r, "gdocURL", gdocURL)
+		pageVars.RemoteLinkURL = gdocURL
+	}
 
 	// Save user preferred stores in cookies and make sure the page is updated with those
 	if blMode {

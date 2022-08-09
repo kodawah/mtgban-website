@@ -163,8 +163,12 @@
             };
             window.askForURL = function(){
                 let url = prompt("Please enter the URL for your public Google spreadsheet", "{{.RemoteLinkURL}}");
-                if (url != null && url.startsWith("https://docs.google.com/spreadsheets/")) {
-                    urlLabel.innerHTML = "Cloud URL loaded"
+                if (url != null && (url.startsWith("https://docs.google.com/spreadsheets/") || url == "")) {
+                    if (url == "") {
+                        urlLabel.innerHTML = "Load spreadsheet";
+                    } else {
+                        urlLabel.innerHTML = "Cloud URL loaded";
+                    }
                     urlLabel.title = url
                     fileLabel.innerHTML = "Select local csv/xls";
 
@@ -172,13 +176,13 @@
                     input.value = url;
 
                     var btn = document.getElementById('submit');
-                    btn.disabled = false;
+                    btn.disabled = (url == "");
 
                     var btn2 = document.getElementById('submit_download');
                     if (btn2) {
-                        btn2.disabled = false;
+                        btn2.disabled = (url == "");
                     }
-                } else if (url != null && url != "") {
+                } else if (url != null) {
                     alert("Invalid URL");
                 }
             };
