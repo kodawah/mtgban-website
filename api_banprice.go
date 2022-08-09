@@ -166,6 +166,13 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Only search conditions when a single store is enabled, or if a list of card is requested
+	if len(enabledStores) == 1 {
+		conds = true
+	} else if conds {
+		conds = filterByHash != nil
+	}
+
 	start := time.Now()
 
 	dumpType := ""
@@ -337,7 +344,8 @@ func getSellerPrices(mode string, enabledStores []string, filterByEdition string
 					for i := range inventory[cardId] {
 						out[id][sellerTag].QtyEtched += inventory[cardId][i].Quantity
 					}
-				} else if len(enabledStores) == 1 || (filterByHash != nil && conds) {
+				}
+				if conds {
 					if out[id][sellerTag].Conditions == nil {
 						out[id][sellerTag].Conditions = map[string]float64{}
 					}
@@ -352,7 +360,8 @@ func getSellerPrices(mode string, enabledStores []string, filterByEdition string
 					for i := range inventory[cardId] {
 						out[id][sellerTag].QtyFoil += inventory[cardId][i].Quantity
 					}
-				} else if len(enabledStores) == 1 || (filterByHash != nil && conds) {
+				}
+				if conds {
 					if out[id][sellerTag].Conditions == nil {
 						out[id][sellerTag].Conditions = map[string]float64{}
 					}
@@ -367,7 +376,8 @@ func getSellerPrices(mode string, enabledStores []string, filterByEdition string
 					for i := range inventory[cardId] {
 						out[id][sellerTag].Qty += inventory[cardId][i].Quantity
 					}
-				} else if len(enabledStores) == 1 || (filterByHash != nil && conds) {
+				}
+				if conds {
 					if out[id][sellerTag].Conditions == nil {
 						out[id][sellerTag].Conditions = map[string]float64{}
 					}
@@ -442,7 +452,8 @@ func getVendorPrices(mode string, enabledStores []string, filterByEdition string
 					for i := range buylist[cardId] {
 						out[id][vendorTag].QtyEtched += buylist[cardId][i].Quantity
 					}
-				} else if len(enabledStores) == 1 || (filterByHash != nil && conds) {
+				}
+				if conds {
 					if out[id][vendorTag].Conditions == nil {
 						out[id][vendorTag].Conditions = map[string]float64{}
 					}
@@ -457,7 +468,8 @@ func getVendorPrices(mode string, enabledStores []string, filterByEdition string
 					for i := range buylist[cardId] {
 						out[id][vendorTag].QtyFoil += buylist[cardId][i].Quantity
 					}
-				} else if len(enabledStores) == 1 || (filterByHash != nil && conds) {
+				}
+				if conds {
 					if out[id][vendorTag].Conditions == nil {
 						out[id][vendorTag].Conditions = map[string]float64{}
 					}
@@ -472,7 +484,8 @@ func getVendorPrices(mode string, enabledStores []string, filterByEdition string
 					for i := range buylist[cardId] {
 						out[id][vendorTag].Qty += buylist[cardId][i].Quantity
 					}
-				} else if len(enabledStores) == 1 || (filterByHash != nil && conds) {
+				}
+				if conds {
 					if out[id][vendorTag].Conditions == nil {
 						out[id][vendorTag].Conditions = map[string]float64{}
 					}
