@@ -527,7 +527,7 @@ func BanPrice2CSV(w *csv.Writer, pm map[string]map[string]*BanPrice, shouldQty, 
 
 	header := []string{"UUID"}
 	if shouldFullName {
-		header = append(header, "Card Name", "Edition", "Number")
+		header = append(header, "TCG Product Id", "Card Name", "Edition", "Number")
 	}
 	header = append(header, "Store", "Regular Price", "Foil Price", "Etched Price")
 	if shouldQty {
@@ -548,15 +548,22 @@ func BanPrice2CSV(w *csv.Writer, pm map[string]map[string]*BanPrice, shouldQty, 
 	}
 
 	for id := range pm {
-		var cardName, edition, number string
+		var cardName, edition, number, tcgId string
 		if shouldFullName {
 			co, err := mtgmatcher.GetUUID(id)
 			if err != nil {
-				continue
+				co, err = mtgmatcher.GetUUID(mtgmatcher.Scryfall2UUID(id))
+				if err != nil {
+					continue
+				}
 			}
 			cardName = co.Name
 			edition = co.Edition
 			number = co.Number
+			tcgId = co.Identifiers["tcgplayerProductId"]
+			if co.Etched {
+				tcgId = co.Identifiers["tcgplayerEtchedProductId"]
+			}
 		}
 		for scraper, entry := range pm[id] {
 			var regular, foil, etched string
@@ -583,7 +590,7 @@ func BanPrice2CSV(w *csv.Writer, pm map[string]map[string]*BanPrice, shouldQty, 
 
 			record := []string{id}
 			if shouldFullName {
-				record = append(record, cardName, edition, number)
+				record = append(record, tcgId, cardName, edition, number)
 			}
 			record = append(record, scraper, regular, foil, etched)
 			if shouldQty {

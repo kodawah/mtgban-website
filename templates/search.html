@@ -218,6 +218,17 @@
                                 </td>
                             </tr>
                         {{end}}
+                        {{if .CanDownloadCSV}}
+                            <tr>
+                                <td>
+                                    <center>
+                                        Download prices as CSV<br>
+                                        <a class="btn success" href="search?q={{.SearchQuery}}&dlrl=true" target="_blank">Retail</a>
+                                        <a class="btn warning" href="search?q={{.SearchQuery}}&dlbl=true" target="_blank">Buylist</a>
+                                    </center>
+                                </td>
+                            </tr>
+                        {{end}}
                     {{end}}
                     <tr>
                         <td style="background-color: var(--background);">

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
 	"log"
 	"net/http"
@@ -67,6 +68,10 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	canSealed = canSealed || (DevMode && !SigCheck)
 
 	pageVars.IsSealed = r.URL.Path == "/sealed"
+
+	canDownloadCSV, _ := strconv.ParseBool(GetParamFromSig(sig, "SearchDownloadCSV"))
+	canDownloadCSV = canDownloadCSV || (DevMode && !SigCheck)
+	pageVars.CanDownloadCSV = canDownloadCSV
 
 	if canSealed {
 		pageVars.Nav = insertNavBar("Sets", pageVars.Nav, []NavElem{
@@ -153,6 +158,64 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	config := parseSearchOptionsNG(query, blocklistRetail, blocklistBuylist)
 	if pageVars.IsSealed {
 		config.SearchMode = "sealed"
+	}
+
+	// Hijack for csv download
+	downloadRetail, _ := strconv.ParseBool(r.FormValue("dlrl"))
+	downloadBuylist, _ := strconv.ParseBool(r.FormValue("dlbl"))
+
+	if canDownloadCSV && (downloadRetail || downloadBuylist) {
+		// Perform the search
+		selectedUUIDs, err := searchAndFilter(config)
+		if err != nil {
+			UserNotify("search", err.Error())
+			pageVars.InfoMessage = "Unable to download CSV right now"
+			render(w, "search.html", pageVars)
+			return
+		}
+
+		// Limit results to be processed
+		if len(selectedUUIDs) > MaxUploadProEntries {
+			selectedUUIDs = selectedUUIDs[:MaxUploadProEntries]
+		}
+
+		var enabledStores []string
+		if downloadRetail {
+			for _, seller := range Sellers {
+				if seller != nil && !SliceStringHas(blocklistRetail, seller.Info().Shorthand) {
+					enabledStores = append(enabledStores, seller.Info().Shorthand)
+				}
+			}
+		} else {
+			for _, vendor := range Vendors {
+				if vendor != nil && !SliceStringHas(blocklistBuylist, vendor.Info().Shorthand) {
+					enabledStores = append(enabledStores, vendor.Info().Shorthand)
+				}
+			}
+		}
+
+		var filename string
+		var results map[string]map[string]*BanPrice
+		if downloadRetail {
+			results = getSellerPrices("scryfall", enabledStores, "", selectedUUIDs, true, true)
+			filename = "mtgban_retail_prices.csv"
+		} else {
+			results = getVendorPrices("scryfall", enabledStores, "", selectedUUIDs, true, true)
+			filename = "mtgban_buylist_prices.csv"
+		}
+
+		w.Header().Set("Content-Type", "text/csv")
+		w.Header().Set("Content-Disposition", "attachment; filename=\""+filename+"\"")
+		csvWriter := csv.NewWriter(w)
+
+		err = BanPrice2CSV(csvWriter, results, true, true, true)
+		if err != nil {
+			w.Header().Del("Content-Type")
+			UserNotify("search", err.Error())
+			pageVars.InfoMessage = "Unable to download CSV right now"
+			render(w, "search.html", pageVars)
+		}
+		return
 	}
 
 	foundSellers, foundVendors := searchParallelNG(config)

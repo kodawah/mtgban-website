@@ -58,6 +58,7 @@ type PageVars struct {
 	ScraperShort    string
 	HasAffiliate    bool
 	QtyNotAvailable bool
+	CanDownloadCSV  bool
 
 	Arb            []Arbitrage
 	ArbitOptKeys   []string
@@ -198,6 +199,7 @@ var OptionalFields = []string{
 	"SearchDisabled",
 	"SearchBuylistDisabled",
 	"SearchSealed",
+	"SearchDownloadCSV",
 	"ArbitEnabled",
 	"ArbitDisabledVendors",
 	"NewsEnabled",
