@@ -18,6 +18,9 @@ type EditionEntry struct {
 	Keyrune string
 	Size    int
 	FmtDate string
+	ShowFin bool
+	HasReg  bool
+	HasFoil bool
 }
 
 var categoryEdition = map[string]string{
@@ -75,6 +78,9 @@ func makeEditionEntry(set *mtgjson.Set) EditionEntry {
 		Keyrune: strings.ToLower(set.KeyruneCode),
 		Size:    len(set.Cards),
 		FmtDate: set.ReleaseDate,
+		ShowFin: !set.IsNonFoilOnly && !set.IsFoilOnly,
+		HasReg:  !set.IsFoilOnly,
+		HasFoil: !set.IsNonFoilOnly,
 	}
 }
 

@@ -49,6 +49,7 @@
             <table style="float: left; background-color: var(--background); width:60%">
                 <tr>
                     <th><a class="btn default" style="padding: 0 0 0 0" href="/sets?sort=name" title="Sort by edition name"> Name</a></th>
+                    <th></th>
                     <th><a class="btn default" style="padding: 0 0 0 0" href="/sets?sort=size" title="Sort by number of cards">Size</a></th>
                     <th><a class="btn default" style="padding: 0 0 0 0" href="/sets" title="Sort by date">Release Date</a></th>
                 </tr>
@@ -68,6 +69,20 @@
                                     </a>
                                     <h6 style="display:inline">{{$edition.Code}}</h6>
                                 </nobr>
+                            </td>
+                            <td>
+                                {{if $edition.ShowFin}}
+                                    {{if $edition.HasReg}}
+                                        <a class="btn normal" href="/search?q=s:{{$edition.Code}}%20f:nonfoil">
+                                            <h6>nonfoil</h6>
+                                        </a>
+                                    {{end}}
+                                    {{if $edition.HasFoil}}
+                                        <a class="btn normal" href="/search?q=s:{{$edition.Code}}%20f:foil,etched">
+                                            <h6>foil</h6>
+                                        </a>
+                                    {{end}}
+                                {{end}}
                             </td>
                             <td>
                                 {{$edition.Size}}
