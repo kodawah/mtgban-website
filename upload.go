@@ -30,7 +30,8 @@ const (
 	TooManyEntriesMessage = "Note: you reached the maximum number of entries supported by this tool"
 )
 
-var UploadIndexKeys = []string{TCG_LOW, TCG_MARKET, TCG_DIRECT_LOW}
+// Keep TCG_DIRECT_LOW last so that it can be ignored ranges and used as backup only
+var UploadIndexKeys = []string{TCG_LOW, TCG_MARKET, TCG_DIRECT, TCG_DIRECT_LOW}
 
 var ErrUploadDecklist = errors.New("decklist")
 
@@ -279,8 +280,8 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	indexResults := getSellerPrices("", UploadIndexKeys, "", cardIds, false, false)
-	pageVars.IndexKeys = UploadIndexKeys
+	indexResults := getSellerPrices("", UploadIndexKeys, "", cardIds, false, shouldCheckForConditions)
+	pageVars.IndexKeys = UploadIndexKeys[:len(UploadIndexKeys)-1]
 
 	pageVars.Metadata = map[string]GenericCard{}
 	if len(hashes) != 0 {
@@ -354,12 +355,17 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 		// Summary of the index entries
 		for indexKey, indexResult := range indexResults[cardId] {
-			indexPrice := getPrice(indexResult, "")
-
-			if resultPrices[cardId] == nil {
-				resultPrices[cardId] = map[string]float64{}
+			var conds string
+			// TCG_DIRECT is the only index price that varies by condition
+			if indexKey == TCG_DIRECT {
+				conds = uploadedData[i].OriginalCondition
 			}
-			resultPrices[cardId][indexKey] = indexPrice
+			indexPrice := getPrice(indexResult, conds)
+
+			if resultPrices[cardId+conds] == nil {
+				resultPrices[cardId+conds] = map[string]float64{}
+			}
+			resultPrices[cardId+conds][indexKey] = indexPrice
 
 			if uploadedData[i].HasQuantity {
 				indexPrice *= float64(uploadedData[i].Quantity)

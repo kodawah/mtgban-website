@@ -260,6 +260,7 @@
                         <li>A final per-store total row will be added at the end, taking into account the quantity information if present.</li>
                         <li>Below that row, you will find a summary of how many cards were not found in any given store, and an estimation (using TCG Low) of the value missing.</li>
                         <li>If price or quantity data is found in your entries, it will be displayed above the results.</li>
+                        <li>The Index Overview contains a section of the most popular index prices available. The TCG Direct one is condition-adjusted, and it fallbacks to the TCG Direct Low variant if not available.</li>
                     </ul>
                     <li>If you prefer to download a CSV of your results, instead of browsing them on BAN, you may hit the "Get CSV" button.</li>
                     <li>If anything doesn't work, post your file on Discord and we'll take a look.</li>
@@ -353,14 +354,28 @@
                             </td>
                             <td rowspan=2>
                                 {{$cardId := .CardId}}
-                                {{$indexEntries := (index $.ResultPrices $cardId)}}
+                                {{$ogCardId := .CardId}}
+                                {{$conds := ""}}
+                                {{$ogConds := .OriginalCondition}}
                                 <b>Index overview</b>
                                 <br>
                                 {{range $.IndexKeys}}
-                                    {{$price := (index $indexEntries .)}}
+                                    {{$indexName := .}}
+                                    {{if eq $indexName "TCG Direct"}}
+                                        {{$cardId = (print $cardId $ogConds)}}
+                                    {{end}}
+                                    {{$indexEntries := (index $.ResultPrices $cardId)}}
+
+                                    {{$price := (index $indexEntries $indexName)}}
+                                    {{if and (not $price) (eq $indexName "TCG Direct")}}
+                                        {{$indexName = "TCG Direct Low"}}
+                                        {{$indexEntries = (index $.ResultPrices $ogCardId)}}
+                                        {{$price = (index $indexEntries $indexName)}}
+                                    {{end}}
+
                                     <nobr>
                                         <a class="btn normal" {{if $price}}href="https://mtgban.com/go/{{.}}/{{$cardId}}"{{end}} target="_blank">
-                                            {{.}}:
+                                            {{$indexName}}:
                                         </a>
                                         {{if not $price}}
                                             n/a
