@@ -269,6 +269,7 @@
             <div class="indent sticky">
                 <table class="searchResults" >
                     {{range $.UploadEntries}}
+                        {{$qty := .Quantity}}
                         {{$card := (index $.Metadata .CardId)}}
                         <tr class="no-hover" {{if .MismatchAlias}}style="background-color:var(--aliasing)"{{end}}>
                             <td class="fullAnchor" rowspan=2>
@@ -365,6 +366,9 @@
                                             n/a
                                         {{else}}
                                             $ {{printf "%.2f" $price}}
+                                            {{if gt $qty 1}}
+                                                (⇨ $ {{printf "%.2f" (mul $price $qty)}})
+                                            {{end}}
                                         {{end}}
                                     </nobr>
                                     <br>
