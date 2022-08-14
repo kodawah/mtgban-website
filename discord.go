@@ -327,56 +327,16 @@ func search2fields(searchRes *searchResult) (fields []embedField) {
 	return
 }
 
-type TCGLastSold struct {
-	PreviousPage string `json:"previousPage"`
-	NextPage     string `json:"nextPage"`
-	ResultCount  int    `json:"resultCount"`
-	Data         []struct {
-		Condition     string    `json:"condition"`
-		Variant       string    `json:"variant"`
-		Language      string    `json:"language"`
-		Quantity      int       `json:"quantity"`
-		Title         string    `json:"title"`
-		ListingType   string    `json:"listingType"`
-		PurchasePrice float64   `json:"purchasePrice"`
-		ShippingPrice float64   `json:"shippingPrice"`
-		OrderDate     time.Time `json:"orderDate"`
-	} `json:"data"`
-}
-
 func grabLastSold(cardId string, lang string) ([]embedField, error) {
 	var fields []embedField
 
-	// Retrieve information about the card
-	co, err := mtgmatcher.GetUUID(cardId)
-	if err != nil {
-		return nil, err
-	}
-
-	// Get the id for TCGPlayer, if missing exit quietly
-	tcgId := co.Identifiers["tcgplayerProductId"]
-	if tcgId == "" {
-		return nil, nil
-	}
-	if co.Etched {
-		id, found := co.Identifiers["tcgplayerEtchedProductId"]
-		if found {
-			tcgId = id
-		}
-	}
-
-	tcgLastSoldResp, err := tcgplayer.TCGLatestSales(tcgId)
+	lastSales, err := getLastSold(cardId)
 	if err != nil {
 		return nil, err
 	}
 
 	var hasValues bool
-	for _, entry := range tcgLastSoldResp.Data {
-		// If the card requested is the foil version, skip any non-foil entry
-		if co.Foil && entry.Variant != "Foil" {
-			continue
-		}
-
+	for _, entry := range lastSales {
 		// If language is requested, skip any language non matching it
 		if lang != "" && entry.Language != lang {
 			continue
@@ -404,7 +364,6 @@ func grabLastSold(cardId string, lang string) ([]embedField, error) {
 	// No prices received, this is not an error,
 	// but print a message warning the user
 	if !hasValues {
-		log.Println("No last sold prices available for id", tcgId)
 		return nil, nil
 	}
 
