@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"strings"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/kodabb/go-mtgban/cardkingdom"
 	"github.com/kodabb/go-mtgban/mtgmatcher"
+	"github.com/kodabb/go-mtgban/tcgplayer"
 )
 
 type meta struct {
@@ -142,6 +144,50 @@ func API(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err := json.NewEncoder(w).Encode(CKAPIOutput)
+	if err != nil {
+		log.Println(err)
+		w.Write([]byte(`{"error": "` + err.Error() + `"}`))
+		return
+	}
+}
+
+func getLastSold(cardId string) ([]tcgplayer.LatestSalesData, error) {
+	co, err := mtgmatcher.GetUUID(cardId)
+	if err != nil {
+		return nil, err
+	}
+
+	tcgId := co.Identifiers["tcgplayerProductId"]
+	if tcgId == "" {
+		return nil, errors.New("tcg id not found")
+	}
+	if co.Etched {
+		id, found := co.Identifiers["tcgplayerEtchedProductId"]
+		if found {
+			tcgId = id
+		}
+	}
+
+	latestSales, err := tcgplayer.TCGLatestSales(tcgId, co.Foil || co.Etched)
+	if err != nil {
+		return nil, err
+	}
+
+	return latestSales.Data, nil
+}
+
+func TCGLastSoldAPI(w http.ResponseWriter, r *http.Request) {
+	cardId := strings.TrimPrefix(r.URL.Path, "/api/tcgplayer/lastsold/")
+	UserNotify("tcgLastSold", cardId)
+
+	data, err := getLastSold(cardId)
+	if err != nil {
+		log.Println(err)
+		w.Write([]byte(`{"error": "` + err.Error() + `"}`))
+		return
+	}
+
+	err = json.NewEncoder(w).Encode(data)
 	if err != nil {
 		log.Println(err)
 		w.Write([]byte(`{"error": "` + err.Error() + `"}`))
