@@ -376,7 +376,7 @@
                             <td>
                                 <table style="margin:0 0 0 0; width:100%; height:100%">
                                     <tr class="no-hover" {{if .MismatchAlias}}style="background-color:var(--antialiasing)"{{else}}style="background-color:rgba(0, 0, 0, 0);"{{end}}>
-                                        {{$scraperEntries := (index $.ResultPrices .CardId)}}
+                                        {{$scraperEntries := (index $.ResultPrices (print .CardId .OriginalCondition))}}
                                         {{$cardId := .CardId}}
                                         {{$oPrice := .OriginalPrice}}
                                         {{range $.ScraperKeys}}
@@ -556,7 +556,7 @@
                                                     {{end}}
                                                 </td>
                                                 <td>
-                                                    {{$scraperEntries := (index $.ResultPrices .CardId)}}
+                                                    {{$scraperEntries := (index $.ResultPrices (print .CardId .Condition))}}
                                                     {{$price := (index $scraperEntries $scraperKey)}}
 
                                                     $

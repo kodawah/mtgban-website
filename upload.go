@@ -48,9 +48,10 @@ type UploadEntry struct {
 }
 
 type OptimizedUploadEntry struct {
-	CardId string
-	Store  string
-	Price  float64
+	CardId    string
+	Store     string
+	Condition string
+	Price     float64
 }
 
 func Upload(w http.ResponseWriter, r *http.Request) {
@@ -368,13 +369,14 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 		// Run summaries for each vendor
 		for shorthand, banPrice := range results[cardId] {
-			price := getPrice(banPrice, uploadedData[i].OriginalCondition)
+			conds := uploadedData[i].OriginalCondition
+			price := getPrice(banPrice, conds)
 
 			// Store computed price
-			if resultPrices[cardId] == nil {
-				resultPrices[cardId] = map[string]float64{}
+			if resultPrices[cardId+conds] == nil {
+				resultPrices[cardId+conds] = map[string]float64{}
 			}
-			resultPrices[cardId][shorthand] = price
+			resultPrices[cardId+conds][shorthand] = price
 
 			// Skip empty results
 			if price == 0 {
@@ -410,6 +412,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if canOptimize && blMode && bestPrice != 0 {
+			conds := uploadedData[i].OriginalCondition
 			cardId := uploadedData[i].CardId
 
 			// Load comparison price, either the loaded one or tcg low
@@ -420,8 +423,9 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 			// Break down by store
 			optimizedResults[bestStore] = append(optimizedResults[bestStore], OptimizedUploadEntry{
-				CardId: cardId,
-				Price:  comparePrice,
+				CardId:    cardId,
+				Condition: conds,
+				Price:     comparePrice,
 			})
 			optimizedTotals[bestStore] += bestPrice
 			highestTotal += bestPrice
@@ -429,9 +433,10 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			// Break down by edition
 			edition := pageVars.Metadata[cardId].SetCode
 			optimizedEditions[edition] = append(optimizedEditions[edition], OptimizedUploadEntry{
-				CardId: cardId,
-				Store:  bestStore,
-				Price:  comparePrice,
+				CardId:    cardId + conds,
+				Store:     bestStore,
+				Condition: conds,
+				Price:     comparePrice,
 			})
 		}
 	}
