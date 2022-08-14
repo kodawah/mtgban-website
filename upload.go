@@ -355,15 +355,16 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		// Summary of the index entries
 		for indexKey, indexResult := range indexResults[cardId] {
 			indexPrice := getPrice(indexResult, "")
-			if uploadedData[i].HasQuantity {
-				indexPrice *= float64(uploadedData[i].Quantity)
-			}
-			pageVars.TotalEntries[indexKey] += indexPrice
 
 			if resultPrices[cardId] == nil {
 				resultPrices[cardId] = map[string]float64{}
 			}
 			resultPrices[cardId][indexKey] = indexPrice
+
+			if uploadedData[i].HasQuantity {
+				indexPrice *= float64(uploadedData[i].Quantity)
+			}
+			pageVars.TotalEntries[indexKey] += indexPrice
 		}
 
 		// Run summaries for each vendor
