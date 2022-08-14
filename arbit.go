@@ -303,7 +303,14 @@ func arbit(w http.ResponseWriter, r *http.Request, reverse bool) {
 
 	pageVars.ReverseMode = reverse
 
+	start := time.Now()
+
 	scraperCompare(w, r, pageVars, allowlistSellers, blocklistVendors, true, anyOptionEnabled)
+
+	user := GetParamFromSig(sig, "UserEmail")
+	msg := fmt.Sprintf("Request by %s took %v", user, time.Since(start))
+	UserNotify("arbit", msg)
+	LogPages["Arbit"].Println(msg)
 }
 
 func Global(w http.ResponseWriter, r *http.Request) {
@@ -362,7 +369,14 @@ func Global(w http.ResponseWriter, r *http.Request) {
 	// Inform the render this is Global
 	pageVars.GlobalMode = true
 
+	start := time.Now()
+
 	scraperCompare(w, r, pageVars, allowlistSellers, blocklistVendors, anyEnabled)
+
+	user := GetParamFromSig(sig, "UserEmail")
+	msg := fmt.Sprintf("Request by %s took %v", user, time.Since(start))
+	UserNotify("global", msg)
+	LogPages["Global"].Println(msg)
 }
 
 func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, allowlistSellers []string, blocklistVendors []string, flags ...bool) {
