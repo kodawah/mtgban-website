@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"encoding/csv"
 	"errors"
 	"fmt"
@@ -222,7 +221,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	} else if gdocURL != "" {
 		uploadedData, err = loadSpreadsheet(gdocURL, maxRows)
 	} else if textArea != "" {
-		uploadedData, err = loadFreeform(strings.NewReader(textArea), maxRows)
+		uploadedData, err = loadCsv(strings.NewReader(textArea), ',', maxRows)
 	} else if strings.HasSuffix(handler.Filename, ".xls") {
 		uploadedData, err = loadOldXls(file, maxRows)
 	} else if strings.HasSuffix(handler.Filename, ".xlsx") {
@@ -830,52 +829,6 @@ func loadSpreadsheet(link string, maxRows int) ([]UploadEntry, error) {
 		}
 
 		res, err := parseRow(indexMap, record, foundHashes)
-		if err != nil {
-			continue
-		}
-
-		uploadEntries = append(uploadEntries, res)
-	}
-
-	return uploadEntries, nil
-}
-
-func loadFreeform(reader io.Reader, maxRows int) ([]UploadEntry, error) {
-	scanner := bufio.NewScanner(reader)
-	scanner.Split(bufio.ScanLines)
-
-	var rows int
-	var record []string
-	for scanner.Scan() && rows < maxRows {
-		record = append(record, scanner.Text())
-		rows++
-	}
-
-	err := scanner.Err()
-	if err != nil {
-		return nil, err
-	}
-	if len(record) == 0 {
-		return nil, errors.New("empty form")
-	}
-
-	var i int
-	indexMap, err := parseHeader([]string{record[0]})
-	if errors.Is(err, ErrUploadDecklist) {
-		i-- // Parse the first line again
-	} else if err != nil {
-		return nil, err
-	}
-
-	foundHashes := map[string]bool{}
-	var uploadEntries []UploadEntry
-	for _, line := range record {
-		i++
-		if i > maxRows {
-			break
-		}
-
-		res, err := parseRow(indexMap, []string{line}, foundHashes)
 		if err != nil {
 			continue
 		}
