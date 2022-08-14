@@ -161,10 +161,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Hijack for csv download
-	downloadRetail, _ := strconv.ParseBool(r.FormValue("dlrl"))
-	downloadBuylist, _ := strconv.ParseBool(r.FormValue("dlbl"))
-
-	if canDownloadCSV && (downloadRetail || downloadBuylist) {
+	downloadCSV := r.FormValue("downloadCSV")
+	if canDownloadCSV && downloadCSV != "" {
 		// Perform the search
 		selectedUUIDs, err := searchAndFilter(config)
 		if err != nil {
@@ -180,13 +178,13 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		}
 
 		var enabledStores []string
-		if downloadRetail {
+		if downloadCSV == "retail" {
 			for _, seller := range Sellers {
 				if seller != nil && !SliceStringHas(blocklistRetail, seller.Info().Shorthand) {
 					enabledStores = append(enabledStores, seller.Info().Shorthand)
 				}
 			}
-		} else {
+		} else if downloadCSV == "buylist" {
 			for _, vendor := range Vendors {
 				if vendor != nil && !SliceStringHas(blocklistBuylist, vendor.Info().Shorthand) {
 					enabledStores = append(enabledStores, vendor.Info().Shorthand)
@@ -196,12 +194,16 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 		var filename string
 		var results map[string]map[string]*BanPrice
-		if downloadRetail {
+		if downloadCSV == "retail" {
 			results = getSellerPrices("scryfall", enabledStores, "", selectedUUIDs, true, true)
 			filename = "mtgban_retail_prices.csv"
-		} else {
+		} else if downloadCSV == "buylist" {
 			results = getVendorPrices("scryfall", enabledStores, "", selectedUUIDs, true, true)
 			filename = "mtgban_buylist_prices.csv"
+		} else {
+			pageVars.InfoMessage = "Unable to download CSV right now"
+			render(w, "search.html", pageVars)
+			return
 		}
 
 		w.Header().Set("Content-Type", "text/csv")
