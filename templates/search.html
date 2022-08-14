@@ -152,11 +152,11 @@
             <script type="text/javascript">
                 function updateSidebar(src, printings) {
                     {{if not .IsSealed}}
-                        document.getElementById('cardImage').src=src
+                        document.getElementById('cardImage').src=src;
                     {{else}}
-                        document.getElementById('hoverImage').src=src
+                        document.getElementById('hoverImage').src=src;
                     {{end}}
-                    document.getElementById('printings').innerHTML=printings
+                    document.getElementById('printings').innerHTML = printings;
                 }
             </script>
 
