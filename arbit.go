@@ -267,7 +267,7 @@ func arbit(w http.ResponseWriter, r *http.Request, reverse bool) {
 		anyOptionEnabled = true
 	} else if allowlistSellersOpt == "DEV" {
 		allowlistSellers = append(Config.ArbitDefaultSellers, Config.DevSellers...)
-	} else if allowlistSellersOpt == "DEFAULT" || allowlistSellersOpt == "" {
+	} else if allowlistSellersOpt == "" {
 		allowlistSellers = Config.ArbitDefaultSellers
 	} else {
 		allowlistSellers = strings.Split(allowlistSellersOpt, ",")
@@ -275,7 +275,7 @@ func arbit(w http.ResponseWriter, r *http.Request, reverse bool) {
 
 	var blocklistVendors []string
 	blocklistVendorsOpt := GetParamFromSig(sig, "ArbitDisabledVendors")
-	if blocklistVendorsOpt == "DEFAULT" || blocklistVendorsOpt == "" {
+	if blocklistVendorsOpt == "" {
 		blocklistVendors = Config.ArbitBlockVendors
 	} else if blocklistVendorsOpt != "NONE" {
 		blocklistVendors = strings.Split(blocklistVendorsOpt, ",")
