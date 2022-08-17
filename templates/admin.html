@@ -141,6 +141,7 @@
                     Spoof User Tier
                     <form action="admin" method="GET">
                         <select name="spoof" onchange="this.form.submit()" class="select-css">
+                            <option disabled selected value="">~ choose tier ~</option>
                             {{range .Tiers}}
                                 <option value="{{.}}">{{.}}</option>
                             {{end}}
