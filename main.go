@@ -177,6 +177,9 @@ type NavElem struct {
 
 	// Which page to render
 	Page string
+
+	// Whether this tab should always be enabled in DevMode
+	AlwaysOnForDev bool
 }
 
 var startTime = time.Now()
@@ -287,6 +290,8 @@ func init() {
 			Link:   "/admin",
 			Handle: Admin,
 			Page:   "admin.html",
+
+			AlwaysOnForDev: true,
 		},
 	}
 }
@@ -414,6 +419,9 @@ func genPageNav(activeTab, sig string) PageVars {
 		for _, feat := range OrderNav {
 			param := GetParamFromSig(sig, feat)
 			allowed, _ := strconv.ParseBool(param)
+			if DevMode && ExtraNavs[feat].AlwaysOnForDev {
+				allowed = true
+			}
 			if allowed || (DevMode && !SigCheck) {
 				pageVars.Nav = append(pageVars.Nav, ExtraNavs[feat])
 			}

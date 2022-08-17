@@ -557,6 +557,9 @@ func enforceSigning(next http.Handler) http.Handler {
 			if r.URL.Path == nav.Link {
 				param := GetParamFromSig(sig, navName)
 				canDo, _ := strconv.ParseBool(param)
+				if DevMode && nav.AlwaysOnForDev {
+					canDo = true
+				}
 				if SigCheck && !canDo {
 					pageVars = genPageNav(nav.Name, sig)
 					pageVars.Title = "This feature is BANned"
