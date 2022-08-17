@@ -256,7 +256,7 @@ func arbit(w http.ResponseWriter, r *http.Request, reverse bool) {
 
 	if allowlistSellersOpt == "ALL" || (DevMode && !SigCheck) {
 		for _, seller := range Sellers {
-			if seller == nil || seller.Info().SealedMode {
+			if seller == nil || seller.Info().SealedMode || seller.Info().MetadataOnly {
 				continue
 			}
 			allowlistSellers = append(allowlistSellers, seller.Info().Shorthand)
@@ -486,9 +486,6 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		if pageVars.GlobalMode {
 			link = "/global"
 		} else {
-			if scraper.Info().MetadataOnly {
-				continue
-			}
 			link = "/arbit"
 			if pageVars.ReverseMode {
 				link = "/reverse"
@@ -599,11 +596,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		if scraper.Info().Shorthand == source.Info().Shorthand {
 			continue
 		}
-		if pageVars.ReverseMode {
-			if scraper.Info().MetadataOnly {
-				continue
-			}
-		} else {
+		if !pageVars.ReverseMode {
 			if SliceStringHas(blocklistVendors, scraper.Info().Shorthand) {
 				continue
 			}
