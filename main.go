@@ -512,7 +512,7 @@ func main() {
 	// load necessary environmental variables
 	err := loadVars(*config)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("unable to load config file:", err)
 	}
 
 	_, err = os.Stat(LogDir)
@@ -520,25 +520,25 @@ func main() {
 		err = os.MkdirAll(LogDir, 0700)
 	}
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("unable to create necessary folders", err)
 	}
 	LogPages = map[string]*log.Logger{}
 
 	GoogleDocsClient, err = loadGoogleCredentials(Config.GoogleCredentials)
 	if err != nil {
 		if DevMode {
-			log.Println("Error creating a Google client:", err)
+			log.Println("error creating a Google client:", err)
 		} else {
-			log.Fatalln(err)
+			log.Fatalln("error creating a Google client:", err)
 		}
 	}
 
 	err = openDBs()
 	if err != nil {
 		if DevMode {
-			log.Println("Error opening databases:", err)
+			log.Println("error opening databases:", err)
 		} else {
-			log.Fatalln(err)
+			log.Fatalln("error opening databases:", err)
 		}
 	}
 
@@ -549,7 +549,7 @@ func main() {
 		log.Println("Loading MTGJSONv5")
 		err = loadDatastore()
 		if err != nil {
-			log.Fatalln(err)
+			log.Fatalln("error loading mtgjson:", err)
 		}
 
 		loadScrapers()
