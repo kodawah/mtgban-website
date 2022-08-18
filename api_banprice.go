@@ -634,7 +634,7 @@ func SimplePrice2CSV(w *csv.Writer, pm map[string]map[string]*BanPrice, uploaded
 
 	header := []string{"UUID", "Card Name", "Set Code", "Number", "Finish"}
 	header = append(header, allScrapers...)
-	header = append(header, "Loaded Price", "Loaded Condition")
+	header = append(header, "Loaded Price", "Loaded Condition", "Notes")
 	err := w.Write(header)
 	if err != nil {
 		return err

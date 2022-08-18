@@ -60,6 +60,9 @@ type UploadEntry struct {
 
 	// Quantity as found in the source data
 	Quantity int
+
+	// Price as found in the source data
+	Notes string
 }
 
 // Subset of data used in the optimizer
@@ -608,6 +611,11 @@ func parseHeader(first []string) (map[string]int, error) {
 			if !found {
 				indexMap["title"] = i
 			}
+		case strings.Contains(field, "notes") || strings.Contains(field, "data"):
+			_, found := indexMap["notes"]
+			if !found {
+				indexMap["notes"] = i
+			}
 		}
 	}
 
@@ -759,6 +767,15 @@ func parseRow(indexMap map[string]int, record []string, foundHashes map[string]b
 	case strings.Contains(conditions, "poor"), strings.Contains(conditions, "damage"),
 		strings.Contains(conditions, "po"), strings.Contains(conditions, "dmg"):
 		res.OriginalCondition = "PO"
+	}
+
+	_, found = indexMap["notes"]
+	if found {
+		notes := record[indexMap["notes"]]
+		if len(notes) > 1024 {
+			notes = notes[:1024]
+		}
+		res.Notes = notes
 	}
 
 	cardId, err := mtgmatcher.Match(&res.Card)
