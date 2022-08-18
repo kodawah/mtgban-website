@@ -670,9 +670,13 @@ func SimplePrice2CSV(w *csv.Writer, pm map[string]map[string]*BanPrice, uploaded
 			price := getPrice(entry, uploadedDada[j].OriginalCondition)
 			prices[i] = fmt.Sprintf("%0.2f", price)
 		}
+		ogPrice := ""
 		if uploadedDada[j].OriginalPrice != 0 {
-			prices = append(prices, fmt.Sprintf("%0.2f", uploadedDada[j].OriginalPrice))
+			ogPrice = fmt.Sprintf("%0.2f", uploadedDada[j].OriginalPrice)
 		}
+		prices = append(prices, ogPrice)
+
+		prices = append(prices, uploadedDada[j].OriginalCondition)
 
 		record := []string{id, cardName, code, number}
 		if co.Etched {
