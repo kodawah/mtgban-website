@@ -35,24 +35,46 @@ var UploadIndexKeys = []string{TCG_LOW, TCG_MARKET, TCG_DIRECT, TCG_DIRECT_LOW}
 
 var ErrUploadDecklist = errors.New("decklist")
 
+// Data coming from the user upload
 type UploadEntry struct {
-	Card          mtgmatcher.Card
-	CardId        string
+	// A reference to the parsed card
+	Card mtgmatcher.Card
+
+	// The UUID of the card
+	CardId string
+
+	// Error when mtgmatcher.Match() fails
 	MismatchError error
+
+	// Error when multiple results are found
 	MismatchAlias bool
+
+	// Price as found in the source data
 	OriginalPrice float64
 
+	// Condition as found in the source data
 	OriginalCondition string
 
+	// Whether source data had Quantity information
 	HasQuantity bool
-	Quantity    int
+
+	// Quantity as found in the source data
+	Quantity int
 }
 
+// Subset of data used in the optimizer
 type OptimizedUploadEntry struct {
-	CardId    string
-	Store     string
+	// The UUID of the card
+	CardId string
+
+	// Condition as found in the source data
 	Condition string
-	Price     float64
+
+	// Shorthand of the store offering the price
+	Store string
+
+	// Price of the card provided by the Store
+	Price float64
 }
 
 func Upload(w http.ResponseWriter, r *http.Request) {
