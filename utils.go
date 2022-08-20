@@ -323,6 +323,11 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 		path = "sealed"
 	}
 
+	tcgId := co.Card.Identifiers["tcgplayerProductId"]
+	if co.Etched {
+		tcgId = co.Card.Identifiers["tcgplayerEtchedProductId"]
+	}
+
 	return GenericCard{
 		Name:      co.Card.Name,
 		Edition:   co.Edition,
@@ -340,7 +345,7 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 		Stocks:    stocks,
 		StocksURL: stocksURL,
 		Printings: printings,
-		TCGId:     co.Card.Identifiers["tcgplayerProductId"],
+		TCGId:     tcgId,
 	}
 }
 
