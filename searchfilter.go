@@ -168,6 +168,15 @@ func fixupRarityNG(code string) []string {
 	return filters
 }
 
+func fixupNumberNG(code string) []string {
+	code = strings.ToLower(code)
+	filters := strings.Split(code, ",")
+	for i := range filters {
+		filters[i] = strings.TrimLeft(filters[i], "0")
+	}
+	return filters
+}
+
 func fixupFinishNG(code string) []string {
 	return strings.Split(strings.ToLower(code), ",")
 }
@@ -430,7 +439,7 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 			filters = append(filters, FilterElem{
 				Name:   opt,
 				Negate: negate,
-				Values: strings.Split(code, ","),
+				Values: fixupNumberNG(code),
 			})
 		case "r":
 			filters = append(filters, FilterElem{
