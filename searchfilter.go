@@ -785,11 +785,11 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 					return false
 				}
 			case "jpn":
-				if co.HasUniqueLanguage(mtgjson.LanguageJapanese) {
+				if co.Language == mtgjson.LanguageJapanese {
 					return false
 				}
 			case "phyrexian":
-				if co.HasUniqueLanguage(mtgjson.LanguagePhyrexian) {
+				if co.Language == mtgjson.LanguagePhyrexian {
 					return false
 				}
 			default:
