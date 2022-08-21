@@ -643,6 +643,13 @@ func searchVendorsNG(cardIds []string, config SearchConfig) (foundVendors map[st
 			if name == "TCG Player Market" {
 				name = "TCG Trade-In"
 			}
+
+			icon := ""
+			switch name {
+			case TCG_DIRECT_NF:
+				icon = "img/misc/direct.png"
+			}
+
 			res := SearchEntry{
 				ScraperName: name,
 				Shorthand:   vendor.Info().Shorthand,
@@ -651,6 +658,7 @@ func searchVendorsNG(cardIds []string, config SearchConfig) (foundVendors map[st
 				Ratio:       entry.PriceRatio,
 				Quantity:    entry.Quantity,
 				URL:         entry.URL,
+				BundleIcon:  icon,
 				Country:     Country2flag[vendor.Info().CountryFlag],
 			}
 			foundVendors[cardId] = append(foundVendors[cardId], res)

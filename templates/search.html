@@ -497,7 +497,11 @@
                                                 {{if ne .Ratio 0.0}}{{printf "%.2f" .Ratio}} %{{end}}
                                             </td>
                                             <td style="text-align: center; vertical-align: middle;">
-                                                {{if ne .Quantity 0}}{{.Quantity}}{{end}}
+                                                {{if .BundleIcon}}
+                                                    <img style="padding-top:4px;" src="{{.BundleIcon}}">
+                                                {{else if ne .Quantity 0}}
+                                                    {{.Quantity}}
+                                                {{end}}
                                             </td>
                                         </tr>
                                     {{end}}
