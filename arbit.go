@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	MaxArbitResults = 600
+	MaxArbitResults = 450
 	MaxPriceRatio   = 120.0
 	MaxSpread       = 650.0
 	MinSpread       = 10.0
