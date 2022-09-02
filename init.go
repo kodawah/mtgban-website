@@ -50,8 +50,8 @@ const (
 	TCG_DIRECT  = "TCG Direct"
 	TCG_BUYLIST = "TCG Player Market"
 
-	// from TCGDirectNF
-	TCG_DIRECT_NF = "TCG Direct No Fees"
+	// from TCGDirectNet
+	TCG_DIRECT_NET = "TCG Direct (net)"
 
 	// from MKMIndex
 	MKM_LOW   = "MKM Low"
@@ -655,10 +655,10 @@ var ScraperOptions = map[string]*scraperOption{
 			return scraper, nil
 		},
 	},
-	"tcg_direct_no_fees": &scraperOption{
+	"tcg_direct_net": &scraperOption{
 		DevEnabled: true,
 		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
-			scraper := tcgplayer.NewTCGDirectNoFees()
+			scraper := tcgplayer.NewTCGDirectNet()
 			return scraper, nil
 		},
 	},
@@ -801,9 +801,9 @@ func loadScrapers() {
 	for _, seller := range Sellers {
 		if seller != nil && seller.Info().Name == TCG_DIRECT {
 			for _, vendor := range newVendors {
-				if vendor != nil && vendor.Info().Name == TCG_DIRECT_NF {
-					tcgNF := vendor.(*tcgplayer.TCGDirectNoFees)
-					tcgNF.DirectInventory, _ = seller.Inventory()
+				if vendor != nil && vendor.Info().Name == TCG_DIRECT_NET {
+					tcg := vendor.(*tcgplayer.TCGDirectNet)
+					tcg.DirectInventory, _ = seller.Inventory()
 					break
 				}
 			}

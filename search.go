@@ -646,7 +646,7 @@ func searchVendorsNG(cardIds []string, config SearchConfig) (foundVendors map[st
 
 			icon := ""
 			switch name {
-			case TCG_DIRECT_NF:
+			case TCG_DIRECT_NET:
 				icon = "img/misc/direct.png"
 			}
 
