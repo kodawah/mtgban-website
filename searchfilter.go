@@ -138,6 +138,8 @@ func fixupStoreCodeNG(code string) []string {
 			filters[i] = TCG_MAIN
 		case "TCG_DIRECT":
 			filters[i] = TCG_DIRECT
+		case "TCG_DIRECT_NET":
+			filters[i] = TCG_DIRECT_NET
 		}
 		filters[i] = strings.ToLower(filters[i])
 	}
