@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -695,7 +696,10 @@ func searchAndFilter(config SearchConfig) ([]string, error) {
 		}
 	}
 	if err != nil {
-		return nil, err
+		uuids, err = attemptMatch(query)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var selectedUUIDs []string
@@ -706,6 +710,84 @@ func searchAndFilter(config SearchConfig) ([]string, error) {
 		selectedUUIDs = append(selectedUUIDs, uuid)
 	}
 	return selectedUUIDs, nil
+}
+
+// Try searching for cards usign the Match algorithm
+func attemptMatch(query string) ([]string, error) {
+	var uuids []string
+	uuid, err := mtgmatcher.Match(&mtgmatcher.Card{
+		Name: query,
+	})
+	if err != nil {
+		var alias *mtgmatcher.AliasingError
+		if errors.As(err, &alias) {
+			uuids = alias.Probe()
+		} else {
+			// Unsupported case, give up
+			return nil, err
+		}
+
+		// Repeat for foil
+		uuid, err = mtgmatcher.Match(&mtgmatcher.Card{
+			Name: query,
+			Foil: true,
+		})
+		if err != nil {
+			if errors.As(err, &alias) {
+				uuids = append(uuids, alias.Probe()...)
+			}
+		} else {
+			uuids = append(uuids, uuid)
+		}
+
+		// Repeat for etched
+		uuid, err = mtgmatcher.Match(&mtgmatcher.Card{
+			Name:      query,
+			Variation: "Etched",
+		})
+		if err != nil {
+			if errors.As(err, &alias) {
+				uuids = append(uuids, alias.Probe()...)
+			}
+		} else {
+			uuids = append(uuids, uuid)
+		}
+
+		// Remove any duplicates
+		foundUUIDs := map[string]bool{}
+		var outUUIDs []string
+		for _, uuid := range uuids {
+			found := foundUUIDs[uuid]
+			if found {
+				continue
+			}
+			foundUUIDs[uuid] = true
+			outUUIDs = append(outUUIDs, uuid)
+		}
+		uuids = outUUIDs
+	} else {
+		uuids = append(uuids, uuid)
+
+		// Repeat for foil (only add if different than the main id found)
+		uuid, err = mtgmatcher.Match(&mtgmatcher.Card{
+			Name: query,
+			Foil: true,
+		})
+		if err == nil && uuid != uuids[0] {
+			uuids = append(uuids, uuid)
+		}
+
+		// Repeat for etched (only add if different than the main id found)
+		uuid, err = mtgmatcher.Match(&mtgmatcher.Card{
+			Name:      query,
+			Variation: "Etched",
+		})
+		if err == nil && uuid != uuids[0] {
+			uuids = append(uuids, uuid)
+		}
+	}
+
+	return uuids, nil
 }
 
 func searchParallelNG(config SearchConfig, flags ...bool) (foundSellers map[string]map[string][]SearchEntry, foundVendors map[string][]SearchEntry) {
