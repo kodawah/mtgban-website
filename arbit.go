@@ -256,7 +256,7 @@ func arbit(w http.ResponseWriter, r *http.Request, reverse bool) {
 
 	if allowlistSellersOpt == "ALL" || (DevMode && !SigCheck) {
 		for _, seller := range Sellers {
-			if seller == nil || seller.Info().SealedMode || seller.Info().MetadataOnly || seller.Info().Name == TCG_DIRECT_NET {
+			if seller == nil || seller.Info().SealedMode || seller.Info().MetadataOnly {
 				continue
 			}
 			allowlistSellers = append(allowlistSellers, seller.Info().Shorthand)
