@@ -158,14 +158,14 @@ func getLastSold(cardId string) ([]tcgplayer.LatestSalesData, error) {
 	}
 
 	tcgId := co.Identifiers["tcgplayerProductId"]
-	if tcgId == "" {
-		return nil, errors.New("tcg id not found")
-	}
 	if co.Etched {
 		id, found := co.Identifiers["tcgplayerEtchedProductId"]
 		if found {
 			tcgId = id
 		}
+	}
+	if tcgId == "" {
+		return nil, errors.New("tcg id not found")
 	}
 
 	latestSales, err := tcgplayer.TCGLatestSales(tcgId, co.Foil || co.Etched)
