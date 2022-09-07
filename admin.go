@@ -414,7 +414,7 @@ func deleteOldCache() {
 
 		for _, subdir := range dirFiles {
 			// Skip most recent entries
-			dayTag := fmt.Sprintf("%03d", time.Now().YearDay())[:2]
+			dayTag := fmt.Sprintf("%03d", time.Now().YearDay()-1)[:2]
 			if strings.HasPrefix(subdir.Name(), dayTag) {
 				continue
 			}
