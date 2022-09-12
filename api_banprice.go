@@ -457,16 +457,9 @@ func getVendorPrices(mode string, enabledStores []string, filterByEdition string
 					if out[id][vendorTag].Conditions == nil {
 						out[id][vendorTag].Conditions = map[string]float64{}
 					}
-					if vendor.Info().MultiCondBuylist {
-						for i := range buylist[cardId] {
-							out[id][vendorTag].Conditions[buylist[cardId][i].Conditions+"_etched"] = buylist[cardId][i].BuyPrice
-						}
-					} else {
-						out[id][vendorTag].Conditions["NM_etched"] = buylist[cardId][0].BuyPrice
-						grade := vendor.Info().Grading(cardId, buylist[cardId][0])
-						for cond, factor := range grade {
-							out[id][vendorTag].Conditions[cond+"_etched"] = buylist[cardId][0].BuyPrice * factor
-						}
+					for i := range buylist[cardId] {
+						condTag := buylist[cardId][i].Conditions
+						out[id][vendorTag].Conditions[condTag+"_etched"] = buylist[cardId][i].BuyPrice
 					}
 				}
 			} else if co.Foil {
@@ -480,16 +473,9 @@ func getVendorPrices(mode string, enabledStores []string, filterByEdition string
 					if out[id][vendorTag].Conditions == nil {
 						out[id][vendorTag].Conditions = map[string]float64{}
 					}
-					if vendor.Info().MultiCondBuylist {
-						for i := range buylist[cardId] {
-							out[id][vendorTag].Conditions[buylist[cardId][i].Conditions+"_foil"] = buylist[cardId][i].BuyPrice
-						}
-					} else {
-						out[id][vendorTag].Conditions["NM_foil"] = buylist[cardId][0].BuyPrice
-						grade := vendor.Info().Grading(cardId, buylist[cardId][0])
-						for cond, factor := range grade {
-							out[id][vendorTag].Conditions[cond+"_foil"] = buylist[cardId][0].BuyPrice * factor
-						}
+					for i := range buylist[cardId] {
+						condTag := buylist[cardId][i].Conditions
+						out[id][vendorTag].Conditions[condTag+"_foil"] = buylist[cardId][i].BuyPrice
 					}
 				}
 			} else {
@@ -503,16 +489,9 @@ func getVendorPrices(mode string, enabledStores []string, filterByEdition string
 					if out[id][vendorTag].Conditions == nil {
 						out[id][vendorTag].Conditions = map[string]float64{}
 					}
-					if vendor.Info().MultiCondBuylist {
-						for i := range buylist[cardId] {
-							out[id][vendorTag].Conditions[buylist[cardId][i].Conditions] = buylist[cardId][i].BuyPrice
-						}
-					} else {
-						out[id][vendorTag].Conditions["NM"] = buylist[cardId][0].BuyPrice
-						grade := vendor.Info().Grading(cardId, buylist[cardId][0])
-						for cond, factor := range grade {
-							out[id][vendorTag].Conditions[cond] = buylist[cardId][0].BuyPrice * factor
-						}
+					for i := range buylist[cardId] {
+						condTag := buylist[cardId][i].Conditions
+						out[id][vendorTag].Conditions[condTag+"_etched"] = buylist[cardId][i].BuyPrice
 					}
 				}
 			}

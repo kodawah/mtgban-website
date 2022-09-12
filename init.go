@@ -98,7 +98,8 @@ func loadInventoryFromFile(info mtgban.ScraperInfo, fname string) (mtgban.Seller
 	}
 
 	// Create seller using the properties of the scraper
-	info.InventoryTimestamp = fileDate(fname)
+	ts := fileDate(fname)
+	info.InventoryTimestamp = &ts
 
 	return mtgban.NewSellerFromInventory(inv, info), nil
 }
@@ -145,7 +146,8 @@ func loadBuylistFromFile(info mtgban.ScraperInfo, fname string) (mtgban.Vendor, 
 	}
 
 	// Create seller using the properties of the scraper
-	info.BuylistTimestamp = fileDate(fname)
+	ts := fileDate(fname)
+	info.BuylistTimestamp = &ts
 
 	return mtgban.NewVendorFromBuylist(bl, info), nil
 }
@@ -231,7 +233,7 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 			}
 
 			// Load if all the sellers inventory timestamps are past the cooldown
-			if SliceStringHas(names, seller.Info().Shorthand) && time.Now().Sub(seller.Info().InventoryTimestamp) < SkipRefreshCooldown {
+			if SliceStringHas(names, seller.Info().Shorthand) && time.Now().Sub(*seller.Info().InventoryTimestamp) < SkipRefreshCooldown {
 				log.Println("Trying to skip", seller.Info().Name, seller.Info().Shorthand, "because too recent")
 			} else {
 				needsLoading = true
@@ -891,7 +893,7 @@ func loadSellers(newSellers []mtgban.Seller) {
 
 			// If the old scraper data is old enough, pull from the new scraper
 			// and update it in the global slice
-			if Sellers[i] == nil || time.Now().Sub(Sellers[i].Info().InventoryTimestamp) > SkipRefreshCooldown {
+			if Sellers[i] == nil || time.Now().Sub(*Sellers[i].Info().InventoryTimestamp) > SkipRefreshCooldown {
 				ServerNotify("reload", "Loading from seller "+newSellers[i].Info().Shorthand)
 				start := time.Now()
 				err := updateSellerAtPosition(newSellers[i], i, true)
@@ -970,7 +972,7 @@ func loadVendors(newVendors []mtgban.Vendor) {
 
 			// If the old scraper data is old enough, pull from the new scraper
 			// and update it in the global slice
-			if Vendors[i] == nil || time.Now().Sub(Vendors[i].Info().BuylistTimestamp) > SkipRefreshCooldown {
+			if Vendors[i] == nil || time.Now().Sub(*Vendors[i].Info().BuylistTimestamp) > SkipRefreshCooldown {
 				ServerNotify("reload", "Loading from vendor "+newVendors[i].Info().Shorthand)
 				start := time.Now()
 				err := updateVendorAtPosition(newVendors[i], i, true)

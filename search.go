@@ -622,15 +622,7 @@ func searchVendorsNG(cardIds []string, config SearchConfig) (foundVendors map[st
 			}
 
 			// Look up the NM printing
-			nmIndex := 0
-			if vendor.Info().MultiCondBuylist {
-				for nmIndex = range blEntries {
-					if blEntries[nmIndex].Conditions == "NM" {
-						break
-					}
-				}
-			}
-			entry := blEntries[nmIndex]
+			entry := blEntries[0]
 
 			if shouldSkipPriceNG(cardId, entry, priceFilters) {
 				continue
