@@ -148,6 +148,11 @@ func editionTitle(cardId string) string {
 		return ""
 	}
 
+	edition := co.Edition
+	if co.OriginalReleaseDate != "" {
+		edition = fmt.Sprintf("%s (%s)", edition, co.OriginalReleaseDate)
+	}
+
 	finish := ""
 	if co.Etched {
 		finish = " Etched"
@@ -160,7 +165,7 @@ func editionTitle(cardId string) string {
 		num = "#" + co.Card.Number
 	}
 
-	return fmt.Sprintf("%s -%s %s %s", co.Edition, finish, strings.Title(co.Card.Rarity), num)
+	return fmt.Sprintf("%s -%s %s %s", edition, finish, strings.Title(co.Card.Rarity), num)
 }
 
 func insertNavBar(page string, nav []NavElem, extra []NavElem) []NavElem {
