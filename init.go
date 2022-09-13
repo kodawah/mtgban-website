@@ -295,18 +295,14 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 				log.Printf("Stashing %s inventory data to DB", seller.Info().Shorthand)
 				inv, _ := seller.Inventory()
 				key := seller.Info().InventoryTimestamp.Format("2006-01-02")
-				var redisErrors []error
 				for uuid, entries := range inv {
 					err = db.HSet(context.Background(), uuid, key, entries[0].Price).Err()
 					if err != nil {
-						redisErrors = append(redisErrors, err)
+						ServerNotify("redis", err.Error())
+						break
 					}
 				}
 				log.Println("Took", time.Now().Sub(start))
-				if redisErrors != nil {
-					log.Printf("- with a total of %d errors", len(redisErrors))
-					log.Printf("- last error reported: %s", redisErrors[len(redisErrors)-1])
-				}
 			}
 		}
 
@@ -917,7 +913,6 @@ func loadSellers(newSellers []mtgban.Seller) {
 				inv, _ := Sellers[i].Inventory()
 
 				key := Sellers[i].Info().InventoryTimestamp.Format("2006-01-02")
-				var redisErrors []error
 				for uuid, entries := range inv {
 					// Adjust price through defaultGradeMap in case NM is not available
 					price := entries[0].Price * defaultGradeMap[entries[0].Conditions]
@@ -925,14 +920,11 @@ func loadSellers(newSellers []mtgban.Seller) {
 					// information (instead of the derivation above)
 					err := opts.RDBs["retail"].HSetNX(context.Background(), uuid, key, price).Err()
 					if err != nil {
-						redisErrors = append(redisErrors, err)
+						ServerNotify("redis", err.Error())
+						break
 					}
 				}
 				log.Println("Took", time.Now().Sub(start))
-				if redisErrors != nil {
-					log.Printf("- with a total of %d errors", len(redisErrors))
-					log.Printf("- last error reported: %s", redisErrors[len(redisErrors)-1])
-				}
 			}
 
 			err := dumpInventoryToFile(Sellers[i], currentDir, fname)
@@ -993,18 +985,14 @@ func loadVendors(newVendors []mtgban.Vendor) {
 				log.Println("Stashing", Vendors[i].Info().Name, Vendors[i].Info().Shorthand, "buylist data to DB")
 				bl, _ := Vendors[i].Buylist()
 				key := Vendors[i].Info().BuylistTimestamp.Format("2006-01-02")
-				var redisErrors []error
 				for uuid, entries := range bl {
 					err := opts.RDBs["buylist"].HSet(context.Background(), uuid, key, entries[0].BuyPrice).Err()
 					if err != nil {
-						redisErrors = append(redisErrors, err)
+						ServerNotify("redis", err.Error())
+						break
 					}
 				}
 				log.Println("Took", time.Now().Sub(start))
-				if redisErrors != nil {
-					log.Printf("- with a total of %d errors", len(redisErrors))
-					log.Printf("- last error reported: %s", redisErrors[len(redisErrors)-1])
-				}
 			}
 
 			err := dumpBuylistToFile(Vendors[i], currentDir, fname)
