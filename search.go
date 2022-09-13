@@ -356,10 +356,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 					return foundSellers[cardId][cond][i].Price < foundSellers[cardId][cond][j].Price
 				})
 			}
-			_, found := foundVendors[cardId]
-			if found {
-				sort.Slice(foundVendors[cardId], func(i, j int) bool {
-					return foundVendors[cardId][i].Price > foundVendors[cardId][j].Price
+			for cond := range foundSellers[cardId] {
+				sort.Slice(foundVendors[cardId][cond], func(i, j int) bool {
+					return foundVendors[cardId][cond][i].Price > foundVendors[cardId][cond][j].Price
 				})
 			}
 		}
@@ -599,8 +598,8 @@ func searchSellersNG(cardIds []string, config SearchConfig) (foundSellers map[st
 	return
 }
 
-func searchVendorsNG(cardIds []string, config SearchConfig) (foundVendors map[string][]SearchEntry) {
-	foundVendors = map[string][]SearchEntry{}
+func searchVendorsNG(cardIds []string, config SearchConfig) (foundVendors map[string]map[string][]SearchEntry) {
+	foundVendors = map[string]map[string][]SearchEntry{}
 
 	storeFilters := config.StoreFilters
 	priceFilters := config.PriceFilters
@@ -616,45 +615,52 @@ func searchVendorsNG(cardIds []string, config SearchConfig) (foundVendors map[st
 		}
 
 		for _, cardId := range cardIds {
-			blEntries, found := buylist[cardId]
+			entries, found := buylist[cardId]
 			if !found {
 				continue
 			}
 
-			// Look up the NM printing
-			entry := blEntries[0]
+			for _, entry := range entries {
+				if shouldSkipPriceNG(cardId, entry, priceFilters) {
+					continue
+				}
 
-			if shouldSkipPriceNG(cardId, entry, priceFilters) {
-				continue
-			}
+				_, found = foundVendors[cardId]
+				if !found {
+					foundVendors[cardId] = map[string][]SearchEntry{}
+				}
 
-			_, found = foundVendors[cardId]
-			if !found {
-				foundVendors[cardId] = []SearchEntry{}
-			}
-			name := vendor.Info().Name
-			if name == "TCG Player Market" {
-				name = "TCG Trade-In"
-			}
+				conditions := entry.Conditions
+				_, found = foundVendors[cardId][conditions]
+				if !found {
+					foundVendors[cardId][conditions] = []SearchEntry{}
+				}
 
-			icon := ""
-			switch name {
-			case TCG_DIRECT_NET:
-				icon = "img/misc/direct.png"
-			}
+				name := vendor.Info().Name
+				if name == "TCG Player Market" {
+					name = "TCG Trade-In"
+				}
 
-			res := SearchEntry{
-				ScraperName: name,
-				Shorthand:   vendor.Info().Shorthand,
-				Price:       entry.BuyPrice,
-				Credit:      entry.TradePrice,
-				Ratio:       entry.PriceRatio,
-				Quantity:    entry.Quantity,
-				URL:         entry.URL,
-				BundleIcon:  icon,
-				Country:     Country2flag[vendor.Info().CountryFlag],
+				icon := ""
+				switch name {
+				case TCG_DIRECT_NET:
+					icon = "img/misc/direct.png"
+				}
+
+				res := SearchEntry{
+					ScraperName: name,
+					Shorthand:   vendor.Info().Shorthand,
+					Price:       entry.BuyPrice,
+					Credit:      entry.TradePrice,
+					Ratio:       entry.PriceRatio,
+					Quantity:    entry.Quantity,
+					URL:         entry.URL,
+					BundleIcon:  icon,
+					Country:     Country2flag[vendor.Info().CountryFlag],
+				}
+
+				foundVendors[cardId][conditions] = append(foundVendors[cardId][conditions], res)
 			}
-			foundVendors[cardId] = append(foundVendors[cardId], res)
 		}
 	}
 
@@ -782,7 +788,7 @@ func attemptMatch(query string) ([]string, error) {
 	return uuids, nil
 }
 
-func searchParallelNG(config SearchConfig, flags ...bool) (foundSellers map[string]map[string][]SearchEntry, foundVendors map[string][]SearchEntry) {
+func searchParallelNG(config SearchConfig, flags ...bool) (foundSellers map[string]map[string][]SearchEntry, foundVendors map[string]map[string][]SearchEntry) {
 	selectedUUIDs, err := searchAndFilter(config)
 	if err != nil {
 		return nil, nil

@@ -49,7 +49,7 @@ type PageVars struct {
 	SearchSort   string
 	CondKeys     []string
 	FoundSellers map[string]map[string][]SearchEntry
-	FoundVendors map[string][]SearchEntry
+	FoundVendors map[string]map[string][]SearchEntry
 	Metadata     map[string]GenericCard
 
 	CanShowAll       bool

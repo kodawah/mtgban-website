@@ -471,10 +471,10 @@
                                 </table>
                             </td>
 
-                            {{$entries := (index $.FoundVendors $cardId)}}
-                            <td style="vertical-align: {{if not $entries}}middle{{else}}top{{end}}; padding: 0; margin: 0;">
-                                <table class="searchResults" style="margin: 0 12px 0 6px">
-                                    {{if not $entries}}
+                            {{$condsEntry := (index $.FoundVendors $cardId)}}
+                            <td style="vertical-align: {{if not $condsEntry}}middle{{else}}top{{end}}; padding: 0; margin: 0;">
+                                <table class="searchResults" style="margin: 0 6px 0 12px;">
+                                    {{if not $condsEntry}}
                                         <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}});" style="background-color:rgba(0, 0, 0, 0);">
                                             <td colspan="4">
                                                 <center>
@@ -483,28 +483,35 @@
                                             </td>
                                         </tr>
                                     {{end}}
-
-                                    {{range $entries}}
-                                        <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}});">
-                                            <td>
-                                                <a class="btn normal" href="{{.URL}}" target="_blank" rel="nofollow">
-                                                    {{.ScraperName}} {{.Country}}
-                                                </a>
-                                            </td>
-                                            <td {{if .Credit}}title="Credit: $ {{printf "%.2f" .Credit}}"{{end}}>
-                                                $ {{printf "%.2f" .Price}}
-                                            </td>
-                                            <td style="text-align: center; vertical-align: middle;">
-                                                {{if ne .Ratio 0.0}}{{printf "%.2f" .Ratio}} %{{end}}
-                                            </td>
-                                            <td style="text-align: center; vertical-align: middle;">
-                                                {{if .BundleIcon}}
-                                                    <img style="padding-top:4px;" src="{{.BundleIcon}}">
-                                                {{else if ne .Quantity 0}}
-                                                    {{.Quantity}}
-                                                {{end}}
-                                            </td>
-                                        </tr>
+                                    {{range $conditions := $.CondKeys}}
+                                        {{$entries := (index $condsEntry $conditions)}}
+                                        {{if $entries}}
+                                            <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}});">
+                                                <td colspan="4" style="padding-top: 8px; padding-bottom: 8px"><i>Conditions: {{$conditions}}</i></td>
+                                            </tr>
+                                        {{end}}
+                                        {{range $entries}}
+                                            <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}});">
+                                                <td>
+                                                    <a class="btn normal" href="{{.URL}}" target="_blank" rel="nofollow">
+                                                        {{.ScraperName}} {{.Country}}
+                                                    </a>
+                                                </td>
+                                                <td {{if .Credit}}title="Credit: $ {{printf "%.2f" .Credit}}"{{end}}>
+                                                    $ {{printf "%.2f" .Price}}
+                                                </td>
+                                                <td style="text-align: center; vertical-align: middle;">
+                                                    {{if eq $conditions "NM"}}
+                                                        {{if ne .Ratio 0.0}}{{printf "%.2f" .Ratio}} %{{end}}
+                                                    {{end}}
+                                                </td>
+                                                <td style="text-align: center; vertical-align: middle;">
+                                                    {{if and .Quantity (eq $conditions "NM")}}
+                                                        {{.Quantity}}
+                                                    {{end}}
+                                                </td>
+                                            </tr>
+                                        {{end}}
                                     {{end}}
                                 </table>
                             </td>

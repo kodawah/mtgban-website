@@ -826,7 +826,7 @@ func processSellersResults(foundSellers map[string]map[string][]SearchEntry, ind
 }
 
 // Retrieve cards from Vendors using the very first result
-func processVendorsResults(foundVendors map[string][]SearchEntry) []SearchEntry {
+func processVendorsResults(foundVendors map[string]map[string][]SearchEntry) []SearchEntry {
 	if len(foundVendors) == 0 {
 		return nil
 	}
@@ -841,5 +841,5 @@ func processVendorsResults(foundVendors map[string][]SearchEntry) []SearchEntry 
 		})
 	}
 
-	return foundVendors[sortedKeysVendor[0]]
+	return foundVendors[sortedKeysVendor[0]]["NM"]
 }
