@@ -672,6 +672,11 @@ var ScraperMap map[string]string
 // Assiciate Scraper shorthands to Scraper Names
 var ScraperNames map[string]string
 
+// A default scale for converting non-NM prices to NM
+var defaultGradeMap = map[string]float64{
+	"NM": 1, "SP": 1.25, "MP": 1.67, "HP": 2.5, "PO": 4,
+}
+
 func loadScrapers() {
 	init := !DatabaseLoaded
 	if init {
@@ -910,14 +915,12 @@ func loadSellers(newSellers []mtgban.Seller) {
 				start := time.Now()
 				log.Println("Stashing", Sellers[i].Info().Name, Sellers[i].Info().Shorthand, "inventory data to DB")
 				inv, _ := Sellers[i].Inventory()
-				// Supply some default price adjustment in case NM is not available
-				grade := map[string]float64{
-					"NM": 1, "SP": 1.25, "MP": 1.67, "HP": 2.5, "PO": 4,
-				}
+
 				key := Sellers[i].Info().InventoryTimestamp.Format("2006-01-02")
 				var redisErrors []error
 				for uuid, entries := range inv {
-					price := entries[0].Price * grade[entries[0].Conditions]
+					// Adjust price through defaultGradeMap in case NM is not available
+					price := entries[0].Price * defaultGradeMap[entries[0].Conditions]
 					// Use NX because the price might have already been set using more accurate
 					// information (instead of the derivation above)
 					err := opts.RDBs["retail"].HSetNX(context.Background(), uuid, key, price).Err()
