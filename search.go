@@ -465,36 +465,39 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		}
 
 		pageVars.StocksURL = pageVars.Metadata[chartId].StocksURL
+	}
+
+	var source string
+	notifyTitle := "search"
+	utm := r.FormValue("utm_source")
+	if utm == "banbot" {
+		id := r.FormValue("utm_affiliate")
+		source = fmt.Sprintf("banbot (%s)", id)
+	} else if utm == "autocard" {
+		source = "autocard anywhere"
+	} else if chartId != "" {
+		source = "chart page"
+		notifyTitle = "chart"
 	} else {
-		// Display tracking for non-chart requests
-		var source string
-		utm := r.FormValue("utm_source")
-		if utm == "banbot" {
-			id := r.FormValue("utm_affiliate")
-			source = fmt.Sprintf("banbot (%s)", id)
-		} else if utm == "autocard" {
-			source = "autocard anywhere"
+		u, err := url.Parse(r.Referer())
+		if err != nil {
+			log.Println(err)
+			source = "n/a"
 		} else {
-			u, err := url.Parse(r.Referer())
-			if err != nil {
-				log.Println(err)
-				source = "n/a"
+			if strings.Contains(u.Host, "mtgban") {
+				source = u.Path
 			} else {
-				if strings.Contains(u.Host, "mtgban") {
-					source = u.Path
-				} else {
-					// Avoid automatic URL expansion in Discord
-					source = fmt.Sprintf("<%s>", u.String())
-				}
+				// Avoid automatic URL expansion in Discord
+				source = fmt.Sprintf("<%s>", u.String())
 			}
 		}
-		user := GetParamFromSig(sig, "UserEmail")
-		msg := fmt.Sprintf("[%s] from %s by %s (took %v)", query, source, user, time.Since(start))
-		UserNotify("search", msg)
-		LogPages["Search"].Println(msg)
-		if DevMode {
-			log.Println(msg)
-		}
+	}
+	user := GetParamFromSig(sig, "UserEmail")
+	msg := fmt.Sprintf("[%s] from %s by %s (took %v)", query, source, user, time.Since(start))
+	UserNotify(notifyTitle, msg)
+	LogPages["Search"].Println(msg)
+	if DevMode {
+		log.Println(msg)
 	}
 
 	if DevMode {
