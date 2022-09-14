@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"sort"
 )
 
 type Dataset struct {
@@ -108,6 +109,12 @@ func getDateAxisValues(cardId string) ([]string, error) {
 			return nil, errors.New("no data available")
 		}
 	}
+
+	// Sort labels from older to newer
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i] < keys[j]
+	})
+
 	return keys, nil
 }
 
