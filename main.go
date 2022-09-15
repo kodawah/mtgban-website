@@ -501,6 +501,8 @@ func main() {
 	devMode := flag.Bool("dev", false, "Enable developer mode")
 	sigCheck := flag.Bool("sig", false, "Enable signature verification")
 	logdir := flag.String("log", "logs", "Directory for scrapers logs")
+	port := flag.String("port", "", "Override server port")
+
 	flag.Parse()
 	DevMode = *devMode
 	SigCheck = true
@@ -513,6 +515,9 @@ func main() {
 	err := loadVars(*config)
 	if err != nil {
 		log.Fatalln("unable to load config file:", err)
+	}
+	if *port != "" {
+		Config.Port = *port
 	}
 
 	_, err = os.Stat(LogDir)
