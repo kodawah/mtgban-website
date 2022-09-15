@@ -76,7 +76,7 @@ func loadDatastore() error {
 	return mtgmatcher.LoadDatastore(allPrintingsReader)
 }
 
-func loadInventoryFromFile(info mtgban.ScraperInfo, fname string) (mtgban.Seller, error) {
+func loadInventoryFromFile(fname string) (mtgban.Seller, error) {
 	// Get file path from symlink
 	link, err := os.Readlink(fname)
 	if err != nil {
@@ -92,21 +92,12 @@ func loadInventoryFromFile(info mtgban.ScraperInfo, fname string) (mtgban.Seller
 	defer file.Close()
 
 	// Load inventory
-	inv, err := mtgban.LoadInventoryFromCSV(file, false)
-	if err != nil {
-		return nil, err
-	}
-
-	// Create seller using the properties of the scraper
-	ts := fileDate(fname)
-	info.InventoryTimestamp = &ts
-
-	return mtgban.NewSellerFromInventory(inv, info), nil
+	return mtgban.ReadSellerFromJSON(file)
 }
 
 func dumpInventoryToFile(seller mtgban.Seller, currentDir, fname string) error {
 	// Create dump file
-	outName := currentDir + "/" + seller.Info().Shorthand + ".csv"
+	outName := currentDir + "/" + seller.Info().Shorthand + ".json"
 	file, err := os.Create(outName)
 	if err != nil {
 		return err
@@ -114,7 +105,7 @@ func dumpInventoryToFile(seller mtgban.Seller, currentDir, fname string) error {
 	defer file.Close()
 
 	// Write everything to dump file
-	err = mtgban.WriteSellerToCSV(seller, file)
+	err = mtgban.WriteSellerToJSON(seller, file)
 	if err != nil {
 		return err
 	}
@@ -124,7 +115,7 @@ func dumpInventoryToFile(seller mtgban.Seller, currentDir, fname string) error {
 	return os.Symlink(outName, fname)
 }
 
-func loadBuylistFromFile(info mtgban.ScraperInfo, fname string) (mtgban.Vendor, error) {
+func loadBuylistFromFile(fname string) (mtgban.Vendor, error) {
 	// Get file path from symlink
 	link, err := os.Readlink(fname)
 	if err != nil {
@@ -140,21 +131,12 @@ func loadBuylistFromFile(info mtgban.ScraperInfo, fname string) (mtgban.Vendor, 
 	defer file.Close()
 
 	// Load inventory
-	bl, err := mtgban.LoadBuylistFromCSV(file, false)
-	if err != nil {
-		return nil, err
-	}
-
-	// Create seller using the properties of the scraper
-	ts := fileDate(fname)
-	info.BuylistTimestamp = &ts
-
-	return mtgban.NewVendorFromBuylist(bl, info), nil
+	return mtgban.ReadVendorFromJSON(file)
 }
 
 func dumpBuylistToFile(vendor mtgban.Vendor, currentDir, fname string) error {
 	// Create dump file
-	outName := currentDir + "/" + vendor.Info().Shorthand + ".csv"
+	outName := currentDir + "/" + vendor.Info().Shorthand + ".json"
 	file, err := os.Create(outName)
 	if err != nil {
 		return err
@@ -162,7 +144,7 @@ func dumpBuylistToFile(vendor mtgban.Vendor, currentDir, fname string) error {
 	defer file.Close()
 
 	// Write everything to dump file
-	err = mtgban.WriteVendorToCSV(vendor, file)
+	err = mtgban.WriteVendorToJSON(vendor, file)
 	if err != nil {
 		return err
 	}
@@ -189,7 +171,7 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 		// Both files need to be present
 		ok := true
 		for _, name := range names {
-			subfname := dirName + name + "-latest.csv"
+			subfname := dirName + name + "-latest.json"
 			if !fileExists(subfname) {
 				ok = false
 				break
@@ -198,14 +180,9 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 
 		if ok {
 			for _, name := range names {
-				subfname := dirName + name + "-latest.csv"
+				subfname := dirName + name + "-latest.json"
 
-				// Override data from the main market scraper
-				info := scraper.Info()
-				info.Name = name
-				info.Shorthand = name
-
-				seller, err := loadInventoryFromFile(info, subfname)
+				seller, err := loadInventoryFromFile(subfname)
 				if err != nil {
 					return err
 				}
@@ -271,7 +248,7 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 				// Add selected seller to the future global seller map
 				newbc.Register(seller)
 
-				fname := dirName + seller.Info().Shorthand + "-latest.csv"
+				fname := dirName + seller.Info().Shorthand + "-latest.json"
 
 				err = dumpInventoryToFile(seller, currentDir, fname)
 				if err != nil {
@@ -872,9 +849,9 @@ func loadSellers(newSellers []mtgban.Seller) {
 	for i := range newSellers {
 		log.Println(newSellers[i].Info().Name, newSellers[i].Info().Shorthand, "Inventory")
 
-		fname := dirName + newSellers[i].Info().Shorthand + "-latest.csv"
+		fname := dirName + newSellers[i].Info().Shorthand + "-latest.json"
 		if init && fileExists(fname) {
-			seller, err := loadInventoryFromFile(newSellers[i].Info(), fname)
+			seller, err := loadInventoryFromFile(fname)
 			if err != nil {
 				log.Println(err)
 				continue
@@ -951,9 +928,9 @@ func loadVendors(newVendors []mtgban.Vendor) {
 	for i := range newVendors {
 		log.Println(newVendors[i].Info().Name, newVendors[i].Info().Shorthand, "Buylist")
 
-		fname := dirName + newVendors[i].Info().Shorthand + "-latest.csv"
+		fname := dirName + newVendors[i].Info().Shorthand + "-latest.json"
 		if init && fileExists(fname) {
-			vendor, err := loadBuylistFromFile(newVendors[i].Info(), fname)
+			vendor, err := loadBuylistFromFile(fname)
 			if err != nil {
 				log.Println(err)
 				continue
