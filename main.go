@@ -297,7 +297,7 @@ func init() {
 }
 
 var Config struct {
-	Port                   int               `json:"port"`
+	Port                   string            `json:"port"`
 	DBAddress              string            `json:"db_address"`
 	DiscordHook            string            `json:"discord_hook"`
 	DiscordNotifHook       string            `json:"discord_notif_hook"`
@@ -349,7 +349,7 @@ var Newspaper1dayDB *sql.DB
 var GoogleDocsClient *http.Client
 
 const (
-	DefaultConfigPort = 8080
+	DefaultConfigPort = "8080"
 	DefaultSecret     = "NotVerySecret!"
 )
 
@@ -454,7 +454,7 @@ func loadVars(cfg string) error {
 		return err
 	}
 
-	if Config.Port == 0 {
+	if Config.Port == "" {
 		Config.Port = DefaultConfigPort
 	}
 
@@ -640,7 +640,7 @@ func main() {
 	http.Handle("/api/cardkingdom/pricelist.json", noSigning(http.HandlerFunc(CKMirrorAPI)))
 	http.HandleFunc("/favicon.ico", Favicon)
 	http.HandleFunc("/auth", Auth)
-	log.Fatal(http.ListenAndServe(":"+fmt.Sprint(Config.Port), nil))
+	log.Fatal(http.ListenAndServe(":"+Config.Port, nil))
 }
 
 func render(w http.ResponseWriter, tmpl string, pageVars PageVars) {
