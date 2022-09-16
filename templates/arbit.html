@@ -349,10 +349,6 @@
                     {{end}}
                     <tr style="background-color: var(--background);">
                         <td colspan={{if $.QtyNotAvailable}}12{{else}}13{{end}}>
-                            <p style="float: left;">
-                                <i>Last update: {{.LastUpdate}}</i>
-                            </p>
-
                             <a class="btn default" style="float: right;" href="#top"><i class="arrow up"></i> back to top</a>
                             {{if eq .Name "ABU Games"}}
                                 <a class="btn {{if index $.ArbitFilters "credit"}}success{{else}}warning{{end}}" style="float: right;" href="?source={{$.ScraperShort}}&sort={{$.SortOption}}&{{range $.ArbitOptKeys}}{{$val := index $.ArbitFilters .}}{{.}}={{if eq . "credit"}}{{not $val}}{{else}}{{$val}}{{end}}&{{end}}">{{if index $.ArbitFilters "credit"}}Return to Cash Arbitrage{{else}}Check Credit Arbitrage{{end}}</a>

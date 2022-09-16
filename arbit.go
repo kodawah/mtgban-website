@@ -224,10 +224,9 @@ var ShinyEditionRanges = map[string][2]int{
 }
 
 type Arbitrage struct {
-	Name       string
-	LastUpdate string
-	Arbit      []mtgban.ArbitEntry
-	HasCredit  bool
+	Name      string
+	Arbit     []mtgban.ArbitEntry
+	HasCredit bool
 
 	HasConditions bool
 }
@@ -688,14 +687,12 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		}
 
 		entry := Arbitrage{
-			Name:       name,
-			LastUpdate: scraper.Info().BuylistTimestamp.Format(time.RFC3339),
-			Arbit:      arbit,
-			HasCredit:  !scraper.Info().NoCredit,
+			Name:      name,
+			Arbit:     arbit,
+			HasCredit: !scraper.Info().NoCredit,
 		}
 		if pageVars.GlobalMode {
 			entry.HasCredit = false
-			entry.LastUpdate = scraper.Info().InventoryTimestamp.Format(time.RFC3339)
 			entry.HasConditions = source.Info().MetadataOnly
 		}
 
