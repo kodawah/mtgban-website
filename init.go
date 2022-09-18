@@ -828,7 +828,7 @@ func loadScrapers() {
 		go prepareCKAPI()
 	}
 
-	LastUpdate = time.Now()
+	LastUpdate = time.Now().Format(time.RFC3339)
 
 	if init {
 		ServerNotify("init", "loading completed")

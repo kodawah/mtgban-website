@@ -329,7 +329,7 @@ var DevMode bool
 var SigCheck bool
 var BenchMode bool
 var LogDir string
-var LastUpdate time.Time
+var LastUpdate string
 var DatabaseLoaded bool
 var Sellers []mtgban.Seller
 var Vendors []mtgban.Vendor
@@ -403,7 +403,7 @@ func genPageNav(activeTab, sig string) PageVars {
 	pageVars := PageVars{
 		Title:        "BAN " + activeTab,
 		ErrorMessage: msg,
-		LastUpdate:   LastUpdate.Format(time.RFC3339),
+		LastUpdate:   LastUpdate,
 
 		PatreonId:    PatreonClientId,
 		PatreonURL:   PatreonHost,
