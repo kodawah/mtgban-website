@@ -777,19 +777,7 @@ func loadScrapers() {
 	ServerNotify("init", msgS)
 	loadSellers(newSellers)
 
-	// Load any conversion needed
-	for _, seller := range Sellers {
-		if seller != nil && seller.Info().Name == TCG_DIRECT {
-			for _, vendor := range newVendors {
-				if vendor != nil && vendor.Info().Name == TCG_DIRECT_NET {
-					tcg := vendor.(*tcgplayer.TCGDirectNet)
-					tcg.DirectInventory, _ = seller.Inventory()
-					break
-				}
-			}
-			break
-		}
-	}
+	loadTCGDirectNet(newVendors)
 
 	log.Println("Vendors table")
 	var msgV string

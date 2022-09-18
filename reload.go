@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/kodabb/go-mtgban/mtgban"
+	"github.com/kodabb/go-mtgban/tcgplayer"
 )
 
 func reloadCK() {
@@ -47,6 +48,8 @@ func reloadSingle(name string) {
 func reloadTCG() {
 	reloadMarket("tcg_index")
 	reloadMarket("tcg_market")
+
+	loadTCGDirectNet(Vendors)
 
 	ServerNotify("refresh", "tcg fully refreshed")
 }
@@ -180,4 +183,24 @@ func updateVendorAtPosition(vendor mtgban.Vendor, i int, andLock bool) error {
 	// and not anything esle, so that filtering works like expected
 	Vendors[i] = mtgban.NewVendorFromBuylist(bl, vendor.Info())
 	return nil
+}
+
+// Load the fake buylist from the TCG Direct data
+func loadTCGDirectNet(newVendors []mtgban.Vendor) {
+	for _, seller := range Sellers {
+		if seller != nil && seller.Info().Name == TCG_DIRECT {
+			for i := range newVendors {
+				if newVendors[i] != nil && newVendors[i].Info().Name == TCG_DIRECT_NET {
+					tcg := tcgplayer.NewTCGDirectNet()
+					tcg.DirectInventory, _ = seller.Inventory()
+					// No error possible
+					tcg.Buylist()
+					// Replace the vendor
+					newVendors[i] = tcg
+					break
+				}
+			}
+			break
+		}
+	}
 }
