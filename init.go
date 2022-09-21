@@ -61,7 +61,8 @@ const (
 	CT_STANDARD = "Card Trader"
 	CT_ZERO     = "Card Trader Zero"
 
-	SkipRefreshCooldown = 2 * time.Hour
+	SkipRefreshCooldown    = 2 * time.Hour
+	DefaultUploaderTimeout = 60 * time.Second
 
 	AllPrintingsFileName = "allprintings5.json"
 )
@@ -93,6 +94,30 @@ func loadInventoryFromFile(fname string) (mtgban.Seller, error) {
 
 	// Load inventory
 	return mtgban.ReadSellerFromJSON(file)
+}
+
+func uploadSeller(seller mtgban.Seller, currentDir string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), DefaultUploaderTimeout)
+	defer cancel()
+
+	outName := currentDir + "/" + seller.Info().Shorthand + ".json"
+	wc := GCSBucketClient.Bucket(Config.Uploader.BucketName).Object(outName).NewWriter(ctx)
+	wc.ContentType = "application/json"
+	defer wc.Close()
+
+	return mtgban.WriteSellerToJSON(seller, wc)
+}
+
+func uploadVendor(vendor mtgban.Vendor, currentDir string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), DefaultUploaderTimeout)
+	defer cancel()
+
+	outName := currentDir + "/" + vendor.Info().Shorthand + ".json"
+	wc := GCSBucketClient.Bucket(Config.Uploader.BucketName).Object(outName).NewWriter(ctx)
+	wc.ContentType = "application/json"
+	defer wc.Close()
+
+	return mtgban.WriteVendorToJSON(vendor, wc)
 }
 
 func dumpInventoryToFile(seller mtgban.Seller, currentDir, fname string) error {
@@ -255,8 +280,14 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 					log.Println(err)
 					continue
 				}
-
 				ScraperOptions[key].Logger.Println(seller.Info().Name, "saved to file")
+
+				err = uploadSeller(seller, currentDir)
+				if err != nil {
+					log.Println(err)
+					continue
+				}
+				ScraperOptions[key].Logger.Println(seller.Info().Name, "uploaded to the cloud")
 			}
 		}
 
@@ -897,8 +928,14 @@ func loadSellers(newSellers []mtgban.Seller) {
 				log.Println(err)
 				continue
 			}
-
 			opts.Logger.Println("Saved to file")
+
+			err = uploadSeller(Sellers[i], currentDir)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			opts.Logger.Println("Uploaded to the cloud")
 		}
 		log.Println("-- OK")
 	}
@@ -965,8 +1002,14 @@ func loadVendors(newVendors []mtgban.Vendor) {
 				log.Println(err)
 				continue
 			}
-
 			opts.Logger.Println("Saved to file")
+
+			err = uploadVendor(Vendors[i], currentDir)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			opts.Logger.Println("Uploaded to the cloud")
 		}
 		log.Println("-- OK")
 	}

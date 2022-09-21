@@ -3,6 +3,7 @@ module github.com/kodabb/mtgban-website
 go 1.14
 
 require (
+	cloud.google.com/go/storage v1.10.0
 	github.com/360EntSecGroup-Skylar/excelize/v2 v2.3.0
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/bwmarrin/discordgo v0.23.2
@@ -20,6 +21,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20210218202405-ba52d332ba99
 	golang.org/x/sys v0.0.0-20210927094055-39ccf1dd6fa6
 	golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e
+	google.golang.org/api v0.30.0
 	gopkg.in/Iwark/spreadsheet.v2 v2.0.0-20191122095212-08231195c43b
 	gopkg.in/robfig/cron.v2 v2.0.0-20150107220207-be2e0b0deed5
 )
