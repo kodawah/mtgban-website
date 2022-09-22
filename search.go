@@ -356,7 +356,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 					return foundSellers[cardId][cond][i].Price < foundSellers[cardId][cond][j].Price
 				})
 			}
-			for cond := range foundSellers[cardId] {
+			for cond := range foundVendors[cardId] {
 				sort.Slice(foundVendors[cardId][cond], func(i, j int) bool {
 					return foundVendors[cardId][cond][i].Price > foundVendors[cardId][cond][j].Price
 				})
