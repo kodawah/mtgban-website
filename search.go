@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/kodabb/go-mtgban/mtgban"
 	"github.com/kodabb/go-mtgban/mtgmatcher"
 )
 
@@ -347,19 +348,20 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	// Optionally sort according to price
 	if pageVars.SearchBest {
 		for _, cardId := range allKeys {
-			for cond := range foundSellers[cardId] {
-				// These entries are special, do not sort them
-				if cond == "INDEX" {
-					continue
+			// This skips INDEX and PO conditions
+			for _, cond := range mtgban.DefaultGradeTags {
+				_, found := foundSellers[cardId][cond]
+				if found {
+					sort.Slice(foundSellers[cardId][cond], func(i, j int) bool {
+						return foundSellers[cardId][cond][i].Price < foundSellers[cardId][cond][j].Price
+					})
 				}
-				sort.Slice(foundSellers[cardId][cond], func(i, j int) bool {
-					return foundSellers[cardId][cond][i].Price < foundSellers[cardId][cond][j].Price
-				})
-			}
-			for cond := range foundVendors[cardId] {
-				sort.Slice(foundVendors[cardId][cond], func(i, j int) bool {
-					return foundVendors[cardId][cond][i].Price > foundVendors[cardId][cond][j].Price
-				})
+				_, found = foundVendors[cardId][cond]
+				if found {
+					sort.Slice(foundVendors[cardId][cond], func(i, j int) bool {
+						return foundVendors[cardId][cond][i].Price > foundVendors[cardId][cond][j].Price
+					})
+				}
 			}
 		}
 	}
