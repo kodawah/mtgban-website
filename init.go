@@ -65,6 +65,9 @@ const (
 	DefaultUploaderTimeout = 60 * time.Second
 
 	AllPrintingsFileName = "allprintings5.json"
+
+	InventoryDir = "cache_inv"
+	BuylistDir   = "cache_bl"
 )
 
 func loadDatastore() error {
@@ -100,7 +103,7 @@ func uploadSeller(seller mtgban.Seller, currentDir string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultUploaderTimeout)
 	defer cancel()
 
-	outName := currentDir + "/" + seller.Info().Shorthand + ".json"
+	outName := path.Join(currentDir, seller.Info().Shorthand+".json")
 	wc := GCSBucketClient.Bucket(Config.Uploader.BucketName).Object(outName).NewWriter(ctx)
 	wc.ContentType = "application/json"
 	defer wc.Close()
@@ -112,7 +115,7 @@ func uploadVendor(vendor mtgban.Vendor, currentDir string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultUploaderTimeout)
 	defer cancel()
 
-	outName := currentDir + "/" + vendor.Info().Shorthand + ".json"
+	outName := path.Join(currentDir, vendor.Info().Shorthand+".json")
 	wc := GCSBucketClient.Bucket(Config.Uploader.BucketName).Object(outName).NewWriter(ctx)
 	wc.ContentType = "application/json"
 	defer wc.Close()
@@ -122,7 +125,7 @@ func uploadVendor(vendor mtgban.Vendor, currentDir string) error {
 
 func dumpInventoryToFile(seller mtgban.Seller, currentDir, fname string) error {
 	// Create dump file
-	outName := currentDir + "/" + seller.Info().Shorthand + ".json"
+	outName := path.Join(currentDir, seller.Info().Shorthand+".json")
 	file, err := os.Create(outName)
 	if err != nil {
 		return err
@@ -161,7 +164,7 @@ func loadBuylistFromFile(fname string) (mtgban.Vendor, error) {
 
 func dumpBuylistToFile(vendor mtgban.Vendor, currentDir, fname string) error {
 	// Create dump file
-	outName := currentDir + "/" + vendor.Info().Shorthand + ".json"
+	outName := path.Join(currentDir, vendor.Info().Shorthand+".json")
 	file, err := os.Create(outName)
 	if err != nil {
 		return err
@@ -183,8 +186,6 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 	names := ScraperOptions[key].Keepers
 	log.Println("Untangling", scraper.Info().Shorthand, "to", names)
 
-	dirName := path.Clean(currentDir+"/..") + "/"
-
 	for _, name := range names {
 		ScraperMap[name] = key
 		ScraperNames[name] = name
@@ -196,7 +197,7 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 		// Both files need to be present
 		ok := true
 		for _, name := range names {
-			subfname := dirName + name + "-latest.json"
+			subfname := path.Join(InventoryDir, name+"-latest.json")
 			if !fileExists(subfname) {
 				ok = false
 				break
@@ -205,7 +206,7 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 
 		if ok {
 			for _, name := range names {
-				subfname := dirName + name + "-latest.json"
+				subfname := path.Join(InventoryDir, name+"-latest.json")
 
 				seller, err := loadInventoryFromFile(subfname)
 				if err != nil {
@@ -273,7 +274,7 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 				// Add selected seller to the future global seller map
 				newbc.Register(seller)
 
-				fname := dirName + seller.Info().Shorthand + "-latest.json"
+				fname := path.Join(InventoryDir, seller.Info().Shorthand+"-latest.json")
 
 				err = dumpInventoryToFile(seller, currentDir, fname)
 				if err != nil {
@@ -689,8 +690,7 @@ func loadScrapers() {
 		ServerNotify("refresh", "full refresh started")
 	}
 
-	dirName := "cache_inv/"
-	currentDir := fmt.Sprintf("%s%03d", dirName, time.Now().YearDay())
+	currentDir := path.Join(InventoryDir, fmt.Sprintf("%03d", time.Now().YearDay()))
 	mkDirIfNotExisting(currentDir)
 
 	newbc := mtgban.NewClient()
@@ -860,15 +860,14 @@ func loadSellers(newSellers []mtgban.Seller) {
 	defer recoverPanicScraper()
 
 	init := !DatabaseLoaded
-	dirName := "cache_inv/"
-	currentDir := fmt.Sprintf("%s%03d", dirName, time.Now().YearDay())
+	currentDir := path.Join(InventoryDir, fmt.Sprintf("%03d", time.Now().YearDay()))
 	mkDirIfNotExisting(currentDir)
 
 	// Load Sellers
 	for i := range newSellers {
 		log.Println(newSellers[i].Info().Name, newSellers[i].Info().Shorthand, "Inventory")
 
-		fname := dirName + newSellers[i].Info().Shorthand + "-latest.json"
+		fname := path.Join(InventoryDir, newSellers[i].Info().Shorthand+"-latest.json")
 		if init && fileExists(fname) {
 			seller, err := loadInventoryFromFile(fname)
 			if err != nil {
@@ -945,15 +944,14 @@ func loadVendors(newVendors []mtgban.Vendor) {
 	defer recoverPanicScraper()
 
 	init := !DatabaseLoaded
-	dirName := "cache_bl/"
-	currentDir := fmt.Sprintf("%s%03d", dirName, time.Now().YearDay())
+	currentDir := path.Join(BuylistDir, fmt.Sprintf("%03d", time.Now().YearDay()))
 	mkDirIfNotExisting(currentDir)
 
 	// Load Vendors
 	for i := range newVendors {
 		log.Println(newVendors[i].Info().Name, newVendors[i].Info().Shorthand, "Buylist")
 
-		fname := dirName + newVendors[i].Info().Shorthand + "-latest.json"
+		fname := path.Join(BuylistDir, newVendors[i].Info().Shorthand+"-latest.json")
 		if init && fileExists(fname) {
 			vendor, err := loadBuylistFromFile(fname)
 			if err != nil {
