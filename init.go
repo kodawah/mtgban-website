@@ -695,6 +695,46 @@ var defaultGradeMap = map[string]float64{
 	"NM": 1, "SP": 1.25, "MP": 1.67, "HP": 2.5, "PO": 4,
 }
 
+// Create log and ScraperMap
+func loadOptions() {
+	if ScraperMap == nil {
+		ScraperMap = map[string]string{}
+	}
+	for key, opt := range ScraperOptions {
+		if DevMode && !opt.DevEnabled {
+			continue
+		}
+
+		// Create the destination logfile if not existing
+		if opt.Logger == nil {
+			logFile, err := logfile.New(&logfile.LogFile{
+				FileName:    path.Join(LogDir, key+".log"),
+				MaxSize:     500 * 1024,       // 500K duh!
+				Flags:       logfile.FileOnly, // Default append
+				OldVersions: 1,
+			})
+			if err != nil {
+				log.Printf("Failed to create logFile for %s: %s", key, err)
+				opt.Logger = log.New(os.Stderr, "", log.LstdFlags)
+				continue
+			}
+			opt.Logger = log.New(logFile, "", log.LstdFlags)
+		}
+
+		scraper, err := opt.Init(opt.Logger)
+		if err != nil {
+			continue
+		}
+
+		// Custom untangling
+		for _, name := range opt.Keepers {
+			ScraperMap[name] = key
+		}
+
+		ScraperMap[scraper.Info().Shorthand] = key
+	}
+}
+
 func loadScrapers() {
 	init := !DatabaseLoaded
 	if init {
@@ -717,25 +757,11 @@ func loadScrapers() {
 		ScraperNames = map[string]string{}
 	}
 
+	loadOptions()
+
 	for key, opt := range ScraperOptions {
 		if DevMode && !opt.DevEnabled {
 			continue
-		}
-
-		// Create the destination logfile if not existing
-		if opt.Logger == nil {
-			logFile, err := logfile.New(&logfile.LogFile{
-				FileName:    path.Join(LogDir, key+".log"),
-				MaxSize:     500 * 1024,       // 500K duh!
-				Flags:       logfile.FileOnly, // Default append
-				OldVersions: 1,
-			})
-			if err != nil {
-				log.Printf("Failed to create logFile for %s: %s", key, err)
-				opt.Logger = log.New(os.Stderr, "", log.LstdFlags)
-				continue
-			}
-			opt.Logger = log.New(logFile, "", log.LstdFlags)
 		}
 
 		log.Println("Initializing " + key)
@@ -804,9 +830,6 @@ func loadScrapers() {
 	if Vendors == nil {
 		Vendors = make([]mtgban.Vendor, len(newVendors))
 	}
-	if Infos == nil {
-		Infos = map[string]mtgban.InventoryRecord{}
-	}
 
 	log.Println("Sellers table")
 	var msgS string
@@ -840,6 +863,20 @@ func loadScrapers() {
 		return
 	}
 
+	updateStaticData()
+
+	if init {
+		ServerNotify("init", "loading completed")
+	} else {
+		ServerNotify("refresh", "full refresh completed")
+	}
+}
+
+func updateStaticData() {
+	if Infos == nil {
+		Infos = map[string]mtgban.InventoryRecord{}
+	}
+
 	SealedEditionsSorted, SealedEditionsList = getSealedEditions()
 	AllEditionsKeys, AllEditionsMap = getAllEditions()
 	TreeEditionsKeys, TreeEditionsMap = getTreeEditions()
@@ -861,12 +898,6 @@ func loadScrapers() {
 	}
 
 	LastUpdate = time.Now().Format(time.RFC3339)
-
-	if init {
-		ServerNotify("init", "loading completed")
-	} else {
-		ServerNotify("refresh", "full refresh completed")
-	}
 }
 
 func loadSellers(newSellers []mtgban.Seller) {
