@@ -110,7 +110,24 @@ func uploadSeller(seller mtgban.Seller, currentDir string) error {
 	wc.ContentType = "application/json"
 	defer wc.Close()
 
-	return mtgban.WriteSellerToJSON(seller, wc)
+	err := mtgban.WriteSellerToJSON(seller, wc)
+	if err != nil {
+		return err
+	}
+
+	configMutex.Lock()
+	_, found := SellersConfigMap[seller.Info().Shorthand]
+	if !found {
+		SellersConfigMap[seller.Info().Shorthand] = &ScraperConfig{
+			Name:      seller.Info().Name,
+			Shorthand: seller.Info().Shorthand,
+		}
+	}
+	SellersConfigMap[seller.Info().Shorthand].Path = outName
+	uploadScrapersConfig(SellersConfigMap, "sellers.json")
+	configMutex.Unlock()
+
+	return nil
 }
 
 func uploadVendor(vendor mtgban.Vendor, currentDir string) error {
@@ -122,7 +139,24 @@ func uploadVendor(vendor mtgban.Vendor, currentDir string) error {
 	wc.ContentType = "application/json"
 	defer wc.Close()
 
-	return mtgban.WriteVendorToJSON(vendor, wc)
+	err := mtgban.WriteVendorToJSON(vendor, wc)
+	if err != nil {
+		return err
+	}
+
+	configMutex.Lock()
+	_, found := VendorsConfigMap[vendor.Info().Shorthand]
+	if !found {
+		VendorsConfigMap[vendor.Info().Shorthand] = &ScraperConfig{
+			Name:      vendor.Info().Name,
+			Shorthand: vendor.Info().Shorthand,
+		}
+	}
+	VendorsConfigMap[vendor.Info().Shorthand].Path = outName
+	uploadScrapersConfig(VendorsConfigMap, "vendors.json")
+	configMutex.Unlock()
+
+	return nil
 }
 
 func dumpInventoryToFile(seller mtgban.Seller, currentDir, fname string) error {
@@ -757,6 +791,13 @@ func loadScrapers() {
 		ScraperNames = map[string]string{}
 	}
 
+	if SellersConfigMap == nil {
+		SellersConfigMap = map[string]*ScraperConfig{}
+	}
+	if VendorsConfigMap == nil {
+		VendorsConfigMap = map[string]*ScraperConfig{}
+	}
+
 	loadOptions()
 
 	for key, opt := range ScraperOptions {
@@ -922,6 +963,12 @@ func loadSellers(newSellers []mtgban.Seller) {
 
 			inv, _ := seller.Inventory()
 			log.Printf("Loaded from file with %d entries", len(inv))
+
+			targetDir := path.Join(InventoryDir, time.Now().Format("2006-01-02/15"))
+			err = uploadSeller(Sellers[i], targetDir)
+			if err != nil {
+				log.Println(err)
+			}
 		} else {
 			_, ok := newSellers[i].(mtgban.Scraper).(mtgban.Market)
 			if ok {
@@ -1007,6 +1054,9 @@ func loadVendors(newVendors []mtgban.Vendor) {
 
 			bl, _ := vendor.Buylist()
 			log.Printf("Loaded from file with %d entries", len(bl))
+
+			targetDir := path.Join(BuylistDir, time.Now().Format("2006-01-02/15"))
+			uploadVendor(vendor, targetDir)
 		} else {
 			opts := ScraperOptions[ScraperMap[newVendors[i].Info().Shorthand]]
 

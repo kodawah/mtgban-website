@@ -571,7 +571,12 @@ func main() {
 			log.Fatalln("error loading mtgjson:", err)
 		}
 
-		loadScrapers()
+		err = loadScrapersNG()
+		if err != nil {
+			log.Println("error loading config:", err)
+			loadScrapers()
+		}
+
 		DatabaseLoaded = true
 
 		// Nothing else to do if hacking around
