@@ -52,6 +52,9 @@
                 </tr>
                 {{range $i, $row := $.Table}}
                     <tr>
+                        <td>
+                            <a href="?cloud={{index $row 1}}" title="Reload from cloud"><span class="emoji">☁️</span></a>
+                        </td>
                         {{range $j, $cell := $row}}
                             <td>
                                 {{if eq $j 0}}
@@ -85,6 +88,9 @@
                 </tr>
                 {{range $i, $row := $.OtherTable}}
                     <tr>
+                         <td>
+                            <a href="?cloud_bl={{index $row 1}}" title="Reload from cloud"><span class="emoji">☁️</span></a>
+                        </td>
                         {{range $j, $cell := $row}}
                             <td>
                                 {{if eq $j 0}}
@@ -120,6 +126,7 @@
                 <li><a href="?reboot=cache" onclick="return confirm('Are you sure you want to wipe old cache?')">🗑️ Wipe old cache</a></li>
                 <li><a href="?reboot=config" onclick="return confirm('Are you sure you want to reload config?')">⚙️ Reload config</a></li>
                 <li><a href="?reboot=scrapers" onclick="return confirm('Are you sure you want to reload all the scrapers?')">🔃 Reload all the scrapers</a></li>
+                <li><a href="?reboot=cloud" onclick="return confirm('Are you sure you want to reload all the scrapers?')">☁️ Reload scrapers from the cloud</a></li>
                 <li><a href="?reboot=server" onclick="return confirm('Are you sure you want to restart the server?')">⚠️ Restart the server</a></li>
             </ul>
         </div>
