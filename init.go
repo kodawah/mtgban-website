@@ -283,7 +283,8 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 				}
 				ScraperOptions[key].Logger.Println(seller.Info().Name, "saved to file")
 
-				err = uploadSeller(seller, currentDir)
+				targetDir := path.Join(InventoryDir, time.Now().Format("2006-01-02/15"))
+				err = uploadSeller(seller, targetDir)
 				if err != nil {
 					log.Println(err)
 					continue
@@ -929,7 +930,8 @@ func loadSellers(newSellers []mtgban.Seller) {
 			}
 			opts.Logger.Println("Saved to file")
 
-			err = uploadSeller(Sellers[i], currentDir)
+			targetDir := path.Join(InventoryDir, time.Now().Format("2006-01-02/15"))
+			err = uploadSeller(Sellers[i], targetDir)
 			if err != nil {
 				log.Println(err)
 				continue
@@ -1002,7 +1004,8 @@ func loadVendors(newVendors []mtgban.Vendor) {
 			}
 			opts.Logger.Println("Saved to file")
 
-			err = uploadVendor(Vendors[i], currentDir)
+			targetDir := path.Join(BuylistDir, time.Now().Format("2006-01-02/15"))
+			err = uploadVendor(Vendors[i], targetDir)
 			if err != nil {
 				log.Println(err)
 				continue
