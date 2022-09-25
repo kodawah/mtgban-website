@@ -3,6 +3,8 @@ package main
 import (
 	"errors"
 	"fmt"
+	"path"
+	"time"
 
 	"github.com/kodabb/go-mtgban/mtgban"
 	"github.com/kodabb/go-mtgban/tcgplayer"
@@ -141,6 +143,9 @@ func updateSellerAtPosition(seller mtgban.Seller, i int, andLock bool) error {
 	// Save seller in global array, making sure it's _only_ a Seller
 	// and not anything esle, so that filtering works like expected
 	Sellers[i] = mtgban.NewSellerFromInventory(inv, seller.Info())
+
+	targetDir := path.Join(InventoryDir, time.Now().Format("2006-01-02/15"))
+	go uploadSeller(Sellers[i], targetDir)
 	return nil
 }
 
@@ -182,6 +187,9 @@ func updateVendorAtPosition(vendor mtgban.Vendor, i int, andLock bool) error {
 	// Save vendor in global array, making sure it's _only_ a Vendor
 	// and not anything esle, so that filtering works like expected
 	Vendors[i] = mtgban.NewVendorFromBuylist(bl, vendor.Info())
+
+	targetDir := path.Join(BuylistDir, time.Now().Format("2006-01-02/15"))
+	go uploadVendor(Vendors[i], targetDir)
 	return nil
 }
 
