@@ -88,14 +88,16 @@ func loadInventoryFromFile(fname string) (mtgban.Seller, error) {
 	}
 
 	log.Println("File dump found:", link)
-	// Open file (not the symlink)
-	file, err := os.Open(link)
+	return loadSellerFromFile(link)
+}
+
+func loadSellerFromFile(fname string) (mtgban.Seller, error) {
+	file, err := os.Open(fname)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	// Load inventory
 	return mtgban.ReadSellerFromJSON(file)
 }
 
@@ -124,16 +126,10 @@ func uploadVendor(vendor mtgban.Vendor, currentDir string) error {
 }
 
 func dumpInventoryToFile(seller mtgban.Seller, currentDir, fname string) error {
-	// Create dump file
 	outName := path.Join(currentDir, seller.Info().Shorthand+".json")
-	file, err := os.Create(outName)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
 
-	// Write everything to dump file
-	err = mtgban.WriteSellerToJSON(seller, file)
+	// Create dump file
+	err := dumpSellerToFile(seller, outName)
 	if err != nil {
 		return err
 	}
@@ -141,6 +137,16 @@ func dumpInventoryToFile(seller mtgban.Seller, currentDir, fname string) error {
 	// Link dumpfile to the latest available source
 	os.Remove(fname)
 	return os.Symlink(outName, fname)
+}
+
+func dumpSellerToFile(seller mtgban.Seller, fname string) error {
+	file, err := os.Create(fname)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	return mtgban.WriteSellerToJSON(seller, file)
 }
 
 func loadBuylistFromFile(fname string) (mtgban.Vendor, error) {
@@ -151,28 +157,24 @@ func loadBuylistFromFile(fname string) (mtgban.Vendor, error) {
 	}
 
 	log.Println("File dump found:", link)
-	// Open file (not the symlink)
-	file, err := os.Open(link)
+	return loadVendorFromFile(link)
+}
+
+func loadVendorFromFile(fname string) (mtgban.Vendor, error) {
+	file, err := os.Open(fname)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	// Load inventory
 	return mtgban.ReadVendorFromJSON(file)
 }
 
 func dumpBuylistToFile(vendor mtgban.Vendor, currentDir, fname string) error {
-	// Create dump file
 	outName := path.Join(currentDir, vendor.Info().Shorthand+".json")
-	file, err := os.Create(outName)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
 
-	// Write everything to dump file
-	err = mtgban.WriteVendorToJSON(vendor, file)
+	// Create dump file
+	err := dumpVendorToFile(vendor, outName)
 	if err != nil {
 		return err
 	}
@@ -180,6 +182,16 @@ func dumpBuylistToFile(vendor mtgban.Vendor, currentDir, fname string) error {
 	// Link dumpfile to the latest available source
 	os.Remove(fname)
 	return os.Symlink(outName, fname)
+}
+
+func dumpVendorToFile(vendor mtgban.Vendor, fname string) error {
+	file, err := os.Create(fname)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	return mtgban.WriteVendorToJSON(vendor, file)
 }
 
 func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scraper mtgban.Market, key string) error {
