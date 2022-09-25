@@ -285,7 +285,7 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 			row := []string{
 				fmt.Sprintf("Error at Vendor %d", i), "", "", "", "",
 			}
-			pageVars.Table = append(pageVars.Table, row)
+			pageVars.OtherTable = append(pageVars.Table, row)
 			continue
 		}
 
