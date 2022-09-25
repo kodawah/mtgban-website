@@ -663,6 +663,8 @@ func SimplePrice2CSV(w *csv.Writer, pm map[string]map[string]*BanPrice, uploaded
 		}
 		prices = append(prices, qty)
 
+		prices = append(prices, uploadedDada[j].Notes)
+
 		record := []string{id, cardName, code, number}
 		if co.Etched {
 			record = append(record, "etched")
