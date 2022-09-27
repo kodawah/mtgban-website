@@ -13,6 +13,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 
+	"github.com/kodabb/go-mtgban/mtgban"
 	"github.com/kodabb/go-mtgban/mtgmatcher"
 	"github.com/kodabb/go-mtgban/tcgplayer"
 )
@@ -795,7 +796,7 @@ func processSellersResults(foundSellers map[string]map[string][]SearchEntry, ind
 	} else {
 		founders := map[string]string{}
 		// Query results with the known (ordered) conditions
-		for _, cond := range []string{"NM", "SP", "MP", "HP"} {
+		for _, cond := range mtgban.DefaultGradeTags {
 			foundResults := foundSellers[cardId][cond]
 
 			// Loop through the results, keep track of the precessed
