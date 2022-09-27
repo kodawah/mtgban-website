@@ -285,10 +285,6 @@ func search2fields(searchRes *searchResult) (fields []embedField) {
 			} else if fieldsNames[i] == "Buylist" {
 				alarm := false
 				for _, subres := range searchRes.ResultsSellers {
-					// Skip non-NM results
-					if strings.HasSuffix(subres.ScraperName, "P)") {
-						continue
-					}
 					// 90% of sell price is the minimum for arbit
 					if subres.Price < entry.Price*0.9 {
 						alarm = true
@@ -559,6 +555,13 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		config.StoreFilters = append(config.StoreFilters, FilterStoreElem{
 			Name:   "region_keep_index",
 			Values: []string{"us"},
+		})
+
+		// Skip non-NM buylist prices
+		config.EntryFilters = append(config.EntryFilters, FilterEntryElem{
+			Name:          "condition",
+			Values:        []string{"NM"},
+			OnlyForVendor: true,
 		})
 
 		foundSellers, foundVendors := searchParallelNG(config)
