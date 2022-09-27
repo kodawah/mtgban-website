@@ -26,3 +26,6 @@ cache_*
 
 # Logs directory
 logs/
+
+# Finder metadata
+.DS_Store
