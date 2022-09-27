@@ -88,6 +88,9 @@ type FilterEntryElem struct {
 	Name   string
 	Negate bool
 	Values []string
+
+	OnlyForSeller bool
+	OnlyForVendor bool
 }
 
 // Return a comma-separated string of set codes, from a comma-separated
@@ -249,6 +252,9 @@ var FilterOperations = map[string][]string{
 	"t":         []string{":"},
 	"f":         []string{":"},
 	"c":         []string{":"},
+	"cond":      []string{":"},
+	"condr":     []string{":"},
+	"condb":     []string{":"},
 	"is":        []string{":"},
 	"on":        []string{":"},
 	"price":     []string{">", "<"},
@@ -523,11 +529,13 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 			})
 
 		// Pricing Options
-		case "c":
+		case "c", "cond", "condr", "condb":
 			filterEntries = append(filterEntries, FilterEntryElem{
-				Name:   "condition",
-				Negate: negate,
-				Values: strings.Split(strings.ToUpper(code), ","),
+				Name:          "condition",
+				Negate:        negate,
+				Values:        strings.Split(strings.ToUpper(code), ","),
+				OnlyForSeller: option == "condr",
+				OnlyForVendor: option == "condb",
 			})
 		case "price", "buy_price", "arb_price", "rev_price":
 			var isSeller, isVendor bool
@@ -986,7 +994,16 @@ var FilterEntryFuncs = map[string]func(filters []string, entry mtgban.GenericEnt
 }
 
 func shouldSkipEntryNG(entry mtgban.GenericEntry, filters []FilterEntryElem) bool {
+	_, isSeller := entry.(mtgban.InventoryEntry)
+	_, isVendor := entry.(mtgban.BuylistEntry)
+
 	for i := range filters {
+		if filters[i].OnlyForSeller && !isSeller {
+			continue
+		} else if filters[i].OnlyForVendor && !isVendor {
+			continue
+		}
+
 		res := FilterEntryFuncs[filters[i].Name](filters[i].Values, entry)
 		if filters[i].Negate {
 			res = !res

@@ -608,6 +608,7 @@ func searchVendorsNG(cardIds []string, config SearchConfig) (foundVendors map[st
 
 	storeFilters := config.StoreFilters
 	priceFilters := config.PriceFilters
+	entryFilters := config.EntryFilters
 
 	for _, vendor := range Vendors {
 		if shouldSkipStoreNG(vendor, storeFilters) {
@@ -626,6 +627,10 @@ func searchVendorsNG(cardIds []string, config SearchConfig) (foundVendors map[st
 			}
 
 			for _, entry := range entries {
+				if shouldSkipEntryNG(entry, entryFilters) {
+					continue
+				}
+
 				if shouldSkipPriceNG(cardId, entry, priceFilters) {
 					continue
 				}
