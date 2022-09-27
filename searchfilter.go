@@ -940,10 +940,11 @@ func shouldSkipPriceNG(cardId string, entry mtgban.GenericEntry, filters []Filte
 		return true
 	}
 
+	_, isSeller := entry.(mtgban.InventoryEntry)
+	_, isVendor := entry.(mtgban.BuylistEntry)
+
 	for i := range filters {
 		// Do not call functions that do not apply to certain elements
-		_, isSeller := entry.(mtgban.InventoryEntry)
-		_, isVendor := entry.(mtgban.BuylistEntry)
 		if filters[i].OnlyForSeller && !isSeller {
 			continue
 		} else if filters[i].OnlyForVendor && !isVendor {
