@@ -49,6 +49,8 @@ const (
 	ChatChannelID  = "736007847560609794"
 )
 
+var DiscordRetailBlocklist []string
+
 func setupDiscord() error {
 	// Create a new Discord session using the provided bot token.
 	dg, err := discordgo.New("Bot " + Config.DiscordToken)
@@ -64,6 +66,8 @@ func setupDiscord() error {
 
 	// In this example, we only care about receiving message events.
 	dg.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsGuilds | discordgo.IntentsGuildMessages)
+
+	DiscordRetailBlocklist = append(Config.SearchRetailBlockList, TCG_DIRECT_LOW)
 
 	// Open a websocket connection to Discord and begin listening.
 	err = dg.Open()
@@ -260,7 +264,7 @@ func search2fields(searchRes *searchResult) (fields []embedField) {
 					// Check what kind of replacement needs to be done
 					if entry.ScraperName == TCG_DIRECT {
 						extraSpaces = "      "
-					} else if entry.ScraperName != TCG_DIRECT_LOW && strings.Contains(subs[j], tag) {
+					} else if strings.Contains(subs[j], tag) {
 
 						// Adjust the name
 						if tag == "TCG" {
@@ -546,7 +550,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	var channel chan *discordgo.MessageEmbed
 
 	if allBls {
-		config := parseSearchOptionsNG(searchRes.CardId, Config.SearchRetailBlockList, Config.SearchBuylistBlockList)
+		config := parseSearchOptionsNG(searchRes.CardId, DiscordRetailBlocklist, Config.SearchBuylistBlockList)
 
 		// Skip any store based outside of the US
 		config.StoreFilters = append(config.StoreFilters, FilterStoreElem{
