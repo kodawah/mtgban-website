@@ -246,6 +246,7 @@ var FilterOperations = map[string][]string{
 	"sm":        []string{":"},
 	"skip":      []string{":"},
 	"s":         []string{":"},
+	"number":    []string{":", ">", "<"},
 	"cn":        []string{":", ">", "<"},
 	"cne":       []string{":"},
 	"date":      []string{":", ">", "<"},
@@ -438,7 +439,7 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 				Negate: negate,
 				Values: fixupEditionNG(code),
 			})
-		case "cn":
+		case "cn", "number":
 			opt := "number"
 			if operation == ">" {
 				opt = "number_greater_than"
