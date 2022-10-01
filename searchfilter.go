@@ -247,6 +247,7 @@ var FilterOperations = map[string][]string{
 	"skip":      []string{":"},
 	"s":         []string{":"},
 	"cn":        []string{":", ">", "<"},
+	"cne":       []string{":"},
 	"date":      []string{":", ">", "<"},
 	"r":         []string{":"},
 	"t":         []string{":"},
@@ -448,6 +449,13 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 				Name:   opt,
 				Negate: negate,
 				Values: fixupNumberNG(code),
+			})
+		case "cne":
+			filters = append(filters, FilterElem{
+				Name:   "number_regexp",
+				Negate: negate,
+				// No fixup because we need to trust input
+				Values: []string{code},
 			})
 		case "r":
 			filters = append(filters, FilterElem{
@@ -665,6 +673,10 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 	},
 	"number": func(filters []string, co *mtgmatcher.CardObject) bool {
 		return !SliceStringHas(filters, co.Number)
+	},
+	"number_regexp": func(filters []string, co *mtgmatcher.CardObject) bool {
+		matched, _ := regexp.MatchString(filters[0], co.Number)
+		return !matched
 	},
 	"number_greater_than": func(filters []string, co *mtgmatcher.CardObject) bool {
 		return compareCollectorNumber(filters, co, func(a, b int) bool {
