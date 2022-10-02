@@ -297,6 +297,7 @@ var FilterOperations = map[string][]string{
 	"sm":        []string{":"},
 	"skip":      []string{":"},
 	"s":         []string{":"},
+	"se":        []string{":"},
 	"number":    []string{":", ">", "<"},
 	"cn":        []string{":", ">", "<"},
 	"cne":       []string{":"},
@@ -492,6 +493,12 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 				Name:   "edition",
 				Negate: negate,
 				Values: fixupEditionNG(code),
+			})
+		case "se":
+			filters = append(filters, FilterElem{
+				Name:   "edition_regexp",
+				Negate: negate,
+				Values: []string{code},
 			})
 		case "cn", "number":
 			opt := "number"
@@ -741,6 +748,10 @@ func compareColors(filters, colors []string) bool {
 var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObject) bool{
 	"edition": func(filters []string, co *mtgmatcher.CardObject) bool {
 		return !SliceStringHas(filters, co.SetCode)
+	},
+	"edition_regexp": func(filters []string, co *mtgmatcher.CardObject) bool {
+		matched, _ := regexp.MatchString(filters[0], co.Edition)
+		return !matched
 	},
 	"rarity": func(filters []string, co *mtgmatcher.CardObject) bool {
 		return !SliceStringHas(filters, co.Rarity)
