@@ -692,6 +692,8 @@ func searchAndFilter(config SearchConfig) ([]string, error) {
 		uuids, err = mtgmatcher.SearchHasPrefix(query)
 	case "hashing":
 		uuids = config.UUIDs
+	case "regexp":
+		uuids, err = mtgmatcher.SearchRegexp(query)
 	case "sealed":
 		uuids, err = mtgmatcher.SearchSealedEquals(query)
 		if err != nil {
@@ -701,6 +703,9 @@ func searchAndFilter(config SearchConfig) ([]string, error) {
 		uuids, err = mtgmatcher.SearchEquals(query)
 		if err != nil {
 			uuids, err = mtgmatcher.SearchHasPrefix(query)
+			if err != nil {
+				uuids, err = mtgmatcher.SearchRegexp(query)
+			}
 		}
 	}
 	if err != nil {

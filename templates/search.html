@@ -113,7 +113,7 @@
                                 </ul>
                             </li>
                             <li>There is limited support for human readable tags, for example if <pre>(Extended Art)</pre> is appended to a card name, the search will only show cards that are Extended Art (similar to the <pre>is:extendedart</pre> filter).</li>
-                            <li>You can change the <b>search mode</b> with <pre>sm:VALUE</pre>, accepting <pre>exact</pre> (default), <pre>prefix</pre>, or <pre>any</pre></li>
+                            <li>You can change the <b>search mode</b> with <pre>sm:VALUE</pre>, accepting <pre>exact</pre> (default), <pre>prefix</pre>, <pre>any</pre>, or <pre>regexp</pre>:</li>
                             <ul class="indent">
                                 <li>Normally a card is searched with an <b>exact</b> strategy, you will get only cards with exactly the same name as searched.
                                     <br>For example <pre>Vesuva</pre> will return the card named Vesuva and no other Vesuvan counterpart.</li>
@@ -121,6 +121,8 @@
                                     <br>For example <pre>"Dragonlord"</pre> will return all the cards starting with "Dragonlord".</li>
                                 <li>If you search in in <b>any</b> mode, you will get all the cards containing any of the text present in card names.
                                     <br>For example <pre>*Draco*</pre> will return the card named Draco and all the cards that have "draco" in their names.</li>
+                                <li>If you search in in <b>regexp</b> mode, you will get all the cards names matching the regular expresion.
+                                    <br>For example <pre>Cluestone$</pre> will return the card that end with Cluestone in their name. Note this search mode is case sensitive.</li>
                             </ul>
                             <li>You can set any option in any order, in any amount. When filtering for a group of values you can use a comma <pre>,</pre> to separate values.</li>
                             <li>You can invert filter results by prepending a <pre>-</pre> to the option name.</li>
