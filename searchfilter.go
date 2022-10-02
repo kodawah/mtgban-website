@@ -206,6 +206,57 @@ func fixupDateNG(code string) string {
 	return ""
 }
 
+var colorMap = map[string][]string{
+	"c":           {},
+	"colorless":   {},
+	"white":       {"W"},
+	"blue":        {"U"},
+	"black":       {"B"},
+	"red":         {"R"},
+	"green":       {"G"},
+	"azorius":     {"W", "U"},
+	"dimir":       {"U", "B"},
+	"rakdos":      {"B", "R"},
+	"gruul":       {"R", "G"},
+	"selesnya":    {"G", "W"},
+	"orzhov":      {"W", "B"},
+	"izzet":       {"U", "R"},
+	"golgari":     {"B", "G"},
+	"boros":       {"R", "W"},
+	"simic":       {"G", "U"},
+	"bant":        {"G", "W", "U"},
+	"esper":       {"W", "U", "B"},
+	"grixis":      {"U", "B", "R"},
+	"jund":        {"B", "G", "R"},
+	"naya":        {"R", "G", "W"},
+	"abzan":       {"W", "B", "G"},
+	"jeskai":      {"U", "R", "W"},
+	"sultai":      {"B", "G", "U"},
+	"mardu":       {"R", "W", "B"},
+	"temur":       {"G", "U", "R"},
+	"lorehold":    {"R", "W"},
+	"prismari":    {"U", "R"},
+	"quandrix":    {"B", "G"},
+	"silverquill": {"U", "R"},
+	"witherbloom": {"B", "G"},
+	"chaos":       {"B", "G", "R", "U"},
+	"aggression":  {"B", "G", "R", "W"},
+	"altruism":    {"G", "R", "U", "W"},
+	"growth":      {"B", "G", "U", "W"},
+	"artifice":    {"B", "R", "U", "W"},
+	"m":           {"W", "U", "B", "R", "G"},
+	"multi":       {"W", "U", "B", "R", "G"},
+	"multicolor":  {"W", "U", "B", "R", "G"},
+}
+
+func fixupColorNG(code string) []string {
+	colors, found := colorMap[strings.ToLower(code)]
+	if found {
+		return colors
+	}
+	return strings.Split(strings.ToUpper(code), "")
+}
+
 func price4seller(cardId, shorthand string) float64 {
 	for _, seller := range Sellers {
 		if seller != nil && strings.ToLower(seller.Info().Shorthand) == strings.ToLower(shorthand) {
@@ -254,6 +305,9 @@ var FilterOperations = map[string][]string{
 	"t":         []string{":"},
 	"f":         []string{":"},
 	"c":         []string{":"},
+	"color":     []string{":"},
+	"ci":        []string{":"},
+	"identity":  []string{":"},
 	"cond":      []string{":"},
 	"condr":     []string{":"},
 	"condb":     []string{":"},
@@ -501,6 +555,16 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 				Negate: negate,
 				Values: []string{fixupDateNG(code)},
 			})
+		case "c", "color", "ci", "identity":
+			opt := "color"
+			if option == "ci" || option == "color_identity" {
+				opt = "color_identity"
+			}
+			filters = append(filters, FilterElem{
+				Name:   opt,
+				Negate: negate,
+				Values: fixupColorNG(code),
+			})
 
 		// Options that modify the searched scrapers
 		case "store", "seller", "aseller", "vendor":
@@ -538,7 +602,7 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 			})
 
 		// Pricing Options
-		case "c", "cond", "condr", "condb":
+		case "cond", "condr", "condb":
 			filterEntries = append(filterEntries, FilterEntryElem{
 				Name:          "condition",
 				Negate:        negate,
@@ -655,6 +719,25 @@ func compareReleaseDate(filters []string, co *mtgmatcher.CardObject, cmpFunc fun
 	return cmpFunc(cardDate, releaseDate)
 }
 
+func compareColors(filters, colors []string) bool {
+	if len(filters) == 0 {
+		return len(colors) != 0
+	}
+	if len(filters) == 5 {
+		return len(colors) <= 1
+	}
+	found := 0
+	for _, value := range filters {
+		if SliceStringHas(colors, value) {
+			found++
+		}
+	}
+	if len(filters) <= found {
+		return false
+	}
+	return true
+}
+
 var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObject) bool{
 	"edition": func(filters []string, co *mtgmatcher.CardObject) bool {
 		return !SliceStringHas(filters, co.SetCode)
@@ -671,6 +754,34 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 			}
 		}
 		return true
+	},
+	"color": func(filters []string, co *mtgmatcher.CardObject) bool {
+		if len(filters) == 0 {
+			return len(co.Colors) != 0
+		}
+		if len(filters) == 5 {
+			return len(co.Colors) <= 1
+		}
+		for _, value := range filters {
+			if !SliceStringHas(co.Colors, value) {
+				return true
+			}
+		}
+		return false
+	},
+	"color_identity": func(filters []string, co *mtgmatcher.CardObject) bool {
+		if len(filters) == 0 {
+			return len(co.ColorIdentity) != 0
+		}
+		if len(filters) == 5 {
+			return len(co.ColorIdentity) <= 1
+		}
+		for _, value := range co.ColorIdentity {
+			if !SliceStringHas(filters, value) {
+				return true
+			}
+		}
+		return false
 	},
 	"number": func(filters []string, co *mtgmatcher.CardObject) bool {
 		return !SliceStringHas(filters, co.Number)
