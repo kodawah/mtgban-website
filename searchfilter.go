@@ -296,6 +296,7 @@ var re *regexp.Regexp
 var FilterOperations = map[string][]string{
 	"sm":        []string{":"},
 	"skip":      []string{":"},
+	"edition":   []string{":"},
 	"s":         []string{":"},
 	"se":        []string{":"},
 	"number":    []string{":", ">", "<"},
@@ -488,7 +489,7 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 			}
 
 		// Options that modify the card searches
-		case "s":
+		case "s", "edition":
 			filters = append(filters, FilterElem{
 				Name:   "edition",
 				Negate: negate,
