@@ -504,6 +504,15 @@ var NewspaperPages = []NewspaperPage{
 
 var NewspaperAllRarities = []string{"", "M", "R", "U", "C", "S"}
 
+func getLastDBUpdate(db *sql.DB) (string, error) {
+	var lastUpdate string
+	err := db.QueryRow("SELECT data_value FROM newspaper_updated").Scan(&lastUpdate)
+	if err != nil {
+		return "", err
+	}
+	return lastUpdate, nil
+}
+
 func Newspaper(w http.ResponseWriter, r *http.Request) {
 	sig := getSignatureFromCookies(r)
 
@@ -559,6 +568,13 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 			Class:  "selected",
 		},
 	})
+
+	var err error
+	pageVars.LastUpdate, err = getLastDBUpdate(db)
+	if err != nil {
+		log.Println(err)
+		pageVars.LastUpdate = "unknown"
+	}
 
 	switch page {
 	case "":
