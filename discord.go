@@ -334,8 +334,8 @@ func grabLastSold(cardId string, lang string) ([]embedField, error) {
 
 	var hasValues bool
 	for _, entry := range lastSales {
-		// If language is requested, skip any language non matching it
-		if lang != "" && entry.Language != lang {
+		// Skip any language non matching the requested language
+		if entry.Language != lang {
 			continue
 		}
 
@@ -578,16 +578,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		go func() {
 			channel = make(chan *discordgo.MessageEmbed)
 			var errMsg string
-			// Set a language for these sets, as there are multiples under the
-			// same identifier
-			lang := ""
-			switch co.SetCode {
-			case "FBB", "LEGITA", "DRKITA":
-				lang = "Italian"
-			case "4BB", "CHRJPN":
-				lang = "Japanese"
-			}
-			ogFields, err = grabLastSold(searchRes.CardId, lang)
+			ogFields, err = grabLastSold(searchRes.CardId, co.Language)
 			if err != nil {
 				errMsg = "Internal bot error ┏༼ ◉ ╭╮ ◉༽┓"
 				log.Println("Bot error:", err, "from", content)
