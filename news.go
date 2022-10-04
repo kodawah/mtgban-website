@@ -502,7 +502,9 @@ var NewspaperPages = []NewspaperPage{
 	},
 }
 
-var NewspaperAllRarities = []string{"", "M", "R", "U", "C", "S"}
+var NewspaperAllRarities = []string{
+	"", "M", "R", "U", "C", "S", "M/R", "U/C",
+}
 
 func getLastDBUpdate(db *sql.DB) (string, error) {
 	var lastUpdate string
@@ -656,7 +658,12 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 				subQuery += " AND a.Set = \"" + filter + "\""
 			}
 			if rarity != "" {
-				subQuery += " AND a.Rarity = \"" + rarity + "\""
+				subQuery += " AND "
+				if strings.Contains(rarity, "/") {
+					subQuery += fmt.Sprintf("(a.Rarity = \"%c\" OR a.Rarity = \"%c\")", rarity[0], rarity[2])
+				} else {
+					subQuery += "a.Rarity = \"" + rarity + "\""
+				}
 			}
 			if newspage.Priced != "" && minPrice != 0 {
 				subQuery += " AND " + newspage.Priced + " > " + fmt.Sprintf("%.2f", minPrice)
@@ -734,7 +741,12 @@ func Newspaper(w http.ResponseWriter, r *http.Request) {
 		query += " AND a.Set = \"" + filter + "\""
 	}
 	if rarity != "" {
-		query += " AND a.Rarity = \"" + rarity + "\""
+		query += " AND "
+		if strings.Contains(rarity, "/") {
+			query += fmt.Sprintf("(a.Rarity = \"%c\" OR a.Rarity = \"%c\")", rarity[0], rarity[2])
+		} else {
+			query += "a.Rarity = \"" + rarity + "\""
+		}
 	}
 
 	// Check for price limits

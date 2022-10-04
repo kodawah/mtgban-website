@@ -219,7 +219,7 @@
                             <input name="min_change" {{if $.FilterMinPercChange}}value="{{$.FilterMinPercChange}}"{{end}} placeholder="Min %" class="input-css" style="width:48px; padding: .6em .5em .5em .5em">
                             <input name="max_change" {{if $.FilterMaxPercChange}}value="{{$.FilterMaxPercChange}}"{{end}} placeholder="Max %" class="input-css" style="width:48px; padding: .6em .5em .5em .5em">
                         {{end}}
-                        <select name="filter" onchange="this.form.submit()" class="select-css" style="width:300px">
+                        <select name="filter" onchange="this.form.submit()" class="select-css" style="width:300px; padding-left:.8em">
                             {{if eq "" $.FilterSet}}
                                 <option value="" disabled selected hidden>Filter by Edition</option>
                             {{end}}
@@ -228,7 +228,7 @@
                             {{end}}
                         </select>
 
-                        <select name="rarity" onchange="this.form.submit()" class="select-css" style="width:52px">
+                        <select name="rarity" onchange="this.form.submit()" class="select-css" style="width:52px; text-align:center;">
                             {{if eq "" $.FilterRarity}}
                                 <option value="" disabled selected hidden>🍀</option>
                             {{end}}
