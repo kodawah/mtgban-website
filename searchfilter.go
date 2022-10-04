@@ -189,7 +189,7 @@ func fixupFinishNG(code string) []string {
 func fixupTypeNG(code string) []string {
 	filters := strings.Split(code, ",")
 	for i := range filters {
-		filters[i] = strings.Title(filters[i])
+		filters[i] = mtgmatcher.Title(filters[i])
 	}
 	return filters
 }

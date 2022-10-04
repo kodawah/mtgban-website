@@ -167,7 +167,7 @@ func editionTitle(cardId string) string {
 		num = "#" + co.Card.Number
 	}
 
-	return fmt.Sprintf("%s -%s %s %s", edition, finish, strings.Title(co.Card.Rarity), num)
+	return fmt.Sprintf("%s -%s %s %s", edition, finish, mtgmatcher.Title(co.Card.Rarity), num)
 }
 
 func insertNavBar(page string, nav []NavElem, extra []NavElem) []NavElem {
@@ -222,7 +222,7 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 	// Loop through the supported promo types, skipping Boosterfun already processed above
 	for _, promoType := range co.PromoTypes {
 		if SliceStringHas(mtgjson.AllPromoTypes, promoType) && promoType != mtgjson.PromoTypeBoosterfun {
-			variant += strings.Title(promoType) + " "
+			variant += mtgmatcher.Title(promoType) + " "
 		}
 	}
 	variant = strings.TrimSpace(variant)

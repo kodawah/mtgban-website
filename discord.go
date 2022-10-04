@@ -448,7 +448,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				}
 
 				// Extract a sensible link title
-				title := strings.Title(strings.Replace(path.Base(u.Path), "-", " ", -1))
+				title := mtgmatcher.Title(strings.Replace(path.Base(u.Path), "-", " ", -1))
 
 				// Add the MTGBAN affiliation
 				v := u.Query()
@@ -471,7 +471,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 						// The old style links do not have the product id and have an extra element
 						if strings.HasSuffix(u.Path, "/listing") {
-							title = strings.Title(strings.Replace(path.Base(strings.TrimSuffix(u.Path, "/listing")), "-", " ", -1))
+							title = mtgmatcher.Title(strings.Replace(path.Base(strings.TrimSuffix(u.Path, "/listing")), "-", " ", -1))
 						}
 						// Sometimes there is the product id embedded in the URL,
 						// try to find it and use it to decorate the title
