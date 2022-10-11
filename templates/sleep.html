@@ -123,8 +123,8 @@
         <div class="indent row">
             <div class="column" id="sellers">
                 {{range $i, $key := .SellerKeys}}
-                    <input type="checkbox" id="{{$key}}" name="{{$key}}">
-                    <label for="{{$key}}">
+                    <input type="checkbox" id="s{{$key}}" name="{{$key}}">
+                    <label for="s{{$key}}">
                         {{scraper_name $key}}
                     </label>
                     <br>
@@ -132,8 +132,8 @@
             </div>
             <div class="column" id="vendors">
                 {{range $i, $key := .VendorKeys}}
-                    <input type="checkbox" id="{{$key}}" name="{{$key}}">
-                    <label for="{{$key}}">
+                    <input type="checkbox" id="v{{$key}}" name="{{$key}}">
+                    <label for="v{{$key}}">
                         {{scraper_name $key}}
                     </label>
                     <br>
