@@ -23,7 +23,7 @@ func TestMain(m *testing.M) {
 	DevMode = true
 	BenchMode = true
 
-	loadScrapers()
+	loadScrapersNG()
 	DatabaseLoaded = true
 
 	sets := mtgmatcher.GetSets()
