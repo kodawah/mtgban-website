@@ -803,7 +803,7 @@ func attemptMatch(query string) ([]string, error) {
 	return uuids, nil
 }
 
-func searchParallelNG(config SearchConfig, flags ...bool) (foundSellers map[string]map[string][]SearchEntry, foundVendors map[string]map[string][]SearchEntry) {
+func searchParallelNG(config SearchConfig) (foundSellers map[string]map[string][]SearchEntry, foundVendors map[string]map[string][]SearchEntry) {
 	selectedUUIDs, err := searchAndFilter(config)
 	if err != nil {
 		return nil, nil
