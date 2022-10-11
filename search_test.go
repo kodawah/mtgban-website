@@ -107,10 +107,8 @@ func BenchmarkSearchWithEditionPrefix(b *testing.B) {
 
 func BenchmarkSearchOnlyRetail(b *testing.B) {
 	config := SearchConfig{
-		CleanQuery: NameToBeFound,
-		Options: map[string]string{
-			"skip": "buylist",
-		},
+		CleanQuery:  NameToBeFound,
+		SkipBuylist: true,
 	}
 
 	b.ResetTimer()
@@ -122,9 +120,7 @@ func BenchmarkSearchOnlyRetail(b *testing.B) {
 func BenchmarkSearchOnlyBuylist(b *testing.B) {
 	config := SearchConfig{
 		CleanQuery: NameToBeFound,
-		Options: map[string]string{
-			"skip": "retail",
-		},
+		SkipRetail: true,
 	}
 
 	b.ResetTimer()
