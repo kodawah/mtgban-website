@@ -46,6 +46,124 @@
         {{if .ShowPromo}}
             <img class="center" src="img/promo/search.jpg">
         {{end}}
+    {{else if eq .Title "Options"}}
+        <script type="text/javascript" src="../js/cookies.js"></script>
+        <br>
+
+        <script type="text/javascript">
+            window.onload = function(e) {
+                loadForm("SearchSellersList", "sellers");
+                loadForm("SearchVendorsList", "vendors");
+                loadForm("SearchMiscOpts", "miscOpts");
+                loadRadio("SearchDefaultSort", "defaultSort");
+                loadRadio("SearchListingPriority", "listingPriority");
+            }
+        </script>
+
+        <div class="indent">
+            <h2>Stores</h2>
+            Select which sellers or vendors you <b>don't</b> want to display in your searches.
+            <br>
+
+            <a class="btn warning" onclick="javascript:clearForm('sellers'); clearForm('vendors');"><b>CLEAR</b></a>
+            <a class="btn success" onclick="javascript:saveForm('SearchSellersList', 'sellers'); saveForm('SearchVendorsList', 'vendors'); window.location.href = '/search'"><b>SAVE</b></a>
+        </div>
+
+        <br>
+        <div class="indent row">
+            <div class="column" id="sellers">
+                {{range $i, $key := .SellerKeys}}
+                    <input type="checkbox" id="s{{$key}}" name="{{$key}}">
+                    <label for="s{{$key}}">
+                        {{scraper_name $key}}
+                    </label>
+                    <br>
+                {{end}}
+            </div>
+            <div class="column" id="vendors">
+                {{range $i, $key := .VendorKeys}}
+                    <input type="checkbox" id="v{{$key}}" name="{{$key}}">
+                    <label for="v{{$key}}">
+                        {{scraper_name $key}}
+                    </label>
+                    <br>
+                {{end}}
+            </div>
+        </div>
+
+        <br>
+        <div class="indent">
+            <h2>Result sorting</h2>
+            Select how card results should be sorted by.
+            <br>
+
+            <a class="btn success" onclick="javascript:saveRadio('SearchDefaultSort', 'defaultSort'); window.location.href = '/search'"><b>SAVE</b></a>
+        </div>
+
+        <br>
+        <div class="indent row">
+            <div class="column" id="defaultSort">
+                <input type="radio" id="chrono" name="sort" value="chrono" checked>
+                <label for="chrono">By chronological order</label>
+                <br>
+                <input type="radio" id="alpha" name="sort" value="alpha">
+                <label for="alpha">By alphabetical order</label>
+                <br>
+                <input type="radio" id="retail" name="sort" value="retail">
+                <label for="retail">By best retail price (off TCGplayer)</label>
+                <br>
+                <input type="radio" id="buylist" name="sort" value="buylist">
+                <label for="buylist">By best buylist price (off Card Kingdom)</label>
+                <br>
+            </div>
+        </div>
+
+        <br>
+        <div class="indent">
+            <h2>Listing priority</h2>
+            Select how price results should be sorted by.
+            <br>
+
+            <a class="btn success" onclick="javascript:saveRadio('SearchListingPriority', 'listingPriority'); window.location.href = '/search'"><b>SAVE</b></a>
+        </div>
+
+        <br>
+        <div class="indent row">
+            <div class="column" id="listingPriority">
+                <input type="radio" id="stores" name="priority" value="stores" checked>
+                <label for="stores">Alphabetical, by store name</label>
+                <br>
+                <input type="radio" id="prices" name="priority" value="prices">
+                <label for="prices">Asc for Retail, Desc for Buylist, by prices</label>
+                <br>
+            </div>
+        </div>
+
+        <br>
+        <div class="indent">
+            <h2>Other preferences</h2>
+            Miscellaneous life hacks for Search.
+            <br>
+
+            <a class="btn warning" onclick="javascript:clearForm('miscOpts');"><b>CLEAR</b></a>
+            <a class="btn success" onclick="javascript:saveForm('SearchMiscOpts', 'miscOpts'); window.location.href = '/search'"><b>SAVE</b></a>
+        </div>
+
+        <br>
+        <div class="indent row">
+            <div class="column" id="miscOpts">
+                <input type="checkbox" id="hideBLconds" name="hideBLconds">
+                <label for="hideBLconds">Hide non-NM Buylist entries</label>
+                <br>
+                <input type="checkbox" id="skipEmpty" name="skipEmpty">
+                <label for="skipEmpty">Skip results with no prices</label>
+                <br>
+                <input type="checkbox" id="noSyp" name="noSyp">
+                <label for="noSyp">Don't show the SYP indication (†)</label>
+                <br>
+            </div>
+        </div>
+
     {{else}}
         <h1>Welcome to BAN {{if .IsSealed}}Sealed{{else}}{{if not (eq .ChartID "")}}Chart{{end}} Search{{end}}</h1>
         <div class="indent sticky" style="top:48px; background-color: var(--background); z-index: 3; width: min-content;">
@@ -55,28 +173,22 @@
                         Search for a card, or... <a class="btn info" href="/random">surprise me</a>
                     {{else}}
                         Sort by
-                        <a class="btn info" href="?q={{.SearchQuery}}&b={{.SearchBest}}&sort=" title="Sort by chronological order">
-                            {{if not .SearchSort}}<b>{{end}}chrono{{if not .SearchSort}}</b>{{end}}
+                        <a class="btn info" href="?q={{.SearchQuery}}&sort=" title="Sort by chronological order">
+                            {{if or (eq .SearchSort "chrono") (not .SearchSort)}}<b>{{end}}chrono{{if or (eq .SearchSort "chrono") (not .SearchSort)}}</b>{{end}}
                         </a>
-                        <a class="btn info" href="?q={{.SearchQuery}}&b={{.SearchBest}}&sort=alpha" title="Sort by alphabetical order">
+                        <a class="btn info" href="?q={{.SearchQuery}}&sort=alpha" title="Sort by alphabetical order">
                             {{if eq .SearchSort "alpha"}}<b>{{end}}alpha{{if eq .SearchSort "alpha"}}</b>{{end}}
                         </a>
-                        <a class="btn info" href="?q={{.SearchQuery}}&b={{.SearchBest}}&sort=retail" title="Sort by best retail price (off TCGplayer)">
+                        <a class="btn info" href="?q={{.SearchQuery}}&sort=retail" title="Sort by best retail price (off TCGplayer)">
                             {{if eq .SearchSort "retail"}}<b>{{end}}retail{{if eq .SearchSort "retail"}}</b>{{end}}
                         </a>
-                        <a class="btn info" href="?q={{.SearchQuery}}&b={{.SearchBest}}&sort=buylist" title="Sort by best buylits price (off Card Kingdom)">
+                        <a class="btn info" href="?q={{.SearchQuery}}&sort=buylist" title="Sort by best buylits price (off Card Kingdom)">
                             {{if eq .SearchSort "buylist"}}<b>{{end}}buylist{{if eq .SearchSort "buylist"}}</b>{{end}}
                         </a>
-                        {{if not .IsSealed}}
-                            <a class="btn info" href="?q={{.SearchQuery}}&b={{not .SearchBest}}&sort={{.SearchSort}}" title="Listing priority">
-                                {{if .SearchBest}}
-                                    [stores]
-                                {{else}}
-                                    [prices]
-                                {{end}}
-                            </a>
-                        {{end}}
                     {{end}}
+                    <span class=emoji>
+                        <a href="?page=options" title="Search settings">⚙️</a>
+                    </span>
                 </label>
                 <input id="searchbox" class="w3-input w3-border w3-round-small search-input" onFocus="this.setSelectionRange(0, this.value.length)" type="text" name="q" placeholder="Enter a card name" value="{{.SearchQuery}}" maxlength="200" autofocus>
             </form>

@@ -67,6 +67,52 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		},
 	})
 
+	page := r.FormValue("page")
+	if page == "options" {
+		pageVars.Title = "Options"
+
+		for _, seller := range Sellers {
+			if seller == nil ||
+				seller.Info().SealedMode ||
+				SliceStringHas(blocklistRetail, seller.Info().Shorthand) {
+				continue
+			}
+
+			pageVars.SellerKeys = append(pageVars.SellerKeys, seller.Info().Shorthand)
+		}
+
+		for _, vendor := range Vendors {
+			if vendor == nil ||
+				vendor.Info().SealedMode ||
+				SliceStringHas(blocklistBuylist, vendor.Info().Shorthand) {
+				continue
+			}
+
+			pageVars.VendorKeys = append(pageVars.VendorKeys, vendor.Info().Shorthand)
+		}
+
+		render(w, "search.html", pageVars)
+
+		return
+	}
+
+	skipSellersOpt := readCookie(r, "SearchSellersList")
+	if skipSellersOpt != "" {
+		blocklistRetail = append(blocklistRetail, strings.Split(skipSellersOpt, ",")...)
+	}
+	skipVendorsOpt := readCookie(r, "SearchVendorsList")
+	if skipVendorsOpt != "" {
+		blocklistBuylist = append(blocklistBuylist, strings.Split(skipVendorsOpt, ",")...)
+	}
+
+	pageVars.SearchSort = readCookie(r, "SearchDefaultSort")
+	defaultSortOpt := r.FormValue("sort")
+	if defaultSortOpt != "" {
+		pageVars.SearchSort = defaultSortOpt
+	}
+
+	pageVars.SearchBest = (readCookie(r, "SearchListingPriority") == "prices")
+
 	canSealed, _ := strconv.ParseBool(GetParamFromSig(sig, "SearchSealed"))
 	canSealed = canSealed || (DevMode && !SigCheck)
 
@@ -153,14 +199,34 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	// Keep track of what was searched
 	pageVars.SearchQuery = query
-	pageVars.SearchBest = readSetFlag(w, r, "b", "MTGBANSearchPref")
-	pageVars.SearchSort = r.FormValue("sort")
 	pageVars.CondKeys = AllConditions
 	pageVars.Metadata = map[string]GenericCard{}
 
 	config := parseSearchOptionsNG(query, blocklistRetail, blocklistBuylist)
 	if pageVars.IsSealed {
 		config.SearchMode = "sealed"
+	}
+
+	var hideSyp bool
+	miscSearchOpts := readCookie(r, "SearchMiscOpts")
+	if miscSearchOpts != "" {
+		for _, optName := range strings.Split(miscSearchOpts, ",") {
+			switch optName {
+			// Skip non-NM buylist prices
+			case "hideBLconds":
+				config.EntryFilters = append(config.EntryFilters, FilterEntryElem{
+					Name:          "condition",
+					Values:        []string{"NM"},
+					OnlyForVendor: true,
+				})
+			// Skip results with no prices
+			case "skipEmpty":
+				config.SkipEmptyRetail = true
+				config.SkipEmptyBuylist = true
+			case "noSyp":
+				hideSyp = true
+			}
+		}
 	}
 
 	// Hijack for csv download
@@ -336,6 +402,11 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		_, found := pageVars.Metadata[cardId]
 		if !found {
 			pageVars.Metadata[cardId] = uuid2card(cardId, false, true)
+			if hideSyp {
+				meta := pageVars.Metadata[cardId]
+				meta.SypList = false
+				pageVars.Metadata[cardId] = meta
+			}
 		}
 		if pageVars.Metadata[cardId].Reserved {
 			pageVars.HasReserved = true

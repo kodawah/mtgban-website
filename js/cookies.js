@@ -67,3 +67,34 @@ function loadForm(cookieName, containerName) {
         }
     }
 }
+
+function saveRadio(cookieName, containerName) {
+    var out = "";
+    const sellers = document.querySelector('#' + containerName);
+    var radios = sellers.querySelectorAll('input');
+    for (var i = 0; i < radios.length; i++) {
+        console.log( radios[i].name);
+        if (radios[i].checked) {
+            out = radios[i].value;
+            break;
+        }
+    }
+
+    setCookie(cookieName, out, 1000);
+}
+
+function loadRadio(cookieName, containerName) {
+    var list = getCookie(cookieName);
+    if (list == "") {
+        return;
+    }
+
+    const container = document.querySelector('#' + containerName);
+    var checkboxes = container.querySelectorAll('input');
+    for (var j = 0; j < checkboxes.length; j++) {
+        if (checkboxes[j].value == list) {
+            checkboxes[j].checked = true;
+            break;
+        }
+    }
+}
