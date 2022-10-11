@@ -486,6 +486,9 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 				config.SkipEmptyRetail = true
 			case "nobuys":
 				config.SkipEmptyBuylist = true
+			case "empty":
+				config.SkipEmptyRetail = true
+				config.SkipEmptyBuylist = true
 			}
 
 		// Options that modify the card searches

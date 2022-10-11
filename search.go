@@ -23,6 +23,7 @@ const (
 	TooLongMessage    = "Your query planeswalked away, try a shorter one"
 	TooManyMessage    = "More results available, try adjusting your filters"
 	NoResultsMessage  = "No results found"
+	NoCardsMessage    = "No cards found"
 )
 
 type SearchEntry struct {
@@ -222,7 +223,14 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	foundSellers, foundVendors := searchParallelNG(config)
+	allKeys, err := searchAndFilter(config)
+	if err != nil {
+		pageVars.InfoMessage = NoCardsMessage
+		render(w, "search.html", pageVars)
+		return
+	}
+
+	foundSellers, foundVendors := searchParallelNG(allKeys, config)
 
 	cleanQuery := config.CleanQuery
 	canShowAll := (len(config.CardFilters) != 0 || len(config.UUIDs) != 0)
@@ -232,11 +240,35 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		pageVars.SearchQuery = config.FullQuery
 	}
 
-	skipEmptyRetail := config.SkipEmptyRetail
-	skipEmptyBuylist := config.SkipEmptyBuylist
+	// If SkipEmptyBuylist or SkipEmptyRetail are set, we need to remove ids from allKeys
+	if config.SkipEmptyBuylist {
+		var filteredKeys []string
+
+		// Skip if nothing was found in buylist
+		for _, cardId := range allKeys {
+			if len(foundVendors[cardId]) == 0 {
+				continue
+			}
+			filteredKeys = append(filteredKeys, cardId)
+		}
+		allKeys = filteredKeys
+	}
+	if config.SkipEmptyRetail {
+		var filteredKeys []string
+
+		// Skip if nothing was found in retail or only INDEX entries were found
+		for _, cardId := range allKeys {
+			if len(foundSellers[cardId]) == 0 ||
+				(len(foundSellers[cardId]) == 1 && len(foundSellers[cardId]["INDEX"]) != 0) {
+				continue
+			}
+			filteredKeys = append(filteredKeys, cardId)
+		}
+		allKeys = filteredKeys
+	}
 
 	// Early exit if there no matches are found
-	if len(foundSellers) == 0 && len(foundVendors) == 0 {
+	if len(allKeys) == 0 {
 		pageVars.InfoMessage = NoResultsMessage
 		render(w, "search.html", pageVars)
 		return
@@ -246,35 +278,6 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	// was searched and no options were specified for it
 	pageVars.CanShowAll = cleanQuery != "" && canShowAll
 	pageVars.CleanSearchQuery = cleanQuery
-
-	// Make a cardId arrays so that they can be sorted later
-	// Assume the same number of keys are found, will be reallocated if needed
-	allKeys := make([]string, 0, len(foundSellers))
-
-	// Append keys to the main array
-	for cardId := range foundSellers {
-		// Skip if skipEmptyBuylist and nothing was found in buylist
-		if skipEmptyBuylist && len(foundVendors[cardId]) == 0 {
-			continue
-		}
-		// Skip if skipEmptyRetail and only INDEX entries were found
-		if skipEmptyRetail && len(foundSellers[cardId]) == 1 && len(foundSellers[cardId]["INDEX"]) != 0 {
-			continue
-		}
-		// Always append the card to the main list
-		allKeys = append(allKeys, cardId)
-	}
-	for cardId := range foundVendors {
-		// Skip if skipEmptyRetail and nothing was found in retail
-		if skipEmptyRetail && len(foundSellers[cardId]) == 0 {
-			continue
-		}
-		// Append the card if it was not already added
-		_, found := foundSellers[cardId]
-		if !found {
-			allKeys = append(allKeys, cardId)
-		}
-	}
 
 	// Sort sets as requested, default to chronological
 	switch pageVars.SearchSort {
@@ -803,24 +806,19 @@ func attemptMatch(query string) ([]string, error) {
 	return uuids, nil
 }
 
-func searchParallelNG(config SearchConfig) (foundSellers map[string]map[string][]SearchEntry, foundVendors map[string]map[string][]SearchEntry) {
-	selectedUUIDs, err := searchAndFilter(config)
-	if err != nil {
-		return nil, nil
-	}
-
+func searchParallelNG(cardIds []string, config SearchConfig) (foundSellers map[string]map[string][]SearchEntry, foundVendors map[string]map[string][]SearchEntry) {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
 	go func() {
 		if !config.SkipRetail {
-			foundSellers = searchSellersNG(selectedUUIDs, config)
+			foundSellers = searchSellersNG(cardIds, config)
 		}
 		wg.Done()
 	}()
 	go func() {
 		if !config.SkipBuylist {
-			foundVendors = searchVendorsNG(selectedUUIDs, config)
+			foundVendors = searchVendorsNG(cardIds, config)
 		}
 		wg.Done()
 	}()

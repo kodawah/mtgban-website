@@ -565,7 +565,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			OnlyForVendor: true,
 		})
 
-		foundSellers, foundVendors := searchParallelNG(config)
+		cardIds, _ := searchAndFilter(config)
+		foundSellers, foundVendors := searchParallelNG(cardIds, config)
 
 		searchRes.ResultsIndex = processSellersResults(foundSellers, true)
 		searchRes.ResultsSellers = processSellersResults(foundSellers, false)
