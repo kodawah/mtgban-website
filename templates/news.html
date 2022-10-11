@@ -130,52 +130,16 @@
                 <br>
 
                 <script type="text/javascript">
-                    function clearform(){
-                        var checkboxes = document.querySelectorAll('input')
-                        for (var i = 0; i < checkboxes.length; i++) {
-                            if (checkboxes[i].checked) {
-                                checkboxes[i].checked = false;
-                            }
-                        }
-                    }
-
-                    function save() {
-                        var list = "";
-                        var checkboxes = document.querySelectorAll('input');
-                        for (var i = 0; i < checkboxes.length; i++) {
-                            if (checkboxes[i].checked) {
-                                list += checkboxes[i].name + ',';
-                            }
-                        }
-
-                        setCookie("NewspaperList", list, 1000);
-
-                        window.location.href = "/newspaper"
-                    }
-
                     window.onload = function(e) {
-                        list = getCookie("NewspaperList");
-                        if (list == "") {
-                            return;
-                        }
-
-                        const sets = list.split(",");
-                        var checkboxes = document.querySelectorAll('input');
-                        for (var i = 0; i < sets.length; i++) {
-                            for (var j = 0; j < checkboxes.length; j++) {
-                                if (checkboxes[j].name == sets[i]) {
-                                    checkboxes[j].checked = true;
-                                }
-                            }
-                        }
+                        loadForm("NewspaperList", "editions");
                     }
                 </script>
 
-                <a class="btn warning" onclick="javascript:clearform();"><b>CLEAR</b></a>
-                <a class="btn success" onclick="javascript:save();"><b>SAVE</b></a>
+                <a class="btn warning" onclick="javascript:clearForm('editions');"><b>CLEAR</b></a>
+                <a class="btn success" onclick="javascript:saveForm('NewspaperList', 'editions'); window.location.href = '/newspaper'"><b>SAVE</b></a>
             </div>
 
-            <div class="indent row">
+            <div class="indent row" id="editions">
                 {{range $i, $key := .Editions}}
                     {{if triple_column_start $i (len $.Editions)}}
                         <div class="column">

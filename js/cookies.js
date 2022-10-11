@@ -26,3 +26,44 @@ function getCookie(cname) {
     }
     return "";
 }
+
+function clearForm(containerName) {
+    const container = document.querySelector('#' + containerName);
+    var checkboxes = container.querySelectorAll('input')
+    for (var i = 0; i < checkboxes.length; i++) {
+        if (checkboxes[i].checked) {
+            checkboxes[i].checked = false;
+        }
+    }
+}
+
+function saveForm(cookieName, containerName) {
+    var list = "";
+    const sellers = document.querySelector('#' + containerName);
+    var checkboxes = sellers.querySelectorAll('input');
+    for (var i = 0; i < checkboxes.length; i++) {
+        if (checkboxes[i].checked) {
+            list += checkboxes[i].name + ',';
+        }
+    }
+
+    setCookie(cookieName, list, 1000);
+}
+
+function loadForm(cookieName, containerName) {
+    var list = getCookie(cookieName);
+    if (list == "") {
+        return;
+    }
+
+    const sets = list.split(",");
+    const container = document.querySelector('#' + containerName);
+    var checkboxes = container.querySelectorAll('input');
+    for (var i = 0; i < sets.length; i++) {
+        for (var j = 0; j < checkboxes.length; j++) {
+            if (checkboxes[j].name == sets[i]) {
+                checkboxes[j].checked = true;
+            }
+        }
+    }
+}
