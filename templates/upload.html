@@ -550,8 +550,21 @@
                                 <tr>
                                     <span class="anchor" id="{{$scraperKey}}"></span>
                                     <a class="btn default" href="#top">
-                                        <b>{{scraper_name $scraperKey}}</b> - $ {{printf "%.2f" (index $.OptimizedTotals $scraperKey)}}<br>
+                                        <b>{{scraper_name $scraperKey}}</b> - $ {{printf "%.2f" (index $.OptimizedTotals $scraperKey)}}
                                     </a>
+                                    {{if eq $scraperKey "CK"}}
+                                        <form action="/upload" method="post" id="ckhashes">
+                                            <input type="hidden" name="mode" value="false"/>
+                                            {{range $entries}}
+                                                <input type="hidden" name="ckhashes" value="{{.CardId}}"/>
+                                            {{end}}
+                                            <a class="btn success" style="text-align: center;" href='javascript:void(0)' onclick='document.getElementById("ckhashes").submit();'>Download CK CSV</a>
+                                            <noscript>
+                                                <input type="submit" value="Download CK CSV"/>
+                                            </noscript>
+                                        </form>
+                                    {{end}}
+                                    <br>
                                     <table onmouseout="document.getElementById('hoverImage').src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';">
                                         {{range $entries}}
                                             {{$card := (index $.Metadata .CardId)}}

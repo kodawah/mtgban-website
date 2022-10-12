@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"encoding/csv"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -11,6 +13,7 @@ import (
 	"time"
 
 	"github.com/kodabb/go-mtgban/cardkingdom"
+	"github.com/kodabb/go-mtgban/mtgban"
 	"github.com/kodabb/go-mtgban/mtgmatcher"
 	"github.com/kodabb/go-mtgban/tcgplayer"
 )
@@ -193,4 +196,44 @@ func TCGLastSoldAPI(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"error": "` + err.Error() + `"}`))
 		return
 	}
+}
+
+func UUID2CKCSV(w *csv.Writer, ids []string) error {
+	var buylist mtgban.BuylistRecord
+	for _, vendor := range Vendors {
+		if vendor != nil && vendor.Info().Shorthand == "CK" {
+			buylist, _ = vendor.Buylist()
+			break
+		}
+	}
+	if buylist == nil {
+		return errors.New("CK scraper not found")
+	}
+
+	header := []string{"Title", "Edition", "Foil", "Quantity"}
+	err := w.Write(header)
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		blEntries, found := buylist[id]
+		if !found {
+			continue
+		}
+		name, found := blEntries[0].CustomFields["CKTitle"]
+		if !found {
+			continue
+		}
+		edition := blEntries[0].CustomFields["CKEdition"]
+		finish := blEntries[0].CustomFields["CKFoil"]
+		quantity := fmt.Sprint(1)
+
+		err = w.Write([]string{name, edition, finish, quantity})
+		if err != nil {
+			return err
+		}
+
+		w.Flush()
+	}
+	return nil
 }
