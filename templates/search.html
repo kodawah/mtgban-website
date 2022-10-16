@@ -518,7 +518,7 @@
                                     <tr style="background-color:rgba(0, 0, 0, 0); margin-bottom: 0px;">
                                         <td>
                                             <h6>
-                                                <a href="?q=s:{{$card.SetCode}}">{{$card.Title}}</a>
+                                                <a href="?q=s:{{$card.SetCode}}{{if $card.Date}} date:{{$card.Date}}{{end}}">{{$card.Title}}</a>
                                             </h6>
                                         </td>
 
