@@ -419,12 +419,12 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 	ogQuery := query
 	if strings.Contains(query, "|") {
 		elements := strings.Split(query, "|")
-		query = elements[0]
+		query = strings.TrimSpace(elements[0])
 		if len(elements) > 1 {
-			query += " s:" + elements[1]
+			query += " s:" + strings.TrimSpace(elements[1])
 		}
 		if len(elements) > 2 {
-			query += " cn:" + elements[2]
+			query += " cn:" + strings.TrimSpace(elements[2])
 		}
 	}
 
