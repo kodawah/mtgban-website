@@ -64,6 +64,7 @@ func prepareCKAPI() error {
 
 	output := map[string]*ck2id{}
 
+	var skipRedis bool
 	for _, card := range list {
 		theCard, err := cardkingdom.Preprocess(card)
 		if err != nil {
@@ -75,17 +76,19 @@ func prepareCKAPI() error {
 			continue
 		}
 
-		if card.SellQuantity > 0 {
+		if card.SellQuantity > 0 && !skipRedis {
 			// We use Set for retail because prices are more accurate
 			err = rdbRT.HSet(context.Background(), cardId, key, card.SellPrice).Err()
 			if err != nil {
 				log.Printf("redis error for %s: %s", cardId, err)
+				skipRedis = true
 			}
 		}
-		if card.BuyQuantity > 0 {
+		if card.BuyQuantity > 0 && !skipRedis {
 			err = rdbBL.HSetNX(context.Background(), cardId, key, card.BuyPrice).Err()
 			if err != nil {
 				log.Printf("redis error for %s: %s", cardId, err)
+				skipRedis = true
 			}
 		}
 
