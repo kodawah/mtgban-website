@@ -37,6 +37,14 @@ function clearForm(containerName) {
     }
 }
 
+function selectAll(containerName) {
+    const container = document.querySelector('#' + containerName);
+    var checkboxes = container.querySelectorAll('input');
+    for (var i = 0; i < checkboxes.length; i++) {
+        checkboxes[i].checked = true;
+    }
+}
+
 function saveForm(cookieName, containerName) {
     var list = "";
     const sellers = document.querySelector('#' + containerName);
