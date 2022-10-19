@@ -671,6 +671,11 @@ func parseRow(indexMap map[string]int, record []string, foundHashes map[string]b
 		return res, errors.New("empty line")
 	}
 
+	// Ensure fields can be parsed correctly
+	for i := range record {
+		record[i] = strings.TrimSpace(record[i])
+	}
+
 	// Decklist mode
 	if len(record) == 1 {
 		line := record[indexMap["cardName"]]
@@ -1035,7 +1040,6 @@ func loadXlsx(reader io.Reader, maxRows int) ([]UploadEntry, error) {
 func loadCsv(reader io.ReadSeeker, comma rune, maxRows int) ([]UploadEntry, error) {
 	csvReader := csv.NewReader(reader)
 
-	csvReader.TrimLeadingSpace = true
 	csvReader.Comma = comma
 
 	// In case we are not using a sane csv
@@ -1052,10 +1056,12 @@ func loadCsv(reader io.ReadSeeker, comma rune, maxRows int) ([]UploadEntry, erro
 		log.Println("Error reading header:", err)
 		return nil, errors.New("error reading file header")
 	}
+	log.Println("Found", len(first), "headers")
 
 	// If there is a single element, parsing didn't work
 	// try again with a different delimiter
 	if len(first) == 1 && comma == ',' {
+		log.Println("Using a different delimiter for csv")
 		_, err = reader.Seek(0, io.SeekStart)
 		if err != nil {
 			return nil, err
