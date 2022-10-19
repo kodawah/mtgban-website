@@ -714,6 +714,8 @@ func parseRow(indexMap map[string]int, record []string, foundHashes map[string]b
 	_, found = indexMap["quantity"]
 	if found {
 		qty := record[indexMap["quantity"]]
+		qty = strings.TrimSuffix(qty, "x")
+		qty = strings.TrimSpace(qty)
 		num, err := strconv.Atoi(qty)
 		if err == nil {
 			res.HasQuantity = true
