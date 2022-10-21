@@ -328,7 +328,6 @@ var Config struct {
 
 	Uploader struct {
 		ServiceAccount string `json:"service_account"`
-		ProjectID      string `json:"project_id"`
 		BucketName     string `json:"bucket_name"`
 	} `json:"uploader"`
 }
