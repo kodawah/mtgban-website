@@ -600,7 +600,7 @@
                                     {{end}}
                                     {{range $conditions := $.CondKeys}}
                                         {{$entries := (index $condsEntry $conditions)}}
-                                        {{if $entries}}
+                                        {{if and $entries (not $.IsSealed)}}
                                             <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}});">
                                                 <td colspan="4" style="padding-top: 8px; padding-bottom: 8px"><i>Conditions: {{$conditions}}</i></td>
                                             </tr>
