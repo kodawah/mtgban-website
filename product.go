@@ -225,6 +225,7 @@ var ProductKeys = []string{
 	"TotalValueByTcgDirect",
 	"TotalValueByTcgLowMinusBulk",
 	"TotalValueBuylist",
+	"TotalValueDirectNet",
 }
 
 var ProductFoilKeys = []string{
@@ -232,6 +233,7 @@ var ProductFoilKeys = []string{
 	"TotalFoilValueByTcgDirect",
 	"TotalFoilValueByTcgLowMinusBulk",
 	"TotalFoilValueBuylist",
+	"TotalFoilValueDirectNet",
 }
 
 var ProductTitles = []string{
@@ -239,6 +241,7 @@ var ProductTitles = []string{
 	"by TCG Direct",
 	"by TCGLow without Bulk",
 	"by CK Buylist",
+	"by TCG Direct (net)",
 }
 
 const (
@@ -289,9 +292,16 @@ func runSealedAnalysis() {
 	}
 
 	var ckBuylist mtgban.BuylistRecord
+	var directNetBuylist mtgban.BuylistRecord
 	for _, vendor := range Vendors {
-		if vendor != nil && vendor.Info().Shorthand == "CK" {
+		if vendor == nil {
+			continue
+		}
+		switch vendor.Info().Shorthand {
+		case "CK":
 			ckBuylist, _ = vendor.Buylist()
+		case "TCGDirectNet":
+			directNetBuylist, _ = vendor.Buylist()
 		}
 	}
 
@@ -303,6 +313,8 @@ func runSealedAnalysis() {
 	invNoBulkFoil := map[string]float64{}
 	bl := map[string]float64{}
 	blFoil := map[string]float64{}
+	blDirectNet := map[string]float64{}
+	blDirectNetFoil := map[string]float64{}
 
 	uuids := mtgmatcher.GetUUIDs()
 	for uuid, co := range uuids {
@@ -382,6 +394,15 @@ func runSealedAnalysis() {
 				invDirect[co.SetCode] += entriesInv[0].Price
 			}
 		}
+
+		entriesBl, found = directNetBuylist[uuid]
+		if found {
+			if useFoil {
+				blDirectNetFoil[co.SetCode] += entriesBl[0].BuyPrice
+			} else {
+				blDirectNet[co.SetCode] += entriesBl[0].BuyPrice
+			}
+		}
 	}
 
 	for i, records := range []map[string]float64{
@@ -389,10 +410,12 @@ func runSealedAnalysis() {
 		invDirect,
 		invNoBulk,
 		bl,
+		blDirectNet,
 		invFoil,
 		invDirectFoil,
 		invNoBulkFoil,
 		blFoil,
+		blDirectNetFoil,
 	} {
 		record := mtgban.InventoryRecord{}
 		for code, price := range records {
