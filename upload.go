@@ -593,7 +593,11 @@ func parseHeader(first []string) (map[string]int, error) {
 			if !found {
 				indexMap["edition"] = i
 			}
-		case strings.Contains(field, "number") || strings.Contains(field, "variant") || strings.Contains(field, "variation") || strings.Contains(field, "version"):
+		case strings.Contains(field, "comment") ||
+			strings.Contains(field, "number") ||
+			strings.Contains(field, "variant") ||
+			strings.Contains(field, "variation") ||
+			strings.Contains(field, "version"):
 			_, found := indexMap["variant"]
 			if !found {
 				indexMap["variant"] = i
@@ -763,7 +767,7 @@ func parseRow(indexMap map[string]int, record []string, foundHashes map[string]b
 		printing = strings.ToLower(record[indexMap["printing"]])
 	}
 	switch printing {
-	case "y", "yes", "true", "t", "1":
+	case "y", "yes", "true", "t", "1", "x":
 		res.Card.Foil = true
 	default:
 		if (strings.Contains(printing, "foil") && !strings.Contains(printing, "non")) ||
