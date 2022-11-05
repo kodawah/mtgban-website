@@ -481,7 +481,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			// Break down by edition
 			edition := pageVars.Metadata[cardId].SetCode
 			optimizedEditions[edition] = append(optimizedEditions[edition], OptimizedUploadEntry{
-				CardId:    cardId + conds,
+				CardId:    cardId,
 				Store:     bestStore,
 				Condition: conds,
 				Price:     comparePrice,

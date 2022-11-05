@@ -661,7 +661,7 @@
                                                 <td>
                                                     {{scraper_name .Store}}
                                                 <td>
-                                                    {{$scraperEntries := (index $.ResultPrices .CardId)}}
+                                                    {{$scraperEntries := (index $.ResultPrices (print .CardId .Condition))}}
                                                     {{$price := (index $scraperEntries .Store)}}
 
                                                     $
