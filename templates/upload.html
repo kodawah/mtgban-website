@@ -571,6 +571,7 @@
                                             <tr onmouseover="document.getElementById('hoverImage').src={{$card.ImageURL}};">
                                                 <td>
                                                     <a href="{{$card.SearchURL}}" target="_blank">{{$card.Name}}</a>
+                                                    {{if not (or (eq .Condition "") (eq .Condition "NM"))}} ({{.Condition}}){{end}}
                                                     {{if $card.Reserved}} *{{end}}
                                                     {{if $card.Stocks}} •{{end}}
                                                     {{if $card.SypList}} †{{end}}
@@ -644,6 +645,7 @@
                                             <tr onmouseover="document.getElementById('hoverImage').src={{$card.ImageURL}};">
                                                 <td>
                                                     <a href="{{$card.SearchURL}}" target="_blank">{{$card.Name}}</a>
+                                                    {{if not (or (eq .Condition "") (eq .Condition "NM"))}} ({{.Condition}}){{end}}
                                                     {{if $card.Reserved}} *{{end}}
                                                     {{if $card.Stocks}} •{{end}}
                                                     {{if $card.SypList}} †{{end}}
