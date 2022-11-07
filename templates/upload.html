@@ -542,6 +542,16 @@
                         </a>
                     </p>
 
+                    <script type="text/javascript">
+                        function waithide(obj) {
+                            obj.style.opacity = '0';
+                            window.setTimeout(
+                            function restore() {
+                                obj.style.opacity = '100';
+                            }, 150);
+                        }
+                    </script>
+
                     <table>
                         {{range .ScraperKeys}}
                             {{$scraperKey := .}}
@@ -570,6 +580,7 @@
                                             {{$card := (index $.Metadata .CardId)}}
                                             <tr onmouseover="document.getElementById('hoverImage').src={{$card.ImageURL}};">
                                                 <td>
+                                                    <span class="emoji" style="cursor: pointer;" onclick="navigator.clipboard.writeText('{{$card.Name}}'); waithide(this)" title="Copy to clipboard">📝</span>&nbsp;
                                                     <a href="{{$card.SearchURL}}" target="_blank">{{$card.Name}}</a>
                                                     {{if not (or (eq .Condition "") (eq .Condition "NM"))}} ({{.Condition}}){{end}}
                                                     {{if $card.Reserved}} *{{end}}
@@ -644,6 +655,7 @@
                                             {{$card := (index $.Metadata .CardId)}}
                                             <tr onmouseover="document.getElementById('hoverImage').src={{$card.ImageURL}};">
                                                 <td>
+                                                    <span class="emoji" style="cursor: pointer;" onclick="navigator.clipboard.writeText('{{$card.Name}}'); waithide(this)" title="Copy to clipboard">📝</span>&nbsp;
                                                     <a href="{{$card.SearchURL}}" target="_blank">{{$card.Name}}</a>
                                                     {{if not (or (eq .Condition "") (eq .Condition "NM"))}} ({{.Condition}}){{end}}
                                                     {{if $card.Reserved}} *{{end}}
