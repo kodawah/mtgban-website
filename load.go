@@ -140,8 +140,10 @@ func loadScrapersNG() error {
 		log.Printf("Loaded %d sellers and %d vendors from cache", len(sellers), len(vendors))
 	}
 
-	go refreshSellerCache()
-	go refreshVendorCache()
+	if !SkipInitialRefresh {
+		go refreshSellerCache()
+		go refreshVendorCache()
+	}
 
 	updateStaticData()
 	loadOptions()

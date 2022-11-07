@@ -334,6 +334,7 @@ var Config struct {
 
 var DevMode bool
 var SigCheck bool
+var SkipInitialRefresh bool
 var BenchMode bool
 var LogDir string
 var LastUpdate string
@@ -508,11 +509,13 @@ func main() {
 	config := flag.String("cfg", DefaultConfigPath, "Load configuration file")
 	devMode := flag.Bool("dev", false, "Enable developer mode")
 	sigCheck := flag.Bool("sig", false, "Enable signature verification")
+	skipInitialRefresh := flag.Bool("skip", false, "Skip initial refresh")
 	logdir := flag.String("log", "logs", "Directory for scrapers logs")
 	port := flag.String("port", "", "Override server port")
 
 	flag.Parse()
 	DevMode = *devMode
+	SkipInitialRefresh = *skipInitialRefresh
 	SigCheck = true
 	if DevMode {
 		SigCheck = *sigCheck
