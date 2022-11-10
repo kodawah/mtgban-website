@@ -438,7 +438,7 @@ func enforceAPISigning(next http.Handler) http.Handler {
 		if exp != "" {
 			expires, err = strconv.ParseInt(exp, 10, 64)
 			if err != nil {
-				log.Println("API error", err.Message())
+				log.Println("API error", err.Error())
 				w.Write([]byte(`{"error": "invalid or expired signature"}`))
 				return
 			}
@@ -449,9 +449,7 @@ func enforceAPISigning(next http.Handler) http.Handler {
 		valid := signHMACSHA1Base64([]byte(secret), []byte(data))
 
 		if SigCheck && (valid != sig || (exp != "" && (expires < time.Now().Unix()))) {
-			if DevMode {
-				log.Println("API error, invalid", data)
-			}
+			log.Println("API error, invalid", data)
 			w.Write([]byte(`{"error": "invalid or expired signature"}`))
 			return
 		}
