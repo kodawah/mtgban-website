@@ -690,7 +690,7 @@ func compareCollectorNumber(filters []string, co *mtgmatcher.CardObject, cmpFunc
 	ref, errR := strconv.Atoi(co.Number)
 	num, errN := strconv.Atoi(value)
 	if errR != nil || errN != nil {
-		return false
+		return true
 	}
 
 	return cmpFunc(num, ref)
@@ -715,12 +715,12 @@ func compareReleaseDate(filters []string, co *mtgmatcher.CardObject, cmpFunc fun
 
 	releaseDate, err := time.Parse("2006-01-02", value)
 	if err != nil {
-		return false
+		return true
 	}
 
 	cardDate, err := parseCardDate(co)
 	if err != nil {
-		return false
+		return true
 	}
 
 	return cmpFunc(cardDate, releaseDate)
