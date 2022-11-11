@@ -693,11 +693,7 @@ func compareCollectorNumber(filters []string, co *mtgmatcher.CardObject, cmpFunc
 		return false
 	}
 
-	if cmpFunc(num, ref) {
-		return true
-	}
-
-	return false
+	return cmpFunc(num, ref)
 }
 
 func parseCardDate(co *mtgmatcher.CardObject) (time.Time, error) {
