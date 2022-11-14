@@ -611,6 +611,10 @@
                                                     {{if .Price}}
                                                         / $ {{printf "%.2f" .Price}}
                                                         {{if lt .Price $price}}⚠️{{end}}
+                                                        &nbsp;
+                                                        <h{{if gt .Spread 80.0}}3{{else}}4{{end}} style="float:inline-end">
+                                                            {{printf "%.2f%%" .Spread}}
+                                                        </h{{if gt .Spread 80.0}}3{{else}}4{{end}}4>
                                                     {{end}}
                                                 </td>
                                             </tr>
@@ -685,6 +689,10 @@
                                                     {{if .Price}}
                                                         / $ {{printf "%.2f" .Price}}
                                                         {{if lt .Price $price}}⚠️{{end}}
+                                                        &nbsp;
+                                                        <h{{if gt .Spread 80.0}}3{{else}}4{{end}} style="float:inline-end">
+                                                            {{printf "%.2f%%" .Spread}}
+                                                        </h{{if gt .Spread 80.0}}3{{else}}4{{end}}4>
                                                     {{end}}
                                                 </td>
                                             </tr>

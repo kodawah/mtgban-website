@@ -78,6 +78,9 @@ type OptimizedUploadEntry struct {
 
 	// Price of the card provided by the Store
 	Price float64
+
+	// Percentage of the store price vs uploaded price
+	Spread float64
 }
 
 func Upload(w http.ResponseWriter, r *http.Request) {
@@ -460,6 +463,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if canOptimize && blMode && bestPrice != 0 {
+			var spread float64
 			conds := uploadedData[i].OriginalCondition
 			cardId := uploadedData[i].CardId
 
@@ -469,11 +473,18 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 				comparePrice = getPrice(indexResults[cardId][TCG_LOW], "")
 			}
 
+			if comparePrice != 0 {
+				// Load the single item priceprice
+				price := resultPrices[cardId+conds][bestStore]
+				spread = price / comparePrice * 100
+			}
+
 			// Break down by store
 			optimizedResults[bestStore] = append(optimizedResults[bestStore], OptimizedUploadEntry{
 				CardId:    cardId,
 				Condition: conds,
 				Price:     comparePrice,
+				Spread:    spread,
 			})
 			optimizedTotals[bestStore] += bestPrice
 			highestTotal += bestPrice
@@ -485,6 +496,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 				Store:     bestStore,
 				Condition: conds,
 				Price:     comparePrice,
+				Spread:    spread,
 			})
 		}
 	}
