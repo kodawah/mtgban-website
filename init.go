@@ -930,7 +930,9 @@ func updateStaticData() {
 	}
 	TotalCards = totalCards
 
-	go loadInfos()
+	if !SkipInitialRefresh {
+		go loadInfos()
+	}
 	go runSealedAnalysis()
 
 	// Load prices for API users
