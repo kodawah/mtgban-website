@@ -407,7 +407,7 @@ func getVendorPrices(mode string, enabledStores []string, filterByEdition string
 		}
 
 		// Skip any vendor that are not enabled
-		if !SliceStringHas(enabledStores, vendorTag) && !DevMode {
+		if !SliceStringHas(enabledStores, vendorTag) {
 			continue
 		}
 
