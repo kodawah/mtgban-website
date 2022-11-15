@@ -384,8 +384,8 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		var bestPrice float64
-		var bestStore string
+		var bestPrices []float64
+		var bestStores []string
 
 		cardId := uploadedData[i].CardId
 
@@ -448,56 +448,60 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			}
 
 			// Save the lowest or highest price depending on mode
-			// If price is tied, pick the value of the store that alphabetically comes first
-			if blMode {
-				if bestPrice < price || (bestPrice == price && shorthand < bestStore) {
-					bestPrice = price
-					bestStore = shorthand
-				}
-			} else {
-				if bestPrice == 0 || bestPrice > price || (bestPrice == price && shorthand < bestStore) {
-					bestPrice = price
-					bestStore = shorthand
-				}
+			// If price is tied, or within a 10% difference, save them all
+			if len(bestPrices) == 0 || (blMode && price*0.9 > bestPrices[0]) || (!blMode && price*0.9 < bestPrices[0]) {
+				bestPrices = []float64{price}
+				bestStores = []string{shorthand}
+			} else if (blMode && price > bestPrices[0]*0.9) || (!blMode && price < bestPrices[0]*0.9) {
+				bestPrices = append(bestPrices, price)
+				bestStores = append(bestStores, shorthand)
 			}
 		}
 
-		if canOptimize && blMode && bestPrice != 0 {
-			var spread float64
-			conds := uploadedData[i].OriginalCondition
-			cardId := uploadedData[i].CardId
+		if canOptimize && blMode {
+			for j, bestPrice := range bestPrices {
+				bestStore := bestStores[j]
 
-			// Load comparison price, either the loaded one or tcg low
-			comparePrice := uploadedData[i].OriginalPrice
-			if comparePrice == 0 {
-				comparePrice = getPrice(indexResults[cardId][TCG_LOW], "")
+				var spread float64
+				conds := uploadedData[i].OriginalCondition
+				cardId := uploadedData[i].CardId
+
+				// Load comparison price, either the loaded one or tcg low
+				comparePrice := uploadedData[i].OriginalPrice
+				if comparePrice == 0 {
+					comparePrice = getPrice(indexResults[cardId][TCG_LOW], "")
+				}
+
+				if comparePrice != 0 {
+					// Load the single item priceprice
+					price := resultPrices[cardId+conds][bestStore]
+					spread = price / comparePrice * 100
+				}
+
+				// Break down by store
+				optimizedResults[bestStore] = append(optimizedResults[bestStore], OptimizedUploadEntry{
+					CardId:    cardId,
+					Condition: conds,
+					Price:     comparePrice,
+					Spread:    spread,
+				})
+
+				// Save totals
+				optimizedTotals[bestStore] += bestPrice
+				if j == 0 {
+					highestTotal += bestPrice
+				}
+
+				// Break down by edition
+				edition := pageVars.Metadata[cardId].SetCode
+				optimizedEditions[edition] = append(optimizedEditions[edition], OptimizedUploadEntry{
+					CardId:    cardId,
+					Store:     bestStore,
+					Condition: conds,
+					Price:     comparePrice,
+					Spread:    spread,
+				})
 			}
-
-			if comparePrice != 0 {
-				// Load the single item priceprice
-				price := resultPrices[cardId+conds][bestStore]
-				spread = price / comparePrice * 100
-			}
-
-			// Break down by store
-			optimizedResults[bestStore] = append(optimizedResults[bestStore], OptimizedUploadEntry{
-				CardId:    cardId,
-				Condition: conds,
-				Price:     comparePrice,
-				Spread:    spread,
-			})
-			optimizedTotals[bestStore] += bestPrice
-			highestTotal += bestPrice
-
-			// Break down by edition
-			edition := pageVars.Metadata[cardId].SetCode
-			optimizedEditions[edition] = append(optimizedEditions[edition], OptimizedUploadEntry{
-				CardId:    cardId,
-				Store:     bestStore,
-				Condition: conds,
-				Price:     comparePrice,
-				Spread:    spread,
-			})
 		}
 	}
 	if canOptimize && blMode {
