@@ -246,7 +246,7 @@
                         <li>You can also upload a list of cards or a decklist, with just the card name only. In this case the most recent printing of the card will be used to populate prices.</li>
                         <li>In case of missing data identifying a card (such as a card with the same name with multiple art in the same set) the system will try to pick one for you, and warn you by using a different background.</li>
                         <li>No data is stored on the website, your exports are private to you only.</li>
-                        <li>The file cannot be larger than 5MB, and it may contain up to 350 entries.</li>
+                        <li>The file cannot be larger than 5MB, and it may contain up to 350 entries (or 1000 in case of Optimizer beta).</li>
                         <li>If a condition field is present, it will be used to adjust the reported prices and totals. It can also used to determine the foiling status of the card.</li>
                         <li>Rows with a Quantity field set to 0 are skipped.</li>
                     </ul>
@@ -265,6 +265,16 @@
                     <li>If you prefer to download a CSV of your results, instead of browsing them on BAN, you may hit the "Get CSV" button.</li>
                     <li>The CSV will contain all parsed data and pricing available, including the loaded price and condition, but also a custom <b>Notes</b> field: this field will be passed through from your uploaded to the CSV, and can be used, for example, to pass your custom identifier or custom pricing.</li>
                     <li>If anything doesn't work, post your file on Discord and we'll take a look.</li>
+                </ul>
+
+                <br>
+                <h2>Optimizer (beta)</h2>
+                <br>
+                <ul class="indent">
+                    <li>The optimizer allows you to sort through the results, and group them together by <b>store</b> and by <b>edition</b>.</li>
+                    <li>A theoretical maximmum amount, split by store will be provided.</li>
+                    <li>If multiple store have a similar price offer, they will all appear in their own section - this might slightly skew highest total results.</li>
+                    <li>In the stores breakdown, the store offering will be listed, next to the loaded price, or TCG Low in its absence. The percentage next to it represents the strength of the offer.</li>
                 </ul>
              </div>
         {{else}}
