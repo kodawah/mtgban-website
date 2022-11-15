@@ -755,3 +755,13 @@ input:checked + .slider {
     width: 90%;
   }
 }
+
+.h6inline {
+  display: inline;
+  font-size: .67em;
+  margin-top: 2.33em;
+  margin-bottom: 2.33em;
+  margin-left: 0;
+  margin-right: 0;
+  font-weight: bold;
+}

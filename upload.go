@@ -23,6 +23,8 @@ import (
 )
 
 const (
+	MinLowValueSpread = 60.0
+
 	MaxUploadEntries    = 350
 	MaxUploadProEntries = 1000
 	MaxUploadFileSize   = 5 << 20
@@ -129,6 +131,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	// Enable optimizer calculation if allowed for buylists
 	optimizerOpt, _ := strconv.ParseBool(GetParamFromSig(sig, "UploadOptimizer"))
 	canOptimize := (optimizerOpt || (DevMode && !SigCheck))
+	skipLowValue := r.FormValue("lowval") != ""
 
 	// Set flags needed to show elements on the page ui
 	pageVars.IsBuylist = blMode
@@ -476,6 +479,10 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 					// Load the single item priceprice
 					price := resultPrices[cardId+conds][bestStore]
 					spread = price / comparePrice * 100
+
+					if skipLowValue && spread < MinLowValueSpread {
+						continue
+					}
 				}
 
 				// Break down by store
