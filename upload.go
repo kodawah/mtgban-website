@@ -24,6 +24,7 @@ import (
 
 const (
 	MinLowValueSpread = 60.0
+	MinLowValueAbs    = 1.0
 
 	MaxUploadEntries    = 350
 	MaxUploadProEntries = 1000
@@ -132,6 +133,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	optimizerOpt, _ := strconv.ParseBool(GetParamFromSig(sig, "UploadOptimizer"))
 	canOptimize := (optimizerOpt || (DevMode && !SigCheck))
 	skipLowValue := r.FormValue("lowval") != ""
+	skipLowValueAbs := r.FormValue("lowvalabs") != ""
 
 	// Set flags needed to show elements on the page ui
 	pageVars.IsBuylist = blMode
@@ -475,9 +477,16 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 					comparePrice = getPrice(indexResults[cardId][TCG_LOW], "")
 				}
 
+				// Load the single item priceprice
+				price := resultPrices[cardId+conds][bestStore]
+
+				// Skip if needed
+				if skipLowValueAbs && price < MinLowValueAbs {
+					continue
+				}
+
+				// Compute spread (and skip if needed)
 				if comparePrice != 0 {
-					// Load the single item priceprice
-					price := resultPrices[cardId+conds][bestStore]
 					spread = price / comparePrice * 100
 
 					if skipLowValue && spread < MinLowValueSpread {
