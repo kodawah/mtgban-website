@@ -627,8 +627,11 @@
                                                     {{if .Price}}
                                                         / $ {{printf "%.2f" .Price}}
                                                         {{if lt .Price $price}}⚠️{{end}}
-                                                        &nbsp;
-                                                        <h{{if gt .Spread 80.0}}3{{else}}4{{end}} style="float:inline-end">
+                                                    {{end}}
+                                                </td>
+                                                <td>
+                                                    {{if .Price}}
+                                                        <h{{if gt .Spread 80.0}}3{{else}}4{{end}} style="text-align: right">
                                                             {{printf "%.2f%%" .Spread}}
                                                         </h{{if gt .Spread 80.0}}3{{else}}4{{end}}4>
                                                     {{end}}
@@ -705,8 +708,11 @@
                                                     {{if .Price}}
                                                         / $ {{printf "%.2f" .Price}}
                                                         {{if lt .Price $price}}⚠️{{end}}
-                                                        &nbsp;
-                                                        <h{{if gt .Spread 80.0}}3{{else}}4{{end}} style="float:inline-end">
+                                                    {{end}}
+                                                </td>
+                                                <td>
+                                                    {{if .Price}}
+                                                        <h{{if gt .Spread 80.0}}3{{else}}4{{end}} style="text-align: right">
                                                             {{printf "%.2f%%" .Spread}}
                                                         </h{{if gt .Spread 80.0}}3{{else}}4{{end}}4>
                                                     {{end}}
