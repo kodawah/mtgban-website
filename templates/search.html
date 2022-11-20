@@ -65,6 +65,7 @@
             Select which sellers or vendors you <b>don't</b> want to display in your searches.
             <br>
 
+            <a class="btn success" onclick="javascript:selectAll('sellers');"><b>SELECT ALL</b></a>
             <a class="btn warning" onclick="javascript:clearForm('sellers'); clearForm('vendors');"><b>CLEAR</b></a>
             <a class="btn success" onclick="javascript:saveForm('SearchSellersList', 'sellers'); saveForm('SearchVendorsList', 'vendors'); window.location.href = '/search'"><b>SAVE</b></a>
         </div>
@@ -185,6 +186,9 @@
                         <a class="btn info" href="?q={{.SearchQuery}}&sort=buylist" title="Sort by best buylits price (off Card Kingdom)">
                             {{if eq .SearchSort "buylist"}}<b>{{end}}buylist{{if eq .SearchSort "buylist"}}</b>{{end}}
                         </a>
+                    <span class=emoji>
+                        <a class="btn info" title="...more surpises" href="/random">🎰</a>
+                    </span>
                     {{end}}
                     <span class=emoji>
                         <a href="?page=options" title="Search settings">⚙️</a>
