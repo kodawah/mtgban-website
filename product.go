@@ -40,7 +40,6 @@ var categoryEdition = map[string]string{
 	"planechase":       "Boxed Sets",
 	"premium_deck":     "Deck Series",
 	"promo":            "Boxed Sets",
-	"spellbook":        "Spellbook Series",
 	"starter":          "Starter Sets",
 	"vanguard":         "Boxed Sets",
 }
@@ -49,6 +48,9 @@ var categoryOverrides = map[string]string{
 	"CMB1": "masters",
 	"CMB2": "masters",
 	"PTG":  "box",
+	"SS1":  "arsenal",
+	"SS2":  "arsenal",
+	"SS3":  "arsenal",
 }
 
 var editionRenames = map[string]string{
