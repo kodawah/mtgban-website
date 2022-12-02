@@ -61,6 +61,7 @@ var editionRenames = map[string]string{
 	"Mystery Booster Playtest Cards 2021":  "Mystery Booster Convention Edition 2021",
 	"Mystery Booster Retail Edition Foils": "Mystery Booster Retail Edition",
 	"World Championship Decks 1997":        "World Championship Decks",
+	"Judge Gift Cards 2014":                "Judge Gift Cards",
 }
 
 var editionSkips = map[string]string{
@@ -190,6 +191,10 @@ func getSealedEditions() ([]string, map[string][]EditionEntry) {
 
 		_, found := editionSkips[set.Name]
 		if found {
+			continue
+		}
+		// Skip Judge promos as they don't have a real product associated, except for 2014
+		if strings.HasPrefix(set.Name, "Judge Gift Cards") && !strings.HasSuffix(set.Name, "2014") {
 			continue
 		}
 
