@@ -34,6 +34,7 @@ var categoryEdition = map[string]string{
 	"expansion":        "Expansions",
 	"from_the_vault":   "From the Vault Sets",
 	"funny":            "Funny Sets",
+	"game":             "Standalone Game",
 	"masterpiece":      "Boxed Sets",
 	"masters":          "Reprint Sets",
 	"memorabilia":      "Boxed Sets",
@@ -51,6 +52,11 @@ var categoryOverrides = map[string]string{
 	"SS1":  "arsenal",
 	"SS2":  "arsenal",
 	"SS3":  "arsenal",
+	"HOP":  "game",
+	"PC2":  "game",
+	"PCA":  "game",
+	"E02":  "game",
+	"ARC":  "game",
 }
 
 var editionRenames = map[string]string{
