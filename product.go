@@ -71,10 +71,15 @@ var editionSkips = map[string]string{
 	"Modern Horizons":        "",
 }
 
-func makeEditionEntry(set *mtgjson.Set) EditionEntry {
+func makeEditionEntry(set *mtgjson.Set, names ...string) EditionEntry {
 	date, _ := time.Parse("2006-01-02", set.ReleaseDate)
+
+	name := set.Name
+	if len(names) > 0 && names[0] != "" {
+		name = names[0]
+	}
 	return EditionEntry{
-		Name:    set.Name,
+		Name:    name,
 		Code:    set.Code,
 		Date:    date,
 		Keyrune: strings.ToLower(set.KeyruneCode),
@@ -198,13 +203,9 @@ func getSealedEditions() ([]string, map[string][]EditionEntry) {
 			category = set.Type
 		}
 
-		name := set.Name
-		rename, found = editionRenames[name]
-		if found {
-			name = rename
-		}
+		rename = editionRenames[set.Name]
 
-		entry := makeEditionEntry(set)
+		entry := makeEditionEntry(set, rename)
 		listEditions[category] = append(listEditions[category], entry)
 	}
 
