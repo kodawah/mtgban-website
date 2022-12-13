@@ -742,6 +742,12 @@ func parseRow(indexMap map[string]int, record []string, foundHashes map[string]b
 				line = strings.Replace(line, "  ", "", -1)
 				res.Card.Edition = set.Name
 			}
+
+			// Parse the number from "Flagstones of Trokair (tsr) 278"
+			if strings.HasPrefix(line, vars[0]) && unicode.IsDigit(rune(line[len(line)-1])) {
+				res.Card.Variation = strings.TrimPrefix(line, vars[0])
+				line = vars[0]
+			}
 		}
 
 		// Parse "10 Swamp <462> [CLB]"
