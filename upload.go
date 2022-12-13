@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -593,6 +594,8 @@ func getPrice(banPrice *BanPrice, conds string) float64 {
 	return price
 }
 
+var reHeader = regexp.MustCompile(`[0-9 ]*.+[0-9 \(\)]*[0-9 ]*`)
+
 func parseHeader(first []string) (map[string]int, error) {
 	if len(first) < 1 {
 		return nil, errors.New("too few fields")
@@ -604,6 +607,20 @@ func parseHeader(first []string) (map[string]int, error) {
 	if len(first) == 1 {
 		indexMap["cardName"] = 0
 		return indexMap, ErrUploadDecklist
+	}
+
+	// In case there was actually a single elmeent, but the comma appears in the card name
+	if len(first) == 2 && reHeader.MatchString(strings.Join(first, ",")) {
+		indexMap["cardName"] = 0
+		return indexMap, ErrUploadDecklist
+	}
+	// For DFC cards, like "Nissa, Vastwood Seer // Nissa, Sage Animist"
+	if len(first) == 3 {
+		line := strings.Join(first, ",")
+		if strings.Contains(line, " // ") && reHeader.MatchString(line) {
+			indexMap["cardName"] = 0
+			return indexMap, ErrUploadDecklist
+		}
 	}
 
 	// Parse the header to understand where these fields are
@@ -1121,6 +1138,7 @@ func loadCsv(reader io.ReadSeeker, comma rune, maxRows int) ([]UploadEntry, erro
 		csvReader = csv.NewReader(reader)
 		csvReader.Comma = '§' // fake comma to parse the whole line
 		csvReader.LazyQuotes = true
+		csvReader.FieldsPerRecord = 1
 	} else if err != nil {
 		return nil, err
 	}
