@@ -536,6 +536,7 @@
 
                 <img id="hoverImage" src="" style="position:absolute; z-index: 3;"/>
                 <script type="text/javascript" src="../js/followmouse.js"></script>
+                <script type="text/javascript" src="../js/copy2clip.js"></script>
 
                 <div class="indent sticky">
                     <span class="anchor" id="top"></span>
@@ -562,16 +563,6 @@
                             <b>Editions Breakdown</b>
                         </a>
                     </p>
-
-                    <script type="text/javascript">
-                        function waithide(obj) {
-                            obj.style.opacity = '0';
-                            window.setTimeout(
-                            function restore() {
-                                obj.style.opacity = '100';
-                            }, 150);
-                        }
-                    </script>
 
                     <table>
                         {{range .ScraperKeys}}
