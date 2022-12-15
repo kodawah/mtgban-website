@@ -270,6 +270,8 @@
                 </ul>
              </div>
         {{else}}
+            <script type="text/javascript" src="../js/copy2clip.js"></script>
+
             <script type="text/javascript">
                 function updateSidebar(src, printings) {
                     {{if not .IsSealed}}
@@ -500,6 +502,9 @@
                                             {{if $card.SypList}}
                                                 †
                                             {{end}}
+                                        </td>
+                                        <td rowspan=2>
+                                            <span class="emoji" style="cursor: pointer;" onclick="navigator.clipboard.writeText('{{$card.Name}}'); waithide(this)" title="Copy to clipboard">📝</span>
                                         </td>
                                         <td rowspan=2>
                                             <a href="https://scryfall.com/card/{{tolower $card.SetCode}}/{{$card.Number}}" title="Check this card on Scryfall.com" target=_blank><img width=28 src="img/logo/scryfall.svg"></a>
