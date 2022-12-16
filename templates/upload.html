@@ -113,18 +113,48 @@
                     {{end}}
                     <br>
                     <label for="lowval">
-                        <input type="checkbox" id="lowval" name="lowval" checked>
-                        <p class="h6inline">Hide low spread offers</p>
+                        <input type="checkbox" id="lowval" name="lowval" checked onClick="javascript:saveCheckbox('lowval')">
+                        <p class="h6inline">Hide low spread offers (below</p>
+                        <input type="text" class="w3-border w3-round-small" id="percspread" name="percspread" value=60 size=1 style="text-align:center;" onchange="javascript:saveText('percspread')">
+                        <p class="h6inline">% wrt loaded price)</p>
                     </label>
                     <br>
                     <label for="lowvalabs">
-                        <input type="checkbox" id="lowvalabs" name="lowvalabs" checked>
-                        <p class="h6inline">Hide low value offers</p>
+                        <input type="checkbox" id="lowvalabs" name="lowvalabs" checked onClick="javascript:saveCheckbox('lowvalabs')">
+                        <p class="h6inline">Hide low value offers (buylist below $</p>
+                        <input type="text" class="w3-border w3-round-small" id="minval" name="minval" value=1 size=1 style="text-align:center;" onchange="javascript:saveText('minval')">
+                        <p class="h6inline">)</p>
                     </label>
                 </form>
             </center>
         </div>
         <script type="text/javascript">
+            function saveCheckbox(box) {
+	        var checkbox = document.getElementById(box);
+                localStorage.setItem(box, checkbox.checked);
+            }
+
+            function saveText(input) {
+	        var textInput = document.getElementById(input);
+                localStorage.setItem(input, textInput.value);
+            }
+
+            const checkboxes = ["lowval", "lowvalabs"];
+            checkboxes.forEach(element => {
+                var checked = JSON.parse(localStorage.getItem(element));
+                if (checked !== null) {
+                    document.getElementById(element).checked = checked;
+                }
+            })
+
+            const textInputs = ["percspread", "minval"];
+            textInputs.forEach(element => {
+                var input = JSON.parse(localStorage.getItem(element));
+                if (input !== null) {
+                    document.getElementById(element).value = input;
+                }
+            })
+
             window.reloadSelect = function(mode) {
                 var selectBox = document.getElementById('stores');
                 if (selectBox) {

@@ -136,6 +136,18 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	skipLowValue := r.FormValue("lowval") != ""
 	skipLowValueAbs := r.FormValue("lowvalabs") != ""
 
+	percSpread := MinLowValueSpread
+	customSpread, err := strconv.ParseFloat(r.FormValue("percspread"), 64)
+	if err == nil && customSpread > 0 {
+		percSpread = customSpread
+	}
+
+	minLowVal := MinLowValueAbs
+	customMin, err := strconv.ParseFloat(r.FormValue("minval"), 64)
+	if err == nil && customMin > 0 {
+		minLowVal = customMin
+	}
+
 	// Set flags needed to show elements on the page ui
 	pageVars.IsBuylist = blMode
 	pageVars.CanBuylist = canBuylist
@@ -482,7 +494,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 				price := resultPrices[cardId+conds][bestStore]
 
 				// Skip if needed
-				if skipLowValueAbs && price < MinLowValueAbs {
+				if skipLowValueAbs && price < minLowVal {
 					continue
 				}
 
@@ -490,7 +502,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 				if comparePrice != 0 {
 					spread = price / comparePrice * 100
 
-					if skipLowValue && spread < MinLowValueSpread {
+					if skipLowValue && spread < percSpread {
 						continue
 					}
 				}
