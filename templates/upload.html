@@ -128,6 +128,12 @@
                                 <input type="text" class="w3-border w3-round-small" id="minval" name="minval" value=1 size=1 style="text-align:center;" onchange="javascript:saveText('minval')">
                                 <p class="h6inline">)</p>
                             </label>
+                            <br>
+                            <label for="perc">
+                                <p class="h6inline">Allow</p>
+                                <input type="text" class="w3-border w3-round-small" id="perc" name="perc" value=10 size=1 style="text-align:center;" onchange="javascript:saveText('perc')">
+                                <p class="h6inline">% difference in offers for multiple selections</p>
+                            </label>
                         </div>
                     </div>
                 </form>
@@ -152,7 +158,7 @@
                 }
             })
 
-            const textInputs = ["percspread", "minval"];
+            const textInputs = ["percspread", "minval", "perc"];
             textInputs.forEach(element => {
                 var input = JSON.parse(localStorage.getItem(element));
                 if (input !== null) {
@@ -323,6 +329,8 @@
                     <li>If multiple store have a similar price offer, they will all appear in their own section - this might slightly skew highest total results.</li>
                     <li>In the stores breakdown, the store offering will be listed, next to the loaded price, or TCG Low in its absence. The percentage next to it represents the strength of the offer.</li>
                     <li>It is possible to skip low value offerings (less than 60% spread or less than $ 1) by selecting the checkboxes at the top.</li>
+                    <li>By default, when multiple stores offer a similar price within a certain range (10% by default) they will be all selected, and found in the list result.</li>
+                    <li>The above options can be modified by selecting "Show optimizer options".</li>
                 </ul>
              </div>
         {{else}}

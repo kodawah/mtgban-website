@@ -31,6 +31,8 @@ const (
 	MaxUploadProEntries = 1000
 	MaxUploadFileSize   = 5 << 20
 
+	DefaultPercentageMargin = 0.1
+
 	TooManyEntriesMessage = "Note: you reached the maximum number of entries supported by this tool"
 )
 
@@ -396,6 +398,12 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	missingPrices := map[string]float64{}
 	resultPrices := map[string]map[string]float64{}
 
+	perc := 1 - DefaultPercentageMargin
+	customMargin, err := strconv.ParseFloat(r.FormValue("margin"), 64)
+	if err == nil && customMargin >= 0 {
+		perc = 1 - customMargin/100.0
+	}
+
 	for i := range uploadedData {
 		// Skip unmatched cards
 		if uploadedData[i].MismatchError != nil {
@@ -466,11 +474,11 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			}
 
 			// Save the lowest or highest price depending on mode
-			// If price is tied, or within a 10% difference, save them all
-			if len(bestPrices) == 0 || (blMode && price*0.9 > bestPrices[0]) || (!blMode && price*0.9 < bestPrices[0]) {
+			// If price is tied, or within a set % difference, save them all
+			if len(bestPrices) == 0 || (blMode && price*perc > bestPrices[0]) || (!blMode && price*perc < bestPrices[0]) {
 				bestPrices = []float64{price}
 				bestStores = []string{shorthand}
-			} else if (blMode && price > bestPrices[0]*0.9) || (!blMode && price < bestPrices[0]*0.9) {
+			} else if (blMode && price > bestPrices[0]*perc) || (!blMode && price < bestPrices[0]*perc) {
 				bestPrices = append(bestPrices, price)
 				bestStores = append(bestStores, shorthand)
 			}
