@@ -277,7 +277,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 
 	maxRows := MaxUploadEntries
-	if canOptimize && blMode {
+	if canOptimize {
 		maxRows = MaxUploadProEntries
 	}
 
