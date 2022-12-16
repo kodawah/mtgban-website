@@ -112,19 +112,24 @@
                         <input type="button" value="&nbsp;&nbsp;Optimizer&nbsp;&nbsp;" onclick="window.location.href = '#top';" style="display:inline">
                     {{end}}
                     <br>
-                    <label for="lowval">
-                        <input type="checkbox" id="lowval" name="lowval" checked onClick="javascript:saveCheckbox('lowval')">
-                        <p class="h6inline">Hide low spread offers (below</p>
-                        <input type="text" class="w3-border w3-round-small" id="percspread" name="percspread" value=60 size=1 style="text-align:center;" onchange="javascript:saveText('percspread')">
-                        <p class="h6inline">% wrt loaded price)</p>
-                    </label>
-                    <br>
-                    <label for="lowvalabs">
-                        <input type="checkbox" id="lowvalabs" name="lowvalabs" checked onClick="javascript:saveCheckbox('lowvalabs')">
-                        <p class="h6inline">Hide low value offers (buylist below $</p>
-                        <input type="text" class="w3-border w3-round-small" id="minval" name="minval" value=1 size=1 style="text-align:center;" onchange="javascript:saveText('minval')">
-                        <p class="h6inline">)</p>
-                    </label>
+                    <div id="opts">
+                        <a id="advOptsButton" class="info h6inline" style="cursor: pointer;" onClick="javascript:document.getElementById('advOpts').style.display = 'inline'; document.getElementById('advOptsButton').style.display = 'none'">Show optimizer options</a>
+                        <div id="advOpts" style="display:none">
+                            <label for="lowval">
+                                <input type="checkbox" id="lowval" name="lowval" checked onClick="javascript:saveCheckbox('lowval')">
+                                <p class="h6inline">Hide low spread offers (below</p>
+                                <input type="text" class="w3-border w3-round-small" id="percspread" name="percspread" value=60 size=1 style="text-align:center;" onchange="javascript:saveText('percspread')">
+                                <p class="h6inline">% wrt loaded price)</p>
+                            </label>
+                            <br>
+                            <label for="lowvalabs">
+                                <input type="checkbox" id="lowvalabs" name="lowvalabs" checked onClick="javascript:saveCheckbox('lowvalabs')">
+                                <p class="h6inline">Hide low value offers (buylist below $</p>
+                                <input type="text" class="w3-border w3-round-small" id="minval" name="minval" value=1 size=1 style="text-align:center;" onchange="javascript:saveText('minval')">
+                                <p class="h6inline">)</p>
+                            </label>
+                        </div>
+                    </div>
                 </form>
             </center>
         </div>
@@ -172,6 +177,7 @@
                                 submitButton.style.display = "none"
                             {{end}}
                         }
+                        document.getElementById('opts').style.display = "inline";
                     } else if (mode == "retail") {
                         selectBox.innerHTML = " \
                             {{range .SellerKeys}} \
@@ -182,6 +188,7 @@
                         if (submitButton) {
                             submitButton.style.display = "inline"
                         }
+                        document.getElementById('opts').style.display = "none";
                     }
                 }
             };
