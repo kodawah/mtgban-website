@@ -552,14 +552,16 @@ func getDemoKey(link string) string {
 	v := url.Values{}
 	v.Set("API", "ALL_ACCESS")
 	v.Set("APImode", "all")
-	v.Set("UserEmail", Config.ApiUserSecrets["demo@mtgban.com"])
+	v.Set("UserEmail", "demo@mtgban.com")
 
 	expires := time.Now().Add(DefaultAPIDemoKeyDuration)
-	data := fmt.Sprintf("GET%d%s%s", expires.Unix(), link, v.Encode())
-	key := os.Getenv("BAN_SECRET")
+	exp := fmt.Sprintf("%d", expires.Unix())
+	v.Set("Expires", exp)
+
+	data := fmt.Sprintf("GET%s%s%s", exp, link, v.Encode())
+	key := Config.ApiUserSecrets["demo@mtgban.com"]
 	sig := signHMACSHA1Base64([]byte(key), []byte(data))
 
-	v.Set("Expires", fmt.Sprintf("%d", expires.Unix()))
 	v.Set("Signature", sig)
 	return base64.StdEncoding.EncodeToString([]byte(v.Encode()))
 }
