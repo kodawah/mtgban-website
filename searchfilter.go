@@ -814,15 +814,15 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 	"finish": func(filters []string, co *mtgmatcher.CardObject) bool {
 		for _, value := range filters {
 			switch value {
-			case "etched":
+			case "etched", "e":
 				if co.Etched {
 					return false
 				}
-			case "foil":
+			case "foil", "f":
 				if co.Foil {
 					return false
 				}
-			case "nonfoil":
+			case "nonfoil", "nf", "r":
 				if !co.Foil && !co.Etched {
 					return false
 				}
@@ -885,7 +885,7 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 				if co.BorderColor == mtgjson.BorderColorGold {
 					return false
 				}
-			case "fullart":
+			case "fullart", "fa":
 				if co.IsFullArt {
 					return false
 				}
@@ -893,7 +893,7 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 				if co.IsPromo {
 					return false
 				}
-			case "extendedart":
+			case "extendedart", "ea":
 				if co.HasFrameEffect(mtgjson.FrameEffectExtendedArt) {
 					return false
 				}
@@ -921,7 +921,7 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 				if co.HasPromoType(mtgjson.PromoTypeArenaLeague) {
 					return false
 				}
-			case "rewards", "playerrewards":
+			case "rewards", "playerrewards", "mpr":
 				if co.HasPromoType(mtgjson.PromoTypeArenaLeague) {
 					return false
 				}
