@@ -944,6 +944,12 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 						return false
 					}
 				}
+
+				// Finally check any leftover tags
+				customTag, found := co.Identifiers["customTag"]
+				if found && customTag == value {
+					return false
+				}
 			}
 		}
 		return true
