@@ -114,41 +114,26 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 		if err == nil {
 			filterByEdition = set.Code
 		} else {
-			co, err := mtgmatcher.GetUUID(base)
-			if err != nil {
-				// Try again, assuming it was a scryfall id, fallback to tcg id
-				uuid := mtgmatcher.Scryfall2UUID(base)
-				if uuid == "" {
-					uuid = mtgmatcher.Tcg2UUID(base)
+			for _, opts := range [][]bool{
+				// Check for nonfoil, foil, etched
+				[]bool{false, false}, []bool{true, false}, []bool{false, true},
+			} {
+				uuid, err := mtgmatcher.MatchId(base, opts...)
+				if err != nil {
+					continue
 				}
-				co, err = mtgmatcher.GetUUID(uuid)
-				if err == nil {
-					base = uuid
+				// Skip if hash is already present
+				if SliceStringHas(filterByHash, uuid) {
+					continue
 				}
+				filterByHash = append(filterByHash, uuid)
 			}
-			if err == nil {
-				filterByHash = append(filterByHash, base)
-
-				// Check if there is a foil (or nonfoil) version of the card
-				altId, err := mtgmatcher.Match(&mtgmatcher.Card{
-					Id:   base,
-					Foil: !co.Foil,
-				})
-				if err == nil && altId != base {
-					filterByHash = append(filterByHash, altId)
+			// Speed up search by keeping only the needed edition
+			if len(filterByHash) > 0 {
+				co, err := mtgmatcher.GetUUID(filterByHash[0])
+				if err == nil {
+					filterByEdition = co.SetCode
 				}
-
-				// and an etched version too
-				altId, err = mtgmatcher.Match(&mtgmatcher.Card{
-					Id:        base,
-					Variation: "Etched",
-				})
-				if err == nil && altId != base {
-					filterByHash = append(filterByHash, altId)
-				}
-
-				// Speed up search by keeping only the needed edition
-				filterByEdition = co.SetCode
 			}
 		}
 
