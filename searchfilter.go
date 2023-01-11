@@ -929,11 +929,11 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 				if co.HasPromoType(mtgjson.PromoTypeBuyABox) {
 					return false
 				}
-			case "jpn":
+			case "japanese", "jpn", "jp":
 				if co.Language == mtgjson.LanguageJapanese {
 					return false
 				}
-			case "phyrexian":
+			case "phyrexian", "ph":
 				if co.Language == mtgjson.LanguagePhyrexian {
 					return false
 				}
