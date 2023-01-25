@@ -877,11 +877,12 @@ func parseRow(indexMap map[string]int, record []string, foundHashes map[string]b
 	switch {
 	case strings.Contains(conditions, "mint"), strings.Contains(conditions, "nm"):
 		res.OriginalCondition = "NM"
-	case strings.Contains(conditions, "light"), strings.Contains(conditions, "lp"), strings.Contains(conditions, "sp"):
+	case strings.Contains(conditions, "light"), strings.Contains(conditions, "lp"),
+		strings.Contains(conditions, "sp"), strings.Contains(conditions, "ex"):
 		res.OriginalCondition = "SP"
-	case strings.Contains(conditions, "moderately"), strings.Contains(conditions, "mp"):
+	case strings.Contains(conditions, "moderately"), strings.Contains(conditions, "mp"), strings.Contains(conditions, "vg"):
 		res.OriginalCondition = "MP"
-	case strings.Contains(conditions, "heav"), strings.Contains(conditions, "hp"):
+	case strings.Contains(conditions, "heav"), strings.Contains(conditions, "hp"), strings.Contains(conditions, "good"):
 		res.OriginalCondition = "HP"
 	case strings.Contains(conditions, "poor"), strings.Contains(conditions, "damage"),
 		strings.Contains(conditions, "po"), strings.Contains(conditions, "dmg"):
