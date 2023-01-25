@@ -893,15 +893,19 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 				if co.IsPromo {
 					return false
 				}
+			case "boosterfun", "bf", "v":
+				if co.HasPromoType(mtgjson.PromoTypeBoosterfun) {
+					return false
+				}
 			case "extendedart", "ea":
 				if co.HasFrameEffect(mtgjson.FrameEffectExtendedArt) {
 					return false
 				}
-			case "showcase":
+			case "showcase", "sc", "sh":
 				if co.HasFrameEffect(mtgjson.FrameEffectShowcase) {
 					return false
 				}
-			case "borderless":
+			case "borderless", "bd", "bl":
 				if co.BorderColor == mtgjson.BorderColorBorderless {
 					return false
 				}
@@ -925,11 +929,11 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 				if co.HasPromoType(mtgjson.PromoTypeArenaLeague) {
 					return false
 				}
-			case "bab", "buyabox":
+			case "bab", "buyabox", "buy-a-box":
 				if co.HasPromoType(mtgjson.PromoTypeBuyABox) {
 					return false
 				}
-			case "japanese", "jpn", "jp":
+			case "japanese", "jpn", "jp", "ja":
 				if co.Language == mtgjson.LanguageJapanese {
 					return false
 				}
