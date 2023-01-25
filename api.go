@@ -240,3 +240,44 @@ func UUID2CKCSV(w *csv.Writer, ids []string) error {
 	}
 	return nil
 }
+
+func UUID2SCGCSV(w *csv.Writer, ids []string) error {
+	var buylist mtgban.BuylistRecord
+	for _, vendor := range Vendors {
+		if vendor != nil && vendor.Info().Shorthand == "SCG" {
+			buylist, _ = vendor.Buylist()
+			break
+		}
+	}
+	if buylist == nil {
+		return errors.New("SCG scraper not found")
+	}
+
+	header := []string{"name", "set_name", "language", "finish", "quantity"}
+	err := w.Write(header)
+	if err != nil {
+		return err
+	}
+	for _, id := range ids {
+		blEntries, found := buylist[id]
+		if !found {
+			continue
+		}
+		name, found := blEntries[0].CustomFields["SCGName"]
+		if !found {
+			continue
+		}
+		edition := blEntries[0].CustomFields["SCGEdition"]
+		language := blEntries[0].CustomFields["SCGLanguage"]
+		finish := blEntries[0].CustomFields["SCGFinish"]
+		quantity := fmt.Sprint(1)
+
+		err = w.Write([]string{name, edition, language, finish, quantity})
+		if err != nil {
+			return err
+		}
+
+		w.Flush()
+	}
+	return nil
+}
