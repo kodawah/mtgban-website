@@ -341,7 +341,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	if blMode {
 		results = getVendorPrices("", enabledStores, "", cardIds, false, shouldCheckForConditions)
 	} else {
-		results = getSellerPrices("", enabledStores, "", cardIds, false, false)
+		results = getSellerPrices("", enabledStores, "", cardIds, false, shouldCheckForConditions)
 	}
 
 	// Allow downloading data as CSV
