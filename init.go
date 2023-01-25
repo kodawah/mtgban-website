@@ -476,10 +476,7 @@ var ScraperOptions = map[string]*scraperOption{
 	},
 	"starcitygames": &scraperOption{
 		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
-			scraper, err := starcitygames.NewScraper(Config.Api["scg_username"], Config.Api["scg_password"])
-			if err != nil {
-				return nil, err
-			}
+			scraper := starcitygames.NewScraper(Config.Api["scg_bearer"])
 			scraper.LogCallback = logger.Printf
 			return scraper, nil
 		},
