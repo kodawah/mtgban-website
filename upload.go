@@ -98,13 +98,29 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(MaxUploadFileSize)
 
 	// See if we need to download the ck csv only
-	ckhashes := r.Form["ckhashes"]
+	ckhashes := r.Form["CKhashes"]
 	if ckhashes != nil {
 		w.Header().Set("Content-Type", "text/csv")
 		w.Header().Set("Content-Disposition", "attachment; filename=\"mtgban_ck.csv\"")
 		csvWriter := csv.NewWriter(w)
 
 		err := UUID2CKCSV(csvWriter, ckhashes)
+		if err != nil {
+			w.Header().Del("Content-Type")
+			UserNotify("upload", err.Error())
+			pageVars.InfoMessage = "Unable to download CSV right now"
+			render(w, "upload.html", pageVars)
+		}
+		return
+	}
+	// Same for scg csv
+	scghashes := r.Form["SCGhashes"]
+	if scghashes != nil {
+		w.Header().Set("Content-Type", "text/csv")
+		w.Header().Set("Content-Disposition", "attachment; filename=\"mtgban_scg.csv\"")
+		csvWriter := csv.NewWriter(w)
+
+		err := UUID2SCGCSV(csvWriter, scghashes)
 		if err != nil {
 			w.Header().Del("Content-Type")
 			UserNotify("upload", err.Error())
