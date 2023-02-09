@@ -415,20 +415,8 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 		}
 	}
 
-	// Support Scryfall bot syntax
-	ogQuery := query
-	if strings.Contains(query, "|") {
-		elements := strings.Split(query, "|")
-		query = strings.TrimSpace(elements[0])
-		if len(elements) > 1 {
-			query += " s:" + strings.TrimSpace(elements[1])
-		}
-		if len(elements) > 2 {
-			query += " cn:" + strings.TrimSpace(elements[2])
-		}
-	}
-
 	// Filter out the finish shortcut suffix
+	ogQuery := query
 	if strings.HasSuffix(ogQuery, "&") {
 		query = strings.TrimSuffix(query, "&")
 		query += " f:nonfoil"
@@ -670,6 +658,21 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 			filter.PriceCache = map[string][]float64{}
 			filterPrices = append(filterPrices, filter)
 		}
+	}
+
+	// Support Scryfall bot syntax only when the search mode is not set
+	if config.SearchMode == "" && strings.Contains(query, "|") {
+		elements := strings.Split(query, "|")
+		query = elements[0]
+		extraQuery := strings.TrimSpace(elements[0])
+		if len(elements) > 1 {
+			extraQuery += " s:" + strings.TrimSpace(elements[1])
+		}
+		if len(elements) > 2 {
+			extraQuery += " cn:" + strings.TrimSpace(elements[2])
+		}
+		extraConfig := parseSearchOptionsNG(extraQuery, nil, nil)
+		filters = append(filters, extraConfig.CardFilters...)
 	}
 
 	config.CleanQuery = strings.TrimSpace(query)
