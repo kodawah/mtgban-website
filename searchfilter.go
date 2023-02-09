@@ -415,19 +415,6 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 		}
 	}
 
-	// Filter out the finish shortcut suffix
-	ogQuery := query
-	if strings.HasSuffix(ogQuery, "&") {
-		query = strings.TrimSuffix(query, "&")
-		query += " f:nonfoil"
-	} else if strings.HasSuffix(ogQuery, "*") {
-		query = strings.TrimSuffix(query, "*")
-		query += " f:foil"
-	} else if strings.HasSuffix(ogQuery, "~") {
-		query = strings.TrimSuffix(query, "~")
-		query += " f:etched"
-	}
-
 	// Iterate over the various possible filters
 	fields := re.FindAllString(query, -1)
 	for _, field := range fields {
@@ -658,6 +645,25 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 			filter.PriceCache = map[string][]float64{}
 			filterPrices = append(filterPrices, filter)
 		}
+	}
+
+	// Filter out the finish shortcut suffix
+	if strings.HasSuffix(query, "&") || strings.HasSuffix(query, "*") || strings.HasSuffix(query, "&") {
+		// Ignore this format if the last element is a regexp
+		lastElementIsRegexp := len(filters) > 0 && strings.HasSuffix(filters[len(filters)-1].Name, "regexp")
+		if !lastElementIsRegexp {
+			finish := "nonfoil"
+			if strings.HasSuffix(query, "*") {
+				finish = "foil"
+			} else if strings.HasSuffix(query, "~") {
+				finish = "etched"
+			}
+			filters = append(filters, FilterElem{
+				Name:   "finish",
+				Values: []string{finish},
+			})
+		}
+		query = strings.TrimRight(query, "&*~")
 	}
 
 	// Support Scryfall bot syntax only when the search mode is not set
