@@ -228,15 +228,7 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 	}
 	variant = strings.TrimSpace(variant)
 
-	isJPN := false
 	switch co.SetCode {
-	case "WAR":
-		isJPN = strings.Contains(co.Card.Number, "★")
-	case "STA":
-		num, _ := strconv.Atoi(co.Number)
-		isJPN = num > 63
-		// Strip "Boderless"
-		variant = ""
 	case "PAFR":
 		if strings.HasSuffix(co.Number, "a") {
 			variant = "Ampersand"
@@ -249,6 +241,7 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 		}
 	}
 
+	isJPN := co.Language == mtgjson.LanguageJapanese
 	if isJPN {
 		if variant != "" {
 			variant = " " + variant
