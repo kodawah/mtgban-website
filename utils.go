@@ -152,8 +152,15 @@ func editionTitle(cardId string) string {
 	}
 
 	edition := co.Edition
+	tag := ""
 	if co.OriginalReleaseDate != "" {
-		edition = fmt.Sprintf("%s (%s)", edition, co.OriginalReleaseDate)
+		tag = co.OriginalReleaseDate
+	}
+	if co.Subsets != nil {
+		tag = strings.Join(co.Subsets, " ")
+	}
+	if tag != "" {
+		edition = fmt.Sprintf("%s (%s)", edition, tag)
 	}
 
 	finish := ""
