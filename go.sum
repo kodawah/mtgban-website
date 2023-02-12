@@ -395,8 +395,8 @@ github.com/kennygrant/sanitize v1.2.4/go.mod h1:LGsjYYtgxbetdg5owWB2mpgUL6e2nfw2
 github.com/kevinburke/ssh_config v0.0.0-20190725054713-01f96b0aa0cd h1:Coekwdh0v2wtGp9Gmz1Ze3eVRAWJMLokvN3QjdzCHLY=
 github.com/kevinburke/ssh_config v0.0.0-20190725054713-01f96b0aa0cd/go.mod h1:CT57kijsi8u/K/BOFA39wgDQJ9CxiF4nAY/ojJ6r6mM=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
-github.com/kodabb/go-mtgban v0.0.0-20230125170659-624310c785e1 h1:+wvneuziPkw9zZFJVcUUkxf7kTi10BrDUr6NxJOzHSc=
-github.com/kodabb/go-mtgban v0.0.0-20230125170659-624310c785e1/go.mod h1:lP/gi69F4jwaaFXSgLX2RujM8pgy9RIP/z8te1xGV/I=
+github.com/kodabb/go-mtgban v0.0.0-20230212235251-3bf0fa87e294 h1:3uqNiFTvbEKgEW7ZcRLVbovH0KShHnDD061gO71SYQE=
+github.com/kodabb/go-mtgban v0.0.0-20230212235251-3bf0fa87e294/go.mod h1:lP/gi69F4jwaaFXSgLX2RujM8pgy9RIP/z8te1xGV/I=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
