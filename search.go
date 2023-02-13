@@ -365,6 +365,15 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
+	// Invert the slice if requested
+	reverseSort, _ := strconv.ParseBool(r.FormValue("reverse"))
+	if reverseSort {
+		for i, j := 0, len(allKeys)-1; i < j; i, j = i+1, j-1 {
+			allKeys[i], allKeys[j] = allKeys[j], allKeys[i]
+		}
+	}
+	pageVars.ReverseMode = reverseSort
+
 	// If results can't fit in one page, chunk response and enable pagination
 	if len(allKeys) > MaxSearchResults {
 		pageVars.TotalIndex = len(allKeys)/MaxSearchResults + 1

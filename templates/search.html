@@ -178,15 +178,27 @@
                         <a class="btn info" href="?q={{.SearchQuery}}&sort=" title="Sort by chronological order">
                             {{if or (eq .SearchSort "chrono") (not .SearchSort)}}<b>{{end}}chrono{{if or (eq .SearchSort "chrono") (not .SearchSort)}}</b>{{end}}
                         </a>
+                        {{if or (eq .SearchSort "chrono") (not .SearchSort)}}
+                            <a href="?q={{.SearchQuery}}&sort=&reverse={{not .ReverseMode}}" title="Sort by reverse chronological order">🔄</a>
+                        {{end}}
                         <a class="btn info" href="?q={{.SearchQuery}}&sort=alpha" title="Sort by alphabetical order">
                             {{if eq .SearchSort "alpha"}}<b>{{end}}alpha{{if eq .SearchSort "alpha"}}</b>{{end}}
                         </a>
+                        {{if eq .SearchSort "alpha"}}
+                            <a href="?q={{.SearchQuery}}&sort=alpha&reverse={{not .ReverseMode}}" title="Sort by reverse alphabetical order">🔄</a>
+                        {{end}}
                         <a class="btn info" href="?q={{.SearchQuery}}&sort=retail" title="Sort by best retail price (off TCGplayer)">
                             {{if eq .SearchSort "retail"}}<b>{{end}}retail{{if eq .SearchSort "retail"}}</b>{{end}}
                         </a>
+                        {{if eq .SearchSort "retail"}}
+                            <a href="?q={{.SearchQuery}}&sort=retail&reverse={{not .ReverseMode}}" title="Sort by lowest retail price (off TCGplayer)">🔄</a>
+                        {{end}}
                         <a class="btn info" href="?q={{.SearchQuery}}&sort=buylist" title="Sort by best buylits price (off Card Kingdom)">
                             {{if eq .SearchSort "buylist"}}<b>{{end}}buylist{{if eq .SearchSort "buylist"}}</b>{{end}}
                         </a>
+                        {{if eq .SearchSort "buylist"}}
+                            <a href="?q={{.SearchQuery}}&sort=buylist&reverse={{not .ReverseMode}}" title="Sort by lowest buylits price (off Card Kingdom)">🔄</a>
+                        {{end}}
                         <span class=emoji>
                             <a class="btn info" title="...more surpises" href="/random">🎰</a>
                         </span>
@@ -654,13 +666,13 @@
                             <td colspan="2" style="text-align: center; vertical-align: middle;">
                                 <p style="display: inline;">
                                     {{if ne .CurrentIndex 1}}
-                                        <a class="pagination" href="?q={{.SearchQuery}}&p=1&sort={{.SearchSort}}">&lt;</a>
-                                        <a class="pagination" href="?q={{.SearchQuery}}&p={{.PrevIndex}}&sort={{.SearchSort}}"><i class="arrow left"></i></a>
+                                        <a class="pagination" href="?q={{.SearchQuery}}&p=1&sort={{.SearchSort}}&reverse={{.ReverseMode}}">&lt;</a>
+                                        <a class="pagination" href="?q={{.SearchQuery}}&p={{.PrevIndex}}&sort={{.SearchSort}}&reverse={{.ReverseMode}}"><i class="arrow left"></i></a>
                                     {{end}}
                                     {{.CurrentIndex}} / {{.TotalIndex}}
                                     {{if ne .CurrentIndex .TotalIndex}}
-                                        <a class="pagination" href="?q={{.SearchQuery}}&p={{.NextIndex}}&sort={{.SearchSort}}"><i class="arrow right"></i></a>
-                                        <a class="pagination" href="?q={{.SearchQuery}}&p={{.TotalIndex}}&sort={{.SearchSort}}">&gt;</a>
+                                        <a class="pagination" href="?q={{.SearchQuery}}&p={{.NextIndex}}&sort={{.SearchSort}}&reverse={{.ReverseMode}}"><i class="arrow right"></i></a>
+                                        <a class="pagination" href="?q={{.SearchQuery}}&p={{.TotalIndex}}&sort={{.SearchSort}}&reverse={{.ReverseMode}}">&gt;</a>
                                     {{end}}
                                 </p>
                             </td>
