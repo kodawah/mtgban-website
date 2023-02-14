@@ -15,6 +15,7 @@ import (
 
 	"github.com/kodabb/go-mtgban/mtgban"
 	"github.com/kodabb/go-mtgban/mtgmatcher"
+	"github.com/kodabb/go-mtgban/mtgmatcher/mtgjson"
 )
 
 const (
@@ -938,9 +939,22 @@ func getSortingData(uuid string) (*SortingData, error) {
 	}, nil
 }
 
-func sortByNumberAndFinish(cI, cJ *mtgmatcher.CardObject) bool {
-	numI := stripNumber(cI.Card.Number)
-	numJ := stripNumber(cJ.Card.Number)
+const charactersToStrip = "abcdefgsp" + mtgjson.SuffixSpecial + mtgjson.SuffixVariant
+
+func stripNumber(num string) string {
+	num = strings.TrimLeft(num, "AB")
+	num = strings.ToLower(num)
+	num = strings.TrimRight(num, charactersToStrip)
+	return num
+}
+
+func sortByNumberAndFinish(cI, cJ *mtgmatcher.CardObject, strip bool) bool {
+	numI := cI.Card.Number
+	numJ := cJ.Card.Number
+	if strip {
+		numI = stripNumber(cI.Card.Number)
+		numJ = stripNumber(cJ.Card.Number)
+	}
 
 	// If their number is the same, check for foiling status
 	if numI == numJ {
@@ -993,7 +1007,7 @@ func sortSets(uuidI, uuidJ string) bool {
 				return cI.Name < cJ.Name
 			}
 
-			return sortByNumberAndFinish(cI, cJ)
+			return sortByNumberAndFinish(cI, cJ, true)
 			// For the special case of set promos, always keeps them after
 		} else if sortingI.parentCode == "" && sortingJ.parentCode != "" {
 			return true
@@ -1023,7 +1037,8 @@ func sortSetsAlphabetical(uuidI, uuidJ string) bool {
 
 	if cI.Name == cJ.Name {
 		if setDateI.Equal(setDateJ) {
-			return sortByNumberAndFinish(cI, cJ)
+			// We need not to strip to keep set ordered wrt Promos etc
+			return sortByNumberAndFinish(cI, cJ, false)
 		}
 
 		return setDateI.After(setDateJ)
