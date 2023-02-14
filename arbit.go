@@ -260,8 +260,6 @@ func arbit(w http.ResponseWriter, r *http.Request, reverse bool) {
 			}
 			allowlistSellers = append(allowlistSellers, seller.Info().Shorthand)
 		}
-		// Always add this scraper
-		allowlistSellers = append(allowlistSellers, TCG_LOW)
 		// Enable any option under FilterOptTests
 		anyOptionEnabled = true
 	} else if allowlistSellersOpt == "DEV" {
