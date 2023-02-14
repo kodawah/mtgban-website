@@ -938,6 +938,39 @@ func getSortingData(uuid string) (*SortingData, error) {
 	}, nil
 }
 
+func sortByNumberAndFinish(cI, cJ *mtgmatcher.CardObject) bool {
+	numI := stripNumber(cI.Card.Number)
+	numJ := stripNumber(cJ.Card.Number)
+
+	// If their number is the same, check for foiling status
+	if numI == numJ {
+		if cI.Etched || cJ.Etched {
+			if cI.Etched && !cJ.Etched {
+				return false
+			} else if !cI.Etched && cJ.Etched {
+				return true
+			}
+		} else if cI.Foil || cJ.Foil {
+			if cI.Foil && !cJ.Foil {
+				return false
+			} else if !cI.Foil && cJ.Foil {
+				return true
+			}
+		}
+	}
+
+	// If both are foil or both are non-foil, check their number
+	cInum, errI := strconv.Atoi(numI)
+	cJnum, errJ := strconv.Atoi(numJ)
+	if errI == nil && errJ == nil {
+		return cInum < cJnum
+	}
+
+	// If either one is not a number (due to extra letters) just
+	// do a normal string comparison
+	return cI.Card.Number < cJ.Card.Number
+}
+
 func sortSets(uuidI, uuidJ string) bool {
 	sortingI, err := getSortingData(uuidI)
 	if err != nil {
@@ -960,33 +993,7 @@ func sortSets(uuidI, uuidJ string) bool {
 				return cI.Name < cJ.Name
 			}
 
-			// If their number is the same, check for foiling status
-			if cI.Card.Number == cJ.Card.Number {
-				if cI.Etched || cJ.Etched {
-					if cI.Etched == true && cJ.Etched == false {
-						return false
-					} else if cI.Etched == false && cJ.Etched == true {
-						return true
-					}
-				} else if cI.Foil || cJ.Foil {
-					if cI.Foil == true && cJ.Foil == false {
-						return false
-					} else if cI.Foil == false && cJ.Foil == true {
-						return true
-					}
-				}
-			}
-
-			// If both are foil or both are non-foil, check their number
-			cInum, errI := strconv.Atoi(cI.Card.Number)
-			cJnum, errJ := strconv.Atoi(cJ.Card.Number)
-			if errI == nil && errJ == nil {
-				return cInum < cJnum
-			}
-			// If either one is not a number (due to extra letters) just
-			// do a normal string comparison
-			return cI.Card.Number < cJ.Card.Number
-
+			return sortByNumberAndFinish(cI, cJ)
 			// For the special case of set promos, always keeps them after
 		} else if sortingI.parentCode == "" && sortingJ.parentCode != "" {
 			return true
@@ -1016,32 +1023,7 @@ func sortSetsAlphabetical(uuidI, uuidJ string) bool {
 
 	if cI.Name == cJ.Name {
 		if setDateI.Equal(setDateJ) {
-			// If their number is the same, check for foiling status
-			if cI.Card.Number == cJ.Card.Number {
-				if cI.Etched || cJ.Etched {
-					if cI.Etched == true && cJ.Etched == false {
-						return false
-					} else if cI.Etched == false && cJ.Etched == true {
-						return true
-					}
-				} else if cI.Foil || cJ.Foil {
-					if cI.Foil == true && cJ.Foil == false {
-						return false
-					} else if cI.Foil == false && cJ.Foil == true {
-						return true
-					}
-				}
-			}
-
-			// If both are foil or both are non-foil, check their number
-			cInum, errI := strconv.Atoi(cI.Card.Number)
-			cJnum, errJ := strconv.Atoi(cJ.Card.Number)
-			if errI == nil && errJ == nil {
-				return cInum < cJnum
-			}
-			// If either one is not a number (due to extra letters) just
-			// do a normal string comparison
-			return cI.Card.Number < cJ.Card.Number
+			return sortByNumberAndFinish(cI, cJ)
 		}
 
 		return setDateI.After(setDateJ)
