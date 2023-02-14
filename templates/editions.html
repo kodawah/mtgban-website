@@ -71,7 +71,16 @@
                                 </nobr>
                             </td>
                             <td>
-                                {{if $edition.ShowFin}}
+                                {{if $edition.Special}}
+                                    {{if eq $edition.Code "H1R"}}
+                                        <a class="btn normal" href="/search?q=s:{{$edition.Code}}%20f:foil">
+                                            <h6>foil</h6>
+                                        </a>
+                                        <a class="btn normal" href="/search?q=s:{{$edition.Code}}%20f:etched">
+                                            <h6>etched</h6>
+                                        </a>
+                                    {{end}}
+                                {{else if $edition.ShowFin}}
                                     {{if $edition.HasReg}}
                                         <a class="btn normal" href="/search?q=s:{{$edition.Code}}%20f:nonfoil">
                                             <h6>nonfoil</h6>

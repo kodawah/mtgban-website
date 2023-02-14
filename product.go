@@ -18,6 +18,7 @@ type EditionEntry struct {
 	Keyrune string
 	Size    int
 	FmtDate string
+	Special bool
 	ShowFin bool
 	HasReg  bool
 	HasFoil bool
@@ -85,6 +86,11 @@ func makeEditionEntry(set *mtgjson.Set, names ...string) EditionEntry {
 	if len(names) > 0 && names[0] != "" {
 		name = names[0]
 	}
+	special := false
+	switch set.Code {
+	case "H1R":
+		special = true
+	}
 	return EditionEntry{
 		Name:    name,
 		Code:    set.Code,
@@ -92,6 +98,7 @@ func makeEditionEntry(set *mtgjson.Set, names ...string) EditionEntry {
 		Keyrune: strings.ToLower(set.KeyruneCode),
 		Size:    len(set.Cards),
 		FmtDate: set.ReleaseDate,
+		Special: special,
 		ShowFin: !set.IsNonFoilOnly && !set.IsFoilOnly,
 		HasReg:  !set.IsFoilOnly,
 		HasFoil: !set.IsNonFoilOnly,
