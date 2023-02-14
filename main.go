@@ -7,7 +7,6 @@ import (
 	"flag"
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
@@ -490,7 +489,7 @@ func openDBs() (err error) {
 }
 
 func loadGoogleCredentials(credentials string) (*http.Client, error) {
-	data, err := ioutil.ReadFile(credentials)
+	data, err := os.ReadFile(credentials)
 	if err != nil {
 		return nil, err
 	}
