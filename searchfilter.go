@@ -259,7 +259,7 @@ func fixupColorNG(code string) []string {
 
 func price4seller(cardId, shorthand string) float64 {
 	for _, seller := range Sellers {
-		if seller != nil && strings.ToLower(seller.Info().Shorthand) == strings.ToLower(shorthand) {
+		if seller != nil && strings.EqualFold(seller.Info().Shorthand, shorthand) {
 			inv, err := seller.Inventory()
 			if err != nil {
 				continue
@@ -276,7 +276,7 @@ func price4seller(cardId, shorthand string) float64 {
 
 func price4vendor(cardId, shorthand string) float64 {
 	for _, vendor := range Vendors {
-		if vendor != nil && strings.ToLower(vendor.Info().Shorthand) == strings.ToLower(shorthand) {
+		if vendor != nil && strings.EqualFold(vendor.Info().Shorthand, shorthand) {
 			bl, err := vendor.Buylist()
 			if err != nil {
 				continue
