@@ -448,7 +448,6 @@ func setCookie(w http.ResponseWriter, r *http.Request, cookieName, value string)
 		// Enforce first party cookies only
 		SameSite: http.SameSiteStrictMode,
 	})
-	return
 }
 
 // Retrieve default blocklists according to the signature contents

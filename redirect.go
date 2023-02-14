@@ -39,7 +39,7 @@ func Redirect(w http.ResponseWriter, r *http.Request) {
 					if !found {
 						entries, found = inv[mtgmatcher.Scryfall2UUID(hash)]
 						if !found {
-							entries, found = inv[mtgmatcher.Tcg2UUID(hash)]
+							entries = inv[mtgmatcher.Tcg2UUID(hash)]
 						}
 					}
 
@@ -75,7 +75,7 @@ func Redirect(w http.ResponseWriter, r *http.Request) {
 					if !found {
 						entries, found = bl[mtgmatcher.Scryfall2UUID(hash)]
 						if !found {
-							entries, found = bl[mtgmatcher.Tcg2UUID(hash)]
+							entries = bl[mtgmatcher.Tcg2UUID(hash)]
 						}
 					}
 
