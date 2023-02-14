@@ -735,25 +735,6 @@ func compareReleaseDate(filters []string, co *mtgmatcher.CardObject, cmpFunc fun
 	return cmpFunc(cardDate, releaseDate)
 }
 
-func compareColors(filters, colors []string) bool {
-	if len(filters) == 0 {
-		return len(colors) != 0
-	}
-	if len(filters) == 5 {
-		return len(colors) <= 1
-	}
-	found := 0
-	for _, value := range filters {
-		if SliceStringHas(colors, value) {
-			found++
-		}
-	}
-	if len(filters) <= found {
-		return false
-	}
-	return true
-}
-
 var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObject) bool{
 	"edition": func(filters []string, co *mtgmatcher.CardObject) bool {
 		return !SliceStringHas(filters, co.SetCode)

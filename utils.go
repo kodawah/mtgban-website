@@ -64,14 +64,6 @@ func fileExists(filename string) bool {
 	return !fi.IsDir()
 }
 
-func fileDate(filename string) time.Time {
-	fi, err := os.Lstat(filename)
-	if errors.Is(err, os.ErrNotExist) {
-		return time.Now()
-	}
-	return fi.ModTime()
-}
-
 func mkDirIfNotExisting(dirName string) error {
 	_, err := os.Stat(dirName)
 	if errors.Is(err, os.ErrNotExist) {

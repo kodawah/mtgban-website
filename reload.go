@@ -56,12 +56,6 @@ func reloadTCG() {
 	ServerNotify("refresh", "tcg fully refreshed")
 }
 
-func reloadCT() {
-	reloadMarket("cardtrader")
-
-	ServerNotify("refresh", "ct full refreshed")
-}
-
 func reloadMarket(name string) {
 	defer recoverPanicScraper()
 
