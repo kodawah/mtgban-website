@@ -515,7 +515,7 @@ func deleteOldCache() {
 
 // Custom time.Duration format to print days as well
 func uptime() string {
-	since := time.Now().Sub(startTime)
+	since := time.Since(startTime)
 	days := int(since.Hours() / 24)
 	hours := int(since.Hours()) % 24
 	minutes := int(since.Minutes()) % 60

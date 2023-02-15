@@ -282,7 +282,7 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 			}
 
 			// Load if all the sellers inventory timestamps are past the cooldown
-			if SliceStringHas(names, seller.Info().Shorthand) && time.Now().Sub(*seller.Info().InventoryTimestamp) < SkipRefreshCooldown {
+			if SliceStringHas(names, seller.Info().Shorthand) && time.Since(*seller.Info().InventoryTimestamp) < SkipRefreshCooldown {
 				log.Println("Trying to skip", seller.Info().Name, seller.Info().Shorthand, "because too recent")
 			} else {
 				needsLoading = true
@@ -306,7 +306,7 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 		if len(inv) == 0 {
 			return errors.New("empty inventory")
 		}
-		log.Println("Took", time.Now().Sub(start))
+		log.Println("Took", time.Since(start))
 
 		// Split subsellers
 		sellers, err := mtgban.Seller2Sellers(scraper)
@@ -358,7 +358,7 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 						break
 					}
 				}
-				log.Println("Took", time.Now().Sub(start))
+				log.Println("Took", time.Since(start))
 			}
 		}
 
@@ -980,7 +980,7 @@ func loadSellers(newSellers []mtgban.Seller) {
 
 			// If the old scraper data is old enough, pull from the new scraper
 			// and update it in the global slice
-			if Sellers[i] == nil || time.Now().Sub(*Sellers[i].Info().InventoryTimestamp) > SkipRefreshCooldown {
+			if Sellers[i] == nil || time.Since(*Sellers[i].Info().InventoryTimestamp) > SkipRefreshCooldown {
 				ServerNotify("reload", "Loading from seller "+newSellers[i].Info().Shorthand)
 				start := time.Now()
 				err := updateSellerAtPosition(newSellers[i], i, true)
@@ -989,7 +989,7 @@ func loadSellers(newSellers []mtgban.Seller) {
 					ServerNotify("reload", msg, true)
 					continue
 				}
-				log.Println("Took", time.Now().Sub(start))
+				log.Println("Took", time.Since(start))
 			}
 
 			// Stash data to DB if requested
@@ -1010,7 +1010,7 @@ func loadSellers(newSellers []mtgban.Seller) {
 						break
 					}
 				}
-				log.Println("Took", time.Now().Sub(start))
+				log.Println("Took", time.Since(start))
 			}
 
 			err := dumpInventoryToFile(Sellers[i], currentDir, fname)
@@ -1062,7 +1062,7 @@ func loadVendors(newVendors []mtgban.Vendor) {
 
 			// If the old scraper data is old enough, pull from the new scraper
 			// and update it in the global slice
-			if Vendors[i] == nil || time.Now().Sub(*Vendors[i].Info().BuylistTimestamp) > SkipRefreshCooldown {
+			if Vendors[i] == nil || time.Since(*Vendors[i].Info().BuylistTimestamp) > SkipRefreshCooldown {
 				ServerNotify("reload", "Loading from vendor "+newVendors[i].Info().Shorthand)
 				start := time.Now()
 				err := updateVendorAtPosition(newVendors[i], i, true)
@@ -1071,7 +1071,7 @@ func loadVendors(newVendors []mtgban.Vendor) {
 					ServerNotify("reload", msg, true)
 					continue
 				}
-				log.Println("Took", time.Now().Sub(start))
+				log.Println("Took", time.Since(start))
 			}
 
 			// Stash data to DB if requested
@@ -1087,7 +1087,7 @@ func loadVendors(newVendors []mtgban.Vendor) {
 						break
 					}
 				}
-				log.Println("Took", time.Now().Sub(start))
+				log.Println("Took", time.Since(start))
 			}
 
 			err := dumpBuylistToFile(Vendors[i], currentDir, fname)
