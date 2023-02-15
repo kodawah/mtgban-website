@@ -609,7 +609,7 @@ func getPrice(banPrice *BanPrice, conds string) float64 {
 	var price float64
 
 	// Grab the correct Price
-	if conds == "" || conds == "NM" {
+	if conds == "" {
 		price = banPrice.Regular
 		if price == 0 {
 			price = banPrice.Foil
