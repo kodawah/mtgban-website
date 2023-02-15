@@ -216,6 +216,8 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 			variant = "Extended Art "
 		case co.BorderColor == mtgjson.BorderColorBorderless:
 			variant = "Borderless "
+		case co.FrameVersion == "1997":
+			variant = "Retro Frame"
 		}
 	}
 	// Loop through the supported promo types, skipping Boosterfun already processed above
@@ -224,28 +226,12 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 			variant += mtgmatcher.Title(promoType) + " "
 		}
 	}
-	variant = strings.TrimSpace(variant)
-
-	switch co.SetCode {
-	case "PAFR":
-		if strings.HasSuffix(co.Number, "a") {
-			variant = "Ampersand"
-		}
-	case "MH2", "H1R":
-		if co.FrameVersion == "1997" {
-			variant = "Retro Frame"
-		} else if co.HasFrameEffect(mtgjson.FrameEffectShowcase) {
-			variant = "Sketch"
-		}
-	}
 
 	isJPN := co.Language == mtgjson.LanguageJapanese
 	if isJPN {
-		if variant != "" {
-			variant = " " + variant
-		}
-		variant = "JPN" + variant
+		variant = "JPN " + variant
 	}
+	variant = strings.TrimSpace(variant)
 
 	query := co.Name
 	if !co.Sealed {
