@@ -133,14 +133,14 @@ var filteredEditions = []string{
 	"WC99",
 }
 
-func parseMessage(content string) (*searchResult, error) {
+func parseMessage(content string) (*searchResult, string) {
 	// Clean up query, no blocklist because we only need keys
 	config := parseSearchOptionsNG(content, nil, nil)
 	query := config.CleanQuery
 
 	// Prevent useless invocations
 	if len(query) < 3 && query != "Ow" && query != "X" {
-		return &searchResult{Invalid: true}, nil
+		return &searchResult{Invalid: true}, ""
 	}
 
 	var editionSearched string
@@ -167,20 +167,20 @@ func parseMessage(content string) (*searchResult, error) {
 		if editionSearched != "" {
 			set, err := mtgmatcher.GetSet(editionSearched)
 			if err != nil {
-				return nil, fmt.Errorf("No edition found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", editionSearched)
+				return nil, fmt.Sprintf("No edition found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", editionSearched)
 			}
 			msg := fmt.Sprintf("No card found named \"%s\" in %s 乁| ･ิ ∧ ･ิ |ㄏ", query, set.Name)
 			printings, err := mtgmatcher.Printings4Card(query)
 			if err == nil {
 				msg = fmt.Sprintf("%s\n\"%s\" is printed in %s.", msg, query, printings2line(printings))
 			}
-			return nil, fmt.Errorf("%s", msg)
+			return nil, msg
 		}
-		return nil, fmt.Errorf("No card found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", query)
+		return nil, fmt.Sprintf("No card found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", query)
 	}
 
 	if len(uuids) == 0 {
-		return nil, fmt.Errorf("No results found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", query)
+		return nil, fmt.Sprintf("No results found for \"%s\" 乁| ･ิ ∧ ･ิ |ㄏ", query)
 	}
 
 	// Keep the first (most recent) result
@@ -192,7 +192,7 @@ func parseMessage(content string) (*searchResult, error) {
 	return &searchResult{
 		CardId:          cardId,
 		EditionSearched: editionSearched,
-	}, nil
+	}, ""
 }
 
 type embedField struct {
@@ -530,10 +530,10 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	content = strings.TrimPrefix(content, "$$")
 
 	// Search a single card match
-	searchRes, err := parseMessage(content)
-	if err != nil {
+	searchRes, errMsg := parseMessage(content)
+	if errMsg != "" {
 		s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
-			Description: err.Error(),
+			Description: errMsg,
 		})
 		return
 	}

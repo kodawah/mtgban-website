@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -88,10 +87,10 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 
 	start := time.Now()
 
-	sleepers, err := getTiers(blocklistRetail, blocklistBuylist)
-	if err != nil {
+	sleepers, errMsg := getTiers(blocklistRetail, blocklistBuylist)
+	if errMsg != "" {
 		pageVars.Title = "Errors have been made"
-		pageVars.InfoMessage = err.Error()
+		pageVars.InfoMessage = errMsg
 
 		render(w, "sleep.html", pageVars)
 		return
@@ -131,7 +130,9 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getTiers(blocklistRetail, blocklistBuylist []string) (map[string][]string, error) {
+const ErrNoSleepers = "No Sleepers Available"
+
+func getTiers(blocklistRetail, blocklistBuylist []string) (map[string][]string, string) {
 	tiers := map[string]int{}
 
 	var tcgSeller mtgban.Seller
@@ -213,7 +214,7 @@ func getTiers(blocklistRetail, blocklistBuylist []string) (map[string][]string, 
 
 	// Avoid accessing the first element if empty
 	if len(tiers) == 0 {
-		return nil, errors.New("No Sleepers Available")
+		return nil, ErrNoSleepers
 	}
 
 	results := []Sleeper{}
@@ -227,7 +228,7 @@ func getTiers(blocklistRetail, blocklistBuylist []string) (map[string][]string, 
 	}
 
 	if len(results) == 0 {
-		return nil, errors.New("No Sleepers Available")
+		return nil, ErrNoSleepers
 	}
 
 	sort.Slice(results, func(i, j int) bool {
@@ -242,7 +243,7 @@ func getTiers(blocklistRetail, blocklistBuylist []string) (map[string][]string, 
 
 	// Avoid a division by 0
 	if max == min {
-		return nil, errors.New(ErrMsgDenied)
+		return nil, ErrMsgDenied
 	}
 
 	sleepers := map[string][]string{}
@@ -271,5 +272,5 @@ func getTiers(blocklistRetail, blocklistBuylist []string) (map[string][]string, 
 		sleepers[letter] = append(sleepers[letter], res.CardId)
 	}
 
-	return sleepers, nil
+	return sleepers, ""
 }

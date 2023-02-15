@@ -43,7 +43,8 @@ func Redirect(w http.ResponseWriter, r *http.Request) {
 						}
 					}
 
-					for _, entry := range entries {
+					if len(entries) > 0 {
+						entry := entries[0]
 						link := entry.URL
 						// Change the utm default query param to improve tracking
 						if strings.HasPrefix(store, "TCG") {
