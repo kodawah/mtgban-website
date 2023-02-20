@@ -17,7 +17,9 @@ import (
 	"unicode"
 
 	"github.com/360EntSecGroup-Skylar/excelize/v2"
+	"github.com/PuerkitoBio/goquery"
 	"github.com/extrame/xls"
+	cleanhttp "github.com/hashicorp/go-cleanhttp"
 	"gopkg.in/Iwark/spreadsheet.v2"
 
 	"github.com/kodabb/go-mtgban/mtgmatcher"
@@ -302,7 +304,13 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	if len(hashes) != 0 {
 		uploadedData, err = loadHashes(hashes)
 	} else if gdocURL != "" {
-		uploadedData, err = loadSpreadsheet(gdocURL, maxRows)
+		if strings.HasPrefix(gdocURL, "https://store.tcgplayer.com/collection/view/") {
+			uploadedData, err = loadCollection(gdocURL, maxRows)
+		} else if strings.HasPrefix(gdocURL, "https://docs.google.com/spreadsheets/") {
+			uploadedData, err = loadSpreadsheet(gdocURL, maxRows)
+		} else {
+			err = errors.New("unsupported URL")
+		}
 	} else if textArea != "" {
 		uploadedData, err = loadCsv(strings.NewReader(textArea), ',', maxRows)
 	} else if strings.HasSuffix(handler.Filename, ".xls") {
@@ -933,6 +941,53 @@ func loadHashes(hashes []string) ([]UploadEntry, error) {
 			CardId: hashes[i],
 		})
 	}
+
+	return uploadEntries, nil
+}
+
+func loadCollection(link string, maxRows int) ([]UploadEntry, error) {
+	resp, err := cleanhttp.DefaultClient().Get(link)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var header []string
+	doc.Find(`div[id="collectionContainer"] table thead`).Find("th").Each(func(i int, s *goquery.Selection) {
+		header = append(header, s.Text())
+	})
+
+	log.Println(header)
+	indexMap, err := parseHeader(header)
+	if err != nil {
+		return nil, err
+	}
+
+	foundHashes := map[string]bool{}
+	var uploadEntries []UploadEntry
+	doc.Find(`div[id="collectionContainer"] table tbody`).Find("tr").EachWithBreak(func(i int, s *goquery.Selection) bool {
+		if i >= maxRows {
+			return false
+		}
+
+		var record []string
+		s.Find("td").Each(func(i int, se *goquery.Selection) {
+			record = append(record, se.Text())
+		})
+
+		res, err := parseRow(indexMap, record, foundHashes)
+		if err != nil {
+			return true
+		}
+
+		uploadEntries = append(uploadEntries, res)
+		return true
+	})
 
 	return uploadEntries, nil
 }

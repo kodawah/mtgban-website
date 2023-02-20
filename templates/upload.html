@@ -81,9 +81,9 @@
                         or
                         <a class="btn default" href="javascript:askForURL()" id="urlLabel" title="{{.RemoteLinkURL}}">
                             {{if .RemoteLinkURL}}
-                                Cloud URL loaded
+                                Remote URL ready
                             {{else}}
-                                Load spreadsheet
+                                Load remote URL
                             {{end}}
                         </a>
                         or
@@ -221,11 +221,11 @@
             };
             window.askForURL = function(){
                 let url = prompt("Please enter the URL for your public Google spreadsheet", "{{.RemoteLinkURL}}");
-                if (url != null && (url.startsWith("https://docs.google.com/spreadsheets/") || url == "")) {
+                if (url != null && (url.startsWith("https://docs.google.com/spreadsheets/") || url.startsWith("https://store.tcgplayer.com/collection/view/") || url == "")) {
                     if (url == "") {
-                        urlLabel.innerHTML = "Load spreadsheet";
+                        urlLabel.innerHTML = "Load remote URL";
                     } else {
-                        urlLabel.innerHTML = "Cloud URL loaded";
+                        urlLabel.innerHTML = "Remote URL ready";
 
                         var textArea = document.getElementById('textArea');
                         if (textArea) {
@@ -287,7 +287,7 @@
                 <ul class="indent">
                     <li>Upload a file and let the <i>Magic</i> begin!</li>
                     <ul class="indent">
-                        <li>This tool can read data from <b>CSV</b>, <b>Excel</b> files, from a remote <b>Google Spreadsheets</b> or by <b>pasting text</b> directly on the page.</li>
+                        <li>This tool can read data from <b>CSV</b>, <b>Excel</b> files, from a remote <b>TCG Collection</b>, or a <b>Google Spreadsheet</b>, or by <b>pasting text</b> directly on the page.</li>
                         <ul class="indent">
                             <li>The Excel sheet can be in any location as long as it contains the <pre>mtgban</pre> indication. Otherwise the system will use the first sheet found.</li>
                             <li>The Google Spreadsheet needs to be publicly accessible from the internet, and there needs to be a sheet named with <pre>mtgban</pre>, or the first sheet found will be used.</li>
