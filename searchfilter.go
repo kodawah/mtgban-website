@@ -380,9 +380,12 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 			field = strings.TrimSpace(field)
 			co, err := mtgmatcher.GetUUID(field)
 			if err != nil {
-				// XXX: Scryfall id reports the first finish available
-				field = mtgmatcher.Scryfall2UUID(field)
-				co, err = mtgmatcher.GetUUID(field)
+				// XXX: id funcs report the first finish available
+				uuid := mtgmatcher.Scryfall2UUID(field)
+				if uuid == "" {
+					uuid = mtgmatcher.Tcg2UUID(field)
+				}
+				co, err = mtgmatcher.GetUUID(uuid)
 				if err != nil {
 					continue
 				}
