@@ -869,9 +869,11 @@ func parseRow(indexMap map[string]int, record []string, foundHashes map[string]b
 	case "y", "yes", "true", "t", "1", "x":
 		res.Card.Foil = true
 	default:
+		variation := strings.ToLower(res.Card.Variation)
 		if (strings.Contains(printing, "foil") && !strings.Contains(printing, "non")) ||
 			(strings.Contains(conditions, "foil") && !strings.Contains(conditions, "non")) ||
-			strings.Contains(strings.ToLower(res.Card.Variation), "foil") ||
+			(strings.Contains(variation, "foil") && !strings.Contains(variation, "non")) ||
+			strings.HasSuffix(conditions, "f") || // MPF
 			strings.Contains(sku, "-f-") || strings.Contains(sku, "-fo-") {
 			res.Card.Foil = true
 		}
