@@ -164,7 +164,6 @@ var FilterOptConfig = map[string]FilterOpt{
 
 // Arbit-only options
 var FilterOptNoGlobal = map[string]bool{
-	"nocond":     true,
 	"nononabu4h": true,
 	"nobuypenny": true,
 	"noposi":     true,
