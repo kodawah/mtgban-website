@@ -418,6 +418,13 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 		}
 	}
 
+	// Clean any special characters from the main query, handle it later
+	var lastChar string
+	if strings.HasSuffix(query, "&") || strings.HasSuffix(query, "*") || strings.HasSuffix(query, "&") {
+		lastChar = query[len(query)-1:]
+		query = strings.TrimRight(query, "&*~")
+	}
+
 	// Iterate over the various possible filters
 	fields := re.FindAllString(query, -1)
 	for _, field := range fields {
@@ -650,15 +657,20 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 		}
 	}
 
-	// Filter out the finish shortcut suffix
-	if strings.HasSuffix(query, "&") || strings.HasSuffix(query, "*") || strings.HasSuffix(query, "&") {
-		// Ignore this format if the last element is a regexp
+	// Check if we can apply a finish filter through the custom syntax
+	// or restore the original regexp if it's the last element
+	if lastChar != "" {
 		lastElementIsRegexp := len(filters) > 0 && strings.HasSuffix(filters[len(filters)-1].Name, "regexp")
-		if !lastElementIsRegexp {
-			finish := "nonfoil"
-			if strings.HasSuffix(query, "*") {
+		if lastElementIsRegexp && len(filters[len(filters)-1].Values) > 0 {
+			filters[len(filters)-1].Values[0] += lastChar
+		} else {
+			var finish string
+			switch lastChar {
+			case "&":
+				finish = "nonfoil"
+			case "*":
 				finish = "foil"
-			} else if strings.HasSuffix(query, "~") {
+			case "~":
 				finish = "etched"
 			}
 			filters = append(filters, FilterElem{
@@ -666,7 +678,6 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 				Values: []string{finish},
 			})
 		}
-		query = strings.TrimRight(query, "&*~")
 	}
 
 	// Support Scryfall bot syntax only when the search mode is not set
