@@ -374,7 +374,7 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 	}
 
 	// Support our UUID style when there are no options to parse
-	if !strings.Contains(query, ":") {
+	if !strings.Contains(query, ":") && !strings.Contains(query, "|") {
 		fields := strings.Split(query, ",")
 		for _, field := range fields {
 			field = strings.TrimSpace(field)
