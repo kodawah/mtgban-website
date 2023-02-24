@@ -79,6 +79,13 @@
                                         <a class="btn normal" href="/search?q=s:{{$edition.Code}}%20f:etched">
                                             <h6>etched</h6>
                                         </a>
+                                    {{else if eq $edition.Code "SCD"}}
+                                        <a class="btn normal" href="/search?q=s:{{$edition.Code}}%20f:nonfoil">
+                                            <h6>nonfoil</h6>
+                                        </a>
+                                        <a class="btn normal" href="/search?q=s:{{$edition.Code}}%20f:etched">
+                                            <h6>etched</h6>
+                                        </a>
                                     {{end}}
                                 {{else if $edition.ShowFin}}
                                     {{if $edition.HasReg}}

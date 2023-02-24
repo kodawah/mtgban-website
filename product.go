@@ -88,7 +88,8 @@ func makeEditionEntry(set *mtgjson.Set, names ...string) EditionEntry {
 	}
 	special := false
 	switch set.Code {
-	case "H1R":
+	case "H1R",
+		"SCD":
 		special = true
 	}
 	return EditionEntry{
