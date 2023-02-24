@@ -220,7 +220,7 @@
                }
             };
             window.askForURL = function(){
-                let url = prompt("Please enter the URL for your public Google spreadsheet", "{{.RemoteLinkURL}}");
+                let url = prompt("Please enter your URL here", "{{.RemoteLinkURL}}");
                 if (url != null && (url.startsWith("https://docs.google.com/spreadsheets/") || url.startsWith("https://store.tcgplayer.com/collection/view/") || url == "")) {
                     if (url == "") {
                         urlLabel.innerHTML = "Load remote URL";
