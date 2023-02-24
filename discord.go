@@ -115,13 +115,13 @@ type searchResult struct {
 }
 
 var filteredEditions = []string{
-	"FBB",
-	"LEGITA",
-	"DRKITA",
-	"RIN",
 	"4BB",
 	"CHRJPN",
+	"DRKITA",
+	"FBB",
+	"LEGITA",
 	"PTC",
+	"RIN",
 	"SUM",
 	"WC00",
 	"WC01",
