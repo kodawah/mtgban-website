@@ -32,12 +32,12 @@ Chart.Tooltip.positioners.bottom = function(elements, position) {
     }
     var pos = this._chart.chartArea.bottom;
     var topPos = this._chart.chartArea.top;
-    var tooltipHeight = this._chart.tooltip._view.height + this._chart.tooltip._view.footerMarginTop;
 
     // The very first hover event might not have drawn the tooltip yet so make up
     // some height value using the default font size plus some margin
-    if (isNaN(tooltipHeight)) {
-        tooltipHeight = elements.length * 12 + 26
+    var tooltipHeight = elements.length * 12 + 26;
+    if (this._chart.tooltip._view) {
+        tooltipHeight = this._chart.tooltip._view.height + this._chart.tooltip._view.footerMarginTop;
     }
 
     elements.forEach(function(element) {
