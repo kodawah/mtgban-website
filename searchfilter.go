@@ -377,11 +377,12 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 	if !strings.Contains(query, ":") && !strings.Contains(query, "|") {
 		fields := strings.Split(query, ",")
 		for _, field := range fields {
-			field = strings.TrimSpace(field)
+			var uuid string
+			field := strings.TrimSpace(field)
 			co, err := mtgmatcher.GetUUID(field)
 			if err != nil {
 				// XXX: id funcs report the first finish available
-				uuid := mtgmatcher.Scryfall2UUID(field)
+				uuid = mtgmatcher.Scryfall2UUID(field)
 				if uuid == "" {
 					uuid = mtgmatcher.Tcg2UUID(field)
 				}
@@ -390,6 +391,8 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 					continue
 				}
 			}
+			uuid = co.UUID
+
 			// Save the last name found
 			config.CleanQuery = co.Name
 			// Rebuild the full query for this card
@@ -402,7 +405,7 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 
 			// Set the special search mode and its data source
 			config.SearchMode = "hashing"
-			config.UUIDs = append(config.UUIDs, field)
+			config.UUIDs = append(config.UUIDs, uuid)
 		}
 
 		// Early return if hash was found
