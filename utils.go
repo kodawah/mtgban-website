@@ -19,6 +19,8 @@ import (
 	"github.com/mtgban/go-mtgban/mtgmatcher/mtgjson"
 )
 
+const AllPrintingsFileName = "allprintings5.json"
+
 var Country2flag = map[string]string{
 	"EU": "🇪🇺",
 	"JP": "🇯🇵",
@@ -43,6 +45,11 @@ type GenericCard struct {
 	Printings string
 	TCGId     string
 	Date      string
+}
+
+// A default scale for converting non-NM prices to NM
+var defaultGradeMap = map[string]float64{
+	"NM": 1, "SP": 1.25, "MP": 1.67, "HP": 2.5, "PO": 4,
 }
 
 func fileExists(filename string) bool {
