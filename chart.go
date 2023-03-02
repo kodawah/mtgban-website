@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"sort"
+
+	"github.com/go-redis/redis/v8"
 )
 
 type Dataset struct {
@@ -16,13 +18,13 @@ type Dataset struct {
 }
 
 type scraperConfig struct {
-	PublicName  string
-	ScraperName string
-	KindName    string
-	Color       string
-	Hidden      bool
-	HasSealed   bool
-	OnlySealed  bool
+	PublicName string
+	Shorthand  string
+	Group      string
+	Color      string
+	Hidden     bool
+	HasSealed  bool
+	OnlySealed bool
 }
 
 /*
@@ -38,78 +40,112 @@ type scraperConfig struct {
 
 var enabledDatasets = []scraperConfig{
 	{
-		PublicName:  "TCGplayer Low",
-		ScraperName: "tcg_index",
-		KindName:    TCG_LOW,
-		Color:       "rgb(255, 99, 132)",
-		HasSealed:   true,
+		PublicName: "TCGplayer Low",
+		Shorthand:  "TCGLow",
+		Group:      "sellers",
+		Color:      "rgb(255, 99, 132)",
+		HasSealed:  true,
 	},
 	{
-		PublicName:  "TCGplayer Market",
-		ScraperName: "tcg_index",
-		KindName:    TCG_MARKET,
-		Color:       "rgb(255, 159, 64)",
-		Hidden:      true,
+		PublicName: "TCGplayer Market",
+		Shorthand:  "TCGMarket",
+		Group:      "sellers",
+		Color:      "rgb(255, 159, 64)",
+		Hidden:     true,
 	},
 	{
-		PublicName:  "Card Kingdom Retail",
-		ScraperName: "cardkingdom",
-		KindName:    "retail",
-		Color:       "rgb(162, 235, 54)",
-		HasSealed:   true,
+		PublicName: "Card Kingdom Retail",
+		Shorthand:  "CK",
+		Group:      "sellers",
+		Color:      "rgb(162, 235, 54)",
+		HasSealed:  true,
 	},
 	{
-		PublicName:  "Card Kingdom Buylist",
-		ScraperName: "cardkingdom",
-		KindName:    "buylist",
-		Color:       "rgb(54, 162, 235)",
-		HasSealed:   true,
+		PublicName: "Card Kingdom Buylist",
+		Shorthand:  "CK",
+		Group:      "vendors",
+		Color:      "rgb(54, 162, 235)",
+		HasSealed:  true,
 	},
 	{
-		PublicName:  "Cardmarket Low",
-		ScraperName: "cardmarket",
-		KindName:    MKM_LOW,
-		Color:       "rgb(235, 205, 86)",
-		HasSealed:   true,
+		PublicName: "Cardmarket Low",
+		Shorthand:  "MKMLow",
+		Group:      "sellers",
+		Color:      "rgb(235, 205, 86)",
+		HasSealed:  true,
 	},
 	{
-		PublicName:  "Cardmarket Trend",
-		ScraperName: "cardmarket",
-		KindName:    MKM_TREND,
-		Color:       "rgb(201, 203, 207)",
-		Hidden:      true,
+		PublicName: "Cardmarket Trend",
+		Shorthand:  "MKMTrend",
+		Group:      "sellers",
+		Color:      "rgb(201, 203, 207)",
+		Hidden:     true,
 	},
 	{
-		PublicName:  "Star City Games Buylist",
-		ScraperName: "starcitygames",
-		KindName:    "buylist",
-		Color:       "rgb(23,42,72)",
+		PublicName: "Star City Games Buylist",
+		Shorthand:  "SCG",
+		Group:      "vendors",
+		Color:      "rgb(23,42,72)",
 	},
 	{
-		PublicName:  "ABU Games Buylist",
-		ScraperName: "abugames",
-		KindName:    "buylist",
-		Color:       "rgb(153, 102, 255)",
+		PublicName: "ABU Games Buylist",
+		Shorthand:  "ABU",
+		Group:      "vendors",
+		Color:      "rgb(153, 102, 255)",
 	},
 	{
-		PublicName:  "Sealed EV Median",
-		ScraperName: "sealed_ev",
-		KindName:    "TCG Low EV Median",
-		Color:       "rgb(201, 203, 207)",
-		HasSealed:   true,
-		OnlySealed:  true,
+		PublicName: "Sealed EV Median",
+		Shorthand:  "TCG Low EV Median",
+		Color:      "rgb(201, 203, 207)",
+		HasSealed:  true,
+		OnlySealed: true,
 	},
+}
+
+func findScraperDataIndex(group, shorthand string) int {
+	for i, scraperData := range Config.Scrapers[group] {
+		if scraperData.Shorthand == shorthand {
+			return i
+		}
+	}
+	return -1
+}
+
+func rdbClientForScraper(group, shorthand string) (*redis.Client, error) {
+	idx := findScraperDataIndex(group, shorthand)
+	if idx < 0 {
+		return nil, errors.New("missing TCGLow data")
+	}
+
+	redisClient := redis.NewClient(&redis.Options{
+		Addr: "localhost:6379",
+		DB:   Config.Scrapers[group][idx].RedisIndex,
+	})
+	_, err := redisClient.Ping(context.Background()).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	return redisClient, nil
 }
 
 // Get all the keys that will be used as x asis labels
 func getDateAxisValues(cardId string) ([]string, error) {
-	db := ScraperOptions["tcg_index"].RDBs[TCG_MARKET]
+	db, err := rdbClientForScraper("sellers", "TCGLow")
+	if err != nil {
+		return nil, err
+	}
+
 	keys, err := db.HKeys(context.Background(), cardId).Result()
 	if err != nil {
 		return nil, err
 	}
 	if len(keys) == 0 {
-		db = ScraperOptions["tcg_index"].RDBs[TCG_LOW]
+		db, err = rdbClientForScraper("sellers", "TCGMarket")
+		if err != nil {
+			return nil, err
+		}
+
 		keys, err = db.HKeys(context.Background(), cardId).Result()
 		if err != nil {
 			return nil, err
@@ -128,7 +164,10 @@ func getDateAxisValues(cardId string) ([]string, error) {
 }
 
 func getDataset(cardId string, labels []string, config scraperConfig) (*Dataset, error) {
-	db := ScraperOptions[config.ScraperName].RDBs[config.KindName]
+	db, err := rdbClientForScraper(config.Group, config.Shorthand)
+	if err != nil {
+		return nil, err
+	}
 	results, err := db.HGetAll(context.Background(), cardId).Result()
 	if err != nil {
 		return nil, err
