@@ -13,15 +13,14 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"path"
 	"runtime/debug"
 	"sort"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
 	cleanhttp "github.com/hashicorp/go-cleanhttp"
+	"github.com/mtgban/go-mtgban/mtgban"
 
 	git "github.com/go-git/go-git/v5"
 	githttp "github.com/go-git/go-git/v5/plumbing/transport/http"
@@ -54,93 +53,28 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 		pageVars.InfoMessage = msg
 	}
 
-	refresh := r.FormValue("refresh")
-	if refresh != "" {
-		key, found := ScraperMap[refresh]
-		if !found {
-			pageVars.InfoMessage = refresh + " not found"
-		}
-		if key != "" {
-			_, found := ScraperOptions[key]
-			if !found {
-				pageVars.InfoMessage = key + " not found"
-			} else {
-				// Strip the request parameter to avoid accidental repeats
-				// and to give a chance to table to update
-				r.URL.RawQuery = ""
-				if ScraperOptions[key].Busy {
-					v := url.Values{
-						"msg": {key + " is already being refreshed"},
-					}
-					r.URL.RawQuery = v.Encode()
-				} else if len(ScraperOptions[key].Keepers) > 0 {
-					go reloadMarket(key)
-				} else {
-					go reloadSingle(key)
-				}
+	var doReboot bool
+	var v url.Values
 
-				http.Redirect(w, r, r.URL.String(), http.StatusFound)
-				return
-			}
-		}
-	}
-	cloud := r.FormValue("cloud")
-	cloud_bl := r.FormValue("cloud_bl")
-	if cloud != "" || cloud_bl != "" {
-		if cloud != "" {
-			configMutex.RLock()
-			config, found := SellersConfigMap[cloud]
-			configMutex.RUnlock()
-			if !found {
-				pageVars.InfoMessage = cloud + " not found"
-			} else {
-				seller, err := downloadSeller(config.Path)
-				if err != nil {
-					v := url.Values{
-						"msg": {cloud + " " + err.Error()},
-					}
-					r.URL.RawQuery = v.Encode()
-				} else {
-					for i := range Sellers {
-						if Sellers[i] != nil && Sellers[i].Info().Shorthand == seller.Info().Shorthand {
-							Sellers[i] = seller
-						}
-					}
-				}
-			}
-		} else {
-			configMutex.RLock()
-			config, found := VendorsConfigMap[cloud_bl]
-			configMutex.RUnlock()
-			if !found {
-				pageVars.InfoMessage = cloud_bl + " not found"
-			} else {
-				vendor, err := downloadVendor(config.Path)
-				if err != nil {
-					v := url.Values{
-						"msg": {cloud_bl + " " + err.Error()},
-					}
-					r.URL.RawQuery = v.Encode()
-				} else {
-					for i := range Vendors {
-						if Vendors[i] != nil && Vendors[i].Info().Shorthand == vendor.Info().Shorthand {
-							Vendors[i] = vendor
-						}
-					}
-				}
-			}
-		}
-	}
+	for _, scraperGroup := range []string{"sellers", "vendors"} {
+		refresh := r.FormValue("refresh_" + scraperGroup)
+		if refresh != "" {
+			v = url.Values{}
+			v.Set("msg", "Refreshing "+refresh+" in the background...")
+			doReboot = true
 
-	logs := r.FormValue("logs")
-	if logs != "" {
-		key, found := ScraperMap[logs]
-		if !found {
-			pageVars.InfoMessage = key + " not found"
+			go func() {
+				now := time.Now()
+				log.Println("Refreshing", refresh)
+				err := updateScraper(scraperGroup, refresh)
+				if err != nil {
+					ServerNotify("refresh", err.Error())
+					return
+				}
+				log.Println(refresh, "took", time.Since(now))
+			}()
+			break
 		}
-		log.Println(path.Join(LogDir, key+".log"))
-		http.ServeFile(w, r, path.Join(LogDir, key+".log"))
-		return
 	}
 
 	spoof := r.FormValue("spoof")
@@ -156,8 +90,6 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reboot := r.FormValue("reboot")
-	doReboot := false
-	var v url.Values
 	switch reboot {
 	case "infos":
 		v = url.Values{}
@@ -254,13 +186,6 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 
 		go pullCode()
 
-	case "cache":
-		v = url.Values{}
-		v.Set("msg", "Deleting old cache...")
-		doReboot = true
-
-		go deleteOldCache()
-
 	case "config":
 		v = url.Values{}
 		v.Set("msg", "New config loaded!")
@@ -276,36 +201,7 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 		v.Set("msg", "Reloading scrapers in the background...")
 		doReboot = true
 
-		skip := false
-		for key, opt := range ScraperOptions {
-			if opt.Busy {
-				v.Set("msg", "Cannot reload everything while "+key+" is refreshing")
-				skip = true
-				break
-			}
-		}
-
-		if !skip {
-			go loadScrapers()
-		}
-
-	case "cloud":
-		v = url.Values{}
-		v.Set("msg", "Reloading scrapers from the cloud in the background...")
-		doReboot = true
-
-		skip := false
-		for key, opt := range ScraperOptions {
-			if opt.Busy {
-				v.Set("msg", "Cannot reload everything while "+key+" is refreshing")
-				skip = true
-				break
-			}
-		}
-
-		if !skip {
-			go loadScrapersNG()
-		}
+		go loadBQcron()
 
 	case "server":
 		v = url.Values{}
@@ -341,37 +237,39 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// If data is older than a day the scraper status will change
+	yesterday := time.Now().AddDate(0, 0, -1)
+
 	pageVars.Headers = []string{
-		"", "Name", "Id+Logs", "Last Update", "Entries", "Status",
+		"", "Name", "Shorthand", "Table Name", "Last Update", "Entries", "Status",
 	}
-	for i := range Sellers {
-		if Sellers[i] == nil {
-			row := []string{
-				fmt.Sprintf("Error at Seller %d", i), "", "", "", "",
+	for _, scraperData := range Config.Scrapers["sellers"] {
+		var lastUpdate string
+		var seller mtgban.Seller
+		for i := range Sellers {
+			if Sellers[i].Info().Shorthand == scraperData.Shorthand {
+				seller = Sellers[i]
+				break
 			}
-			pageVars.Table = append(pageVars.Table, row)
-			continue
 		}
 
-		scraperOptions, found := ScraperOptions[ScraperMap[Sellers[i].Info().Shorthand]]
-		if !found {
-			continue
+		var inv mtgban.InventoryRecord
+		if seller != nil {
+			inv, _ = seller.Inventory()
+			lastUpdate = seller.Info().InventoryTimestamp.Format(time.Stamp)
 		}
-
-		lastUpdate := Sellers[i].Info().InventoryTimestamp.Format(time.Stamp)
-
-		inv, _ := Sellers[i].Inventory()
 
 		status := "✅"
-		if scraperOptions.Busy {
-			status = "🔶"
-		} else if len(inv) == 0 {
+		if len(inv) == 0 {
 			status = "🔴"
+		} else if seller.Info().InventoryTimestamp.Before(yesterday) {
+			status = "🔶"
 		}
 
 		row := []string{
-			Sellers[i].Info().Name,
-			Sellers[i].Info().Shorthand,
+			scraperData.Name,
+			scraperData.Shorthand,
+			scraperData.TableName,
 			lastUpdate,
 			fmt.Sprint(len(inv)),
 			status,
@@ -380,34 +278,33 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 		pageVars.Table = append(pageVars.Table, row)
 	}
 
-	for i := range Vendors {
-		if Vendors[i] == nil {
-			row := []string{
-				fmt.Sprintf("Error at Vendor %d", i), "", "", "", "",
+	for _, scraperData := range Config.Scrapers["vendors"] {
+		var lastUpdate string
+		var vendor mtgban.Vendor
+		for i := range Vendors {
+			if Vendors[i].Info().Shorthand == scraperData.Shorthand {
+				vendor = Vendors[i]
+				break
 			}
-			pageVars.OtherTable = append(pageVars.Table, row)
-			continue
 		}
 
-		scraperOptions, found := ScraperOptions[ScraperMap[Vendors[i].Info().Shorthand]]
-		if !found {
-			continue
+		var bl mtgban.BuylistRecord
+		if vendor != nil {
+			bl, _ = vendor.Buylist()
+			lastUpdate = vendor.Info().BuylistTimestamp.Format(time.Stamp)
 		}
-
-		lastUpdate := Vendors[i].Info().BuylistTimestamp.Format(time.Stamp)
-
-		bl, _ := Vendors[i].Buylist()
 
 		status := "✅"
-		if scraperOptions.Busy {
-			status = "🔶"
-		} else if len(bl) == 0 {
+		if len(bl) == 0 {
 			status = "🔴"
+		} else if vendor.Info().BuylistTimestamp.Before(yesterday) {
+			status = "🔶"
 		}
 
 		row := []string{
-			Vendors[i].Info().Name,
-			Vendors[i].Info().Shorthand,
+			scraperData.Name,
+			scraperData.Shorthand,
+			scraperData.TableName,
 			lastUpdate,
 			fmt.Sprint(len(bl)),
 			status,
@@ -481,59 +378,6 @@ func build() (string, error) {
 		return "Build successful", nil
 	}
 	return out.String(), nil
-}
-
-func deleteOldCache() {
-	var size int64
-
-	log.Println("Wiping cache")
-	for _, directory := range []string{"cache_inv/", "cache_bl"} {
-		// Open the directory and read all its files.
-		dirRead, err := os.Open(directory)
-		if err != nil {
-			continue
-		}
-		defer dirRead.Close()
-
-		dirFiles, err := dirRead.Readdir(0)
-		if err != nil {
-			continue
-		}
-
-		for _, subdir := range dirFiles {
-			// Skip most recent entries
-			dayTag := fmt.Sprintf("%03d", time.Now().YearDay()-1)[:2]
-			if strings.HasPrefix(subdir.Name(), dayTag) {
-				continue
-			}
-
-			// Read and list subdirectories
-			subPath := path.Join(directory, subdir.Name())
-			subDirRead, err := os.Open(subPath)
-			if err != nil {
-				continue
-			}
-			defer subDirRead.Close()
-
-			subDirFiles, err := subDirRead.Readdir(0)
-			if err != nil {
-				continue
-			}
-
-			// Loop over the directory's files and remove them
-			for _, files := range subDirFiles {
-				size += files.Size()
-				fullPath := path.Join(directory, subdir.Name(), files.Name())
-				log.Println("Deleting", fullPath)
-				os.Remove(fullPath)
-			}
-
-			// Remove containing directory
-			log.Println("Deleting", subPath)
-			os.Remove(subPath)
-		}
-	}
-	log.Printf("Cache is wiped, %dkb freed", size/1024)
 }
 
 // Custom time.Duration format to print days as well

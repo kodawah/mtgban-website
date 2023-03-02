@@ -400,3 +400,54 @@ func loadBQ() error {
 
 	return nil
 }
+
+func updateScraper(group, tableName string) error {
+	var found bool
+	var idx int
+	for i, scraperData := range Config.Scrapers[group] {
+		if scraperData.TableName == tableName {
+			idx = i
+			found = true
+			break
+		}
+	}
+	if !found {
+		return errors.New("not found")
+	}
+
+	ctx := context.Background()
+	client, err := bigquery.NewClient(ctx, Config.Uploader.ProjectID, option.WithCredentialsFile(Config.Uploader.ServiceAccount))
+	if err != nil {
+		return err
+	}
+
+	now := time.Now()
+	info := Config.Scrapers[group][idx].ScraperInfo
+	if group == "sellers" {
+		inv, err := loadInventoryFromTable(client, tableName)
+		if err != nil {
+			return err
+		}
+		info.InventoryTimestamp = &now
+		for i := range Sellers {
+			if Sellers[i].Info().Shorthand == info.Shorthand {
+				Sellers[i] = mtgban.NewSellerFromInventory(inv, info)
+				break
+			}
+		}
+	} else if group == "vendors" {
+		bl, err := loadBuylistFromTable(client, tableName)
+		if err != nil {
+			return err
+		}
+		info.BuylistTimestamp = &now
+		for i := range Vendors {
+			if Vendors[i].Info().Shorthand == info.Shorthand {
+				Vendors[i] = mtgban.NewVendorFromBuylist(bl, info)
+				break
+			}
+		}
+	}
+
+	return nil
+}

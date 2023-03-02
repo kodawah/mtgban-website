@@ -53,14 +53,14 @@
                 {{range $i, $row := $.Table}}
                     <tr>
                         <td>
-                            <a href="?cloud={{index $row 1}}" title="Reload from cloud"><span class="emoji">☁️</span></a>
+                            <span class="emoji">☁️</span>
                         </td>
                         {{range $j, $cell := $row}}
                             <td>
                                 {{if eq $j 0}}
-                                    <a href="?refresh={{index $row 1}}" onclick="return confirm('Are you sure you want to refresh {{$cell}}?')">{{$cell}}</a>
+                                    <a href="?refresh_sellers={{index $row 2}}" onclick="return confirm('Are you sure you want to refresh {{$cell}}?')">{{$cell}}</a>
                                 {{else if eq $j 1}}
-                                    <a href="?logs={{$cell}}" target="_blank">{{$cell}}</a>
+                                    {{$cell}}
                                 {{else}}
                                     {{if eq $j 4}}
                                         <center>
@@ -89,14 +89,14 @@
                 {{range $i, $row := $.OtherTable}}
                     <tr>
                          <td>
-                            <a href="?cloud_bl={{index $row 1}}" title="Reload from cloud"><span class="emoji">☁️</span></a>
+                            <span class="emoji">☁️</span>
                         </td>
                         {{range $j, $cell := $row}}
                             <td>
                                 {{if eq $j 0}}
-                                    <a href="?refresh={{index $row 1}}" onclick="return confirm('Are you sure you want to refresh {{$cell}}?')">{{$cell}}</a>
+                                    <a href="?refresh_vendors={{index $row 2}}" onclick="return confirm('Are you sure you want to refresh {{$cell}}?')">{{$cell}}</a>
                                 {{else if eq $j 1}}
-                                    <a href="?logs={{$cell}}" target="_blank">{{$cell}}</a>
+                                    {{$cell}}
                                 {{else}}
                                     {{if eq $j 4}}
                                         <center>
@@ -123,10 +123,8 @@
                    (<a href="?reboot=build" onclick="return confirm('Are you sure you want to build the code?')">Build</a> +
                     <a href="?reboot=code" onclick="return confirm('Are you sure you want to pull new code?')">Pull</a> +
                     <a href="?reboot=server" onclick="return confirm('Are you sure you want to restart the server?')">Restart</a>)
-                <li><a href="?reboot=cache" onclick="return confirm('Are you sure you want to wipe old cache?')">🗑️ Wipe old cache</a></li>
                 <li><a href="?reboot=config" onclick="return confirm('Are you sure you want to reload config?')">⚙️ Reload config</a></li>
-                <li><a href="?reboot=scrapers" onclick="return confirm('Are you sure you want to reload all the scrapers?')">🔃 Reload all the scrapers</a></li>
-                <li><a href="?reboot=cloud" onclick="return confirm('Are you sure you want to reload all the scrapers?')">☁️ Reload scrapers from the cloud</a></li>
+                <li><a href="?reboot=scrapers" onclick="return confirm('Are you sure you want to reload scrapers from BQ?')">🔃 Reload everything from BQ</a></li>
                 <li><a href="?reboot=server" onclick="return confirm('Are you sure you want to restart the server?')">⚠️ Restart the server</a></li>
             </ul>
         </div>
