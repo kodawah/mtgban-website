@@ -608,21 +608,14 @@ func main() {
 			return
 		}
 
-		// Set up new refreshes as needed
+		// Set up new refreshes as needed (Times are in UTC)
 		c := cron.New()
 
-		// Times are in UTC
 		// Reload data from BQ every 3 hours
 		c.AddFunc("0 */3 * * *", loadBQcron)
 
-		// Refresh everything daily at 2am (after MTGJSON update)
-		c.AddFunc("35 11 * * *", loadScrapers)
-		// Refresh CK at every 4th hour, 40 minutes past the hour (six times in total)
-		c.AddFunc("40 */4 * * *", reloadCK)
-		// Refresh TCG at every 4th hour, 45 minutes past the hour (six times in total)
-		c.AddFunc("45 */4 * * *", reloadTCG)
-		// Refresh SCG every day at 2:15pm (twice in total)
-		c.AddFunc("15 14 * * *", reloadSCG)
+		// Reload infos every 12 hours
+		c.AddFunc("0 */12 * * *", loadInfos)
 
 		// MTGJSON builds go live 7am EST, pull the update 30 minutes after
 		c.AddFunc("30 11 * * *", func() {
