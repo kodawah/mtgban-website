@@ -337,7 +337,16 @@ var Config struct {
 	Uploader struct {
 		ServiceAccount string `json:"service_account"`
 		BucketName     string `json:"bucket_name"`
+		ProjectID      string `json:"project_id"`
+		DatasetID      string `json:"dataset_id"`
 	} `json:"uploader"`
+
+	Scrapers map[string][]struct {
+		HasRedis   bool   `json:"has_redis,omitempty"`
+		RedisIndex int    `json:"redis_index,omitempty"`
+		TableName  string `json:"table_name"`
+		mtgban.ScraperInfo
+	} `json:"scrapers"`
 
 	/* The location of the configuation file */
 	filePath string
@@ -588,21 +597,25 @@ func main() {
 
 	// load website up
 	go func() {
-		var err error
+		go func() {
+			log.Println("Loading MTGJSONv5")
+			err := loadDatastore()
+			if err != nil {
+				log.Fatalln("error loading mtgjson:", err)
+			}
+		}()
 
-		log.Println("Loading MTGJSONv5")
-		err = loadDatastore()
+		log.Println("Loading cache")
+		err := startup()
 		if err != nil {
-			log.Fatalln("error loading mtgjson:", err)
+			log.Fatalln("error loading cache:", err)
 		}
 
-		err = loadScrapersNG()
+		log.Println("Loading BQ")
+		err = loadBQ()
 		if err != nil {
-			log.Println("error loading config:", err)
-			loadScrapers()
+			log.Fatalln("error loading bq:", err)
 		}
-
-		DatabaseLoaded = true
 
 		// Nothing else to do if hacking around
 		if DevMode {
@@ -613,6 +626,8 @@ func main() {
 		c := cron.New()
 
 		// Times are in UTC
+		// Reload data from BQ every 3 hours
+		c.AddFunc("0 */3 * * *", loadBQcron)
 
 		// Refresh everything daily at 2am (after MTGJSON update)
 		c.AddFunc("35 11 * * *", loadScrapers)
