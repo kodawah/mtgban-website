@@ -40,14 +40,14 @@ type scraperConfig struct {
 
 var enabledDatasets = []scraperConfig{
 	{
-		PublicName: "TCGplayer Low",
+		PublicName: "TCG Player Low",
 		Shorthand:  "TCGLow",
 		Group:      "sellers",
 		Color:      "rgb(255, 99, 132)",
 		HasSealed:  true,
 	},
 	{
-		PublicName: "TCGplayer Market",
+		PublicName: "TCG Player Market",
 		Shorthand:  "TCGMarket",
 		Group:      "sellers",
 		Color:      "rgb(255, 159, 64)",
