@@ -128,10 +128,6 @@ func fixupStoreCodeNG(code string) []string {
 	filters := strings.Split(code, ",")
 	for i := range filters {
 		switch filters[i] {
-		case "CT":
-			filters[i] = CT_STANDARD
-		case "CT0":
-			filters[i] = CT_ZERO
 		case "MKM_LOW":
 			filters[i] = MKM_LOW
 		case "MKM_TREND":

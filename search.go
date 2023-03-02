@@ -26,6 +26,17 @@ const (
 	TooManyMessage    = "More results available, try adjusting your filters"
 	NoResultsMessage  = "No results found"
 	NoCardsMessage    = "No cards found"
+
+	// Shorthands
+	CT_ZERO        = "CT0"
+	MKM_LOW        = "MKMLow"
+	MKM_TREND      = "MKMTrend"
+	TCG_LOW        = "TCGLow"
+	TCG_MARKET     = "TCGMarket"
+	TCG_MAIN       = "TCGPlayer"
+	TCG_DIRECT     = "TCGDirect"
+	TCG_DIRECT_LOW = "TCGDirectLow"
+	TCG_DIRECT_NET = "TCGDirectNet"
 )
 
 type SearchEntry struct {
@@ -497,7 +508,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 		// Iterate on array, always passthrough, except for specific entries
 		for i := range indexArray {
-			switch indexArray[i].ScraperName {
+			switch indexArray[i].Shorthand {
 			case MKM_LOW:
 				// Save reference to the array
 				tmp = append(tmp, indexArray[i])
@@ -692,8 +703,7 @@ func searchSellersNG(cardIds []string, config SearchConfig) (foundSellers map[st
 				}
 
 				icon := ""
-				name := seller.Info().Name
-				switch name {
+				switch seller.Info().Shorthand {
 				case TCG_DIRECT:
 					icon = "img/misc/direct.png"
 				case CT_ZERO:
@@ -702,7 +712,7 @@ func searchSellersNG(cardIds []string, config SearchConfig) (foundSellers map[st
 
 				// Prepare all the deets
 				res := SearchEntry{
-					ScraperName: name,
+					ScraperName: seller.Info().Name,
 					Shorthand:   seller.Info().Shorthand,
 					Price:       entry.Price,
 					Quantity:    entry.Quantity,
@@ -764,19 +774,14 @@ func searchVendorsNG(cardIds []string, config SearchConfig) (foundVendors map[st
 					foundVendors[cardId][conditions] = []SearchEntry{}
 				}
 
-				name := vendor.Info().Name
-				if name == "TCG Player Market" {
-					name = "TCG Trade-In"
-				}
-
 				icon := ""
-				switch name {
+				switch vendor.Info().Shorthand {
 				case TCG_DIRECT_NET:
 					icon = "img/misc/direct.png"
 				}
 
 				res := SearchEntry{
-					ScraperName: name,
+					ScraperName: vendor.Info().Name,
 					Shorthand:   vendor.Info().Shorthand,
 					Price:       entry.BuyPrice,
 					Credit:      entry.TradePrice,
