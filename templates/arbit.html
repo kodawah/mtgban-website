@@ -130,7 +130,7 @@
             {{range $i, $key := .VendorKeys}}
                 <input type="checkbox" id="{{$key}}" name="{{$key}}">
                 <label for="{{$key}}">
-                    {{scraper_name $key}}
+                    {{vendor_name $key}}
                 </label>
                 <br>
             {{end}}

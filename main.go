@@ -755,8 +755,21 @@ func render(w http.ResponseWriter, tmpl string, pageVars PageVars) {
 			n, _ := strconv.ParseFloat(s, 64)
 			return fmt.Sprintf("$ %0.2f", n)
 		},
-		"scraper_name": func(s string) string {
-			return ScraperNames[s]
+		"seller_name": func(s string) string {
+			for _, scraperData := range Config.Scrapers["sellers"] {
+				if s == scraperData.Shorthand {
+					return scraperData.Name
+				}
+			}
+			return ""
+		},
+		"vendor_name": func(s string) string {
+			for _, scraperData := range Config.Scrapers["vendors"] {
+				if s == scraperData.Shorthand {
+					return scraperData.Name
+				}
+			}
+			return ""
 		},
 		"slice_has": func(s []string, p string) bool {
 			return slices.Contains(s, p)

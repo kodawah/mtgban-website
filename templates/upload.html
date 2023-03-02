@@ -257,7 +257,7 @@
                         selectBox.innerHTML = " \
                             {{range .VendorKeys}} \
                                 <label for='{{.}}'> \
-                                    <input type='checkbox' name='stores' id='{{.}}' value='{{.}}' {{if slice_has $.EnabledVendors .}}checked{{end}}>&nbsp;{{scraper_name .}}</label><br> \
+                                    <input type='checkbox' name='stores' id='{{.}}' value='{{.}}' {{if slice_has $.EnabledVendors .}}checked{{end}}>&nbsp;{{vendor_name .}}</label><br> \
                             {{end}} \
                         ";
 
@@ -273,7 +273,7 @@
                         selectBox.innerHTML = " \
                             {{range .SellerKeys}} \
                                 <label for='{{.}}'> \
-                                    <input type='checkbox' name='stores' id='{{.}}' value='{{.}}' {{if slice_has $.EnabledSellers .}}checked{{end}}>&nbsp;{{scraper_name .}}</label><br> \
+                                    <input type='checkbox' name='stores' id='{{.}}' value='{{.}}' {{if slice_has $.EnabledSellers .}}checked{{end}}>&nbsp;{{seller_name .}}</label><br> \
                             {{end}} \
                         ";
 
@@ -564,7 +564,11 @@
                                             {{$price := (index $scraperEntries .)}}
                                             <td class="fullAnchor" style="border:1px solid black;min-width:50px">
                                                 <a class="btn {{if $price}}{{if and $.IsBuylist (and (ne $oPrice 0.0) (lt $oPrice $price))}}success{{else}}normal{{end}}{{else}}default{{end}}" {{if $price}}href="https://mtgban.com/go/{{if $.IsBuylist}}b/{{end}}{{.}}/{{$cardId}}"{{end}} target="_blank">
-                                                    {{scraper_name .}}
+                                                    {{if $.IsBuylist}}
+                                                        {{vendor_name .}}
+                                                    {{else}}
+                                                        {{seller_name .}}
+                                                    {{end}}
                                                 </a>
                                             </td>
                                         {{end}}
@@ -614,7 +618,11 @@
                                         {{$entry := (index $.TotalEntries .)}}
                                         <td class="fullAnchor" style="border:1px solid black;min-width:50px">
                                             <a class="btn default">
-                                                {{scraper_name .}}
+                                                {{if $.IsBuylist}}
+                                                    {{vendor_name .}}
+                                                {{else}}
+                                                    {{seller_name .}}
+                                                {{end}}
                                             </a>
                                         </td>
                                     {{end}}
@@ -655,7 +663,7 @@
                             <b>Index totals</b>
                             {{range $.IndexKeys}}
                                 <br>
-                                <a class="btn info">{{scraper_name .}}:</a>
+                                <a class="btn info">{{seller_name .}}:</a>
                                 {{$price := (index $.TotalEntries .)}}
                                 {{if $price}}
                                     <nobr>$ {{printf "%.2f" $price}}</nobr>
@@ -691,7 +699,7 @@
                             {{$entries := index $.Optimized $scraperKey}}
                             {{if $entries}}
                                 <a class="btn default" href="#{{$scraperKey}}">
-                                    {{len $entries}} cards {{if $.IsBuylist}}to{{else}}at{{end}} <b>{{scraper_name $scraperKey}}</b>: $ {{printf "%.2f" (index $.OptimizedTotals $scraperKey)}}
+                                    {{len $entries}} cards {{if $.IsBuylist}}to <b>{{vendor_name $scraperKey}}</b>{{else}}at <b>{{seller_name $scraperKey}}</b>{{end}}: $ {{printf "%.2f" (index $.OptimizedTotals $scraperKey)}}
                                 </a>
                                 <br>
                             {{end}}
@@ -706,7 +714,7 @@
                                 <tr>
                                     <span class="anchor" id="{{$scraperKey}}"></span>
                                     <a class="btn default" href="#top">
-                                        <b>{{scraper_name $scraperKey}}</b> - $ {{printf "%.2f" (index $.OptimizedTotals $scraperKey)}}
+                                        <b>{{vendor_name $scraperKey}}</b> - $ {{printf "%.2f" (index $.OptimizedTotals $scraperKey)}}
                                     </a>
 
                                     {{$sourceKey := $scraperKey}}

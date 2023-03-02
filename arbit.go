@@ -303,9 +303,6 @@ func arbit(w http.ResponseWriter, r *http.Request, reverse bool) {
 			}
 			vendorKeys = append(vendorKeys, vendor.Info().Shorthand)
 		}
-		sort.Slice(vendorKeys, func(i, j int) bool {
-			return ScraperNames[vendorKeys[i]] < ScraperNames[vendorKeys[j]]
-		})
 		pageVars.VendorKeys = vendorKeys
 	} else {
 		filters := strings.Split(readCookie(r, "ArbitVendorsList"), ",")
