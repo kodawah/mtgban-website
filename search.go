@@ -28,7 +28,6 @@ const (
 	NoCardsMessage    = "No cards found"
 
 	// Shorthands
-	CT_ZERO        = "CT0"
 	MKM_LOW        = "MKMLow"
 	MKM_TREND      = "MKMTrend"
 	TCG_LOW        = "TCGLow"
@@ -702,14 +701,6 @@ func searchSellersNG(cardIds []string, config SearchConfig) (foundSellers map[st
 					foundSellers[cardId][conditions] = []SearchEntry{}
 				}
 
-				icon := ""
-				switch seller.Info().Shorthand {
-				case TCG_DIRECT:
-					icon = "img/misc/direct.png"
-				case CT_ZERO:
-					icon = "img/misc/zero.png"
-				}
-
 				// Prepare all the deets
 				res := SearchEntry{
 					ScraperName: seller.Info().Name,
@@ -718,7 +709,7 @@ func searchSellersNG(cardIds []string, config SearchConfig) (foundSellers map[st
 					Quantity:    entry.Quantity,
 					URL:         entry.URL,
 					NoQuantity:  seller.Info().NoQuantityInventory || seller.Info().MetadataOnly,
-					BundleIcon:  icon,
+					BundleIcon:  seller.Info().CustomFields["icon"],
 					Country:     Country2flag[seller.Info().CountryFlag],
 				}
 
