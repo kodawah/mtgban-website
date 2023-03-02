@@ -20,6 +20,33 @@ import (
 	"github.com/mtgban/go-mtgban/mtgmatcher/mtgjson"
 )
 
+const (
+	// from TCGIndex
+	TCG_LOW        = "TCG Low"
+	TCG_MARKET     = "TCG Market"
+	TCG_DIRECT_LOW = "TCG Direct Low"
+
+	// from TCGMrkt
+	TCG_MAIN    = "TCG Player"
+	TCG_DIRECT  = "TCG Direct"
+	TCG_BUYLIST = "TCG Player Market"
+
+	// from TCGDirectNet
+	TCG_DIRECT_NET = "TCG Direct (net)"
+
+	// from MKMIndex
+	MKM_LOW   = "MKM Low"
+	MKM_TREND = "MKM Trend"
+
+	// from CT
+	CT_STANDARD        = "Card Trader"
+	CT_ZERO            = "Card Trader Zero"
+	CT_STANDARD_SEALED = "Card Trader Sealed"
+	CT_ZERO_SEALED     = "Card Trader Zero Sealed"
+)
+
+const AllPrintingsFileName = "allprintings5.json"
+
 var Country2flag = map[string]string{
 	"EU": "🇪🇺",
 	"JP": "🇯🇵",
@@ -50,6 +77,11 @@ type GenericCard struct {
 	Booster   bool
 
 	SourceSealed []string
+}
+
+// A default scale for converting non-NM prices to NM
+var defaultGradeMap = map[string]float64{
+	"NM": 1, "SP": 1.25, "MP": 1.67, "HP": 2.5, "PO": 4,
 }
 
 func fileExists(filename string) bool {
