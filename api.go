@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/csv"
 	"encoding/json"
 	"errors"
@@ -9,7 +8,6 @@ import (
 	"net/http"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/mtgban/go-mtgban/cardkingdom"
 	"github.com/mtgban/go-mtgban/mtgban"
@@ -56,14 +54,8 @@ func prepareCKAPI() error {
 	}
 	CKAPIData = list
 
-	// Backup option for stashing CK data
-	rdbRT := ScraperOptions["cardkingdom"].RDBs["retail"]
-	rdbBL := ScraperOptions["cardkingdom"].RDBs["buylist"]
-	key := time.Now().Format("2006-01-02")
-
 	output := map[string]*ck2id{}
 
-	var skipRedis bool
 	for _, card := range list {
 		theCard, err := cardkingdom.Preprocess(card)
 		if err != nil {
@@ -73,22 +65,6 @@ func prepareCKAPI() error {
 		cardId, err := mtgmatcher.Match(theCard)
 		if err != nil {
 			continue
-		}
-
-		if card.SellQuantity > 0 && !skipRedis {
-			// We use Set for retail because prices are more accurate
-			err = rdbRT.HSet(context.Background(), cardId, key, card.SellPrice).Err()
-			if err != nil {
-				log.Printf("redis error for %s: %s", cardId, err)
-				skipRedis = true
-			}
-		}
-		if card.BuyQuantity > 0 && !skipRedis {
-			err = rdbBL.HSetNX(context.Background(), cardId, key, card.BuyPrice).Err()
-			if err != nil {
-				log.Printf("redis error for %s: %s", cardId, err)
-				skipRedis = true
-			}
 		}
 
 		co, err := mtgmatcher.GetUUID(cardId)
