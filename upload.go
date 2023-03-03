@@ -372,13 +372,14 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	indexResults := getSellerPrices("", UploadIndexKeys, "", cardIds, false, shouldCheckForConditions)
 	pageVars.IndexKeys = UploadIndexKeys[:len(UploadIndexKeys)-1]
 
+	// Orders implies priority of argument search
 	pageVars.Metadata = map[string]GenericCard{}
 	if len(hashes) != 0 {
 		pageVars.SearchQuery = "hashes"
-	} else if gdocURL != "" {
-		pageVars.SearchQuery = gdocURL
 	} else if textArea != "" {
 		pageVars.SearchQuery = "pasted text"
+	} else if gdocURL != "" {
+		pageVars.SearchQuery = gdocURL
 	} else {
 		pageVars.SearchQuery = handler.Filename
 	}
