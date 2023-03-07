@@ -404,13 +404,19 @@ func loadBQ() error {
 	return nil
 }
 
-func updateScraper(group, tableName string) error {
+func updateScraper(tableName string) error {
 	var found bool
 	var idx int
-	for i, scraperData := range Config.Scrapers[group] {
-		if scraperData.TableName == tableName {
-			idx = i
-			found = true
+	var group string
+	for group = range Config.Scrapers {
+		for i, scraperData := range Config.Scrapers[group] {
+			if scraperData.TableName == tableName {
+				idx = i
+				found = true
+				break
+			}
+		}
+		if found {
 			break
 		}
 	}

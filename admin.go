@@ -67,7 +67,7 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 			go func() {
 				now := time.Now()
 				log.Println("Refreshing", refresh)
-				err := updateScraper(scraperGroup, refresh)
+				err := updateScraper(refresh)
 				if err != nil {
 					ServerNotify("refresh", err.Error())
 					return
@@ -241,6 +241,9 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 	// If data is older than a day the scraper status will change
 	yesterday := time.Now().AddDate(0, 0, -1)
 
+	pageVars.AllKeys = []string{"sellers", "vendors", "info"}
+	pageVars.Tables = make([][][]string, len(pageVars.AllKeys))
+
 	pageVars.Headers = []string{
 		"", "Name", "Shorthand", "Table Name", "Last Update", "Entries", "Status",
 	}
@@ -276,7 +279,7 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 			status,
 		}
 
-		pageVars.Table = append(pageVars.Table, row)
+		pageVars.Tables[0] = append(pageVars.Tables[0], row)
 	}
 
 	for _, scraperData := range Config.Scrapers["vendors"] {
@@ -311,7 +314,7 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 			status,
 		}
 
-		pageVars.OtherTable = append(pageVars.OtherTable, row)
+		pageVars.Tables[1] = append(pageVars.Tables[1], row)
 	}
 
 	var tiers []string

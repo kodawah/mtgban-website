@@ -41,77 +41,44 @@
             <h2>{{.InfoMessage}}</h2>
         </div>
         <br>
-        <div class="indent">
-            <table style="float: left;">
-                <tr>
-                    {{range $.Headers}}
-                        <th class="wrap stickyHeader" style="top:48px">
-                            {{.}}
-                        </th>
-                    {{end}}
-                </tr>
-                {{range $i, $row := $.Table}}
+        {{range $e, $key := $.AllKeys}}
+            <div class="indent">
+                <table style="float: left;">
                     <tr>
-                        <td>
-                            <span class="emoji">☁️</span>
-                        </td>
-                        {{range $j, $cell := $row}}
-                            <td>
-                                {{if eq $j 0}}
-                                    <a href="?refresh_sellers={{index $row 2}}" onclick="return confirm('Are you sure you want to refresh {{$cell}}?')">{{$cell}}</a>
-                                {{else if eq $j 1}}
-                                    {{$cell}}
-                                {{else}}
-                                    {{if eq $j 4}}
-                                        <center>
-                                    {{end}}
-                                    {{$cell}}
-                                    {{if eq $j 4}}
-                                        </center>
-                                    {{end}}
-                                {{end}}
-                            </td>
+                        {{range $.Headers}}
+                            <th class="wrap stickyHeader" style="top:48px">
+                                {{.}}
+                            </th>
                         {{end}}
                     </tr>
-                {{end}}
-            </table>
-        </div>
-
-        <div class="indent">
-            <table style="float: left;">
-                <tr>
-                    {{range $.Headers}}
-                        <th class="wrap stickyHeader" style="top:48px">
-                            {{.}}
-                        </th>
-                    {{end}}
-                </tr>
-                {{range $i, $row := $.OtherTable}}
-                    <tr>
-                         <td>
-                            <span class="emoji">☁️</span>
-                        </td>
-                        {{range $j, $cell := $row}}
+                    {{$table := index $.Tables $e}}
+                    {{range $i, $row := $table}}
+                        <tr>
                             <td>
-                                {{if eq $j 0}}
-                                    <a href="?refresh_vendors={{index $row 2}}" onclick="return confirm('Are you sure you want to refresh {{$cell}}?')">{{$cell}}</a>
-                                {{else if eq $j 1}}
-                                    {{$cell}}
-                                {{else}}
-                                    {{if eq $j 4}}
-                                        <center>
-                                    {{end}}
-                                    {{$cell}}
-                                    {{if eq $j 4}}
-                                        </center>
-                                    {{end}}
-                                {{end}}
+                                <span class="emoji">☁️</span>
                             </td>
-                        {{end}}
-                    </tr>
-                {{end}}
-            </table>
-        </div>
+                            {{range $j, $cell := $row}}
+                                <td>
+                                    {{if eq $j 0}}
+                                        <a href="?refresh_sellers={{index $row 2}}" onclick="return confirm('Are you sure you want to refresh {{$cell}}?')">{{$cell}}</a>
+                                    {{else if eq $j 1}}
+                                        {{$cell}}
+                                    {{else}}
+                                        {{if eq $j 4}}
+                                            <center>
+                                        {{end}}
+                                        {{$cell}}
+                                        {{if eq $j 4}}
+                                            </center>
+                                        {{end}}
+                                    {{end}}
+                                </td>
+                            {{end}}
+                        </tr>
+                    {{end}}
+                </table>
+            </div>
+        {{end}}
         <br>
         <div style="clear:both;"></div>
         <br>
