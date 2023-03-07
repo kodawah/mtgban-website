@@ -112,7 +112,7 @@ type PageVars struct {
 	SleepersColors []string
 
 	Headers      []string
-	OtherTable   [][]string
+	Tables       [][][]string
 	CurrentTime  time.Time
 	Uptime       string
 	DiskStatus   string
