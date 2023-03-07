@@ -7,13 +7,18 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/mtgban/go-mtgban/cardkingdom"
 	"github.com/mtgban/go-mtgban/mtgban"
 	"github.com/mtgban/go-mtgban/mtgmatcher"
 	"github.com/mtgban/go-mtgban/tcgplayer"
+
+	"golang.org/x/sync/singleflight"
 )
 
 type meta struct {
@@ -175,6 +180,35 @@ func TCGLastSoldAPI(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"error": "` + err.Error() + `"}`))
 		return
 	}
+}
+
+var tableGroup singleflight.Group
+
+func RefreshTable(w http.ResponseWriter, r *http.Request) {
+	table := filepath.Base(r.URL.Path)
+
+	ServerNotify("tableRefresh", table+" refresh started")
+
+	now := time.Now()
+
+	resp, _, _ := tableGroup.Do(table, func() (interface{}, error) {
+		return updateScraper(table), nil
+	})
+
+	msg := "ok"
+	if resp != nil {
+		msg = resp.(error).Error()
+		ServerNotify("tableRefresh", msg)
+	} else {
+		ServerNotify("tableRefresh", fmt.Sprintf("%s refreshed in %v", table, time.Since(now)))
+	}
+	w.Write([]byte(`{"msg": "` + msg + `"}`))
+
+	doRedir, _ := strconv.ParseBool(r.FormValue("redir"))
+	if doRedir {
+		http.Redirect(w, r, "/admin?msg="+msg, http.StatusFound)
+	}
+	return
 }
 
 func UUID2CKCSV(w *csv.Writer, ids []string) error {
