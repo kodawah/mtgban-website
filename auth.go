@@ -429,7 +429,9 @@ func enforceAPISigning(next http.Handler) http.Handler {
 		exp := v.Get("Expires")
 
 		secret := os.Getenv("BAN_SECRET")
+		apiUsersMutex.RLock()
 		user_secret, found := Config.ApiUserSecrets[v.Get("UserEmail")]
+		apiUsersMutex.RUnlock()
 		if found {
 			secret = user_secret
 		}

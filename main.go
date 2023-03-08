@@ -329,6 +329,9 @@ var Config struct {
 		ServiceAccount string `json:"service_account"`
 		BucketName     string `json:"bucket_name"`
 	} `json:"uploader"`
+
+	/* The location of the configuation file */
+	filePath string
 }
 
 var DevMode bool
@@ -461,6 +464,8 @@ func loadVars(cfg string) error {
 	if err != nil {
 		return err
 	}
+
+	Config.filePath = cfg
 
 	if Config.Port == "" {
 		Config.Port = DefaultConfigPort

@@ -161,6 +161,21 @@
                         <input value="{{.DemoKey}}" onClick="this.setSelectionRange(0, this.value.length)" class="input-css">
                     </form>
                 </li>
+                <li>
+                    Generate New Key
+                    <form>
+                        <input type="hidden" name="reboot" value="newKey"/>
+                        <input name="user" id="user" placeholder="User email" class="input-css">
+                        <select name="duration" class="select-css" style="width: 30px; line-height: inherit;" onchange="if (document.getElementById('user').value !== '') { this.form.submit() }">
+                            <option selected value=""></option>
+                                <option value="0">No expiration</option>
+                                <option value="15">Two weeks</option>
+                                <option value="31">One month</option>
+                                <option value="183">Half year</option>
+                                <option value="365">One year</option>
+                        </select>
+                    </form>
+                </li>
             </ul>
         </div>
 

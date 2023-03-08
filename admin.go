@@ -3,16 +3,21 @@ package main
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
 	"os/exec"
 	"path"
 	"sort"
+	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	cleanhttp "github.com/hashicorp/go-cleanhttp"
@@ -302,6 +307,22 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 			log.Println("Admin requested server restart")
 			os.Exit(0)
 		}()
+
+	case "newKey":
+		v = url.Values{}
+		doReboot = true
+
+		user := r.FormValue("user")
+		dur := r.FormValue("duration")
+		duration, _ := strconv.Atoi(dur)
+
+		key, err := generateAPIKey(getBaseURL(r), user, time.Duration(duration)*24*time.Hour)
+		msg := key
+		if err != nil {
+			msg = "error: " + err.Error()
+		}
+
+		v.Set("msg", msg)
 	}
 	if doReboot {
 		r.URL.RawQuery = v.Encode()
@@ -546,22 +567,74 @@ func mem() string {
 	return fmt.Sprintf("%.2f%% of %.2fGB", float64(memData.Used)/float64(memData.Total)*100, float64(memData.Total)/1024/1024/1024)
 }
 
-const DefaultAPIDemoKeyDuration = 30 * 24 * time.Hour
+const (
+	DefaultAPIDemoKeyDuration = 30 * 24 * time.Hour
+	DefaultAPIDemoUser        = "demo@mtgban.com"
+)
 
 func getDemoKey(link string) string {
+	key, _ := generateAPIKey(link, DefaultAPIDemoUser, DefaultAPIDemoKeyDuration)
+	return key
+}
+
+var apiUsersMutex sync.RWMutex
+
+func generateAPIKey(link, user string, duration time.Duration) (string, error) {
+	if user == "" {
+		return "", errors.New("missing user")
+	}
+
+	apiUsersMutex.RLock()
+	key, found := Config.ApiUserSecrets[user]
+	apiUsersMutex.RUnlock()
+
+	if !found {
+		key = randomString(15)
+		apiUsersMutex.Lock()
+		Config.ApiUserSecrets[user] = key
+		apiUsersMutex.Unlock()
+
+		file, err := os.Create(Config.filePath)
+		if err != nil {
+			return "", err
+		}
+		defer file.Close()
+
+		e := json.NewEncoder(file)
+		// Avoids & -> \u0026 and similar
+		e.SetEscapeHTML(false)
+		e.SetIndent("", "    ")
+		err = e.Encode(&Config)
+		if err != nil {
+			return "", err
+		}
+	}
+
 	v := url.Values{}
 	v.Set("API", "ALL_ACCESS")
 	v.Set("APImode", "all")
-	v.Set("UserEmail", "demo@mtgban.com")
+	v.Set("UserEmail", user)
 
-	expires := time.Now().Add(DefaultAPIDemoKeyDuration)
-	exp := fmt.Sprintf("%d", expires.Unix())
-	v.Set("Expires", exp)
+	var exp string
+	if duration != 0 {
+		expires := time.Now().Add(duration)
+		exp = fmt.Sprintf("%d", expires.Unix())
+		v.Set("Expires", exp)
+	}
 
 	data := fmt.Sprintf("GET%s%s%s", exp, link, v.Encode())
-	key := Config.ApiUserSecrets["demo@mtgban.com"]
 	sig := signHMACSHA1Base64([]byte(key), []byte(data))
 
 	v.Set("Signature", sig)
-	return base64.StdEncoding.EncodeToString([]byte(v.Encode()))
+	return base64.StdEncoding.EncodeToString([]byte(v.Encode())), nil
+}
+
+// 32-126 are the printable characters in ashii, 33 excludes space
+func randomString(l int) string {
+	rand.Seed(time.Now().UnixNano())
+	bytes := make([]byte, l)
+	for i := 0; i < l; i++ {
+		bytes[i] = byte(33 + rand.Intn(126-33))
+	}
+	return string(bytes)
 }
