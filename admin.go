@@ -14,6 +14,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"runtime/debug"
 	"sort"
 	"strconv"
 	"strings"
@@ -32,6 +33,17 @@ const (
 	mtgjsonURL = "https://mtgjson.com/api/v5/AllPrintings.json"
 	GoFullPath = "/usr/local/go/bin/go"
 )
+
+var BuildCommit = func() string {
+	if info, ok := debug.ReadBuildInfo(); ok {
+		for _, setting := range info.Settings {
+			if setting.Key == "vcs.revision" {
+				return setting.Value
+			}
+		}
+	}
+	return ""
+}()
 
 func Admin(w http.ResponseWriter, r *http.Request) {
 	sig := getSignatureFromCookies(r)
@@ -411,26 +423,11 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 	pageVars.Uptime = uptime()
 	pageVars.DiskStatus = disk()
 	pageVars.MemoryStatus = mem()
-	pageVars.LatestHash, _ = latestHash()
+	pageVars.LatestHash = BuildCommit
 	pageVars.CurrentTime = time.Now()
 	pageVars.DemoKey = url.QueryEscape(getDemoKey(getBaseURL(r)))
 
 	render(w, "admin.html", pageVars)
-}
-
-func latestHash() (string, error) {
-	r, err := git.PlainOpen(".")
-	if err != nil {
-		return "", err
-	}
-
-	// Print the latest commit
-	ref, err := r.Head()
-	if err != nil {
-		return "", err
-	}
-
-	return ref.Hash().String(), nil
 }
 
 func pullCode() (string, error) {
