@@ -16,10 +16,10 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/360EntSecGroup-Skylar/excelize/v2"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/extrame/xls"
 	cleanhttp "github.com/hashicorp/go-cleanhttp"
+	"github.com/xuri/excelize/v2"
 	"gopkg.in/Iwark/spreadsheet.v2"
 
 	"github.com/kodabb/go-mtgban/mtgmatcher"
