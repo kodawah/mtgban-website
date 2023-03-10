@@ -12,10 +12,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kodabb/go-mtgban/cardkingdom"
-	"github.com/kodabb/go-mtgban/mtgban"
-	"github.com/kodabb/go-mtgban/mtgmatcher"
-	"github.com/kodabb/go-mtgban/tcgplayer"
+	"github.com/mtgban/go-mtgban/cardkingdom"
+	"github.com/mtgban/go-mtgban/mtgban"
+	"github.com/mtgban/go-mtgban/mtgmatcher"
+	"github.com/mtgban/go-mtgban/tcgplayer"
 )
 
 type meta struct {

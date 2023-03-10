@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kodabb/go-mtgban/mtgban"
+	"github.com/mtgban/go-mtgban/mtgban"
 )
 
 type ScraperConfig struct {

@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-	"github.com/kodabb/go-mtgban/mtgban"
+	"github.com/mtgban/go-mtgban/mtgban"
 	"google.golang.org/api/option"
 )
 

@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kodabb/go-mtgban/mtgmatcher"
+	"github.com/mtgban/go-mtgban/mtgmatcher"
 )
 
 const (

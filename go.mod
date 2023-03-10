@@ -15,9 +15,9 @@ require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2
-	github.com/kodabb/go-mtgban v0.0.0-20230310164842-766e68ce26fd
 	github.com/leemcloughlin/logfile v0.0.0-20201123203928-cff1c8a30a10
 	github.com/mackerelio/go-osstat v0.1.0
+	github.com/mtgban/go-mtgban v0.0.0-20230310165902-98fe2eed557f
 	github.com/xuri/excelize/v2 v2.7.0
 	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783
 	golang.org/x/sys v0.4.0

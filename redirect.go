@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/kodabb/go-mtgban/mtgmatcher"
+	"github.com/mtgban/go-mtgban/mtgmatcher"
 )
 
 const UTM_BOT = "banbot"

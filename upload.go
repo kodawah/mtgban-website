@@ -22,7 +22,7 @@ import (
 	"github.com/xuri/excelize/v2"
 	"gopkg.in/Iwark/spreadsheet.v2"
 
-	"github.com/kodabb/go-mtgban/mtgmatcher"
+	"github.com/mtgban/go-mtgban/mtgmatcher"
 )
 
 const (

@@ -26,7 +26,7 @@ import (
 	"gopkg.in/Iwark/spreadsheet.v2"
 	cron "gopkg.in/robfig/cron.v2"
 
-	"github.com/kodabb/go-mtgban/mtgban"
+	"github.com/mtgban/go-mtgban/mtgban"
 )
 
 type PageVars struct {
