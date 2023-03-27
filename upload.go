@@ -29,9 +29,10 @@ const (
 	MinLowValueSpread = 60.0
 	MinLowValueAbs    = 1.0
 
-	MaxUploadEntries    = 350
-	MaxUploadProEntries = 1000
-	MaxUploadFileSize   = 5 << 20
+	MaxUploadEntries      = 350
+	MaxUploadProEntries   = 1000
+	MaxUploadTotalEntries = 10000
+	MaxUploadFileSize     = 5 << 20
 
 	DefaultPercentageMargin = 0.1
 
@@ -292,11 +293,17 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		pageVars.EnabledSellers = enabledStores
 	}
 
+	estimate, _ := strconv.ParseBool(r.FormValue("estimate"))
+
 	start := time.Now()
 
 	maxRows := MaxUploadEntries
 	if canOptimize {
 		maxRows = MaxUploadProEntries
+	}
+	// Allow a larger upload limit since prices are not provided
+	if estimate && ((canBuylist && !blMode) || canOptimize) {
+		maxRows = MaxUploadTotalEntries
 	}
 
 	// Load data
@@ -323,6 +330,53 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		pageVars.WarningMessage = err.Error()
 		render(w, "upload.html", pageVars)
+		return
+	}
+
+	// Allow estimating on a separate page
+	if estimate && ((canBuylist && !blMode) || canOptimize) {
+		var items []CCItem
+		for i := range uploadedData {
+			if uploadedData[i].CardId == "" {
+				continue
+			}
+			co, err := mtgmatcher.GetUUID(uploadedData[i].CardId)
+			if err != nil {
+				continue
+			}
+			var cond string
+			if uploadedData[i].OriginalCondition != "" {
+				cond = map[string]string{
+					"NM": "nm",
+					"SP": "lp",
+					"MP": "mp",
+					"HP": "hp",
+					"PO": "dmg",
+				}[uploadedData[i].OriginalCondition]
+			}
+			var qty int
+			if uploadedData[i].HasQuantity {
+				qty = uploadedData[i].Quantity
+			}
+
+			items = append(items, CCItem{
+				ScryfallID: co.Identifiers["scryfallId"],
+				Condition:  cond,
+				Quantity:   qty,
+				IsFoil:     co.Foil,
+				IsEtched:   co.Etched,
+			})
+		}
+
+		link, err := sendCardConduitEstimate(items)
+		if err != nil {
+			UserNotify("upload", err.Error())
+			pageVars.InfoMessage = "Unable to process your list to CardConduit right now"
+			render(w, "upload.html", pageVars)
+			return
+		}
+
+		http.Redirect(w, r, link, http.StatusFound)
 		return
 	}
 

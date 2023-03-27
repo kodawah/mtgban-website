@@ -95,18 +95,20 @@
                     <br><br>
 
                     <script type="text/javascript">
-                        function downloadResults(val) {
-                            var download = document.getElementById('download');
-                            download.value = val;
+                        function submitForm(field, val) {
+                            var formField = document.getElementById(field);
+                            formField.value = val;
                             var btn = document.getElementById('submit');
                             btn.submit();
                         }
                     </script>
 
                     <input type="hidden" id="download" name="download" value="false"/>
-                    <input type="submit" id="submit" value="&nbsp;&nbsp;Upload&nbsp;&nbsp;" onclick="javascript:downloadResults('false');" {{if and (not .RemoteLinkURL) (not .CardHashes)}}disabled{{end}} style="display:inline">
+                    <input type="hidden" id="estimate" name="estimate" value="false"/>
+                    <input type="submit" id="submit" value="&nbsp;&nbsp;Upload&nbsp;&nbsp;" onclick="javascript:submitForm('download', 'false');" {{if and (not .RemoteLinkURL) (not .CardHashes)}}disabled{{end}} style="display:inline">
                     {{if .CanBuylist}}
-                        <input type="submit" id="submit_download" value="&nbsp;&nbsp;Get CSV&nbsp;&nbsp;" onclick="javascript:downloadResults('true');" {{if and (not .RemoteLinkURL) (not .CardHashes)}}disabled{{end}} style="display:none">
+                        <input type="submit" id="submit_download" value="&nbsp;&nbsp;Get CSV&nbsp;&nbsp;" onclick="javascript:submitForm('download', 'true');" {{if and (not .RemoteLinkURL) (not .CardHashes)}}disabled{{end}} style="display:none">
+                        <input type="submit" id="submit_estimate" value="&nbsp;CardConduit&nbsp;" onclick="javascript:submitForm('estimate', 'true');" {{if and (not .RemoteLinkURL) (not .CardHashes)}}disabled{{end}} style="display:none">
                     {{end}}
                     {{if .Optimized}}
                         <input type="button" value="&nbsp;&nbsp;Optimizer&nbsp;&nbsp;" onclick="window.location.href = '#top';" style="display:inline">
@@ -169,20 +171,25 @@
             window.reloadSelect = function(mode) {
                 var selectBox = document.getElementById('stores');
                 if (selectBox) {
+                    const fields = ['submit_download', 'submit_estimate'];
                     if (mode == "buylist") {
                         selectBox.innerHTML = " \
                             {{range .VendorKeys}} \
                                 <option value='{{.}}' {{if slice_has $.EnabledVendors .}}selected{{end}}>{{scraper_name .}}</option> \
                             {{end}} \
                         ";
-                        var submitButton = document.getElementById('submit_download');
-                        if (submitButton) {
-                            {{if .CanOptimize}}
-                                submitButton.style.display = "inline"
-                            {{else}}
-                                submitButton.style.display = "none"
-                            {{end}}
-                        }
+
+                        fields.forEach(element => {
+                            var btn = document.getElementById(element);
+                            if (btn) {
+                                {{if .CanOptimize}}
+                                    btn.style.display = "inline"
+                                {{else}}
+                                    btn.style.display = "none"
+                                {{end}}
+                            }
+                        })
+
                         document.getElementById('opts').style.display = "inline";
                     } else if (mode == "retail") {
                         selectBox.innerHTML = " \
@@ -190,10 +197,14 @@
                                 <option value='{{.}}' {{if slice_has $.EnabledSellers .}}selected{{end}}>{{scraper_name .}}</option> \
                             {{end}} \
                         ";
-                        var submitButton = document.getElementById('submit_download');
-                        if (submitButton) {
-                            submitButton.style.display = "inline"
-                        }
+
+                        fields.forEach(element => {
+                            var btn = document.getElementById(element);
+                            if (btn) {
+                                btn.style.display = "inline"
+                            }
+                        })
+
                         document.getElementById('opts').style.display = "none";
                     }
                 }
@@ -210,14 +221,15 @@
                     var url = document.getElementById('urlLabel');
                     url.innerHTML = "Select spreadsheet";
 
-                    var btn = document.getElementById('submit');
-                    btn.disabled = false;
+                    const fields = ['submit', 'submit_download', 'submit_estimate'];
 
-                    var btn2 = document.getElementById('submit_download');
-                    if (btn2) {
-                        btn2.disabled = false;
-                    }
-               }
+                    fields.forEach(element => {
+                        var btn = document.getElementById(element);
+                        if (btn) {
+                            btn.disabled = false;
+                        }
+                    })
+                }
             };
             window.askForURL = function(){
                 let url = prompt("Please enter your URL here", "{{.RemoteLinkURL}}");
@@ -238,13 +250,14 @@
                     var input = document.getElementById('gdocURL');
                     input.value = url;
 
-                    var btn = document.getElementById('submit');
-                    btn.disabled = (url == "");
+                    const fields = ['submit', 'submit_download', 'submit_estimate'];
 
-                    var btn2 = document.getElementById('submit_download');
-                    if (btn2) {
-                        btn2.disabled = (url == "");
-                    }
+                    fields.forEach(element => {
+                        var btn = document.getElementById(element);
+                        if (btn) {
+                            btn.disabled = (url == "");
+                        }
+                    })
                 } else if (url != null) {
                     alert("Invalid URL");
                 }
@@ -253,13 +266,14 @@
                 var textArea = document.getElementById('textArea');
                 textArea.style.display = "block";
 
-                var btn = document.getElementById('submit');
-                btn.disabled = false;
+                const fields = ['submit', 'submit_download', 'submit_estimate'];
 
-                var btn2 = document.getElementById('submit_download');
-                if (btn2) {
-                    btn2.disabled = false;
-                }
+                fields.forEach(element => {
+                    var btn = document.getElementById(element);
+                    if (btn) {
+                        btn.disabled = false;
+                    }
+                })
             }
 
             window.onload = (event) => {
