@@ -802,7 +802,7 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 		return false
 	},
 	"number": func(filters []string, co *mtgmatcher.CardObject) bool {
-		return !SliceStringHas(filters, co.Number)
+		return !SliceStringHas(filters, strings.ToLower(co.Number))
 	},
 	"number_regexp": func(filters []string, co *mtgmatcher.CardObject) bool {
 		matched, _ := regexp.MatchString(filters[0], co.Number)
