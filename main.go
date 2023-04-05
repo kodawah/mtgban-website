@@ -52,6 +52,7 @@ type PageVars struct {
 	FoundSellers map[string]map[string][]SearchEntry
 	FoundVendors map[string]map[string][]SearchEntry
 	Metadata     map[string]GenericCard
+	PromoTags    []string
 
 	CanShowAll       bool
 	CleanSearchQuery string
