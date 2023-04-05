@@ -214,6 +214,25 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	if miscSearchOpts != "" {
 		for _, optName := range strings.Split(miscSearchOpts, ",") {
 			switch optName {
+			// Skip promotional entries (unless specified)
+			case "hidePromos":
+				var skipOption bool
+				for _, filter := range config.CardFilters {
+					if filter.Name == "is" {
+						for _, value := range filter.Values {
+							if value == "promo" && !filter.Negate {
+								skipOption = true
+							}
+						}
+					}
+				}
+				if !skipOption {
+					config.CardFilters = append(config.CardFilters, FilterElem{
+						Name:   "is",
+						Negate: true,
+						Values: []string{"promo"},
+					})
+				}
 			// Skip non-NM buylist prices
 			case "hideBLconds":
 				config.EntryFilters = append(config.EntryFilters, FilterEntryElem{
