@@ -124,10 +124,24 @@
                                 <p class="h6inline">% wrt loaded price)</p>
                             </label>
                             <br>
+                            <label for="highval">
+                                <input type="checkbox" id="highval" name="highval" onClick="javascript:saveCheckbox('highval')">
+                                <p class="h6inline">Hide high spread offers (above</p>
+                                <input type="text" class="w3-border w3-round-small" id="percspreadmax" name="percspreadmax" value=0 size=1 style="text-align:center;" onchange="javascript:saveText('percspreadmax')">
+                                <p class="h6inline">% wrt loaded price)</p>
+                            </label>
+                            <br>
                             <label for="lowvalabs">
                                 <input type="checkbox" id="lowvalabs" name="lowvalabs" checked onClick="javascript:saveCheckbox('lowvalabs')">
                                 <p class="h6inline">Hide low value offers (buylist below $</p>
                                 <input type="text" class="w3-border w3-round-small" id="minval" name="minval" value=1 size=1 style="text-align:center;" onchange="javascript:saveText('minval')">
+                                <p class="h6inline">)</p>
+                            </label>
+                            <br>
+                            <label for="highvalabs">
+                                <input type="checkbox" id="highvalabs" name="highvalabs" onClick="javascript:saveCheckbox('highvalabs')">
+                                <p class="h6inline">Hide high value offers (buylist above $</p>
+                                <input type="text" class="w3-border w3-round-small" id="maxval" name="maxval" value=0 size=1 style="text-align:center;" onchange="javascript:saveText('maxval')">
                                 <p class="h6inline">)</p>
                             </label>
                             <br>
@@ -152,7 +166,7 @@
                 localStorage.setItem(input, textInput.value);
             }
 
-            const checkboxes = ["lowval", "lowvalabs"];
+            const checkboxes = ["lowval", "highval", "lowvalabs", "highvalabs"];
             checkboxes.forEach(element => {
                 var checked = JSON.parse(localStorage.getItem(element));
                 if (checked !== null) {
@@ -160,7 +174,7 @@
                 }
             })
 
-            const textInputs = ["percspread", "minval", "perc"];
+            const textInputs = ["percspread", "percspreadmax", "minval", "maxval", "perc"];
             textInputs.forEach(element => {
                 var input = JSON.parse(localStorage.getItem(element));
                 if (input !== null) {

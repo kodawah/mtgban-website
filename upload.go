@@ -26,8 +26,10 @@ import (
 )
 
 const (
-	MinLowValueSpread = 60.0
-	MinLowValueAbs    = 1.0
+	MinLowValueSpread  = 60.0
+	MinLowValueAbs     = 1.0
+	MaxHighValueSpread = 0.0
+	MaxHighValueAbs    = 0.0
 
 	MaxUploadEntries      = 350
 	MaxUploadProEntries   = 1000
@@ -156,6 +158,8 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	canOptimize := (optimizerOpt || (DevMode && !SigCheck))
 	skipLowValue := r.FormValue("lowval") != ""
 	skipLowValueAbs := r.FormValue("lowvalabs") != ""
+	skipHighValue := r.FormValue("highval") != ""
+	skipHighValueAbs := r.FormValue("highvalabs") != ""
 
 	percSpread := MinLowValueSpread
 	customSpread, err := strconv.ParseFloat(r.FormValue("percspread"), 64)
@@ -163,10 +167,22 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		percSpread = customSpread
 	}
 
+	percSpreadMax := MaxHighValueSpread
+	customSpreadMax, err := strconv.ParseFloat(r.FormValue("percspreadmax"), 64)
+	if err == nil && customSpreadMax > percSpread {
+		percSpreadMax = customSpreadMax
+	}
+
 	minLowVal := MinLowValueAbs
 	customMin, err := strconv.ParseFloat(r.FormValue("minval"), 64)
 	if err == nil && customMin > 0 {
 		minLowVal = customMin
+	}
+
+	maxHighVal := MaxHighValueAbs
+	customMax, err := strconv.ParseFloat(r.FormValue("maxval"), 64)
+	if err == nil && customMax > minLowVal {
+		maxHighVal = customMax
 	}
 
 	// Set flags needed to show elements on the page ui
@@ -584,12 +600,18 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 				if skipLowValueAbs && price < minLowVal {
 					continue
 				}
+				if skipHighValueAbs && maxHighVal != 0 && price >= maxHighVal {
+					continue
+				}
 
 				// Compute spread (and skip if needed)
 				if comparePrice != 0 {
 					spread = price / comparePrice * 100
 
 					if skipLowValue && spread < percSpread {
+						continue
+					}
+					if skipHighValue && percSpreadMax != 0 && spread >= percSpreadMax {
 						continue
 					}
 				}
