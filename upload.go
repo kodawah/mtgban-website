@@ -159,13 +159,17 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	// Enable optimizer calculation if allowed for buylists
 	optimizerOpt, _ := strconv.ParseBool(GetParamFromSig(sig, "UploadOptimizer"))
 	canOptimize := (optimizerOpt || (DevMode && !SigCheck))
-	skipLowValue := r.FormValue("lowval") != ""
-	skipLowValueAbs := r.FormValue("lowvalabs") != ""
-	skipHighValue := r.FormValue("highval") != ""
-	skipHighValueAbs := r.FormValue("highvalabs") != ""
-	skipMargin := r.FormValue("minmargin") != ""
-	skipConds := r.FormValue("nocond") != ""
-	skipPrices := r.FormValue("noprice") != ""
+	var skipLowValue, skipLowValueAbs, skipHighValue, skipHighValueAbs bool
+	var skipMargin, skipConds, skipPrices bool
+	if blMode && canOptimize {
+		skipLowValue = r.FormValue("lowval") != ""
+		skipLowValueAbs = r.FormValue("lowvalabs") != ""
+		skipHighValue = r.FormValue("highval") != ""
+		skipHighValueAbs = r.FormValue("highvalabs") != ""
+		skipMargin = r.FormValue("minmargin") != ""
+		skipConds = r.FormValue("nocond") != ""
+		skipPrices = r.FormValue("noprice") != ""
+	}
 	sorting := r.FormValue("sorting")
 
 	percSpread := MinLowValueSpread
