@@ -145,9 +145,9 @@
                                 <p class="h6inline">)</p>
                             </label>
                             <br>
-                            <label for="perc">
+                            <label for="margin">
                                 <p class="h6inline">Allow</p>
-                                <input type="text" class="w3-border w3-round-small" id="perc" name="perc" value=10 size=1 style="text-align:center;" onchange="javascript:saveText('perc')">
+                                <input type="text" class="w3-border w3-round-small" id="margin" name="margin" value=10 size=1 style="text-align:center;" onchange="javascript:saveText('margin')">
                                 <p class="h6inline">% difference in offers for multiple selections</p>
                             </label>
                         </div>
@@ -174,7 +174,7 @@
                 }
             })
 
-            const textInputs = ["percspread", "percspreadmax", "minval", "maxval", "perc"];
+            const textInputs = ["percspread", "percspreadmax", "minval", "maxval", "margin"];
             textInputs.forEach(element => {
                 var input = JSON.parse(localStorage.getItem(element));
                 if (input !== null) {
