@@ -342,6 +342,16 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	var uploadedData []UploadEntry
 	if len(hashes) != 0 {
 		uploadedData, err = loadHashes(hashes)
+	} else if textArea != "" {
+		uploadedData, err = loadCsv(strings.NewReader(textArea), ',', maxRows)
+	} else if handler != nil {
+		if strings.HasSuffix(handler.Filename, ".xls") {
+			uploadedData, err = loadOldXls(file, maxRows)
+		} else if strings.HasSuffix(handler.Filename, ".xlsx") {
+			uploadedData, err = loadXlsx(file, maxRows)
+		} else {
+			uploadedData, err = loadCsv(file, ',', maxRows)
+		}
 	} else if gdocURL != "" {
 		if strings.HasPrefix(gdocURL, "https://store.tcgplayer.com/collection/view/") {
 			uploadedData, err = loadCollection(gdocURL, maxRows)
@@ -350,14 +360,6 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		} else {
 			err = errors.New("unsupported URL")
 		}
-	} else if textArea != "" {
-		uploadedData, err = loadCsv(strings.NewReader(textArea), ',', maxRows)
-	} else if strings.HasSuffix(handler.Filename, ".xls") {
-		uploadedData, err = loadOldXls(file, maxRows)
-	} else if strings.HasSuffix(handler.Filename, ".xlsx") {
-		uploadedData, err = loadXlsx(file, maxRows)
-	} else {
-		uploadedData, err = loadCsv(file, ',', maxRows)
 	}
 	if err != nil {
 		pageVars.WarningMessage = err.Error()
