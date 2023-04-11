@@ -296,8 +296,8 @@ github.com/mitchellh/go-homedir v1.1.0 h1:lukF9ziXFxDFPkA1vsr5zpc1XuPDn/wFntq5mG
 github.com/mitchellh/go-homedir v1.1.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=
 github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 h1:RWengNIwukTxcDr9M+97sNutRR1RKhG96O6jWumTTnw=
 github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826/go.mod h1:TaXosZuwdSHYgviHp1DAtfrULt5eUgsSMsZf+YrPgl8=
-github.com/mtgban/go-mtgban v0.0.0-20230405162610-dd4ecb9091a5 h1:wxmMiUc4tL8FvlU3Kud0iEhcT8FVqGIQD6NqhFfXXe4=
-github.com/mtgban/go-mtgban v0.0.0-20230405162610-dd4ecb9091a5/go.mod h1:kKJUTR6L0Ca1fpvrYtRyzyt5YycH1e+7RefNBDadOf4=
+github.com/mtgban/go-mtgban v0.0.0-20230410125624-32ecd62d0c3d h1:/swZBxoFDxYn2tAPbv2AkBn57sQprRVVgpazQboyRKI=
+github.com/mtgban/go-mtgban v0.0.0-20230410125624-32ecd62d0c3d/go.mod h1:kKJUTR6L0Ca1fpvrYtRyzyt5YycH1e+7RefNBDadOf4=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWbfPhv4DMiApHyliiK5xCTNVSPiaAs=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
 github.com/nxadm/tail v1.4.4 h1:DQuhQpB1tVlglWS2hLQ5OV6B5r8aGxSrPc5Qo6uTN78=
