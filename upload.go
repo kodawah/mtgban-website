@@ -87,11 +87,14 @@ type OptimizedUploadEntry struct {
 	// Shorthand of the store offering the price
 	Store string
 
-	// Price of the card provided by the Store
+	// Price of the card provided in the source data (or TCG_LOW)
 	Price float64
 
 	// Percentage of the store price vs uploaded price
 	Spread float64
+
+	// Price of the card provided by the Store (condition accounted)
+	BestPrice float64
 }
 
 func Upload(w http.ResponseWriter, r *http.Request) {
@@ -163,6 +166,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	skipMargin := r.FormValue("minmargin") != ""
 	skipConds := r.FormValue("nocond") != ""
 	skipPrices := r.FormValue("noprice") != ""
+	sorting := r.FormValue("sorting")
 
 	percSpread := MinLowValueSpread
 	customSpread, err := strconv.ParseFloat(r.FormValue("percspread"), 64)
@@ -637,6 +641,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 					Condition: conds,
 					Price:     comparePrice,
 					Spread:    spread,
+					BestPrice: price,
 				})
 
 				// Save totals
@@ -653,6 +658,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 					Condition: conds,
 					Price:     comparePrice,
 					Spread:    spread,
+					BestPrice: price,
 				})
 			}
 		}
@@ -660,16 +666,38 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	if canOptimize && blMode {
 		// Keep cards sorted by edition, following the same rules of search
 		for store := range optimizedResults {
-			sort.Slice(optimizedResults[store], func(i, j int) bool {
-				return sortSets(optimizedResults[store][i].CardId, optimizedResults[store][j].CardId)
-			})
+			switch sorting {
+			case "highprice":
+				sort.Slice(optimizedResults[store], func(i, j int) bool {
+					return optimizedResults[store][i].BestPrice > optimizedResults[store][j].BestPrice
+				})
+			case "highspread":
+				sort.Slice(optimizedResults[store], func(i, j int) bool {
+					return optimizedResults[store][i].Spread > optimizedResults[store][j].Spread
+				})
+			default:
+				sort.Slice(optimizedResults[store], func(i, j int) bool {
+					return sortSets(optimizedResults[store][i].CardId, optimizedResults[store][j].CardId)
+				})
+			}
 		}
 
 		// Keep edition list sorted in the same way
 		for code := range optimizedEditions {
-			sort.Slice(optimizedEditions[code], func(i, j int) bool {
-				return sortSets(optimizedEditions[code][i].CardId, optimizedEditions[code][j].CardId)
-			})
+			switch sorting {
+			case "highprice":
+				sort.Slice(optimizedEditions[code], func(i, j int) bool {
+					return optimizedEditions[code][i].BestPrice > optimizedEditions[code][j].BestPrice
+				})
+			case "highspread":
+				sort.Slice(optimizedEditions[code], func(i, j int) bool {
+					return optimizedEditions[code][i].Spread > optimizedEditions[code][j].Spread
+				})
+			default:
+				sort.Slice(optimizedEditions[code], func(i, j int) bool {
+					return sortSets(optimizedEditions[code][i].CardId, optimizedEditions[code][j].CardId)
+				})
+			}
 		}
 
 		pageVars.Optimized = optimizedResults

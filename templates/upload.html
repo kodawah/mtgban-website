@@ -161,6 +161,15 @@
                                 <input type="checkbox" id="noprice" name="noprice" onClick="javascript:saveCheckbox('noprice')">
                                 <p class="h6inline">Ignore prices when loading data (<i>use TCG Low instead</i>)</p>
                             </label>
+                            <br>
+                            <label for="sorting">
+                                <p class="h6inline">Sort results by</p>
+                                <select id="sorting" name="sorting" onChange="javascript:saveText('sorting')" style="text-align-last=center;">
+                                    <option value="" selected>&nbsp;set/name/number</option>
+                                    <option value="highprice">&nbsp;highest offer</option>
+                                    <option value="highspread">&nbsp;highest spread</option>
+                                </select>
+                            </label>
                         </div>
                     </div>
                 </form>
@@ -187,7 +196,9 @@
                 }
             })
 
-            const textInputs = ["percspread", "percspreadmax", "minval", "maxval", "margin"];
+            const textInputs = [
+                "percspread", "percspreadmax", "minval", "maxval", "margin", "sorting"
+            ];
             textInputs.forEach(element => {
                 var input = localStorage.getItem(element);
                 if (input) {
