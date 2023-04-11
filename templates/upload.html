@@ -146,6 +146,7 @@
                             </label>
                             <br>
                             <label for="margin">
+                                <input type="checkbox" id="minmargin" name="minmargin" checked onClick="javascript:saveCheckbox('minmargin')">
                                 <p class="h6inline">Allow</p>
                                 <input type="text" class="w3-border w3-round-small" id="margin" name="margin" value=10 size=1 style="text-align:center;" onchange="javascript:saveText('margin')">
                                 <p class="h6inline">% difference in offers for multiple selections</p>
@@ -166,7 +167,7 @@
                 localStorage.setItem(input, textInput.value);
             }
 
-            const checkboxes = ["lowval", "highval", "lowvalabs", "highvalabs"];
+            const checkboxes = ["lowval", "highval", "lowvalabs", "highvalabs", "minmargin"];
             checkboxes.forEach(element => {
                 var checked = JSON.parse(localStorage.getItem(element));
                 if (checked !== null) {

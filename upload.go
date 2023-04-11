@@ -160,6 +160,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	skipLowValueAbs := r.FormValue("lowvalabs") != ""
 	skipHighValue := r.FormValue("highval") != ""
 	skipHighValueAbs := r.FormValue("highvalabs") != ""
+	skipMargin := r.FormValue("minmargin") != ""
 
 	percSpread := MinLowValueSpread
 	customSpread, err := strconv.ParseFloat(r.FormValue("percspread"), 64)
@@ -183,6 +184,15 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	customMax, err := strconv.ParseFloat(r.FormValue("maxval"), 64)
 	if err == nil && customMax > minLowVal {
 		maxHighVal = customMax
+	}
+
+	percMargin := 1.0
+	if !skipMargin {
+		percMargin = 1 - DefaultPercentageMargin
+		customMargin, err := strconv.ParseFloat(r.FormValue("margin"), 64)
+		if err == nil && customMargin >= 0 {
+			percMargin = 1 - customMargin/100.0
+		}
 	}
 
 	// Set flags needed to show elements on the page ui
@@ -493,12 +503,6 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	missingPrices := map[string]float64{}
 	resultPrices := map[string]map[string]float64{}
 
-	perc := 1 - DefaultPercentageMargin
-	customMargin, err := strconv.ParseFloat(r.FormValue("margin"), 64)
-	if err == nil && customMargin >= 0 {
-		perc = 1 - customMargin/100.0
-	}
-
 	for i := range uploadedData {
 		// Skip unmatched cards
 		if uploadedData[i].MismatchError != nil {
@@ -570,10 +574,10 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 			// Save the lowest or highest price depending on mode
 			// If price is tied, or within a set % difference, save them all
-			if len(bestPrices) == 0 || (blMode && price*perc > bestPrices[0]) || (!blMode && price*perc < bestPrices[0]) {
+			if len(bestPrices) == 0 || (blMode && price*percMargin > bestPrices[0]) || (!blMode && price*percMargin < bestPrices[0]) {
 				bestPrices = []float64{price}
 				bestStores = []string{shorthand}
-			} else if (blMode && price > bestPrices[0]*perc) || (!blMode && price < bestPrices[0]*perc) {
+			} else if (blMode && price > bestPrices[0]*percMargin) || (!blMode && price < bestPrices[0]*percMargin) {
 				bestPrices = append(bestPrices, price)
 				bestStores = append(bestStores, shorthand)
 			}
