@@ -151,6 +151,16 @@
                                 <input type="text" class="w3-border w3-round-small" id="margin" name="margin" value=10 size=1 style="text-align:center;" onchange="javascript:saveText('margin')">
                                 <p class="h6inline">% difference in offers for multiple selections</p>
                             </label>
+                            <br>
+                            <label for="nocond">
+                                <input type="checkbox" id="nocond" name="nocond" onClick="javascript:saveCheckbox('nocond')">
+                                <p class="h6inline">Ignore conditions when loading data</p>
+                            </label>
+                            <br>
+                            <label for="noprice">
+                                <input type="checkbox" id="noprice" name="noprice" onClick="javascript:saveCheckbox('noprice')">
+                                <p class="h6inline">Ignore prices when loading data (<i>use TCG Low instead</i>)</p>
+                            </label>
                         </div>
                     </div>
                 </form>
@@ -167,7 +177,9 @@
                 localStorage.setItem(input, textInput.value);
             }
 
-            const checkboxes = ["lowval", "highval", "lowvalabs", "highvalabs", "minmargin"];
+            const checkboxes = [
+                "lowval", "highval", "lowvalabs", "highvalabs", "minmargin", "nocond", "noprice"
+            ];
             checkboxes.forEach(element => {
                 var checked = JSON.parse(localStorage.getItem(element));
                 if (checked !== null) {

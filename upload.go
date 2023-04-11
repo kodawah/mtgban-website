@@ -161,6 +161,8 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	skipHighValue := r.FormValue("highval") != ""
 	skipHighValueAbs := r.FormValue("highvalabs") != ""
 	skipMargin := r.FormValue("minmargin") != ""
+	skipConds := r.FormValue("nocond") != ""
+	skipPrices := r.FormValue("noprice") != ""
 
 	percSpread := MinLowValueSpread
 	customSpread, err := strconv.ParseFloat(r.FormValue("percspread"), 64)
@@ -414,7 +416,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		cardIds = append(cardIds, uploadedData[i].CardId)
 
 		// Check if conditions should be retrieved
-		if uploadedData[i].OriginalCondition != "" {
+		if uploadedData[i].OriginalCondition != "" && !skipConds {
 			shouldCheckForConditions = true
 		}
 	}
@@ -530,6 +532,9 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			if indexKey == TCG_DIRECT {
 				conds = uploadedData[i].OriginalCondition
 			}
+			if skipConds {
+				conds = ""
+			}
 			indexPrice := getPrice(indexResult, conds)
 
 			if resultPrices[cardId+conds] == nil {
@@ -546,6 +551,9 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		// Run summaries for each vendor
 		for shorthand, banPrice := range results[cardId] {
 			conds := uploadedData[i].OriginalCondition
+			if skipConds {
+				conds = ""
+			}
 			price := getPrice(banPrice, conds)
 
 			// Store computed price
@@ -589,11 +597,14 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 				var spread float64
 				conds := uploadedData[i].OriginalCondition
+				if skipConds {
+					conds = ""
+				}
 				cardId := uploadedData[i].CardId
 
 				// Load comparison price, either the loaded one or tcg low
 				comparePrice := uploadedData[i].OriginalPrice
-				if comparePrice == 0 {
+				if comparePrice == 0 || skipPrices {
 					comparePrice = getPrice(indexResults[cardId][TCG_LOW], "")
 				}
 
