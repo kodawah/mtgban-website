@@ -558,6 +558,11 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			pageVars.TotalEntries[indexKey] += indexPrice
 		}
 
+		// Quantity summary
+		if uploadedData[i].HasQuantity {
+			pageVars.TotalQuantity += uploadedData[i].Quantity
+		}
+
 		// Run summaries for each vendor
 		for shorthand, banPrice := range results[cardId] {
 			conds := uploadedData[i].OriginalCondition
@@ -580,11 +585,13 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			// Adjust for quantity
 			if uploadedData[i].HasQuantity {
 				price *= float64(uploadedData[i].Quantity)
-				pageVars.TotalQuantity += uploadedData[i].Quantity
 			}
 
-			// Add to totals
-			pageVars.TotalEntries[shorthand] += price
+			// Add to totals (unless it was an index, since it was already added)
+			_, found := indexResults[cardId][shorthand]
+			if !found {
+				pageVars.TotalEntries[shorthand] += price
+			}
 
 			if !(canOptimize && blMode) {
 				continue
