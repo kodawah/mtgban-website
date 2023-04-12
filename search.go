@@ -366,6 +366,11 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	pageVars.CanShowAll = cleanQuery != "" && canShowAll
 	pageVars.CleanSearchQuery = cleanQuery
 
+	// Update page title
+	if cleanQuery != "" {
+		pageVars.Title += ": " + cleanQuery
+	}
+
 	// Sort sets as requested, default to chronological
 	switch pageVars.SearchSort {
 	case "alpha":
