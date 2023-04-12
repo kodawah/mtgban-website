@@ -171,7 +171,7 @@
 
     {{else}}
         <h1>Welcome to BAN {{if .IsSealed}}Sealed{{else}}{{if not (eq .ChartID "")}}Chart{{end}} Search{{end}}</h1>
-        <div class="indent sticky" style="top:48px; background-color: var(--background); z-index: 3; width: min-content;">
+        <div class="indent sticky" style="top: 48px; background-color: var(--background); z-index: 3; float:left">
             <form class="search autocomplete" action="" autocomplete="off" spellcheck="false" id="searchform">
                 <label style="clear: both; float: left; width: 110%" for="searchbox">
                     {{if not .SearchQuery}}
@@ -212,7 +212,6 @@
                 </label>
                 <input id="searchbox" class="w3-input w3-border w3-round-small search-input" onFocus="this.setSelectionRange(0, this.value.length)" type="text" name="q" placeholder="Enter a card name" value="{{.SearchQuery}}" maxlength="200" autofocus>
             </form>
-        </div>
 
         {{if not .IsSealed}}
             <script type="text/javascript">
@@ -350,7 +349,7 @@
                 <script type="text/javascript" src="../js/followmouse.js"></script>
             {{end}}
 
-            <div class="indent sticky" style="top: 128px;">
+            <div>
                 <table style="float: left; background-color: var(--background)">
                     {{if .IsSealed}}
                         <br><br>
@@ -441,6 +440,7 @@
                     </tr>
                 </table>
             </div>
+        </div>
 
             <div class="indent sticky">
                 {{$firstImg := ""}}
@@ -684,7 +684,7 @@
                     {{if ne .InfoMessage ""}}
                         <tr>
                             <td colspan="2" style="text-align: center; vertical-align: middle;">
-                                <h4><i>{{.InfoMessage}}</i></h4>
+                                <h4 class="indent"><i>{{.InfoMessage}}</i></h4>
                             </td>
                         </tr>
                     {{end}}
