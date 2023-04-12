@@ -170,7 +170,19 @@
         </div>
 
     {{else}}
-        <h1>Welcome to BAN {{if .IsSealed}}Sealed{{else}}{{if not (eq .ChartID "")}}Chart{{end}} Search{{end}}</h1>
+        <h1>
+            Welcome to BAN {{if .IsSealed}}Sealed{{else}}{{if not (eq .ChartID "")}}Chart{{end}} Search{{end}}
+
+            {{if .TotalUnique}}
+                -
+                <small><small><small>
+                    {{.TotalUnique}} card{{if gt (len .AllKeys) 1}}s{{end}} found
+                    {{if gt .TotalUnique (len .AllKeys)}}
+                        ({{len .AllKeys}} shown)
+                    {{end}}
+                </small></small></small>
+            {{end}}
+        </h1>
         <div class="indent sticky" style="top: 48px; background-color: var(--background); z-index: 3; float:left">
             <form class="search autocomplete" action="" autocomplete="off" spellcheck="false" id="searchform">
                 <label style="clear: both; float: left; width: 110%" for="searchbox">

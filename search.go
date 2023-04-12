@@ -371,6 +371,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		pageVars.Title += ": " + cleanQuery
 	}
 
+	// Save stats
+	pageVars.TotalUnique = len(allKeys)
+
 	// Sort sets as requested, default to chronological
 	switch pageVars.SearchSort {
 	case "alpha":
