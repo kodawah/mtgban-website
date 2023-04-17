@@ -76,6 +76,9 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 			pageVars.VendorKeys = append(pageVars.VendorKeys, vendor.Info().Shorthand)
 		}
 
+		pageVars.Editions = AllEditionsKeys
+		pageVars.EditionsMap = AllEditionsMap
+
 		render(w, "sleep.html", pageVars)
 
 		return
@@ -90,9 +93,15 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 		blocklistBuylist = append(blocklistBuylist, strings.Split(skipVendorsOpt, ",")...)
 	}
 
+	var skipEditions []string
+	skipEditionsOpt := readCookie(r, "SleepersEditionList")
+	if skipEditionsOpt != "" {
+		skipEditions = strings.Split(skipEditionsOpt, ",")
+	}
+
 	start := time.Now()
 
-	tiers := getTiers(blocklistRetail, blocklistBuylist)
+	tiers := getTiers(blocklistRetail, blocklistBuylist, skipEditions)
 	sleepers, err := sleepersLayout(tiers)
 	if err != nil {
 		pageVars.Title = "Errors have been made"
@@ -136,7 +145,7 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getTiers(blocklistRetail, blocklistBuylist []string) map[string]int {
+func getTiers(blocklistRetail, blocklistBuylist, skipEditions []string) map[string]int {
 	tiers := map[string]int{}
 
 	var tcgSeller mtgban.Seller
@@ -150,6 +159,7 @@ func getTiers(blocklistRetail, blocklistBuylist []string) map[string]int {
 	opts := &mtgban.ArbitOpts{
 		MinSpread: MinSpread,
 		MinPrice:  SleepersMinPrice,
+		Editions:  skipEditions,
 	}
 
 	for _, seller := range Sellers {

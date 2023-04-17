@@ -82,6 +82,43 @@
             </div>
         </div>
 
+        <div class="indent">
+            <h2>Edition list</h2>
+                Select which editions you <b>don't</b> want to display in your sleep(ers).
+            <br>
+
+            <script type="text/javascript">
+                window.onload = function(e) {
+                    loadForm("SleepersEditionList", "editions");
+                }
+            </script>
+
+            <a class="btn warning" onclick="javascript:clearForm('editions');"><b>CLEAR</b></a>
+            <a class="btn success" onclick="javascript:selectAll('editions');"><b>SELECT ALL</b></a>
+            <a class="btn success" onclick="javascript:saveForm('SleepersEditionList', 'editions'); window.location.href = '/sleepers'"><b>SAVE</b></a>
+        </div>
+
+        <div class="indent row" id="editions">
+            {{range $i, $key := .Editions}}
+                {{if triple_column_start $i (len $.Editions)}}
+                    <div class="column">
+                {{end}}
+
+                {{$edition := index $.EditionsMap $key}}
+                {{if $edition}}
+                    <input type="checkbox" id="{{$key}}" name="{{$key}}">
+                    <label for="{{$key}}">
+                        <i class="ss ss-{{$edition.Keyrune}} ss-2x ss-fw"></i>
+                        {{$edition.Name}}
+                    </label>
+                    <br>
+                {{end}}
+
+                {{if triple_column_end $i (len $.Editions)}}
+                    </div>
+                {{end}}
+            {{end}}
+        </div>
     {{else}}
         <h1>Welcome to BAN Sleepers</h1>
         <div class="indent" style="max-width: 85%;">
