@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -21,6 +22,8 @@ type Sleeper struct {
 const (
 	SleeperSize = 7
 	MaxSleepers = 34
+
+	ErrNoSleepers = "No Sleepers Available"
 )
 
 var SleeperLetters = []string{
@@ -87,10 +90,11 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 
 	start := time.Now()
 
-	sleepers, errMsg := getTiers(blocklistRetail, blocklistBuylist)
-	if errMsg != "" {
+	tiers := getTiers(blocklistRetail, blocklistBuylist)
+	sleepers, err := sleepersLayout(tiers)
+	if err != nil {
 		pageVars.Title = "Errors have been made"
-		pageVars.InfoMessage = errMsg
+		pageVars.InfoMessage = ErrNoSleepers
 
 		render(w, "sleep.html", pageVars)
 		return
@@ -130,9 +134,7 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-const ErrNoSleepers = "No Sleepers Available"
-
-func getTiers(blocklistRetail, blocklistBuylist []string) (map[string][]string, string) {
+func getTiers(blocklistRetail, blocklistBuylist []string) map[string]int {
 	tiers := map[string]int{}
 
 	var tcgSeller mtgban.Seller
@@ -212,11 +214,11 @@ func getTiers(blocklistRetail, blocklistBuylist []string) (map[string][]string, 
 		}
 	}
 
-	// Avoid accessing the first element if empty
-	if len(tiers) == 0 {
-		return nil, ErrNoSleepers
-	}
+	return tiers
+}
 
+// Return a map of letter : []cardId from a map of cardId : amount
+func sleepersLayout(tiers map[string]int) (map[string][]string, error) {
 	results := []Sleeper{}
 	for c := range tiers {
 		if tiers[c] > 1 {
@@ -228,7 +230,7 @@ func getTiers(blocklistRetail, blocklistBuylist []string) (map[string][]string, 
 	}
 
 	if len(results) == 0 {
-		return nil, ErrNoSleepers
+		return nil, errors.New("empty results")
 	}
 
 	sort.Slice(results, func(i, j int) bool {
@@ -243,7 +245,7 @@ func getTiers(blocklistRetail, blocklistBuylist []string) (map[string][]string, 
 
 	// Avoid a division by 0
 	if max == min {
-		return nil, ErrMsgDenied
+		return nil, errors.New("invalid range")
 	}
 
 	sleepers := map[string][]string{}
@@ -272,5 +274,5 @@ func getTiers(blocklistRetail, blocklistBuylist []string) (map[string][]string, 
 		sleepers[letter] = append(sleepers[letter], res.CardId)
 	}
 
-	return sleepers, ""
+	return sleepers, nil
 }
