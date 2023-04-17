@@ -23,6 +23,8 @@ const (
 	SleeperSize = 7
 	MaxSleepers = 34
 
+	SleepersMinPrice = 3.0
+
 	ErrNoSleepers = "No Sleepers Available"
 )
 
@@ -145,6 +147,11 @@ func getTiers(blocklistRetail, blocklistBuylist []string) map[string]int {
 		}
 	}
 
+	opts := &mtgban.ArbitOpts{
+		MinSpread: MinSpread,
+		MinPrice:  SleepersMinPrice,
+	}
+
 	for _, seller := range Sellers {
 		if seller == nil {
 			continue
@@ -159,6 +166,7 @@ func getTiers(blocklistRetail, blocklistBuylist []string) map[string]int {
 		if seller.Info().SealedMode {
 			continue
 		}
+
 		// Skip any seller explicitly in blocklist
 		if SliceStringHas(blocklistRetail, seller.Info().Shorthand) {
 			continue
@@ -180,10 +188,6 @@ func getTiers(blocklistRetail, blocklistBuylist []string) map[string]int {
 				continue
 			}
 
-			opts := &mtgban.ArbitOpts{
-				MinSpread: MinSpread,
-			}
-
 			arbit, err := mtgban.Arbit(opts, vendor, seller)
 			if err != nil {
 				log.Println(err)
@@ -199,7 +203,7 @@ func getTiers(blocklistRetail, blocklistBuylist []string) map[string]int {
 		}
 
 		if tcgSeller != nil {
-			mismatch, err := mtgban.Mismatch(nil, tcgSeller, seller)
+			mismatch, err := mtgban.Mismatch(opts, tcgSeller, seller)
 			if err != nil {
 				log.Println(err)
 				continue
