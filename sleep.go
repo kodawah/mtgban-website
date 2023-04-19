@@ -49,8 +49,34 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 		blocklistBuylist = append(blocklistBuylist, Config.SleepersBlockList...)
 	}
 
+	skipSellersOpt := readCookie(r, "SleepersSellersList")
+	if skipSellersOpt != "" {
+		blocklistRetail = append(blocklistRetail, strings.Split(skipSellersOpt, ",")...)
+	}
+	skipVendorsOpt := readCookie(r, "SleepersVendorsList")
+	if skipVendorsOpt != "" {
+		blocklistBuylist = append(blocklistBuylist, strings.Split(skipVendorsOpt, ",")...)
+	}
+
+	var skipEditions []string
+	skipEditionsOpt := readCookie(r, "SleepersEditionList")
+	if skipEditionsOpt != "" {
+		skipEditions = strings.Split(skipEditionsOpt, ",")
+	}
+
+	var tiers map[string]int
+
+	start := time.Now()
+
 	page := r.FormValue("page")
-	if page == "options" {
+	switch page {
+	default:
+		pageVars.Title = "Index"
+
+		render(w, "sleep.html", pageVars)
+
+		return
+	case "options":
 		pageVars.Title = "Options"
 
 		for _, seller := range Sellers {
@@ -82,26 +108,12 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 		render(w, "sleep.html", pageVars)
 
 		return
+	case "mismatch":
+		pageVars.Title = "Market Mismatch"
+
+		tiers = getTiers(blocklistRetail, blocklistBuylist, skipEditions)
 	}
 
-	skipSellersOpt := readCookie(r, "SleepersSellersList")
-	if skipSellersOpt != "" {
-		blocklistRetail = append(blocklistRetail, strings.Split(skipSellersOpt, ",")...)
-	}
-	skipVendorsOpt := readCookie(r, "SleepersVendorsList")
-	if skipVendorsOpt != "" {
-		blocklistBuylist = append(blocklistBuylist, strings.Split(skipVendorsOpt, ",")...)
-	}
-
-	var skipEditions []string
-	skipEditionsOpt := readCookie(r, "SleepersEditionList")
-	if skipEditionsOpt != "" {
-		skipEditions = strings.Split(skipEditionsOpt, ",")
-	}
-
-	start := time.Now()
-
-	tiers := getTiers(blocklistRetail, blocklistBuylist, skipEditions)
 	sleepers, err := sleepersLayout(tiers)
 	if err != nil {
 		pageVars.Title = "Errors have been made"
@@ -124,8 +136,6 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 	pageVars.Sleepers = sleepers
 	pageVars.SleepersKeys = SleeperLetters
 	pageVars.SleepersColors = SleeperColors
-
-	pageVars.Title = "Sleeper cards"
 
 	// Log performance
 	user := GetParamFromSig(sig, "UserEmail")

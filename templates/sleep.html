@@ -39,6 +39,34 @@
             <img class="center" src="img/promo/arbit.jpg">
         {{end}}
 
+    {{else if eq .Title "Index"}}
+
+        <h1>Welcome to BAN Sleepers</h1>
+        <div class="indent" style="max-width: 85%;">
+            <br>
+            <h3>
+                <ul class="indent">
+                    <li><a href="?page=mismatch">Market Mismatch</a></li>
+                    <li><a href="?page=options">Options</a></li>
+                </ul>
+                </h3>
+            <br>
+
+            <hr width=30% style="border: 1px dotted;"><br>
+
+            <h2>Instructions</h2>
+            <p class="indent">
+            This page offers a set tools aimed at identifying interesting cards according to different point of views, as explained belowes. <br>
+            They are categorized as "sleepers" because the market is apparently "sleeping" on them, and it has not been catching up on them yet. <br>
+            They are presented on a S-F tiered scale, the higher the more interesting results!<br>
+
+            </p>
+            <ul class="indent">
+                <li><b>Market Mismatch</b><br>
+                    These cards have a higher buylist price than what market is selling them at, or they are simply priced below TCG Low.<br>
+            </ul>
+        </div>
+
     {{else if eq .Title "Options"}}
         <script type="text/javascript" src="../js/cookies.js"></script>
         <br>
@@ -120,12 +148,7 @@
             {{end}}
         </div>
     {{else}}
-        <h1>Welcome to BAN Sleepers</h1>
         <div class="indent" style="max-width: 85%;">
-            These cards have a higher buylist than the market price, or are priced below TCG rates, but the market has not noticed yet! <br>
-            You can also <a href="?page=options">tweak options</a> for more customized results. <br>
-            <br>
-
             <table class="tiers">
                 {{range $i, $letter := .SleepersKeys}}
                     {{$bgColor := index $.SleepersColors $i}}
