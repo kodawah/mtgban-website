@@ -286,11 +286,43 @@ func sleepersLayout(tiers map[string]int) (map[string][]string, error) {
 
 		letter := SleeperLetters[level]
 
-		if len(sleepers[letter]) > MaxSleepers {
-			continue
-		}
-
 		sleepers[letter] = append(sleepers[letter], res.CardId)
+	}
+
+	// Sort sleepers by price
+	var tcgSeller mtgban.Seller
+	for _, seller := range Sellers {
+		if seller != nil && seller.Info().Shorthand == TCG_LOW {
+			tcgSeller = seller
+			break
+		}
+	}
+	inv, err := tcgSeller.Inventory()
+	if err != nil {
+		return nil, err
+	}
+	for letter := range sleepers {
+		sort.Slice(sleepers[letter], func(i, j int) bool {
+			var priceI, priceJ float64
+			entries, found := inv[sleepers[letter][i]]
+			if found {
+				priceI = entries[0].Price
+			}
+			entries, found = inv[sleepers[letter][j]]
+			if found {
+				priceJ = entries[0].Price
+			}
+			// Just to preserve order
+			if priceI == priceJ {
+				return sleepers[letter][i] < sleepers[letter][j]
+			}
+			return priceI > priceJ
+		})
+
+		// Truncate to avoid flooding the page
+		if len(sleepers[letter]) > MaxSleepers {
+			sleepers[letter] = sleepers[letter][:MaxSleepers]
+		}
 	}
 
 	return sleepers, nil
