@@ -290,13 +290,14 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 	// Keep it secret. Keep it safe.
 	putSignatureInCookies(w, r, sig)
 
-	// Reset path to be redirected to home page (it should just be /auth)
-	r.URL.Path = ""
-	// Clean up anything else (in particular remove "code")
-	r.URL.RawQuery = ""
+	// Redirect to the URL indicated in this query param, or go to homepage
+	redir := r.FormValue("state")
+	if redir == "" {
+		redir = getBaseURL(r)
+	}
 
 	// Redirect, we're done here
-	http.Redirect(w, r, r.URL.String(), http.StatusFound)
+	http.Redirect(w, r, redir, http.StatusFound)
 }
 
 func signHMACSHA1Base64(key []byte, data []byte) string {
