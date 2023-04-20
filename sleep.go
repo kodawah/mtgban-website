@@ -243,6 +243,11 @@ func sleepersLayout(tiers map[string]int) (map[string][]string, error) {
 	max := float64(results[0].Level)
 	min := float64(results[len(results)-1].Level)
 
+	if DevMode {
+		log.Println("Max value:", max)
+		log.Println("Min value:", min)
+	}
+
 	// Avoid a division by 0
 	if max == min {
 		return nil, errors.New("invalid range")
