@@ -108,6 +108,10 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 		render(w, "sleep.html", pageVars)
 
 		return
+	case "reprint":
+		pageVars.Title = "Long time no reprint"
+
+		tiers = getReprints(skipEditions)
 	case "mismatch":
 		pageVars.Title = "Market Mismatch"
 
@@ -153,6 +157,44 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 	if DevMode {
 		log.Println("Sleepers render took", time.Since(start))
 	}
+}
+
+func getReprints(skipEditions []string) map[string]int {
+	tiers := map[string]int{}
+
+	// Filter results
+	for _, key := range ReprintsKeys {
+		reprints, found := ReprintsMap[key]
+		if !found {
+			continue
+		}
+
+		var minPrice float64
+		var uuid string
+		latest := reprints[0].Date
+
+		for _, reprint := range reprints {
+			if SliceStringHas(skipEditions, reprint.SetCode) {
+				continue
+			}
+			if minPrice == 0 || minPrice > reprint.Price {
+				minPrice = reprint.Price
+				uuid = reprint.UUID
+			}
+		}
+		// Sanity check
+		if minPrice == 0 {
+			continue
+		}
+
+		// Assign a custom value to the card
+		// Use Seconds to give a heavier weight on older items and square of
+		// price to let expensive cards have a bigger impact
+		// Log just spreads the results more nicely on the tier system
+		tiers[uuid] = int(math.Log(float64(time.Now().Sub(latest).Seconds()) * minPrice * minPrice))
+	}
+
+	return tiers
 }
 
 func getTiers(blocklistRetail, blocklistBuylist, skipEditions []string) map[string]int {
@@ -311,7 +353,7 @@ func sleepersLayout(tiers map[string]int) (map[string][]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	for letter := range sleepers {
+	for _, letter := range SleeperLetters {
 		sort.Slice(sleepers[letter], func(i, j int) bool {
 			var priceI, priceJ float64
 			entries, found := inv[sleepers[letter][i]]

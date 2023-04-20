@@ -919,6 +919,7 @@ func updateStaticData() {
 	SealedEditionsSorted, SealedEditionsList = getSealedEditions()
 	AllEditionsKeys, AllEditionsMap = getAllEditions()
 	TreeEditionsKeys, TreeEditionsMap = getTreeEditions()
+	ReprintsKeys, ReprintsMap = getReprintsGlobal()
 
 	TotalSets = len(AllEditionsKeys)
 	TotalUnique = len(mtgmatcher.GetUUIDs())

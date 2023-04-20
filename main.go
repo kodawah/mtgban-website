@@ -352,6 +352,9 @@ var AllEditionsKeys []string
 var AllEditionsMap map[string]EditionEntry
 var TreeEditionsKeys []string
 var TreeEditionsMap map[string][]EditionEntry
+var ReprintsKeys []string
+var ReprintsMap map[string][]ReprintEntry
+
 var TotalSets, TotalCards, TotalUnique int
 
 var Newspaper3dayDB *sql.DB

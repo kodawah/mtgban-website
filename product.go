@@ -242,6 +242,134 @@ func getSealedEditions() ([]string, map[string][]EditionEntry) {
 	return sortedEditions, listEditions
 }
 
+type ReprintEntry struct {
+	UUID    string
+	SetCode string
+	Date    time.Time
+	Price   float64
+}
+
+const (
+	YearsBeforeReprint  = 2
+	MinimumReprintPrice = 3.0
+)
+
+// Produce a map of card : []ReprintEntry containing array reprints sorted by age
+func getReprintsGlobal() ([]string, map[string][]ReprintEntry) {
+	var tcgLow mtgban.InventoryRecord
+	var tcgMarket mtgban.InventoryRecord
+	for _, seller := range Sellers {
+		if seller == nil {
+			continue
+		}
+		if seller.Info().Shorthand == TCG_LOW {
+			tcgLow, _ = seller.Inventory()
+		}
+		if seller.Info().Shorthand == TCG_MARKET {
+			tcgMarket, _ = seller.Inventory()
+		}
+	}
+
+	sets := mtgmatcher.GetSets()
+	uuids := mtgmatcher.GetUUIDs()
+
+	var names []string
+	listReprints := map[string][]ReprintEntry{}
+
+	dupes := map[string]bool{}
+	for _, co := range uuids {
+		set, found := sets[co.SetCode]
+		if !found {
+			continue
+		}
+
+		// Skip very old stuff
+		switch set.Code {
+		case "PVAN", "OARC", "PCEL", "PDCI",
+			"LEG", "DRK", "ATQ", "ARN", "PTK",
+			"FBB", "4BB", "DRKITA", "LEGITA", "RIN", "4EDALT", "BCHR":
+			continue
+		}
+
+		// Skip strange stuff
+		if co.IsReserved || co.Sealed || co.IsFunny || mtgmatcher.IsToken(co.Name) ||
+			co.BorderColor == "gold" || co.BorderColor == "silver" ||
+			co.HasPromoType(mtgjson.PromoTypePromoPack) ||
+			co.HasPromoType(mtgjson.PromoTypePrerelease) {
+			continue
+		}
+
+		// Ignore the foil printing of printed cards
+		if co.Foil && len(co.Finishes) > 1 {
+			continue
+		}
+
+		// Skip processed cards (using scryfallId to catch foil/nonfoil)
+		if dupes[co.Identifiers["scryfallId"]] {
+			continue
+		}
+		dupes[co.Identifiers["scryfallId"]] = true
+
+		// Load the date for the card
+		releaseDate := set.ReleaseDate
+		if co.OriginalReleaseDate != "" {
+			releaseDate = co.OriginalReleaseDate
+		}
+		printDate, err := time.Parse("2006-01-02", releaseDate)
+		if err != nil {
+			continue
+		}
+
+		var price float64
+		entries, found := tcgLow[co.UUID]
+		if !found {
+			entries, found = tcgMarket[co.UUID]
+		}
+		if found {
+			price = entries[0].Price
+		}
+
+		// Append to the results
+		listReprints[co.Name] = append(listReprints[co.Name], ReprintEntry{
+			UUID:  co.UUID,
+			Price: price,
+			Date:  printDate,
+		})
+	}
+
+	// Filter results
+	for name, reprints := range listReprints {
+		var shouldSkip bool
+		for i := range reprints {
+			// Skip cards that are not old enough
+			if time.Now().Sub(reprints[i].Date).Hours()/24/365 <= YearsBeforeReprint {
+				shouldSkip = true
+				break
+			}
+
+			// Skip cards that are too low or that don't have a price
+			price := reprints[i].Price
+			if price < MinimumReprintPrice {
+				shouldSkip = true
+				break
+			}
+		}
+
+		if shouldSkip {
+			delete(listReprints, name)
+			continue
+		}
+
+		names = append(names, name)
+		sort.Slice(reprints, func(i, j int) bool {
+			return reprints[i].Date.After(reprints[j].Date)
+		})
+		listReprints[name] = reprints
+	}
+
+	return names, listReprints
+}
+
 var ProductKeys = []string{
 	"TotalValueByTcgLow",
 	"TotalValueByTcgDirect",
