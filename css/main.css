@@ -765,3 +765,15 @@ input:checked + .slider {
   margin-right: 0;
   font-weight: bold;
 }
+
+.small-hidden-text {
+  z-index: 1000;
+  color: transparent;
+  font-size: 14px;
+  position: absolute;
+  padding: .65% 0 0 1%;
+  letter-spacing: 0px;
+  pointer-events: none;
+  width: 146px; /* Size of the small img */
+  white-space: normal;
+}
