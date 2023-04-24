@@ -12,6 +12,7 @@ import (
 
 	"github.com/mtgban/go-mtgban/mtgban"
 	"github.com/mtgban/go-mtgban/mtgmatcher"
+	"github.com/mtgban/go-mtgban/mtgmatcher/mtgjson"
 )
 
 type Sleeper struct {
@@ -108,6 +109,11 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 		render(w, "sleep.html", pageVars)
 
 		return
+	case "bulk":
+		pageVars.Title = "Bulk me up"
+
+		tiers = getBulks(skipEditions)
+
 	case "reprint":
 		pageVars.Title = "Long time no reprint"
 
@@ -157,6 +163,115 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 	if DevMode {
 		log.Println("Sleepers render took", time.Since(start))
 	}
+}
+
+func getBulks(skipEditions []string) map[string]int {
+	var tcgSeller mtgban.Seller
+	for _, seller := range Sellers {
+		if seller != nil && seller.Info().Shorthand == TCG_LOW {
+			tcgSeller = seller
+			break
+		}
+	}
+	var ckVendor mtgban.Vendor
+	for _, vendor := range Vendors {
+		if vendor != nil && vendor.Info().Shorthand == "CK" {
+			ckVendor = vendor
+			break
+		}
+	}
+
+	inv, err := tcgSeller.Inventory()
+	if err != nil {
+		return nil
+	}
+	bl, err := ckVendor.Buylist()
+	if err != nil {
+		return nil
+	}
+
+	tiers := map[string]int{}
+
+	sets := mtgmatcher.GetSets()
+	for _, set := range sets {
+		if SliceStringHas(skipEditions, set.Code) {
+			continue
+		}
+
+		// Commander sets would pollute results too much
+		switch set.Code {
+		case "OPCA", "PLIST", "MB1", "30A":
+			continue
+		case "40K":
+		default:
+			if set.Type == "commander" {
+				continue
+			}
+		}
+
+		// Skip anything older than 5 years
+		releaseDate, err := time.Parse("2006-01-02", set.ReleaseDate)
+		if err != nil {
+			continue
+		}
+		if time.Now().Sub(releaseDate).Hours()/24/365 > 5 {
+			continue
+		}
+
+		count := 0
+		cardPrices := map[string]float64{}
+		var totalPrices float64
+		for _, card := range set.Cards {
+			uuid := mtgmatcher.Scryfall2UUID(card.Identifiers["scryfallId"])
+			co, err := mtgmatcher.GetUUID(uuid)
+			if err != nil {
+				continue
+			}
+			if co.Foil || co.Etched || co.IsPromo ||
+				co.HasPromoType(mtgjson.PromoTypeBoosterfun) ||
+				co.HasPromoType(mtgjson.PromoTypePromoPack) {
+				continue
+			}
+
+			// Only consider common and uncommon cards
+			entries, found := inv[uuid]
+			if !found {
+				continue
+			}
+			if card.Rarity == "common" || card.Rarity == "uncommon" {
+				count++
+				price := entries[0].Price
+				totalPrices += price
+				cardPrices[uuid] = price
+			}
+		}
+		if count == 0 {
+			continue
+		}
+
+		averagePrice := totalPrices / float64(count)
+
+		for uuid, price := range cardPrices {
+			if price < averagePrice {
+				continue
+			}
+
+			// Assign a value considering how big of a gap the minimum price has
+			tiers[uuid] = int(price-averagePrice) + 1
+
+			// Assign additional value if buylist has non-bulk worth
+			var blPrice float64
+			blEntries, found := bl[uuid]
+			if found {
+				blPrice = blEntries[0].BuyPrice
+			}
+			if blPrice > SleepersMinPrice {
+				tiers[uuid] += 1
+			}
+		}
+	}
+
+	return tiers
 }
 
 func getReprints(skipEditions []string) map[string]int {
