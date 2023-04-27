@@ -176,7 +176,8 @@
             {{if .TotalUnique}}
                 -
                 <small><small><small>
-                    {{.TotalUnique}} card{{if gt (len .AllKeys) 1}}s{{end}} found
+                    {{.TotalUnique}}
+                    {{if .IsSealed}}product{{else}}card{{end}}{{if gt (len .AllKeys) 1}}s{{end}} found
                     {{if gt .TotalUnique (len .AllKeys)}}
                         ({{len .AllKeys}} shown)
                     {{end}}
