@@ -486,6 +486,10 @@ func runSealedAnalysis() {
 		}
 	}
 
+	runRawSetValue(tcgInventory, tcgDirect, ckBuylist, directNetBuylist)
+}
+
+func runRawSetValue(tcgInventory, tcgDirect mtgban.InventoryRecord, ckBuylist, directNetBuylist mtgban.BuylistRecord) {
 	inv := map[string]float64{}
 	invFoil := map[string]float64{}
 	invDirect := map[string]float64{}
