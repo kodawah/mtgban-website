@@ -424,6 +424,37 @@ func combineFinish(setCode string) bool {
 	return false
 }
 
+func bulkBuylist(co *mtgmatcher.CardObject) float64 {
+	var price float64
+	switch co.Rarity {
+	case "mythic":
+		price = 0.30
+		if co.Foil {
+			price = 0.25
+		}
+	case "rare":
+		price = 0.08
+		if co.Foil {
+			price = 0.15
+		}
+	case "common", "uncommon":
+		price = 5.0 / 1000
+		if co.Foil {
+			price = 0.02
+		}
+	default:
+		if co.IsPromo {
+			price = 0.05
+		} else if mtgmatcher.IsBasicLand(co.Name) {
+			price = 0.01
+			if co.Foil {
+				price = 0.10
+			}
+		}
+	}
+	return price
+}
+
 func runSealedAnalysis() {
 	log.Println("Running set analysis")
 
@@ -476,48 +507,17 @@ func runSealedAnalysis() {
 		// Determine whether to keep prices separated or combine them
 		useFoil := co.Foil && !combineFinish(co.SetCode)
 
+		var blPrice float64
 		entriesBl, found := ckBuylist[uuid]
 		if !found {
-			switch co.Rarity {
-			case "mythic":
-				if useFoil {
-					blFoil[co.SetCode] += 0.30
-				} else {
-					bl[co.SetCode] += 0.30
-				}
-			case "rare":
-				if useFoil {
-					blFoil[co.SetCode] += 0.30
-				} else {
-					bl[co.SetCode] += 0.10
-				}
-			case "common", "uncommon":
-				if useFoil {
-					blFoil[co.SetCode] += 0.05
-				} else {
-					bl[co.SetCode] += 0.005
-				}
-			default:
-				if co.IsPromo {
-					if useFoil {
-						blFoil[co.SetCode] += 0.05
-					} else {
-						bl[co.SetCode] += 0.05
-					}
-				} else if mtgmatcher.IsBasicLand(co.Name) {
-					if useFoil {
-						blFoil[co.SetCode] += 0.10
-					} else {
-						bl[co.SetCode] += 0.01
-					}
-				}
-			}
+			blPrice = bulkBuylist(&co)
 		} else {
-			if useFoil {
-				blFoil[co.SetCode] += entriesBl[0].BuyPrice
-			} else {
-				bl[co.SetCode] += entriesBl[0].BuyPrice
-			}
+			blPrice = entriesBl[0].BuyPrice
+		}
+		if useFoil {
+			blFoil[co.SetCode] += blPrice
+		} else {
+			bl[co.SetCode] += blPrice
 		}
 
 		entriesInv, found := tcgInventory[uuid]
