@@ -161,12 +161,14 @@ func editionTitle(cardId string) string {
 		finish = " Foil"
 	}
 
-	num := ""
-	if !co.Sealed {
-		num = "#" + co.Card.Number
+	extra := ""
+	if co.Sealed {
+		extra = mtgmatcher.Title(co.Side + " " + co.Layout)
+	} else {
+		extra = "#" + co.Card.Number
 	}
 
-	return fmt.Sprintf("%s -%s %s %s", edition, finish, mtgmatcher.Title(co.Card.Rarity), num)
+	return fmt.Sprintf("%s -%s %s %s", edition, finish, mtgmatcher.Title(co.Card.Rarity), extra)
 }
 
 func insertNavBar(page string, nav []NavElem, extra []NavElem) []NavElem {
