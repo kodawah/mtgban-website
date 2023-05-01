@@ -476,7 +476,7 @@ func getVendorPrices(mode string, enabledStores []string, filterByEdition string
 					}
 					for i := range buylist[cardId] {
 						condTag := buylist[cardId][i].Conditions
-						out[id][vendorTag].Conditions[condTag+"_etched"] = buylist[cardId][i].BuyPrice
+						out[id][vendorTag].Conditions[condTag] = buylist[cardId][i].BuyPrice
 					}
 				}
 			}
