@@ -95,20 +95,23 @@
                     <br><br>
 
                     <script type="text/javascript">
-                        function submitForm(field, val) {
+                        function submitForm(field, val, newWindow) {
                             var formField = document.getElementById(field);
                             formField.value = val;
                             var form = document.getElementById("upload_form")
+                            if (newWindow) {
+                                form.target = '_blank';
+                            }
                             form.submit();
                         }
                     </script>
 
                     <input type="hidden" id="download" name="download" value="false"/>
                     <input type="hidden" id="estimate" name="estimate" value="false"/>
-                    <input type="submit" id="submit_default" value="&nbsp;&nbsp;Upload&nbsp;&nbsp;" onclick="javascript:submitForm('download', 'false');" {{if and (not .RemoteLinkURL) (not .CardHashes)}}disabled{{end}} style="display:inline">
+                    <input type="submit" id="submit_default" value="&nbsp;&nbsp;Upload&nbsp;&nbsp;" onclick="javascript:submitForm('download', 'false', false);" {{if and (not .RemoteLinkURL) (not .CardHashes)}}disabled{{end}} style="display:inline">
                     {{if .CanBuylist}}
-                        <input type="submit" id="submit_download" value="&nbsp;&nbsp;Get CSV&nbsp;&nbsp;" onclick="javascript:submitForm('download', 'true');" {{if and (not .RemoteLinkURL) (not .CardHashes)}}disabled{{end}} style="display:none">
-                        <input type="submit" id="submit_estimate" value="&nbsp;CardConduit&nbsp;" onclick="javascript:submitForm('estimate', 'true');" {{if and (not .RemoteLinkURL) (not .CardHashes)}}disabled{{end}} style="display:none">
+                        <input type="submit" id="submit_download" value="&nbsp;&nbsp;Get CSV&nbsp;&nbsp;" onclick="javascript:submitForm('download', 'true', false);" {{if and (not .RemoteLinkURL) (not .CardHashes)}}disabled{{end}} style="display:none">
+                        <input type="submit" id="submit_estimate" value="&nbsp;CardConduit&nbsp;" onclick="javascript:submitForm('estimate', 'true', true);" {{if and (not .RemoteLinkURL) (not .CardHashes)}}disabled{{end}} style="display:none">
                     {{end}}
                     {{if .Optimized}}
                         <input type="button" value="&nbsp;&nbsp;Optimizer&nbsp;&nbsp;" onclick="window.location.href = '#top';" style="display:inline">
