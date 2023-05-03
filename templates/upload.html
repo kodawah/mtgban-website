@@ -43,7 +43,7 @@
         <h1>Welcome to BAN Upload</h1>
         <div class="indent">
             <center>
-                <form enctype="multipart/form-data" action="/upload" method="post">
+                <form enctype="multipart/form-data" action="/upload" method="post" id="upload_form">
                     <input type="radio" id="retail" name="mode" value="false" {{if not .IsBuylist}}checked{{end}} onchange="reloadSelect('retail')">
                     <label for="retail">Retail</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <input type="radio" id="buylist" name="mode" value="true" {{if .IsBuylist}}checked{{end}} onchange="reloadSelect('buylist')" {{if not .CanBuylist}}disabled{{end}}>
@@ -98,14 +98,14 @@
                         function submitForm(field, val) {
                             var formField = document.getElementById(field);
                             formField.value = val;
-                            var btn = document.getElementById('submit');
-                            btn.submit();
+                            var form = document.getElementById("upload_form")
+                            form.submit();
                         }
                     </script>
 
                     <input type="hidden" id="download" name="download" value="false"/>
                     <input type="hidden" id="estimate" name="estimate" value="false"/>
-                    <input type="submit" id="submit" value="&nbsp;&nbsp;Upload&nbsp;&nbsp;" onclick="javascript:submitForm('download', 'false');" {{if and (not .RemoteLinkURL) (not .CardHashes)}}disabled{{end}} style="display:inline">
+                    <input type="submit" id="submit_default" value="&nbsp;&nbsp;Upload&nbsp;&nbsp;" onclick="javascript:submitForm('download', 'false');" {{if and (not .RemoteLinkURL) (not .CardHashes)}}disabled{{end}} style="display:inline">
                     {{if .CanBuylist}}
                         <input type="submit" id="submit_download" value="&nbsp;&nbsp;Get CSV&nbsp;&nbsp;" onclick="javascript:submitForm('download', 'true');" {{if and (not .RemoteLinkURL) (not .CardHashes)}}disabled{{end}} style="display:none">
                         <input type="submit" id="submit_estimate" value="&nbsp;CardConduit&nbsp;" onclick="javascript:submitForm('estimate', 'true');" {{if and (not .RemoteLinkURL) (not .CardHashes)}}disabled{{end}} style="display:none">
@@ -259,7 +259,7 @@
                     var url = document.getElementById('urlLabel');
                     url.innerHTML = "Select spreadsheet";
 
-                    const fields = ['submit', 'submit_download', 'submit_estimate'];
+                    const fields = ['submit_default', 'submit_download', 'submit_estimate'];
 
                     fields.forEach(element => {
                         var btn = document.getElementById(element);
@@ -288,7 +288,7 @@
                     var input = document.getElementById('gdocURL');
                     input.value = url;
 
-                    const fields = ['submit', 'submit_download', 'submit_estimate'];
+                    const fields = ['submit_default', 'submit_download', 'submit_estimate'];
 
                     fields.forEach(element => {
                         var btn = document.getElementById(element);
@@ -304,7 +304,7 @@
                 var textArea = document.getElementById('textArea');
                 textArea.style.display = "block";
 
-                const fields = ['submit', 'submit_download', 'submit_estimate'];
+                const fields = ['submit_default', 'submit_download', 'submit_estimate'];
 
                 fields.forEach(element => {
                     var btn = document.getElementById(element);
