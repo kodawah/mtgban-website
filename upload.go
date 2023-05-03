@@ -423,6 +423,10 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	// Extract card Ids
 	cardIds := make([]string, 0, len(uploadedData))
 	for i := range uploadedData {
+		// Filter out empty ids
+		if uploadedData[i].CardId == "" {
+			continue
+		}
 		cardIds = append(cardIds, uploadedData[i].CardId)
 
 		// Check if conditions should be retrieved
