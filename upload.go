@@ -337,8 +337,10 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	if canOptimize {
 		maxRows = MaxUploadProEntries
 	}
-	// Allow a larger upload limit since prices are not provided
-	if estimate && ((canBuylist && !blMode) || canOptimize) {
+	// Allow a larger upload limit if set, if dev, or if it's an external call
+	limitOpt, _ := strconv.ParseBool(GetParamFromSig(sig, "UploadNoLimit"))
+	uploadNoLimit := limitOpt || (DevMode && !SigCheck) || estimate
+	if uploadNoLimit && ((canBuylist && !blMode) || canOptimize) {
 		maxRows = MaxUploadTotalEntries
 	}
 
