@@ -165,6 +165,11 @@
                                 <p class="h6inline">Ignore prices when loading data (<i>use TCG Low instead</i>)</p>
                             </label>
                             <br>
+                            <label for="noresults">
+                                <input type="checkbox" id="noresults" name="noresults" onClick="javascript:saveCheckbox('noresults')">
+                                <p class="h6inline">Skip main results, only show Optimizer</p>
+                            </label>
+                            <br>
                             <label for="sorting">
                                 <p class="h6inline">Sort results by</p>
                                 <select id="sorting" name="sorting" onChange="javascript:saveText('sorting')" style="text-align-last=center;">
@@ -190,7 +195,7 @@
             }
 
             const checkboxes = [
-                "lowval", "highval", "lowvalabs", "highvalabs", "minmargin", "nocond", "noprice"
+                "lowval", "highval", "lowvalabs", "highvalabs", "minmargin", "nocond", "noprice", "noresults",
             ];
             checkboxes.forEach(element => {
                 var checked = JSON.parse(localStorage.getItem(element));

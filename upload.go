@@ -480,8 +480,12 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		pageVars.SearchQuery = handler.Filename
 	}
 	pageVars.ScraperKeys = enabledStores
-	pageVars.UploadEntries = uploadedData
 	pageVars.TotalEntries = map[string]float64{}
+
+	skipResults := r.FormValue("noresults") != ""
+	if !skipResults {
+		pageVars.UploadEntries = uploadedData
+	}
 
 	// Load up image links
 	for _, data := range uploadedData {
