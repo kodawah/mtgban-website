@@ -485,7 +485,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	pageVars.TotalEntries = map[string]float64{}
 
 	skipResults := r.FormValue("noresults") != ""
-	if !skipResults {
+	if !(blMode && skipResults) {
 		pageVars.UploadEntries = uploadedData
 	}
 

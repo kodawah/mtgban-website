@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -969,19 +970,14 @@ func getSortingData(uuid string) (*SortingData, error) {
 
 const charactersToStrip = "abcdefgsp" + mtgjson.SuffixSpecial + mtgjson.SuffixVariant
 
-func stripNumber(num string) string {
-	num = strings.TrimLeft(num, "AB")
-	num = strings.ToLower(num)
-	num = strings.TrimRight(num, charactersToStrip)
-	return num
-}
+var reSort = regexp.MustCompile(`\d+`)
 
 func sortByNumberAndFinish(cI, cJ *mtgmatcher.CardObject, strip bool) bool {
 	numI := cI.Card.Number
 	numJ := cJ.Card.Number
 	if strip {
-		numI = stripNumber(cI.Card.Number)
-		numJ = stripNumber(cJ.Card.Number)
+		numI = reSort.FindString(cI.Card.Number)
+		numJ = reSort.FindString(cJ.Card.Number)
 	}
 
 	// If their number is the same, check for foiling status
