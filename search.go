@@ -982,6 +982,9 @@ func sortByNumberAndFinish(cI, cJ *mtgmatcher.CardObject, strip bool) bool {
 
 	// If their number is the same, check for foiling status
 	if numI == numJ {
+		if len(cI.PromoTypes) > 0 && len(cJ.PromoTypes) > 0 && cI.PromoTypes[0] != cJ.PromoTypes[0] {
+			return cI.PromoTypes[0] < cJ.PromoTypes[0]
+		}
 		if cI.Etched || cJ.Etched {
 			if cI.Etched && !cJ.Etched {
 				return false
@@ -1000,7 +1003,7 @@ func sortByNumberAndFinish(cI, cJ *mtgmatcher.CardObject, strip bool) bool {
 	// If both are foil or both are non-foil, check their number
 	cInum, errI := strconv.Atoi(numI)
 	cJnum, errJ := strconv.Atoi(numJ)
-	if errI == nil && errJ == nil {
+	if errI == nil && errJ == nil && cInum != cJnum {
 		return cInum < cJnum
 	}
 
