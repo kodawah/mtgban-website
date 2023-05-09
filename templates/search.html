@@ -184,7 +184,13 @@
                 </small></small></small>
             {{end}}
         </h1>
-        <div class="indent sticky" style="top: 48px; background-color: var(--background); z-index: 3; float:left">
+
+        {{if .IsSealed}}
+            <img id="hoverImage" src="" style="position:absolute; z-index: 3; max-width: 360px; max-height: 360px;"/>
+            <script type="text/javascript" src="../js/followmouse.js"></script>
+        {{end}}
+
+        <div class="indent sticky" style="top: 48px; background-color: var(--background); float:left">
             <form class="search autocomplete" action="" autocomplete="off" spellcheck="false" id="searchform">
                 <label style="clear: both; float: left; width: 110%" for="searchbox">
                     {{if not .SearchQuery}}
@@ -357,11 +363,6 @@
             </script>
 
             {{$emptyImg := "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"}}
-            {{if .IsSealed}}
-                <img id="hoverImage" src="" style="position:absolute; z-index: 3; max-width: 360px; max-height: 360px;"/>
-                <script type="text/javascript" src="../js/followmouse.js"></script>
-            {{end}}
-
             <div>
                 <table style="float: left; background-color: var(--background)">
                     {{if .IsSealed}}
