@@ -287,6 +287,7 @@ func getReprintsGlobal() ([]string, map[string][]ReprintEntry) {
 		switch set.Code {
 		case "PVAN", "OARC", "PCEL", "PDCI",
 			"LEG", "DRK", "ATQ", "ARN", "PTK",
+			"OPCA", "OHOP",
 			"FBB", "4BB", "DRKITA", "LEGITA", "RIN", "4EDALT", "BCHR":
 			continue
 		}
