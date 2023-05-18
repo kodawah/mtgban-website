@@ -17,6 +17,9 @@ type SearchConfig struct {
 	// The search strategy to be used
 	SearchMode string
 
+	// Sort strategy
+	SortMode string
+
 	// Only for SearchMode == "hashing"
 	UUIDs []string
 
@@ -296,6 +299,7 @@ var re *regexp.Regexp
 var FilterOperations = map[string][]string{
 	"sm":        []string{":"},
 	"skip":      []string{":"},
+	"sort":      []string{":"},
 	"edition":   []string{":"},
 	"s":         []string{":"},
 	"se":        []string{":"},
@@ -477,6 +481,12 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 			case "empty":
 				config.SkipEmptyRetail = true
 				config.SkipEmptyBuylist = true
+			}
+		case "sort":
+			code = strings.ToLower(code)
+			switch code {
+			case "chrono", "alpha", "retail", "buylist":
+				config.SortMode = code
 			}
 
 		// Options that modify the card searches
