@@ -210,6 +210,11 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		config.SearchMode = "sealed"
 	}
 
+	if config.SortMode != "" {
+		pageVars.SearchSort = config.SortMode
+		pageVars.NoSort = true
+	}
+
 	var hideSyp bool
 	miscSearchOpts := readCookie(r, "SearchMiscOpts")
 	if miscSearchOpts != "" {
