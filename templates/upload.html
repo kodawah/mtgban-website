@@ -6,9 +6,21 @@
     <link rel="stylesheet" type="text/css" href="../css/tooltip.css">
     <link href="//cdn.jsdelivr.net/npm/keyrune@latest/css/keyrune.css" rel="stylesheet" type="text/css" />
     <title>{{.Title}}</title>
+    <script>function hoverMultiSelect() {
+        var selectElement = document.getElementById('stores');
+        selectElement.addEventListener('mouseover', function(e) {
+                        var option = e.target;
+                option.selected = true;
+                });
+                selectElement.addEventListener('mouseout', function(e) {
+            var option = e.target;
+        option.selected = false;
+        });
+    }
+</script>
 </head>
 
-<body class="light-theme">
+<body onload="hoverMultiSelect()" class="light-theme">
 <script type="text/javascript" src="../js/themechecker.js"></script>
 <nav>
     <ul>
