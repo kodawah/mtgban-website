@@ -373,6 +373,8 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	uploadedData = mergeIdenticalEntries(uploadedData)
+
 	// Allow estimating on a separate page
 	if estimate && ((canBuylist && !blMode) || canOptimize) {
 		var items []CCItem
@@ -781,6 +783,48 @@ func getPrice(banPrice *BanPrice, conds string) float64 {
 	return price
 }
 
+func mergeIdenticalEntries(uploadedData []UploadEntry) []UploadEntry {
+	var uploadedDataClean []UploadEntry
+	duplicatedHashes := map[string]bool{}
+
+	for i := range uploadedData {
+		// Preserve empty results (for errors and whatnot)
+		if uploadedData[i].CardId == "" {
+			uploadedDataClean = append(uploadedDataClean, uploadedData[i])
+			continue
+		}
+
+		// Use id + condition to mimic a "sku"
+		sku := uploadedData[i].CardId + uploadedData[i].OriginalCondition
+
+		if duplicatedHashes[sku] {
+			qty := 1
+			if uploadedData[i].HasQuantity {
+				qty = uploadedData[i].Quantity
+			}
+
+			// Iterate on the already added cards to update the quantity
+			for j := range uploadedDataClean {
+				if uploadedData[i].CardId == uploadedDataClean[j].CardId &&
+					uploadedData[i].OriginalCondition == uploadedDataClean[j].OriginalCondition {
+					if uploadedDataClean[j].Quantity == 0 {
+						uploadedDataClean[j].Quantity++
+					}
+					uploadedDataClean[j].Quantity += qty
+					uploadedDataClean[j].HasQuantity = true
+					break
+				}
+			}
+			continue
+		}
+
+		duplicatedHashes[sku] = true
+		uploadedDataClean = append(uploadedDataClean, uploadedData[i])
+	}
+
+	return uploadedDataClean
+}
+
 var reHeader = regexp.MustCompile(`[0-9 ]*.+[0-9 \(\)]*[0-9 ]*`)
 
 func parseHeader(first []string) (map[string]int, error) {
@@ -895,7 +939,7 @@ func parseHeader(first []string) (map[string]int, error) {
 	return indexMap, nil
 }
 
-func parseRow(indexMap map[string]int, record []string, foundHashes map[string]bool) (UploadEntry, error) {
+func parseRow(indexMap map[string]int, record []string) (UploadEntry, error) {
 	var res UploadEntry
 	var found bool
 
@@ -1067,14 +1111,6 @@ func parseRow(indexMap map[string]int, record []string, foundHashes map[string]b
 	}
 	res.CardId = cardId
 
-	// Use id + condition to mimic a "sku"
-	if foundHashes[res.CardId+res.OriginalCondition] {
-		return res, errors.New("repeated")
-	}
-	if res.MismatchError == nil && !res.MismatchAlias {
-		foundHashes[res.CardId+res.OriginalCondition] = true
-	}
-
 	return res, nil
 }
 
@@ -1113,7 +1149,6 @@ func loadCollection(link string, maxRows int) ([]UploadEntry, error) {
 		return nil, err
 	}
 
-	foundHashes := map[string]bool{}
 	var uploadEntries []UploadEntry
 	doc.Find(`div[id="collectionContainer"] table tbody`).Find("tr").EachWithBreak(func(i int, s *goquery.Selection) bool {
 		if i >= maxRows {
@@ -1125,7 +1160,7 @@ func loadCollection(link string, maxRows int) ([]UploadEntry, error) {
 			record = append(record, se.Text())
 		})
 
-		res, err := parseRow(indexMap, record, foundHashes)
+		res, err := parseRow(indexMap, record)
 		if err != nil {
 			return true
 		}
@@ -1181,7 +1216,6 @@ func loadSpreadsheet(link string, maxRows int) ([]UploadEntry, error) {
 		return nil, err
 	}
 
-	foundHashes := map[string]bool{}
 	var uploadEntries []UploadEntry
 	for {
 		i++
@@ -1198,7 +1232,7 @@ func loadSpreadsheet(link string, maxRows int) ([]UploadEntry, error) {
 			record[j] = sheet.Rows[i][j].Value
 		}
 
-		res, err := parseRow(indexMap, record, foundHashes)
+		res, err := parseRow(indexMap, record)
 		if err != nil {
 			continue
 		}
@@ -1243,7 +1277,6 @@ func loadOldXls(reader io.ReadSeeker, maxRows int) ([]UploadEntry, error) {
 		return nil, err
 	}
 
-	foundHashes := map[string]bool{}
 	var uploadEntries []UploadEntry
 	for {
 		i++
@@ -1260,7 +1293,7 @@ func loadOldXls(reader io.ReadSeeker, maxRows int) ([]UploadEntry, error) {
 			record[j] = sheet.Row(i).Col(j)
 		}
 
-		res, err := parseRow(indexMap, record, foundHashes)
+		res, err := parseRow(indexMap, record)
 		if err != nil {
 			continue
 		}
@@ -1309,7 +1342,6 @@ func loadXlsx(reader io.Reader, maxRows int) ([]UploadEntry, error) {
 		return nil, err
 	}
 
-	foundHashes := map[string]bool{}
 	var uploadEntries []UploadEntry
 	for {
 		i++
@@ -1322,7 +1354,7 @@ func loadXlsx(reader io.Reader, maxRows int) ([]UploadEntry, error) {
 			continue
 		}
 
-		res, err := parseRow(indexMap, rows[i], foundHashes)
+		res, err := parseRow(indexMap, rows[i])
 		if err != nil {
 			continue
 		}
@@ -1380,7 +1412,6 @@ func loadCsv(reader io.ReadSeeker, comma rune, maxRows int) ([]UploadEntry, erro
 		return nil, err
 	}
 
-	foundHashes := map[string]bool{}
 	var i int
 	var uploadEntries []UploadEntry
 	for {
@@ -1399,7 +1430,7 @@ func loadCsv(reader io.ReadSeeker, comma rune, maxRows int) ([]UploadEntry, erro
 			continue
 		}
 
-		res, err := parseRow(indexMap, record, foundHashes)
+		res, err := parseRow(indexMap, record)
 		if err != nil {
 			continue
 		}
