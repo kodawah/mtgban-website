@@ -777,3 +777,13 @@ input:checked + .slider {
   width: 146px; /* Size of the small img */
   white-space: normal;
 }
+
+div.stores-select {
+    width: 180px;
+    height: 242px;
+    text-align: left;
+    border: 1px solid var(--normal);
+    padding: 5px;
+    resize: both;
+    overflow: auto;
+}

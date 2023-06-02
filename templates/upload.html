@@ -60,7 +60,7 @@
                     <br>
                     <br>
                     <div class="tooltip">
-                        <select style="width: 180px; height: 242px;" name="stores" id="stores" multiple {{if not .CanChangeStores}}disabled{{end}}></select>
+                        <div class="stores-select" id="storesBox"></div>
                         {{if not .CanChangeStores}}
                             <span class="tooltiptext">Increase your tier and customize the list of stores!</span>
                         {{end}}
@@ -228,13 +228,14 @@
             })
 
             window.reloadSelect = function(mode) {
-                var selectBox = document.getElementById('stores');
+                var selectBox = document.getElementById('storesBox');
                 if (selectBox) {
                     const fields = ['submit_download', 'submit_estimate'];
                     if (mode == "buylist") {
                         selectBox.innerHTML = " \
                             {{range .VendorKeys}} \
-                                <option value='{{.}}' {{if slice_has $.EnabledVendors .}}selected{{end}}>{{scraper_name .}}</option> \
+                                <label for='{{.}}'> \
+                                    <input type='checkbox' name='stores' id='{{.}}' value='{{.}}' {{if slice_has $.EnabledVendors .}}checked{{end}}>&nbsp;{{scraper_name .}}</label><br> \
                             {{end}} \
                         ";
 
@@ -253,7 +254,8 @@
                     } else if (mode == "retail") {
                         selectBox.innerHTML = " \
                             {{range .SellerKeys}} \
-                                <option value='{{.}}' {{if slice_has $.EnabledSellers .}}selected{{end}}>{{scraper_name .}}</option> \
+                                <label for='{{.}}'> \
+                                    <input type='checkbox' name='stores' id='{{.}}' value='{{.}}' {{if slice_has $.EnabledSellers .}}checked{{end}}>&nbsp;{{scraper_name .}}</label><br> \
                             {{end}} \
                         ";
 
