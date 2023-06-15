@@ -1079,6 +1079,26 @@ func sortSetsAlphabetical(uuidI, uuidJ string) bool {
 	return cI.Name < cJ.Name
 }
 
+// Sort card by their names, keeping cards grouped by edition alphabetically
+func sortSetsAlphabeticalSet(uuidI, uuidJ string) bool {
+	sortingI, err := getSortingData(uuidI)
+	if err != nil {
+		return false
+	}
+	sortingJ, err := getSortingData(uuidJ)
+	if err != nil {
+		return false
+	}
+	cI, setDateI := sortingI.co, sortingI.releaseDate
+	cJ, setDateJ := sortingJ.co, sortingJ.releaseDate
+
+	if setDateI.Equal(setDateJ) {
+		return sortSetsAlphabetical(uuidI, uuidJ)
+	}
+
+	return cI.Edition < cJ.Edition
+}
+
 // Sort cards by their prices according to TCG MARKET, fallbacking to TCG LOW
 // If same price is found, sort as normal
 func sortSetsByRetail(uuidI, uuidJ string) bool {

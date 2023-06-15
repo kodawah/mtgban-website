@@ -706,6 +706,10 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 				sort.Slice(optimizedResults[store], func(i, j int) bool {
 					return optimizedResults[store][i].Spread > optimizedResults[store][j].Spread
 				})
+			case "alphabetical":
+				sort.Slice(optimizedResults[store], func(i, j int) bool {
+					return sortSetsAlphabeticalSet(optimizedResults[store][i].CardId, optimizedResults[store][j].CardId)
+				})
 			default:
 				sort.Slice(optimizedResults[store], func(i, j int) bool {
 					return sortSets(optimizedResults[store][i].CardId, optimizedResults[store][j].CardId)
@@ -723,6 +727,10 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			case "highspread":
 				sort.Slice(optimizedEditions[code], func(i, j int) bool {
 					return optimizedEditions[code][i].Spread > optimizedEditions[code][j].Spread
+				})
+			case "alphabetical":
+				sort.Slice(optimizedEditions[code], func(i, j int) bool {
+					return sortSetsAlphabeticalSet(optimizedEditions[code][i].CardId, optimizedEditions[code][j].CardId)
 				})
 			default:
 				sort.Slice(optimizedEditions[code], func(i, j int) bool {
