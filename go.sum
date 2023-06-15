@@ -298,8 +298,10 @@ github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 h1:RWengNIwukTxcDr9
 github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826/go.mod h1:TaXosZuwdSHYgviHp1DAtfrULt5eUgsSMsZf+YrPgl8=
 github.com/mroth/weightedrand/v2 v2.0.1 h1:zrEVDIaau/E4QLOKu02kpg8T8myweFlMGikIgbIdrRA=
 github.com/mroth/weightedrand/v2 v2.0.1/go.mod h1:f2faGsfOGOwc1p94wzHKKZyTpcJUW7OJ/9U4yfiNAOU=
-github.com/mtgban/go-mtgban v0.0.0-20230602161151-15735663b75e h1:sKaHn3xnYfw/Sv73NKD344g/07+jv/AEr5hTKEkansM=
-github.com/mtgban/go-mtgban v0.0.0-20230602161151-15735663b75e/go.mod h1:Pbyi/PMJvQ9fEcz2iza2hBg2g2FZcdiyJExwxycGKY4=
+github.com/mtgban/go-mtgban v0.0.0-20230615220957-74ab403b2b56 h1:qmumEWlaiHxZL3PTG/24hCRpGD9SAAjtw78EnRjJYio=
+github.com/mtgban/go-mtgban v0.0.0-20230615220957-74ab403b2b56/go.mod h1:Pbyi/PMJvQ9fEcz2iza2hBg2g2FZcdiyJExwxycGKY4=
+github.com/mtgban/go-mtgban v0.0.0-20230622185108-084c49ddd9c6 h1:x4xqBkLUIkMgFDryR4XLfKmOS2wF0BRV+OofOK4k2ns=
+github.com/mtgban/go-mtgban v0.0.0-20230622185108-084c49ddd9c6/go.mod h1:Pbyi/PMJvQ9fEcz2iza2hBg2g2FZcdiyJExwxycGKY4=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWbfPhv4DMiApHyliiK5xCTNVSPiaAs=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
 github.com/nxadm/tail v1.4.4 h1:DQuhQpB1tVlglWS2hLQ5OV6B5r8aGxSrPc5Qo6uTN78=

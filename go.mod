@@ -15,7 +15,7 @@ require (
 	github.com/hashicorp/go-cleanhttp v0.5.2
 	github.com/leemcloughlin/logfile v0.0.0-20201123203928-cff1c8a30a10
 	github.com/mackerelio/go-osstat v0.1.0
-	github.com/mtgban/go-mtgban v0.0.0-20230602161151-15735663b75e
+	github.com/mtgban/go-mtgban v0.0.0-20230622185108-084c49ddd9c6
 	github.com/xuri/excelize/v2 v2.7.0
 	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783
 	golang.org/x/sys v0.4.0
