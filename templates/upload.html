@@ -700,6 +700,7 @@
                                             <input type="hidden" name="mode" value="false"/>
                                             {{range $entries}}
                                                 <input type="hidden" name="{{$scraperKey}}hashes" value="{{.CardId}}"/>
+                                                <input type="hidden" name="hashesQtys" value="{{.Quantity}}"/>
                                             {{end}}
                                             <a class="btn success" style="text-align: center;" href='javascript:void(0)' onclick='document.getElementById("{{$scraperKey}}hashes").submit();'>Download {{$scraperKey}} CSV</a>
                                             <noscript>

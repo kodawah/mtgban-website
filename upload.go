@@ -95,6 +95,9 @@ type OptimizedUploadEntry struct {
 
 	// Price of the card provided by the Store (condition accounted)
 	BestPrice float64
+
+	// Quantity as found in the source data
+	Quantity int
 }
 
 func Upload(w http.ResponseWriter, r *http.Request) {
@@ -107,12 +110,13 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	// See if we need to download the ck csv only
 	ckhashes := r.Form["CKhashes"]
+	hashesQtys := r.Form["hashesQtys"]
 	if ckhashes != nil {
 		w.Header().Set("Content-Type", "text/csv")
 		w.Header().Set("Content-Disposition", "attachment; filename=\"mtgban_ck.csv\"")
 		csvWriter := csv.NewWriter(w)
 
-		err := UUID2CKCSV(csvWriter, ckhashes)
+		err := UUID2CKCSV(csvWriter, ckhashes, hashesQtys)
 		if err != nil {
 			w.Header().Del("Content-Type")
 			UserNotify("upload", err.Error())
@@ -128,7 +132,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Disposition", "attachment; filename=\"mtgban_scg.csv\"")
 		csvWriter := csv.NewWriter(w)
 
-		err := UUID2SCGCSV(csvWriter, scghashes)
+		err := UUID2SCGCSV(csvWriter, scghashes, hashesQtys)
 		if err != nil {
 			w.Header().Del("Content-Type")
 			UserNotify("upload", err.Error())
@@ -667,6 +671,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 					Price:     comparePrice,
 					Spread:    spread,
 					BestPrice: price,
+					Quantity:  uploadedData[i].Quantity,
 				})
 
 				// Save totals
@@ -684,6 +689,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 					Price:     comparePrice,
 					Spread:    spread,
 					BestPrice: price,
+					Quantity:  uploadedData[i].Quantity,
 				})
 			}
 		}

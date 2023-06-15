@@ -5,7 +5,6 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -201,7 +200,7 @@ func TCGLastSoldAPI(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func UUID2CKCSV(w *csv.Writer, ids []string) error {
+func UUID2CKCSV(w *csv.Writer, ids, qtys []string) error {
 	var buylist mtgban.BuylistRecord
 	for _, vendor := range Vendors {
 		if vendor != nil && vendor.Info().Shorthand == "CK" {
@@ -218,7 +217,7 @@ func UUID2CKCSV(w *csv.Writer, ids []string) error {
 	if err != nil {
 		return err
 	}
-	for _, id := range ids {
+	for i, id := range ids {
 		blEntries, found := buylist[id]
 		if !found {
 			continue
@@ -229,7 +228,10 @@ func UUID2CKCSV(w *csv.Writer, ids []string) error {
 		}
 		edition := blEntries[0].CustomFields["CKEdition"]
 		finish := blEntries[0].CustomFields["CKFoil"]
-		quantity := fmt.Sprint(1)
+		quantity := "1"
+		if len(qtys) == len(ids) && qtys[i] != "0" {
+			quantity = qtys[i]
+		}
 
 		err = w.Write([]string{name, edition, finish, quantity})
 		if err != nil {
@@ -241,7 +243,7 @@ func UUID2CKCSV(w *csv.Writer, ids []string) error {
 	return nil
 }
 
-func UUID2SCGCSV(w *csv.Writer, ids []string) error {
+func UUID2SCGCSV(w *csv.Writer, ids, qtys []string) error {
 	var buylist mtgban.BuylistRecord
 	for _, vendor := range Vendors {
 		if vendor != nil && vendor.Info().Shorthand == "SCG" {
@@ -258,7 +260,7 @@ func UUID2SCGCSV(w *csv.Writer, ids []string) error {
 	if err != nil {
 		return err
 	}
-	for _, id := range ids {
+	for i, id := range ids {
 		blEntries, found := buylist[id]
 		if !found {
 			continue
@@ -270,7 +272,10 @@ func UUID2SCGCSV(w *csv.Writer, ids []string) error {
 		edition := blEntries[0].CustomFields["SCGEdition"]
 		language := blEntries[0].CustomFields["SCGLanguage"]
 		finish := blEntries[0].CustomFields["SCGFinish"]
-		quantity := fmt.Sprint(1)
+		quantity := "1"
+		if len(qtys) == len(ids) && qtys[i] != "0" {
+			quantity = qtys[i]
+		}
 
 		err = w.Write([]string{name, edition, language, finish, quantity})
 		if err != nil {
