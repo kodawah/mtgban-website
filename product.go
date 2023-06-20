@@ -71,7 +71,7 @@ var editionRenames = map[string]string{
 	"Judge Gift Cards 2014":                "Judge Gift Cards",
 }
 
-var editionSkips = map[string]string{
+var sealedEditionSkips = map[string]string{
 	"Chronicles Japanese":    "",
 	"Legends Italian":        "",
 	"The Dark Italian":       "",
@@ -112,11 +112,6 @@ func getAllEditions() ([]string, map[string]EditionEntry) {
 	sortedEditions := make([]string, 0, len(sets))
 	listEditions := map[string]EditionEntry{}
 	for _, set := range sets {
-		_, found := editionSkips[set.Name]
-		if found {
-			continue
-		}
-
 		sortedEditions = append(sortedEditions, set.Code)
 
 		listEditions[set.Code] = makeEditionEntry(set)
@@ -203,7 +198,7 @@ func getSealedEditions() ([]string, map[string][]EditionEntry) {
 			continue
 		}
 
-		_, found := editionSkips[set.Name]
+		_, found := sealedEditionSkips[set.Name]
 		if found {
 			continue
 		}
