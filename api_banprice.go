@@ -92,6 +92,7 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 	idOpt := r.FormValue("id")
 	qty, _ := strconv.ParseBool(r.FormValue("qty"))
 	conds, _ := strconv.ParseBool(r.FormValue("conds"))
+	filterByFinish := r.FormValue("finish")
 
 	// Filter by user preference, as long as it's listed in the enebled stores
 	filterByVendor := r.FormValue("vendor")
@@ -145,7 +146,8 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Only filtered output can have csv encoding, and only for retail or buylist requests
-	if strings.HasSuffix(urlPath, ".csv") && ((filterByEdition == "" && filterByHash == nil) || strings.HasPrefix(urlPath, "all")) {
+	checkCSVoutput := (filterByEdition == "" && filterByHash == nil && filterByFinish == "") || strings.HasPrefix(urlPath, "all")
+	if strings.HasSuffix(urlPath, ".csv") && checkCSVoutput {
 		out.Error = "Invalid request"
 		json.NewEncoder(w).Encode(&out)
 		return
@@ -165,15 +167,15 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 	canBuylist := SliceStringHas(enabledModes, "buylist") || (SliceStringHas(enabledModes, "all") || (DevMode && !SigCheck))
 	if (strings.HasPrefix(urlPath, "retail") || strings.HasPrefix(urlPath, "all")) && canRetail {
 		dumpType += "retail"
-		out.Retail = getSellerPrices(idOpt, enabledStores, filterByEdition, filterByHash, qty, conds)
+		out.Retail = getSellerPrices(idOpt, enabledStores, filterByEdition, filterByHash, filterByFinish, qty, conds)
 	}
 	if (strings.HasPrefix(urlPath, "buylist") || strings.HasPrefix(urlPath, "all")) && canBuylist {
 		dumpType += "buylist"
-		out.Buylist = getVendorPrices(idOpt, enabledStores, filterByEdition, filterByHash, qty, conds)
+		out.Buylist = getVendorPrices(idOpt, enabledStores, filterByEdition, filterByHash, filterByFinish, qty, conds)
 	}
 
 	user := GetParamFromSig(sig, "UserEmail")
-	msg := fmt.Sprintf("[%v] %s requested a '%s' API dump ('%s','%q')", time.Since(start), user, dumpType, filterByEdition, filterByHash)
+	msg := fmt.Sprintf("[%v] %s requested a '%s' API dump ('%s','%q','%s')", time.Since(start), user, dumpType, filterByEdition, filterByHash, filterByFinish)
 	if qty {
 		msg += " with quantities"
 	}
@@ -262,7 +264,7 @@ func getIdFunc(mode string) func(co *mtgmatcher.CardObject) string {
 	}
 }
 
-func getSellerPrices(mode string, enabledStores []string, filterByEdition string, filterByHash []string, qty bool, conds bool) map[string]map[string]*BanPrice {
+func getSellerPrices(mode string, enabledStores []string, filterByEdition string, filterByHash []string, filterByFinish string, qty bool, conds bool) map[string]map[string]*BanPrice {
 	out := map[string]map[string]*BanPrice{}
 	idFunc := getIdFunc(mode)
 	for _, seller := range Sellers {
@@ -304,6 +306,9 @@ func getSellerPrices(mode string, enabledStores []string, filterByEdition string
 				continue
 			}
 			if filterByHash != nil && !SliceStringHas(filterByHash, cardId) {
+				continue
+			}
+			if filterByFinish != "" && checkFinish(co, filterByFinish) {
 				continue
 			}
 
@@ -377,7 +382,7 @@ func getSellerPrices(mode string, enabledStores []string, filterByEdition string
 	return out
 }
 
-func getVendorPrices(mode string, enabledStores []string, filterByEdition string, filterByHash []string, qty bool, conds bool) map[string]map[string]*BanPrice {
+func getVendorPrices(mode string, enabledStores []string, filterByEdition string, filterByHash []string, filterByFinish string, qty bool, conds bool) map[string]map[string]*BanPrice {
 	out := map[string]map[string]*BanPrice{}
 	idFunc := getIdFunc(mode)
 	for _, vendor := range Vendors {
@@ -419,6 +424,9 @@ func getVendorPrices(mode string, enabledStores []string, filterByEdition string
 				continue
 			}
 			if filterByHash != nil && !SliceStringHas(filterByHash, cardId) {
+				continue
+			}
+			if filterByFinish != "" && checkFinish(co, filterByFinish) {
 				continue
 			}
 
@@ -484,6 +492,18 @@ func getVendorPrices(mode string, enabledStores []string, filterByEdition string
 	}
 
 	return out
+}
+
+func checkFinish(co *mtgmatcher.CardObject, finish string) bool {
+	switch finish {
+	case "nonfoil":
+		return co.Foil || co.Etched
+	case "foil":
+		return !co.Foil || co.Etched
+	case "etched":
+		return co.Foil || !co.Etched
+	}
+	return false
 }
 
 func BanPrice2CSV(w *csv.Writer, pm map[string]map[string]*BanPrice, shouldQty, shouldCond, shouldFullName bool) error {

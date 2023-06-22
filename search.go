@@ -291,10 +291,10 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		var filename string
 		var results map[string]map[string]*BanPrice
 		if downloadCSV == "retail" {
-			results = getSellerPrices("scryfall", enabledStores, "", selectedUUIDs, true, true)
+			results = getSellerPrices("scryfall", enabledStores, "", selectedUUIDs, "", true, true)
 			filename = "mtgban_retail_prices.csv"
 		} else if downloadCSV == "buylist" {
-			results = getVendorPrices("scryfall", enabledStores, "", selectedUUIDs, true, true)
+			results = getVendorPrices("scryfall", enabledStores, "", selectedUUIDs, "", true, true)
 			filename = "mtgban_buylist_prices.csv"
 		} else {
 			pageVars.InfoMessage = "Unable to download CSV right now"
