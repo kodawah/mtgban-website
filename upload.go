@@ -872,7 +872,8 @@ func parseHeader(first []string) (map[string]int, error) {
 	for i, field := range first {
 		field = strings.ToLower(field)
 		switch {
-		case field == "id" || (strings.Contains(field, "id") && (strings.Contains(field, "tcg") || strings.Contains(field, "scryfall"))):
+		// Skip "tcgplayer id" because it could mean SKU or Product, and the two systems often overlap
+		case field == "id" || (strings.Contains(field, "id") && field != "tcgplayer id" && (strings.Contains(field, "tcg") || strings.Contains(field, "scryfall"))):
 			_, found := indexMap["id"]
 			if !found {
 				indexMap["id"] = i
