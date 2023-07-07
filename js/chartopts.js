@@ -91,7 +91,8 @@ function getChartOpts() {
                     type: "time",
                     distribution: "linear",
                     time: {
-                        unit: "day",
+                        unit: "month",
+                        stepSize: 1,
                     },
                 },
             ],
