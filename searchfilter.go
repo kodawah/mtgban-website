@@ -400,11 +400,14 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 			// Save the last name found
 			config.CleanQuery = co.Name
 			// Rebuild the full query for this card
-			config.FullQuery = co.Name + " s:" + co.SetCode + " cn:" + co.Number
-			if co.Etched {
-				config.FullQuery += " f:etched"
-			} else if co.Foil {
-				config.FullQuery += " f:foil"
+			config.FullQuery = co.Name
+			if !co.Sealed {
+				config.FullQuery += " s:" + co.SetCode + " cn:" + co.Number
+				if co.Etched {
+					config.FullQuery += " f:etched"
+				} else if co.Foil {
+					config.FullQuery += " f:foil"
+				}
 			}
 
 			// Set the special search mode and its data source
