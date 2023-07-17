@@ -494,6 +494,8 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		tmp := indexArray[:0]
 		mkmIndex := -1
 		tcgIndex := -1
+		tcgEVIndex := -1
+		tcgEVDirctIndex := -1
 
 		// Iterate on array, always passthrough, except for specific entries
 		for i := range indexArray {
@@ -529,6 +531,36 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			case TCG_DIRECT_LOW:
 				// Skip this one for search results
 				continue
+			case "TCG Low EV Mean":
+				// Save reference to the array
+				tmp = append(tmp, indexArray[i])
+				tcgEVIndex = len(tmp) - 1
+				tmp[tcgEVIndex].ScraperName = "TCG Low EV"
+			case "TCG Low EV Median":
+				// If the reference is found, add a secondary price
+				// otherwise just leave it as is
+				if tcgEVIndex >= 0 {
+					tmp[tcgEVIndex].Secondary = indexArray[i].Price
+					tmp[tcgEVIndex].ScraperName = "TCG Low EV (Mean / Median)"
+					tmp[tcgEVIndex].IndexCombined = true
+				} else {
+					tmp = append(tmp, indexArray[i])
+				}
+			case "TCG Direct (net) EV Mean":
+				// Save reference to the array
+				tmp = append(tmp, indexArray[i])
+				tcgEVDirctIndex = len(tmp) - 1
+				tmp[tcgEVDirctIndex].ScraperName = "Direct EV"
+			case "TCG Direct (net) EV Median":
+				// If the reference is found, add a secondary price
+				// otherwise just leave it as is
+				if tcgEVDirctIndex >= 0 {
+					tmp[tcgEVDirctIndex].Secondary = indexArray[i].Price
+					tmp[tcgEVDirctIndex].ScraperName = "Direct EV (Mean / Median)"
+					tmp[tcgEVDirctIndex].IndexCombined = true
+				} else {
+					tmp = append(tmp, indexArray[i])
+				}
 			default:
 				tmp = append(tmp, indexArray[i])
 			}
@@ -771,6 +803,8 @@ func searchVendorsNG(cardIds []string, config SearchConfig) (foundVendors map[st
 					icon = "img/misc/direct.png"
 				case "TCG Player Market":
 					name = "TCG Trade-In"
+				case "Sealed EV Scraper":
+					name = "CK Buylist for Singles"
 				}
 
 				res := SearchEntry{

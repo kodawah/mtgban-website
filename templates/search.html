@@ -588,10 +588,10 @@
                                     {{end}}
                                     {{range $conditions := $.CondKeys}}
                                         {{$entries := (index $condsEntry $conditions)}}
-                                        {{if and (ne $conditions "INDEX") (not $.IsSealed)}}
+                                        {{if ne $conditions "INDEX"}}
                                             {{if $entries}}
                                                 <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}});">
-                                                    <td colspan="4" style="padding-top: 8px; padding-bottom: 8px"><i>Conditions: {{$conditions}}</i></td>
+                                                    <td colspan="4" style="padding-top: 8px; padding-bottom: 8px"><i>{{if $.IsSealed}}Available offers{{else}}Conditions: {{$conditions}}{{end}}</i></td>
                                                 </tr>
                                             {{end}}
                                         {{end}}
@@ -646,10 +646,12 @@
                                     {{end}}
                                     {{range $conditions := $.CondKeys}}
                                         {{$entries := (index $condsEntry $conditions)}}
-                                        {{if and $entries (not $.IsSealed)}}
-                                            <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}});">
-                                                <td colspan="4" style="padding-top: 8px; padding-bottom: 8px"><i>Conditions: {{$conditions}}</i></td>
-                                            </tr>
+                                        {{if ne $conditions "INDEX"}}
+                                            {{if $entries }}
+                                                <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}});">
+                                                    <td colspan="4" style="padding-top: 8px; padding-bottom: 8px"><i>{{if $.IsSealed}}Available offers{{else}}Conditions: {{$conditions}}{{end}}</i></td>
+                                                </tr>
+                                            {{end}}
                                         {{end}}
                                         {{range $entries}}
                                             <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}});">
