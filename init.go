@@ -29,6 +29,7 @@ import (
 	"github.com/mtgban/go-mtgban/mtgstocks"
 	"github.com/mtgban/go-mtgban/mythicmtg"
 	"github.com/mtgban/go-mtgban/ninetyfive"
+	"github.com/mtgban/go-mtgban/sealedev"
 	"github.com/mtgban/go-mtgban/starcitygames"
 	"github.com/mtgban/go-mtgban/strikezone"
 	"github.com/mtgban/go-mtgban/tcgplayer"
@@ -713,6 +714,18 @@ var ScraperOptions = map[string]*scraperOption{
 			scraper := tcgplayer.NewTCGDirectNet()
 			return scraper, nil
 		},
+	},
+	"sealed_ev": &scraperOption{
+		DevEnabled: true,
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
+			scraper := sealedev.NewScraper(Config.Api["ban_api_key"])
+			scraper.FastMode = DevMode
+			scraper.Affiliate = Config.Affiliate["TCG"]
+			scraper.BuylistAffiliate = Config.Affiliate["CK"]
+			scraper.LogCallback = logger.Printf
+			return scraper, nil
+		},
+		Keepers: sealedev.NewScraper("").MarketNames(),
 	},
 }
 
