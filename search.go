@@ -764,15 +764,13 @@ func searchVendorsNG(cardIds []string, config SearchConfig) (foundVendors map[st
 					foundVendors[cardId][conditions] = []SearchEntry{}
 				}
 
-				name := vendor.Info().Name
-				if name == "TCG Player Market" {
-					name = "TCG Trade-In"
-				}
-
 				icon := ""
+				name := vendor.Info().Name
 				switch name {
 				case TCG_DIRECT_NET:
 					icon = "img/misc/direct.png"
+				case "TCG Player Market":
+					name = "TCG Trade-In"
 				}
 
 				res := SearchEntry{
