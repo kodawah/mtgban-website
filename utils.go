@@ -113,7 +113,11 @@ func scryfallImageURL(cardId string, small bool) string {
 	}
 
 	if co.Sealed {
-		return "https://product-images.tcgplayer.com/" + co.Identifiers["tcgplayerProductId"] + ".jpg"
+		tcgId, found := co.Identifiers["tcgplayerProductId"]
+		if !found {
+			return ""
+		}
+		return "https://product-images.tcgplayer.com/" + tcgId + ".jpg"
 	}
 
 	version := "normal"
