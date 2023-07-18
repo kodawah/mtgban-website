@@ -194,7 +194,7 @@
             <form class="search autocomplete" action="" autocomplete="off" spellcheck="false" id="searchform">
                 <label style="clear: both; float: left; width: 110%" for="searchbox">
                     {{if not .SearchQuery}}
-                        Search for a card, or... <a class="btn info" href="/random">surprise me</a>
+                        Search for a {{if .IsSealed}}product{{else}}card{{end}}, or... <a class="btn info" href="/random{{if .IsSealed}}sealed{{end}}">surprise me</a>
                     {{else}}
                         Sort by
                         {{if .NoSort}}
@@ -226,14 +226,14 @@
                             {{end}}
                         {{end}}
                         <span class=emoji>
-                            <a class="btn info" title="...more surpises" href="/random">🎰</a>
+                            <a class="btn info" title="...more surpises" href="/random{{if .IsSealed}}sealed{{end}}">🎰</a>
                         </span>
                     {{end}}
                     <span class=emoji>
                         <a href="?page=options" title="Search settings">⚙️</a>
                     </span>
                 </label>
-                <input id="searchbox" class="w3-input w3-border w3-round-small search-input" onFocus="this.setSelectionRange(0, this.value.length)" type="text" name="q" placeholder="Enter a card name" value="{{.SearchQuery}}" maxlength="200" autofocus>
+                <input id="searchbox" class="w3-input w3-border w3-round-small search-input" onFocus="this.setSelectionRange(0, this.value.length)" type="text" name="q" placeholder="Enter a {{if .IsSealed}}product{{else}}card{{end}} name" value="{{.SearchQuery}}" maxlength="200" autofocus>
             </form>
 
         {{if not .IsSealed}}
@@ -241,7 +241,7 @@
                 autocomplete(document.getElementById("searchform"), document.getElementById("searchbox"));
             </script>
         {{end}}
-        {{if eq .SearchQuery ""}}
+        {{if and (eq .SearchQuery "") (not .IsSealed)}}
             <div class="indent">
                 <h2>Instructions</h2>
                 <br>
@@ -309,6 +309,34 @@
                     <li>Should you find this content useful, consider clicking on one of the provided links to make a purchase on the website, and directly support BAN.</li>
                 </ul>
              </div>
+        {{else if and (eq .SearchQuery "") (.IsSealed)}}
+            <p style="max-width: 70%">
+                Jump to
+                {{range $key := .EditionSort}}
+                    <a class="btn normal" href="#{{.}}">{{.}}</a>
+                {{end}}
+            </p>
+
+            {{range $key := .EditionSort}}
+                <div class="sticky" style="top: 48px; background-color: var(--background);">
+                    <span class="anchor" id="{{.}}"></span>
+                    <h3 class="storename">{{.}}</a></h3>
+                    <hr width=15%>
+                </div>
+
+                <div class="indent" style="max-width: 85%; padding-top:10px">
+                    {{$editionList := index $.EditionList $key }}
+                    {{range $editionList}}
+                        <nobr>
+                            <i class="ss ss-{{.Keyrune}} ss-2x ss-fw"></i>
+                            <a class="btn normal" href="/sealed?q=s:{{.Code}}">
+                                {{.Name}}
+                            </a>
+                        </nobr>
+                    {{end}}
+                </div>
+                <br>
+            {{end}}
         {{else}}
             <script type="text/javascript" src="../js/copy2clip.js"></script>
 

@@ -160,7 +160,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		if pageVars.IsSealed {
 			pageVars.EditionSort = SealedEditionsSorted
 			pageVars.EditionList = SealedEditionsList
-			render(w, "product.html", pageVars)
+			render(w, "search.html", pageVars)
 			return
 		} else if pageVars.IsSets {
 			pageVars.EditionSort = TreeEditionsKeys
