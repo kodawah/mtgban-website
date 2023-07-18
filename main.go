@@ -640,6 +640,7 @@ func main() {
 	// custom redirector
 	http.HandleFunc("/go/", Redirect)
 	http.HandleFunc("/random", RandomSearch)
+	http.HandleFunc("/randomsealed", RandomSealedSearch)
 	http.HandleFunc("/discord", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, Config.DiscordInviteLink, http.StatusFound)
 	})

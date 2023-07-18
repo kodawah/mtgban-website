@@ -112,3 +112,24 @@ func RandomSearch(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, r.URL.String(), http.StatusFound)
 }
+
+func RandomSealedSearch(w http.ResponseWriter, r *http.Request) {
+	var uuid string
+
+	// Reuse the randomness of maps to our advantage
+	sets := mtgmatcher.GetSets()
+	for _, set := range sets {
+		if len(set.SealedProduct) == 0 || len(set.Booster) == 0 {
+			continue
+		}
+		index := rand.Intn(len(set.SealedProduct))
+		uuid = set.SealedProduct[index].UUID
+		break
+	}
+	v := r.URL.Query()
+	v.Set("q", uuid)
+	r.URL.RawQuery = v.Encode()
+	r.URL.Path = "/sealed"
+
+	http.Redirect(w, r, r.URL.String(), http.StatusFound)
+}
