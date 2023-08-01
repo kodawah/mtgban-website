@@ -41,15 +41,38 @@
     {{else}}
         <h1>Welcome to BAN Editions</h1>
         <div class="indent" style="max-width: 85%">
+            <script>
+                function showAll() {
+                    const table = document.getElementById("table");
+                    table.style.width = "85%"
+
+                    const link = document.getElementById("hideme");
+                    link.style.display = 'none'
+
+                    const heads = document.getElementsByTagName("th");
+                    let inputList = Array.prototype.slice.call(heads);
+                    inputList.forEach(element =>
+                        element.style.display = ''
+                    );
+
+                    const cells = document.getElementsByTagName("td");
+                    inputList = Array.prototype.slice.call(cells);
+                    inputList.forEach(element =>
+                        element.style.display = ''
+                    );
+                }
+            </script>
             <div class="indent" style="max-width: 85%">
-                Tracking {{.TotalSets}} editions, for {{.TotalCards}} cards over {{.TotalUnique}} printings.
+                Tracking {{.TotalSets}} editions, for {{.TotalCards}} cards over {{.TotalUnique}} printings. <a href="javascript:showAll()" id="hideme">Show additional search options.</a>
             </div>
             <br>
 
-            <table style="float: left; background-color: var(--background); width:60%">
+            <table style="float: left; background-color: var(--background); width:60%" id="table">
                 <tr>
                     <th><a class="btn default" style="padding: 0 0 0 0" href="/sets?sort=name" title="Sort by edition name"> Name</a></th>
-                    <th></th>
+                    <th>Finish</th>
+                    <th style="display:none;">Color</th>
+                    <th style="display:none;">Rarity</th>
                     <th><a class="btn default" style="padding: 0 0 0 0" href="/sets?sort=size" title="Sort by number of cards">Size</a></th>
                     <th><a class="btn default" style="padding: 0 0 0 0" href="/sets" title="Sort by date">Release Date</a></th>
                 </tr>
@@ -98,6 +121,60 @@
                                             <h6>foil</h6>
                                         </a>
                                     {{end}}
+                                {{end}}
+                            </td>
+                            <td style="display:none;">
+                                <a class="btn normal" href="/search?q=s:{{$edition.Code}}%20c:w" title="White">
+                                    <h6>⚪️</h6>
+                                </a>
+                                <a class="btn normal" href="/search?q=s:{{$edition.Code}}%20c:u" title="Blue">
+                                    <h6>🔵</h6>
+                                </a>
+                                <a class="btn normal" href="/search?q=s:{{$edition.Code}}%20c:b" title="Black">
+                                    <h6>⚫️</h6>
+                                </a>
+                                <a class="btn normal" href="/search?q=s:{{$edition.Code}}%20c:r" title="Red">
+                                    <h6>🔴</h6>
+                                </a>
+                                <a class="btn normal" href="/search?q=s:{{$edition.Code}}%20c:g" title="Green">
+                                    <h6>🟢</h6>
+                                </a>
+                                <a class="btn normal" href="/search?q=s:{{$edition.Code}}%20c:c" title="Colorless">
+                                    <h6>🔘</h6>
+                                </a>
+                                <a class="btn normal" href="/search?q=s:{{$edition.Code}}%20c:m" title="Multicolor">
+                                    <h6>🌕</h6>
+                                </a>
+                            </td>
+                            <td style="display:none;">
+                                {{if $edition.HasRarityMythic}}
+                                    <a class="btn normal" href="/search?q=s:{{$edition.Code}}%20r:m" title="Mythic">
+                                        <h6>M</h6>
+                                    </a>
+                                {{else}}
+                                    &nbsp;
+                                    &nbsp;
+                                    &nbsp;
+                                    &nbsp;
+                                {{end}}
+                                <a class="btn normal" href="/search?q=s:{{$edition.Code}}%20r:r" title="Rare">
+                                    <h6>R</h6>
+                                </a>
+                                <a class="btn normal" href="/search?q=s:{{$edition.Code}}%20r:u" title="Uncommon">
+                                    <h6>U</h6>
+                                </a>
+                                <a class="btn normal" href="/search?q=s:{{$edition.Code}}%20r:c" title="Common">
+                                    <h6>C</h6>
+                                </a>
+                                {{if $edition.HasRaritySpecial}}
+                                    <a class="btn normal" href="/search?q=s:{{$edition.Code}}%20r:s" title="Special">
+                                        <h6>S</h6>
+                                    </a>
+                                {{else}}
+                                    &nbsp;
+                                    &nbsp;
+                                    &nbsp;
+                                    &nbsp;
                                 {{end}}
                             </td>
                             <td>

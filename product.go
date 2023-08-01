@@ -22,6 +22,9 @@ type EditionEntry struct {
 	ShowFin bool
 	HasReg  bool
 	HasFoil bool
+
+	HasRaritySpecial bool
+	HasRarityMythic  bool
 }
 
 var categoryEdition = map[string]string{
@@ -81,16 +84,24 @@ var sealedEditionSkips = map[string]string{
 
 func makeEditionEntry(set *mtgjson.Set, names ...string) EditionEntry {
 	date, _ := time.Parse("2006-01-02", set.ReleaseDate)
+	dateAfterMythic, _ := time.Parse("2006-01-02", "2008-10-01")
 
 	name := set.Name
 	if len(names) > 0 && names[0] != "" {
 		name = names[0]
 	}
 	special := false
+	var specialRarity bool
 	switch set.Code {
 	case "H1R",
 		"SCD":
 		special = true
+	case "PLIST",
+		"CLB",
+		"CMR",
+		"TSR",
+		"TSB":
+		specialRarity = true
 	}
 	return EditionEntry{
 		Name:    name,
@@ -103,6 +114,9 @@ func makeEditionEntry(set *mtgjson.Set, names ...string) EditionEntry {
 		ShowFin: !set.IsNonFoilOnly && !set.IsFoilOnly,
 		HasReg:  !set.IsFoilOnly,
 		HasFoil: !set.IsNonFoilOnly,
+
+		HasRaritySpecial: specialRarity,
+		HasRarityMythic:  date.After(dateAfterMythic),
 	}
 }
 
