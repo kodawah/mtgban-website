@@ -315,6 +315,7 @@
                 {{range $key := .EditionSort}}
                     <a class="btn normal" href="#{{.}}">{{.}}</a>
                 {{end}}
+                <a class="btn normal" href="#faq">F.A.Q.</a>
             </p>
 
             {{range $key := .EditionSort}}
@@ -337,6 +338,53 @@
                 </div>
                 <br>
             {{end}}
+
+            <div style="max-width: 85%; padding-top:10px">
+                <span class="anchor" id="faq"></span>
+                <h3>F.A.Q.</h3>
+                <br>
+                <ul class="indent">
+                    <li>
+                        <h4>How is EV calculated?</h4>
+                        <ul class="indent">
+                            For any product with a static decklist, the card values a just summed up and provided as is. For boosters and booster boxes, we generate as many boosters as needed to represent the product (typically 36 boosters), for 5000 times to even out any possible variance, and then run the mean and median of the results.
+                        </ul>
+                    </li>
+                    <li>
+                        <h4>How do you emulate booster openings?</h4>
+                        <ul class="indent">
+                            We use data from multiple projects, in paritcular we derive the collation information from the <a href="https://www.lethe.xyz/mtg/collation/">Lethe project</a>, the distribution of cards in the boosters from <a href="https://github.com/taw/magic-sealed-data">mtg.wft search engine</a>, and the contents description from <a href="https://github.com/mtgjson/mtg-sealed-content/">MTGJSON repository</a>. Please refer to each proejct website to know more how estimations works.
+                        </ul>
+                    </li>
+                    <li>
+                        <h4>Can you describe the data sources available?</h4>
+                        <ul class="indent">
+                            There are three EV-dependent data sources: <i>TCG Low</i>, which reflects the lowest possible value on TCG (excluding shipping), <i>TCG Direct</i>, which represents the Direct <u>price minus fees</u> that the cards could be sold at, and CK buylist, which shows how much a given set of cards could be sold to the vendor. Note that TCG Direct prices could be sometimes skewed due to ridiculous prices being set by sellers "parking" their cards - we try to work around this by capping the maximum value to twice as much as TCG Low when we're able to detect such an offset. <br>
+                            The other prices shown under <i>Available offers</i> represent the prices of the sealed products as available from different stores.
+                        </ul>
+                    </li>
+                    <li>
+                        <h4>What's the difference between mean and median?</h4>
+                        <ul class="indent">
+                            From <a href="https://www.khanacademy.org/math/cc-sixth-grade-math/cc-6th-data-statistics/mean-and-median/v/statistics-intro-mean-median-and-mode">Khan Academy</a>: "The mean (average) of a data set is found by adding all numbers in the data set and then dividing by the number of values in the set. The median is the middle value when a data set is ordered from least to greatest."
+                            Also from <a href="https://towardsdatascience.com/mean-or-median-choose-based-on-the-decision-not-the-distribution-f951215c1376">towardsdatascience</a>: "The mean is typically better when the data follow a symmetric distribution. When the data are skewed, the median is more useful because the mean will be distorted by outliers."
+                        </ul>
+                    </li>
+                    <li>
+                        <h4>Why is this set missing?</h4>
+                        <ul class="indent">
+                           Given there is a three way dependency on the source data, it might be that the information for the given set or product simply hasn't been filled and has not propagated to us yet. Retry in a few days or, if you're able to code, try contributing to one of the open source projects mentioned.
+                        </ul>
+                    </li>
+                    <li>
+                        <h4>Do you consider The List cards, boxtoppers, variations etc when computing a box EV?</h4>
+                        <ul class="indent">
+                           Yes.
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
         {{else}}
             <script type="text/javascript" src="../js/copy2clip.js"></script>
 
