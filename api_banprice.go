@@ -93,6 +93,7 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 	qty, _ := strconv.ParseBool(r.FormValue("qty"))
 	conds, _ := strconv.ParseBool(r.FormValue("conds"))
 	filterByFinish := r.FormValue("finish")
+	showFullName, _ := strconv.ParseBool(r.FormValue("full"))
 
 	// Filter by user preference, as long as it's listed in the enebled stores
 	filterByVendor := r.FormValue("vendor")
@@ -208,9 +209,9 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 		var err error
 		csvWriter := csv.NewWriter(w)
 		if out.Retail != nil {
-			err = BanPrice2CSV(csvWriter, out.Retail, qty, conds, false)
+			err = BanPrice2CSV(csvWriter, out.Retail, qty, conds, showFullName)
 		} else if out.Buylist != nil {
-			err = BanPrice2CSV(csvWriter, out.Buylist, qty, conds, false)
+			err = BanPrice2CSV(csvWriter, out.Buylist, qty, conds, showFullName)
 		}
 		if err != nil {
 			log.Println(err)
