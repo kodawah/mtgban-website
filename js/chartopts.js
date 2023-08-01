@@ -52,7 +52,7 @@ Chart.Tooltip.positioners.bottom = function(elements, position) {
     }
 };
 
-function getChartOpts() {
+function getChartOpts(len) {
     return {
         responsive: true,
         // Keep "holes" in the graph when data is missing
@@ -91,7 +91,7 @@ function getChartOpts() {
                     type: "time",
                     distribution: "linear",
                     time: {
-                        unit: "month",
+                        unit: (len > 45) ? "month" : "day",
                         stepSize: 1,
                     },
                 },
