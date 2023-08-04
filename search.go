@@ -591,6 +591,9 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				if co.Sealed && !config.HasSealed {
 					continue
 				}
+				if !co.Sealed && config.OnlySealed {
+					continue
+				}
 				dataset, err := getDataset(chartId, labels, config)
 				if err != nil {
 					log.Println(err)

@@ -22,6 +22,7 @@ type scraperConfig struct {
 	Color       string
 	Hidden      bool
 	HasSealed   bool
+	OnlySealed  bool
 }
 
 /*
@@ -89,6 +90,14 @@ var enabledDatasets = []scraperConfig{
 		ScraperName: "abugames",
 		KindName:    "buylist",
 		Color:       "rgb(153, 102, 255)",
+	},
+	{
+		PublicName:  "Sealed EV Median",
+		ScraperName: "sealed_ev",
+		KindName:    "TCG Low EV Median",
+		Color:       "rgb(201, 203, 207)",
+		HasSealed:   true,
+		OnlySealed:  true,
 	},
 }
 
