@@ -286,7 +286,9 @@ func getReprintsGlobal() ([]string, map[string][]ReprintEntry) {
 	listReprints := map[string][]ReprintEntry{}
 
 	dupes := map[string]bool{}
-	for _, co := range uuids {
+	for _, uuid := range uuids {
+		co, _ := mtgmatcher.GetUUID(uuid)
+
 		set, found := sets[co.SetCode]
 		if !found {
 			continue
@@ -512,7 +514,10 @@ func runRawSetValue(tcgInventory, tcgDirect mtgban.InventoryRecord, ckBuylist, d
 	blDirectNetFoil := map[string]float64{}
 
 	uuids := mtgmatcher.GetUUIDs()
-	for uuid, co := range uuids {
+
+	for _, uuid := range uuids {
+		co, _ := mtgmatcher.GetUUID(uuid)
+
 		// Skip sets that are not well tracked upstream
 		if co.SetCode == "PMEI" || co.BorderColor == "gold" {
 			continue
@@ -524,7 +529,7 @@ func runRawSetValue(tcgInventory, tcgDirect mtgban.InventoryRecord, ckBuylist, d
 		var blPrice float64
 		entriesBl, found := ckBuylist[uuid]
 		if !found {
-			blPrice = bulkBuylist(&co)
+			blPrice = bulkBuylist(co)
 		} else {
 			blPrice = entriesBl[0].BuyPrice
 		}

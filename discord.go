@@ -520,7 +520,9 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 						continue
 					}
 					mid := u2.Query().Get("multiverseid")
-					for _, co := range mtgmatcher.GetUUIDs() {
+					uuids := mtgmatcher.GetUUIDs()
+					for _, uuid := range uuids {
+						co, _ := mtgmatcher.GetUUID(uuid)
 						if co.Identifiers["multiverseId"] == mid {
 							m.Content = fmt.Sprintf("!%s|%s|%s", co.Name, co.SetCode, co.Number)
 							messageCreate(s, m)
