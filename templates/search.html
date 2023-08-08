@@ -686,7 +686,11 @@
                                         {{range $entries}}
                                             <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}});">
                                                 <td>
-                                                    <a class="btn normal" href="{{.URL}}" target="_blank" rel="nofollow">
+                                                    {{if eq .URL ""}}
+                                                        <a class="btn default">
+                                                    {{else}}
+                                                        <a class="btn normal" href="{{.URL}}" target="_blank" rel="nofollow">
+                                                    {{end}}
                                                         {{.ScraperName}}
                                                         {{if ne $conditions "INDEX"}}
                                                             {{.Country}}
@@ -744,7 +748,11 @@
                                         {{range $entries}}
                                             <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}});">
                                                 <td>
-                                                    <a class="btn normal" href="{{.URL}}" target="_blank" rel="nofollow">
+                                                    {{if eq .URL ""}}
+                                                        <a class="btn default">
+                                                    {{else}}
+                                                        <a class="btn normal" href="{{.URL}}" target="_blank" rel="nofollow">
+                                                    {{end}}
                                                         {{.ScraperName}} {{.Country}}
                                                     </a>
                                                 </td>
