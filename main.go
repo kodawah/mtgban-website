@@ -183,6 +183,9 @@ type NavElem struct {
 
 	// Whether this tab should always be enabled in DevMode
 	AlwaysOnForDev bool
+
+	// Allow to receive POST requests
+	CanPOST bool
 }
 
 var startTime = time.Now()
@@ -260,11 +263,12 @@ func init() {
 			Page:   "sleep.html",
 		},
 		"Upload": NavElem{
-			Name:   "Upload",
-			Short:  "🚢",
-			Link:   "/upload",
-			Handle: Upload,
-			Page:   "upload.html",
+			Name:    "Upload",
+			Short:   "🚢",
+			Link:    "/upload",
+			Handle:  Upload,
+			Page:    "upload.html",
+			CanPOST: true,
 		},
 		"Global": NavElem{
 			Name:   "Global",

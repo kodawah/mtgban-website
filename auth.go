@@ -475,7 +475,20 @@ func enforceSigning(next http.Handler) http.Handler {
 			putSignatureInCookies(w, r, querySig)
 		}
 
-		if r.Method != "GET" && r.URL.Path != "/upload" {
+		switch r.Method {
+		case "GET":
+		case "POST":
+			var ok bool
+			for _, nav := range ExtraNavs {
+				if nav.Link == r.URL.Path {
+					ok = nav.CanPOST
+				}
+			}
+			if !ok {
+				http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
+				return
+			}
+		default:
 			http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
 			return
 		}
