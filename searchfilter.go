@@ -284,6 +284,32 @@ func fixupIDs(code string) []string {
 	return fields
 }
 
+func fixupPicks(code string) []string {
+	co, err := mtgmatcher.GetUUID(code)
+	if err != nil {
+		code = strings.TrimLeft(strings.TrimRight(code, "\" "), "\" ")
+		res, err := mtgmatcher.SearchSealedEquals(code)
+		if err != nil {
+			return nil
+		}
+		code = res[0]
+		co, err = mtgmatcher.GetUUID(code)
+		if err != nil {
+			return nil
+		}
+	}
+	if !co.Sealed {
+		return nil
+	}
+
+	picks, err := mtgmatcher.GetPicksForSealed(co.SetCode, code)
+	if err != nil {
+		return nil
+	}
+
+	return picks
+}
+
 func price4seller(cardId, shorthand string) float64 {
 	for _, seller := range Sellers {
 		if seller != nil && strings.EqualFold(seller.Info().Shorthand, shorthand) {
@@ -336,6 +362,7 @@ var FilterOperations = map[string][]string{
 	"f":         []string{":"},
 	"c":         []string{":"},
 	"color":     []string{":"},
+	"contents":  []string{":"},
 	"ci":        []string{":"},
 	"identity":  []string{":"},
 	"cond":      []string{":"},
@@ -597,6 +624,12 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 				Name:   "idlookup",
 				Negate: negate,
 				Values: fixupIDs(code),
+			})
+		case "contents":
+			filters = append(filters, FilterElem{
+				Name:   "idlookup",
+				Negate: negate,
+				Values: fixupPicks(code),
 			})
 
 		// Options that modify the searched scrapers

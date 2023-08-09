@@ -43,6 +43,7 @@ type GenericCard struct {
 	Printings string
 	TCGId     string
 	Date      string
+	Booster   bool
 }
 
 func fileExists(filename string) bool {
@@ -309,9 +310,27 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 		}
 	}
 
+	var canBoosterGen bool
 	path := "search"
 	if co.Sealed {
 		path = "sealed"
+
+		set, err := mtgmatcher.GetSet(co.SetCode)
+		if err == nil {
+			for _, product := range set.SealedProduct {
+				if product.UUID != co.UUID {
+					continue
+				}
+				var minKeysInContents int
+				_, found := product.Contents["other"]
+				if found {
+					minKeysInContents++
+				}
+				if len(product.Contents) > minKeysInContents {
+					canBoosterGen = true
+				}
+			}
+		}
 	}
 
 	tcgId := co.Card.Identifiers["tcgplayerProductId"]
@@ -338,6 +357,7 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 		Printings: printings,
 		TCGId:     tcgId,
 		Date:      co.OriginalReleaseDate,
+		Booster:   canBoosterGen,
 	}
 }
 

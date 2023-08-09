@@ -384,6 +384,12 @@
                         </ul>
                     </li>
                     <li>
+                        <h4>What is the gift box next to product titles?</h4>
+                        <ul class="indent">
+                           For products with a complete contents description, if you press 🎁 you will emulate opening one item of a single product - every run will be generated randomly, unless of static decklists. For larger products like cases or booster boxes, only the first few results will be displayed, paging through the results will generate new iterations. Once in this search page, you can add search terms normally to filter for color, rarities, and names using the common search syntax.
+                        </ul>
+                    </li>
+                    <li>
                         <h4>Is there a minimum value for a card to be considered?</h4>
                         <ul class="indent">
                            No, every single price found is added up, there is no mimum threshold. The multiple runs should take care of the variance for EV computation, and the impact of low value cards should be nullified in this way. For buylists, bulk prices are considered too.
@@ -652,6 +658,11 @@
                                         <td rowspan=2>
                                             <a href="https://scryfall.com/card/{{tolower $card.SetCode}}/{{$card.Number}}" title="Check this card on Scryfall.com" target=_blank><img width=28 src="img/logo/scryfall.svg"></a>
                                         </td>
+                                        {{if and $.IsSealed $card.Booster}}
+                                            <td rowspan=2>
+                                                <a href='/search?q=contents:"{{$card.Name}}"' title="Simulate opening product"><span class="emoji">🎁</span></a>
+                                            </td>
+                                        {{end}}
                                         {{if $card.TCGId}}
                                             <td rowspan=2>
                                                     <a href="https://store.tcgplayer.com/admin/product/manage/{{$card.TCGId}}" title="Manage your TCGplayer inventory" target=_blank><img width=22 src="img/logo/tcgapp.png"></a>
