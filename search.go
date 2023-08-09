@@ -21,7 +21,7 @@ import (
 
 const (
 	MaxSearchQueryLen = 200
-	MaxSearchResults  = 64
+	MaxSearchResults  = 100
 	TooLongMessage    = "Your query planeswalked away, try a shorter one"
 	TooManyMessage    = "More results available, try adjusting your filters"
 	NoResultsMessage  = "No results found"
