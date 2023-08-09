@@ -260,6 +260,30 @@ func fixupColorNG(code string) []string {
 	return strings.Split(strings.ToUpper(code), "")
 }
 
+// Validate UUIDs, convert them to mtgban format
+func fixupIDs(code string) []string {
+	fields := strings.Split(code, ",")
+	for i, field := range fields {
+		var uuid string
+		_, err := mtgmatcher.GetUUID(field)
+		if err == nil {
+			continue
+		}
+		// XXX: id funcs report the first finish available
+		uuid = mtgmatcher.Scryfall2UUID(field)
+		if uuid != "" {
+			fields[i] = uuid
+			continue
+		}
+		uuid = mtgmatcher.Tcg2UUID(field)
+		if uuid != "" {
+			fields[i] = uuid
+			continue
+		}
+	}
+	return fields
+}
+
 func price4seller(cardId, shorthand string) float64 {
 	for _, seller := range Sellers {
 		if seller != nil && strings.EqualFold(seller.Info().Shorthand, shorthand) {
@@ -317,6 +341,7 @@ var FilterOperations = map[string][]string{
 	"cond":      []string{":"},
 	"condr":     []string{":"},
 	"condb":     []string{":"},
+	"id":        []string{":"},
 	"is":        []string{":"},
 	"on":        []string{":"},
 	"price":     []string{">", "<"},
@@ -379,23 +404,13 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 
 	// Support our UUID style when there are no options to parse
 	if !strings.Contains(query, ":") && !strings.Contains(query, "|") {
-		fields := strings.Split(query, ",")
-		for _, field := range fields {
-			var uuid string
-			field := strings.TrimSpace(field)
-			co, err := mtgmatcher.GetUUID(field)
+		// XXX should use the idlookup filter
+		uuids := fixupIDs(query)
+		for _, uuid := range uuids {
+			co, err := mtgmatcher.GetUUID(uuid)
 			if err != nil {
-				// XXX: id funcs report the first finish available
-				uuid = mtgmatcher.Scryfall2UUID(field)
-				if uuid == "" {
-					uuid = mtgmatcher.Tcg2UUID(field)
-				}
-				co, err = mtgmatcher.GetUUID(uuid)
-				if err != nil {
-					continue
-				}
+				continue
 			}
-			uuid = co.UUID
 
 			// Save the last name found
 			config.CleanQuery = co.Name
@@ -419,7 +434,7 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 		if config.SearchMode != "" {
 			// When multiple fields are requested it's impossible to rebuild
 			// the query, so just ignore it
-			if len(fields) != 1 {
+			if len(config.UUIDs) != 1 {
 				config.CleanQuery = ""
 				config.FullQuery = ""
 			}
@@ -576,6 +591,12 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 				Name:   opt,
 				Negate: negate,
 				Values: fixupColorNG(code),
+			})
+		case "id":
+			filters = append(filters, FilterElem{
+				Name:   "idlookup",
+				Negate: negate,
+				Values: fixupIDs(code),
 			})
 
 		// Options that modify the searched scrapers
@@ -813,6 +834,9 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 			}
 		}
 		return false
+	},
+	"idlookup": func(filters []string, co *mtgmatcher.CardObject) bool {
+		return !SliceStringHas(filters, co.UUID)
 	},
 	"number": func(filters []string, co *mtgmatcher.CardObject) bool {
 		return !SliceStringHas(filters, strings.ToLower(co.Number))
