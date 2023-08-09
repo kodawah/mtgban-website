@@ -380,6 +380,11 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	// Save stats
 	pageVars.TotalUnique = len(allKeys)
 
+	// Needed to load search in Upload
+	if canDownloadCSV {
+		pageVars.CardHashes = allKeys
+	}
+
 	// Sort sets as requested, default to chronological
 	switch pageVars.SearchSort {
 	case "alpha":

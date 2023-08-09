@@ -519,6 +519,24 @@
                                     </center>
                                 </td>
                             </tr>
+                            <tr>
+                                <td>
+                                    <center>
+                                        Load search in Uploader<br>
+                                        <form action="/upload" method="post">
+                                            <input id="mode" type="hidden" name="mode" value="false"/>
+                                            {{range .CardHashes}}
+                                                <input type="hidden" name="hashes" value="{{.}}"/>
+                                            {{end}}
+                                            <a class="btn success" style="text-align: center;" onclick='document.getElementById("mode").value=false; this.parentNode.submit(); return false;'>Retail</a>
+                                            <a class="btn warning" style="text-align: center;" onclick='document.getElementById("mode").value=true; this.parentNode.submit(); return false;'>Buylist</a>
+                                            <noscript>
+                                                <input type="submit" value="Check Uploader!" />
+                                            </noscript>
+                                        </form>
+                                    </center>
+                                </td>
+                            </tr>
                         {{end}}
                     {{end}}
                     <tr>
