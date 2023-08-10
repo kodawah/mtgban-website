@@ -655,9 +655,11 @@
                                         <td rowspan=2>
                                             <span class="emoji" style="cursor: pointer;" onclick="navigator.clipboard.writeText('{{$card.Name}}'); waithide(this)" title="Copy to clipboard">📝</span>
                                         </td>
-                                        <td rowspan=2>
-                                            <a href="https://scryfall.com/card/{{tolower $card.SetCode}}/{{$card.Number}}" title="Check this card on Scryfall.com" target=_blank><img width=28 src="img/logo/scryfall.svg"></a>
-                                        </td>
+                                        {{if not $.IsSealed}}
+                                            <td rowspan=2>
+                                                <a href="https://scryfall.com/card/{{tolower $card.SetCode}}/{{$card.Number}}" title="Check this card on Scryfall.com" target=_blank><img width=28 src="img/logo/scryfall.svg"></a>
+                                            </td>
+                                        {{end}}
                                         {{if and $.IsSealed $card.Booster}}
                                             <td rowspan=2>
                                                 <a href='/search?q=contents:"{{$card.Name}}"' title="Simulate opening product"><span class="emoji">🎁</span></a>
