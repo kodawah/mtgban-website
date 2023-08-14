@@ -34,7 +34,7 @@ async function autocomplete(form, inp) {
         /* For each item in the array... */
         for (i = 0; i < arr.length; i++) {
             /* Check if the item starts with the same letters as the text field value */
-            if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+            if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase() || arr[i].substr(0, val.length).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase() == val.toUpperCase()) {
                 /* Create a DIV element for each matching element */
                 b = document.createElement("DIV");
 
