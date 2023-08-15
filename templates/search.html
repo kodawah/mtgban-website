@@ -229,9 +229,11 @@
                             <a class="btn info" title="...more surpises" href="/random{{if .IsSealed}}sealed{{end}}">🎰</a>
                         </span>
                     {{end}}
-                    <span class=emoji>
-                        <a href="?page=options" title="Search settings">⚙️</a>
-                    </span>
+                    {{if not $.IsSealed}}
+                        <span class=emoji>
+                            <a href="?page=options" title="Search settings">⚙️</a>
+                        </span>
+                    {{end}}
                 </label>
                 <input id="searchbox" class="w3-input w3-border w3-round-small search-input" onFocus="this.setSelectionRange(0, this.value.length)" type="text" name="q" placeholder="Enter a {{if .IsSealed}}product{{else}}card{{end}} name" value="{{.SearchQuery}}" maxlength="200" autofocus>
             </form>
