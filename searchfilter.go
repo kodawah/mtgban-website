@@ -970,10 +970,6 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 				if co.IsPromo {
 					return false
 				}
-			case "boosterfun", "bf", "v":
-				if co.HasPromoType(mtgjson.PromoTypeBoosterfun) {
-					return false
-				}
 			case "extendedart", "ea":
 				if co.HasFrameEffect(mtgjson.FrameEffectExtendedArt) {
 					return false
@@ -994,22 +990,6 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 				if co.FlavorName != "" {
 					return false
 				}
-			case "judge", "judgegift":
-				if co.HasPromoType(mtgjson.PromoTypeJudgeGift) {
-					return false
-				}
-			case "arena", "arenaleague":
-				if co.HasPromoType(mtgjson.PromoTypeArenaLeague) {
-					return false
-				}
-			case "rewards", "playerrewards", "mpr":
-				if co.HasPromoType(mtgjson.PromoTypeArenaLeague) {
-					return false
-				}
-			case "bab", "buyabox", "buy-a-box":
-				if co.HasPromoType(mtgjson.PromoTypeBuyABox) {
-					return false
-				}
 			case "japanese", "jpn", "jp", "ja":
 				if co.Language == mtgjson.LanguageJapanese {
 					return false
@@ -1019,6 +999,22 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 					return false
 				}
 			default:
+				// Adjust input for these known cases
+				switch value {
+				case "bf", "v":
+					value = "boosterfun"
+				case "rewards", "mpr":
+					value = "playerrewards"
+				case "bab", "buy-a-box":
+					value = "buyabox"
+				case "arena":
+					value = "arenaleague"
+				case "judge":
+					value = "judgegift"
+				case "confetti", "galaxy", "halo":
+					value += "foil"
+				}
+
 				// Fall back to any promo type currently supported
 				if SliceStringHas(mtgjson.AllPromoTypes, value) {
 					if co.HasPromoType(value) {
