@@ -168,7 +168,9 @@ func editionTitle(cardId string) string {
 
 	extra := ""
 	if co.Sealed {
-		extra = mtgmatcher.Title(co.Side + " " + co.Layout)
+		subtype := strings.Replace(co.Side, "_", " ", -1)
+		category := strings.Replace(co.Layout, "_", " ", -1)
+		extra = mtgmatcher.Title(subtype + " " + category)
 	} else {
 		extra = "#" + co.Card.Number
 	}
