@@ -370,6 +370,7 @@ var FilterOperations = map[string][]string{
 	"condb":     []string{":"},
 	"id":        []string{":"},
 	"is":        []string{":"},
+	"not":       []string{":"},
 	"on":        []string{":"},
 	"price":     []string{">", "<"},
 	"buy_price": []string{">", "<"},
@@ -584,7 +585,10 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 				Negate: negate,
 				Values: fixupTypeNG(code),
 			})
-		case "is":
+		case "is", "not":
+			if option == "not" {
+				negate = !negate
+			}
 			filters = append(filters, FilterElem{
 				Name:   "is",
 				Negate: negate,
