@@ -41,6 +41,7 @@ type GenericCard struct {
 	Stocks    bool
 	StocksURL string
 	Printings string
+	Products  string
 	TCGId     string
 	Date      string
 	Booster   bool
@@ -335,6 +336,31 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 		}
 	}
 
+	var sourceSealed []string
+	if co.Sealed {
+		sourceSealed = co.SourceProducts["sealed"]
+	} else if co.Etched {
+		sourceSealed = co.SourceProducts["etched"]
+	} else if co.Foil {
+		sourceSealed = co.SourceProducts["foil"]
+	} else {
+		sourceSealed = co.SourceProducts["nonfoil"]
+	}
+	var products string
+	if len(sourceSealed) > 0 {
+		products += "<h4>"
+		for _, sealed := range sourceSealed {
+			co, _ := mtgmatcher.GetUUID(sealed)
+			products += "<a href=/sealed?q=" + sealed + ">" + co.Name + "</a><br>"
+		}
+		products += "</h4>"
+		if len(sourceSealed) > 5 {
+			products = strings.Replace(products, "h4>", "h6>", -1)
+		} else if len(sourceSealed) > 3 {
+			products = strings.Replace(products, "h4>", "h5>", -1)
+		}
+	}
+
 	tcgId := co.Card.Identifiers["tcgplayerProductId"]
 	if co.Etched {
 		tcgId = co.Card.Identifiers["tcgplayerEtchedProductId"]
@@ -357,6 +383,7 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 		Stocks:    stocks,
 		StocksURL: stocksURL,
 		Printings: printings,
+		Products:  products,
 		TCGId:     tcgId,
 		Date:      co.OriginalReleaseDate,
 		Booster:   canBoosterGen,
