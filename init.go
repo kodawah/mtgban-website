@@ -477,7 +477,6 @@ var ScraperOptions = map[string]*scraperOption{
 		},
 	},
 	"starcitygames": &scraperOption{
-		DevEnabled: true,
 		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper := starcitygames.NewScraper(Config.Api["scg_guid"], Config.Api["scg_bearer"])
 			scraper.LogCallback = logger.Printf
@@ -555,7 +554,6 @@ var ScraperOptions = map[string]*scraperOption{
 		},
 	},
 	"blueprint": &scraperOption{
-		DevEnabled: true,
 		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper := blueprint.NewScraper()
 			scraper.LogCallback = logger.Printf
@@ -604,7 +602,6 @@ var ScraperOptions = map[string]*scraperOption{
 		},
 	},
 	"amazon": &scraperOption{
-		DevEnabled: true,
 		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper := amazon.NewScraper(Config.Api["amz_token"])
 			scraper.LogCallback = logger.Printf
@@ -612,7 +609,6 @@ var ScraperOptions = map[string]*scraperOption{
 		},
 	},
 	"cardtrader": &scraperOption{
-		DevEnabled: true,
 		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper, err := cardtrader.NewScraperMarket(Config.Api["cardtrader"])
 			if err != nil {
