@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/mtgban/go-mtgban/mtgban"
+	"golang.org/x/exp/slices"
 )
 
 const (
@@ -281,7 +282,7 @@ func arbit(w http.ResponseWriter, r *http.Request, reverse bool) {
 		// Load all available vendors
 		vendorKeys := make([]string, 0, len(blocklistVendors))
 		for _, vendor := range Vendors {
-			if vendor == nil || SliceStringHas(blocklistVendors, vendor.Info().Shorthand) || vendor.Info().SealedMode {
+			if vendor == nil || slices.Contains(blocklistVendors, vendor.Info().Shorthand) || vendor.Info().SealedMode {
 				continue
 			}
 			vendorKeys = append(vendorKeys, vendor.Info().Shorthand)
@@ -293,7 +294,7 @@ func arbit(w http.ResponseWriter, r *http.Request, reverse bool) {
 	} else {
 		filters := strings.Split(readCookie(r, "ArbitVendorsList"), ",")
 		for _, code := range filters {
-			if !SliceStringHas(blocklistVendors, code) {
+			if !slices.Contains(blocklistVendors, code) {
 				blocklistVendors = append(blocklistVendors, code)
 			}
 		}
@@ -333,12 +334,12 @@ func Global(w http.ResponseWriter, r *http.Request) {
 		}
 		if anyEnabled {
 			// This is the list of allowed global sellers, minus the ones blocked from search
-			if SliceStringHas(Config.GlobalAllowList, seller.Info().Shorthand) {
-				if !anyExperiment && SliceStringHas(Config.SearchRetailBlockList, seller.Info().Shorthand) {
+			if slices.Contains(Config.GlobalAllowList, seller.Info().Shorthand) {
+				if !anyExperiment && slices.Contains(Config.SearchRetailBlockList, seller.Info().Shorthand) {
 					continue
 				}
 				allowlistSellers = append(allowlistSellers, seller.Info().Shorthand)
-			} else if anyExperiment && SliceStringHas(Config.DevSellers, seller.Info().Shorthand) {
+			} else if anyExperiment && slices.Contains(Config.DevSellers, seller.Info().Shorthand) {
 				// Append any experimental ones if enabled
 				allowlistSellers = append(allowlistSellers, seller.Info().Shorthand)
 			}
@@ -358,7 +359,7 @@ func Global(w http.ResponseWriter, r *http.Request) {
 		if seller == nil {
 			continue
 		}
-		if SliceStringHas(Config.GlobalProbeList, seller.Info().Shorthand) {
+		if slices.Contains(Config.GlobalProbeList, seller.Info().Shorthand) {
 			continue
 		}
 		blocklistVendors = append(blocklistVendors, seller.Info().Shorthand)
@@ -399,7 +400,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		case "source":
 			// Source can be a Seller or Vendor depending on operation mode
 			if pageVars.ReverseMode {
-				if SliceStringHas(blocklistVendors, v[0]) {
+				if slices.Contains(blocklistVendors, v[0]) {
 					log.Println("Unauthorized attempt with", v[0])
 					message = "Unknown " + v[0] + " seller"
 					break
@@ -415,7 +416,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 					}
 				}
 			} else {
-				if !SliceStringHas(allowlistSellers, v[0]) {
+				if !slices.Contains(allowlistSellers, v[0]) {
 					log.Println("Unauthorized attempt with", v[0])
 					message = "Unknown " + v[0] + " seller"
 					break
@@ -464,14 +465,14 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	var menuScrapers []mtgban.Scraper
 	if pageVars.ReverseMode {
 		for _, vendor := range Vendors {
-			if vendor == nil || SliceStringHas(blocklistVendors, vendor.Info().Shorthand) {
+			if vendor == nil || slices.Contains(blocklistVendors, vendor.Info().Shorthand) {
 				continue
 			}
 			menuScrapers = append(menuScrapers, vendor)
 		}
 	} else {
 		for _, seller := range Sellers {
-			if seller == nil || !SliceStringHas(allowlistSellers, seller.Info().Shorthand) {
+			if seller == nil || !slices.Contains(allowlistSellers, seller.Info().Shorthand) {
 				continue
 			}
 			menuScrapers = append(menuScrapers, seller)
@@ -526,7 +527,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	}
 
 	pageVars.ScraperShort = source.Info().Shorthand
-	pageVars.HasAffiliate = SliceStringHas(Config.AffiliatesList, source.Info().Shorthand)
+	pageVars.HasAffiliate = slices.Contains(Config.AffiliatesList, source.Info().Shorthand)
 	pageVars.QtyNotAvailable = source.Info().NoQuantityInventory
 	pageVars.ArbitFilters = arbitFilters
 	pageVars.ArbitOptKeys = FilterOptKeys
@@ -595,7 +596,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 			continue
 		}
 		if !pageVars.ReverseMode {
-			if SliceStringHas(blocklistVendors, scraper.Info().Shorthand) {
+			if slices.Contains(blocklistVendors, scraper.Info().Shorthand) {
 				continue
 			}
 		}

@@ -17,6 +17,7 @@ import (
 	"github.com/mtgban/go-mtgban/mtgban"
 	"github.com/mtgban/go-mtgban/mtgmatcher"
 	"github.com/mtgban/go-mtgban/mtgmatcher/mtgjson"
+	"golang.org/x/exp/slices"
 )
 
 const (
@@ -77,7 +78,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		for _, seller := range Sellers {
 			if seller == nil ||
 				seller.Info().SealedMode ||
-				SliceStringHas(blocklistRetail, seller.Info().Shorthand) {
+				slices.Contains(blocklistRetail, seller.Info().Shorthand) {
 				continue
 			}
 
@@ -87,7 +88,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		for _, vendor := range Vendors {
 			if vendor == nil ||
 				vendor.Info().SealedMode ||
-				SliceStringHas(blocklistBuylist, vendor.Info().Shorthand) {
+				slices.Contains(blocklistBuylist, vendor.Info().Shorthand) {
 				continue
 			}
 
@@ -276,13 +277,13 @@ func Search(w http.ResponseWriter, r *http.Request) {
 		var enabledStores []string
 		if downloadCSV == "retail" {
 			for _, seller := range Sellers {
-				if seller != nil && !SliceStringHas(blocklistRetail, seller.Info().Shorthand) {
+				if seller != nil && !slices.Contains(blocklistRetail, seller.Info().Shorthand) {
 					enabledStores = append(enabledStores, seller.Info().Shorthand)
 				}
 			}
 		} else if downloadCSV == "buylist" {
 			for _, vendor := range Vendors {
-				if vendor != nil && !SliceStringHas(blocklistBuylist, vendor.Info().Shorthand) {
+				if vendor != nil && !slices.Contains(blocklistBuylist, vendor.Info().Shorthand) {
 					enabledStores = append(enabledStores, vendor.Info().Shorthand)
 				}
 			}

@@ -13,6 +13,7 @@ import (
 	"github.com/mtgban/go-mtgban/mtgban"
 	"github.com/mtgban/go-mtgban/mtgmatcher"
 	"github.com/mtgban/go-mtgban/mtgmatcher/mtgjson"
+	"golang.org/x/exp/slices"
 )
 
 type Sleeper struct {
@@ -85,7 +86,7 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 				seller.Info().CountryFlag != "" ||
 				seller.Info().SealedMode ||
 				seller.Info().MetadataOnly ||
-				SliceStringHas(blocklistRetail, seller.Info().Shorthand) {
+				slices.Contains(blocklistRetail, seller.Info().Shorthand) {
 				continue
 			}
 
@@ -96,7 +97,7 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 			if vendor == nil ||
 				vendor.Info().CountryFlag != "" ||
 				vendor.Info().SealedMode ||
-				SliceStringHas(blocklistBuylist, vendor.Info().Shorthand) {
+				slices.Contains(blocklistBuylist, vendor.Info().Shorthand) {
 				continue
 			}
 
@@ -194,7 +195,7 @@ func getBulks(skipEditions []string) map[string]int {
 
 	sets := mtgmatcher.GetSets()
 	for _, set := range sets {
-		if SliceStringHas(skipEditions, set.Code) {
+		if slices.Contains(skipEditions, set.Code) {
 			continue
 		}
 
@@ -289,7 +290,7 @@ func getReprints(skipEditions []string) map[string]int {
 		latest := reprints[0].Date
 
 		for _, reprint := range reprints {
-			if SliceStringHas(skipEditions, reprint.SetCode) {
+			if slices.Contains(skipEditions, reprint.SetCode) {
 				continue
 			}
 			if minPrice == 0 || minPrice > reprint.Price {
@@ -345,7 +346,7 @@ func getTiers(blocklistRetail, blocklistBuylist, skipEditions []string) map[stri
 		}
 
 		// Skip any seller explicitly in blocklist
-		if SliceStringHas(blocklistRetail, seller.Info().Shorthand) {
+		if slices.Contains(blocklistRetail, seller.Info().Shorthand) {
 			continue
 		}
 
@@ -361,7 +362,7 @@ func getTiers(blocklistRetail, blocklistBuylist, skipEditions []string) map[stri
 			}
 
 			// Skip any vendor explicitly in blocklist
-			if SliceStringHas(blocklistBuylist, vendor.Info().Shorthand) {
+			if slices.Contains(blocklistBuylist, vendor.Info().Shorthand) {
 				continue
 			}
 

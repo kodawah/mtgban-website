@@ -11,6 +11,7 @@ import (
 	"github.com/mtgban/go-mtgban/mtgban"
 	"github.com/mtgban/go-mtgban/mtgmatcher"
 	"github.com/mtgban/go-mtgban/mtgmatcher/mtgjson"
+	"golang.org/x/exp/slices"
 )
 
 type SearchConfig struct {
@@ -563,7 +564,7 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 		}
 
 		// Check the operation is allowed on the given option
-		if !SliceStringHas(FilterOperations[option], operation) {
+		if !slices.Contains(FilterOperations[option], operation) {
 			continue
 		}
 
@@ -895,20 +896,20 @@ func compareReleaseDate(filters []string, co *mtgmatcher.CardObject, cmpFunc fun
 
 var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObject) bool{
 	"edition": func(filters []string, co *mtgmatcher.CardObject) bool {
-		return !SliceStringHas(filters, co.SetCode)
+		return !slices.Contains(filters, co.SetCode)
 	},
 	"edition_regexp": func(filters []string, co *mtgmatcher.CardObject) bool {
 		matched, _ := regexp.MatchString(filters[0], co.Edition)
 		return !matched
 	},
 	"rarity": func(filters []string, co *mtgmatcher.CardObject) bool {
-		return !SliceStringHas(filters, co.Rarity)
+		return !slices.Contains(filters, co.Rarity)
 	},
 	"type": func(filters []string, co *mtgmatcher.CardObject) bool {
 		for _, value := range filters {
-			if SliceStringHas(co.Subtypes, value) ||
-				SliceStringHas(co.Types, value) ||
-				SliceStringHas(co.Supertypes, value) {
+			if slices.Contains(co.Subtypes, value) ||
+				slices.Contains(co.Types, value) ||
+				slices.Contains(co.Supertypes, value) {
 				return false
 			}
 		}
@@ -922,7 +923,7 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 			return len(co.Colors) <= 1
 		}
 		for _, value := range filters {
-			if !SliceStringHas(co.Colors, value) {
+			if !slices.Contains(co.Colors, value) {
 				return true
 			}
 		}
@@ -936,26 +937,26 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 			return len(co.ColorIdentity) <= 1
 		}
 		for _, value := range co.ColorIdentity {
-			if !SliceStringHas(filters, value) {
+			if !slices.Contains(filters, value) {
 				return true
 			}
 		}
 		return false
 	},
 	"idlookup": func(filters []string, co *mtgmatcher.CardObject) bool {
-		return !SliceStringHas(filters, co.UUID)
+		return !slices.Contains(filters, co.UUID)
 	},
 	"contents": func(filters []string, co *mtgmatcher.CardObject) bool {
 		values := cardobject2sources(co)
 		for _, filter := range filters {
-			if !SliceStringHas(values, filter) {
+			if !slices.Contains(values, filter) {
 				return true
 			}
 		}
 		return false
 	},
 	"number": func(filters []string, co *mtgmatcher.CardObject) bool {
-		return !SliceStringHas(filters, strings.ToLower(co.Number))
+		return !slices.Contains(filters, strings.ToLower(co.Number))
 	},
 	"number_regexp": func(filters []string, co *mtgmatcher.CardObject) bool {
 		matched, _ := regexp.MatchString(filters[0], co.Number)
@@ -1099,7 +1100,7 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 				}
 
 				// Fall back to any promo type currently supported
-				if SliceStringHas(mtgjson.AllPromoTypes, value) {
+				if slices.Contains(mtgjson.AllPromoTypes, value) {
 					if co.HasPromoType(value) {
 						return false
 					}
@@ -1157,22 +1158,22 @@ func localizeScraper(filters []string, scraper mtgban.Scraper) bool {
 
 var FilterStoreFuncs = map[string]func(filters []string, scraper mtgban.Scraper) bool{
 	"store": func(filters []string, scraper mtgban.Scraper) bool {
-		return !SliceStringHas(filters, strings.ToLower(scraper.Info().Shorthand))
+		return !slices.Contains(filters, strings.ToLower(scraper.Info().Shorthand))
 	},
 	"seller_keep_index": func(filters []string, scraper mtgban.Scraper) bool {
 		if scraper.Info().MetadataOnly {
 			return false
 		}
 		_, ok := scraper.(mtgban.Seller)
-		return ok && !SliceStringHas(filters, strings.ToLower(scraper.Info().Shorthand))
+		return ok && !slices.Contains(filters, strings.ToLower(scraper.Info().Shorthand))
 	},
 	"seller": func(filters []string, scraper mtgban.Scraper) bool {
 		_, ok := scraper.(mtgban.Seller)
-		return ok && !SliceStringHas(filters, strings.ToLower(scraper.Info().Shorthand))
+		return ok && !slices.Contains(filters, strings.ToLower(scraper.Info().Shorthand))
 	},
 	"vendor": func(filters []string, scraper mtgban.Scraper) bool {
 		_, ok := scraper.(mtgban.Vendor)
-		return ok && !SliceStringHas(filters, strings.ToLower(scraper.Info().Shorthand))
+		return ok && !slices.Contains(filters, strings.ToLower(scraper.Info().Shorthand))
 	},
 	"region": func(filters []string, scraper mtgban.Scraper) bool {
 		return localizeScraper(filters, scraper)
@@ -1290,7 +1291,7 @@ func shouldSkipPriceNG(cardId string, entry mtgban.GenericEntry, filters []Filte
 
 var FilterEntryFuncs = map[string]func(filters []string, entry mtgban.GenericEntry) bool{
 	"condition": func(filters []string, entry mtgban.GenericEntry) bool {
-		return !SliceStringHas(filters, entry.Condition())
+		return !slices.Contains(filters, entry.Condition())
 	},
 }
 

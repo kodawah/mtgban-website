@@ -14,6 +14,7 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/leemcloughlin/logfile"
+	"golang.org/x/exp/slices"
 
 	"github.com/mtgban/go-mtgban/abugames"
 	"github.com/mtgban/go-mtgban/amazon"
@@ -283,7 +284,7 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 			}
 
 			// Load if all the sellers inventory timestamps are past the cooldown
-			if SliceStringHas(names, seller.Info().Shorthand) && time.Since(*seller.Info().InventoryTimestamp) < SkipRefreshCooldown {
+			if slices.Contains(names, seller.Info().Shorthand) && time.Since(*seller.Info().InventoryTimestamp) < SkipRefreshCooldown {
 				log.Println("Trying to skip", seller.Info().Name, seller.Info().Shorthand, "because too recent")
 			} else {
 				needsLoading = true
@@ -317,7 +318,7 @@ func untangleMarket(init bool, currentDir string, newbc *mtgban.BanClient, scrap
 
 		// Dump files for the requested sellers
 		for _, seller := range sellers {
-			if SliceStringHas(names, seller.Info().Shorthand) {
+			if slices.Contains(names, seller.Info().Shorthand) {
 				// Add selected seller to the future global seller map
 				newbc.Register(seller)
 
@@ -841,7 +842,7 @@ func loadScrapers() {
 					// Use the old data instead of skipping it
 					if !init {
 						for _, seller := range Sellers {
-							if seller != nil && SliceStringHas(ScraperOptions[key].Keepers, seller.Info().Shorthand) {
+							if seller != nil && slices.Contains(ScraperOptions[key].Keepers, seller.Info().Shorthand) {
 								newbc.RegisterSeller(seller)
 							}
 						}

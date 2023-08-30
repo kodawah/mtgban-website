@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"golang.org/x/exp/slices"
 
 	"github.com/mtgban/go-mtgban/mtgban"
 	"github.com/mtgban/go-mtgban/mtgmatcher"
@@ -87,7 +88,7 @@ func guildCreate(s *discordgo.Session, gc *discordgo.GuildCreate) {
 	s.UpdateGameStatus(0, "http://mtgban.com")
 
 	// If guild is authorized, then we can proceed as normal
-	if SliceStringHas(Config.DiscordAllowList, gc.Guild.ID) {
+	if slices.Contains(Config.DiscordAllowList, gc.Guild.ID) {
 		return
 	}
 	// Skip this check when running on dev
@@ -401,7 +402,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	// Ignore messages coming from unauthorized discords
-	if !SliceStringHas(Config.DiscordAllowList, m.GuildID) {
+	if !slices.Contains(Config.DiscordAllowList, m.GuildID) {
 		return
 	}
 

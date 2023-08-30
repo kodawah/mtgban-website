@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/mtgban/go-mtgban/mtgmatcher"
+	"golang.org/x/exp/slices"
 )
 
 const (
@@ -65,12 +66,12 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 	switch storesOpt {
 	case "ALL_ACCESS":
 		for _, seller := range Sellers {
-			if seller != nil && !SliceStringHas(Config.SearchRetailBlockList, seller.Info().Shorthand) {
+			if seller != nil && !slices.Contains(Config.SearchRetailBlockList, seller.Info().Shorthand) {
 				enabledStores = append(enabledStores, seller.Info().Shorthand)
 			}
 		}
 		for _, vendor := range Vendors {
-			if vendor != nil && !SliceStringHas(Config.SearchBuylistBlockList, vendor.Info().Shorthand) {
+			if vendor != nil && !slices.Contains(Config.SearchBuylistBlockList, vendor.Info().Shorthand) {
 				enabledStores = append(enabledStores, vendor.Info().Shorthand)
 			}
 		}
@@ -97,7 +98,7 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 
 	// Filter by user preference, as long as it's listed in the enebled stores
 	filterByVendor := r.FormValue("vendor")
-	if SliceStringHas(enabledStores, filterByVendor) {
+	if slices.Contains(enabledStores, filterByVendor) {
 		enabledStores = []string{filterByVendor}
 	}
 
@@ -125,7 +126,7 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 					continue
 				}
 				// Skip if hash is already present
-				if SliceStringHas(filterByHash, uuid) {
+				if slices.Contains(filterByHash, uuid) {
 					continue
 				}
 				filterByHash = append(filterByHash, uuid)
@@ -164,8 +165,8 @@ func PriceAPI(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 
 	dumpType := ""
-	canRetail := SliceStringHas(enabledModes, "retail") || (SliceStringHas(enabledModes, "all") || (DevMode && !SigCheck))
-	canBuylist := SliceStringHas(enabledModes, "buylist") || (SliceStringHas(enabledModes, "all") || (DevMode && !SigCheck))
+	canRetail := slices.Contains(enabledModes, "retail") || (slices.Contains(enabledModes, "all") || (DevMode && !SigCheck))
+	canBuylist := slices.Contains(enabledModes, "buylist") || (slices.Contains(enabledModes, "all") || (DevMode && !SigCheck))
 	if (strings.HasPrefix(urlPath, "retail") || strings.HasPrefix(urlPath, "all")) && canRetail {
 		dumpType += "retail"
 		out.Retail = getSellerPrices(idOpt, enabledStores, filterByEdition, filterByHash, filterByFinish, qty, conds)
@@ -280,7 +281,7 @@ func getSellerPrices(mode string, enabledStores []string, filterByEdition string
 		}
 
 		// Skip any seller that are not enabled
-		if !SliceStringHas(enabledStores, sellerTag) {
+		if !slices.Contains(enabledStores, sellerTag) {
 			continue
 		}
 
@@ -306,7 +307,7 @@ func getSellerPrices(mode string, enabledStores []string, filterByEdition string
 			if filterByEdition != "" && co.SetCode != filterByEdition {
 				continue
 			}
-			if filterByHash != nil && !SliceStringHas(filterByHash, cardId) {
+			if filterByHash != nil && !slices.Contains(filterByHash, cardId) {
 				continue
 			}
 			if filterByFinish != "" && checkFinish(co, filterByFinish) {
@@ -398,7 +399,7 @@ func getVendorPrices(mode string, enabledStores []string, filterByEdition string
 		}
 
 		// Skip any vendor that are not enabled
-		if !SliceStringHas(enabledStores, vendorTag) {
+		if !slices.Contains(enabledStores, vendorTag) {
 			continue
 		}
 
@@ -424,7 +425,7 @@ func getVendorPrices(mode string, enabledStores []string, filterByEdition string
 			if filterByEdition != "" && co.SetCode != filterByEdition {
 				continue
 			}
-			if filterByHash != nil && !SliceStringHas(filterByHash, cardId) {
+			if filterByHash != nil && !slices.Contains(filterByHash, cardId) {
 				continue
 			}
 			if filterByFinish != "" && checkFinish(co, filterByFinish) {

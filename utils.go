@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-cleanhttp"
+	"golang.org/x/exp/slices"
 
 	"github.com/mtgban/go-mtgban/mtgmatcher"
 	"github.com/mtgban/go-mtgban/mtgmatcher/mtgjson"
@@ -236,7 +237,7 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 	}
 	// Loop through the supported promo types, skipping Boosterfun already processed above
 	for _, promoType := range co.PromoTypes {
-		if SliceStringHas(mtgjson.AllPromoTypes, promoType) && promoType != mtgjson.PromoTypeBoosterfun {
+		if slices.Contains(mtgjson.AllPromoTypes, promoType) && promoType != mtgjson.PromoTypeBoosterfun {
 			variant += mtgmatcher.Title(promoType) + " "
 		}
 	}
@@ -398,15 +399,6 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 
 		SourceSealed: sourceSealed,
 	}
-}
-
-func SliceStringHas(slice []string, probe string) bool {
-	for i := range slice {
-		if slice[i] == probe {
-			return true
-		}
-	}
-	return false
 }
 
 type Notification struct {

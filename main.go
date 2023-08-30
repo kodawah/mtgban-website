@@ -21,6 +21,7 @@ import (
 	"cloud.google.com/go/storage"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/leemcloughlin/logfile"
+	"golang.org/x/exp/slices"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"gopkg.in/Iwark/spreadsheet.v2"
@@ -709,7 +710,7 @@ func render(w http.ResponseWriter, tmpl string, pageVars PageVars) {
 			return ScraperNames[s]
 		},
 		"slice_has": func(s []string, p string) bool {
-			return SliceStringHas(s, p)
+			return slices.Contains(s, p)
 		},
 		"triple_column_start": func(i int, length int) bool {
 			return i == 0 || i == length/3 || i == length*2/3

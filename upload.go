@@ -20,6 +20,7 @@ import (
 	"github.com/extrame/xls"
 	cleanhttp "github.com/hashicorp/go-cleanhttp"
 	"github.com/xuri/excelize/v2"
+	"golang.org/x/exp/slices"
 	"gopkg.in/Iwark/spreadsheet.v2"
 
 	"github.com/mtgban/go-mtgban/mtgmatcher"
@@ -222,12 +223,12 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	// Load all possible sellers, and vendors according to user permissions
 	for _, seller := range Sellers {
-		if seller != nil && !SliceStringHas(blocklistRetail, seller.Info().Shorthand) && !seller.Info().SealedMode && !seller.Info().MetadataOnly {
+		if seller != nil && !slices.Contains(blocklistRetail, seller.Info().Shorthand) && !seller.Info().SealedMode && !seller.Info().MetadataOnly {
 			allSellers = append(allSellers, seller.Info().Shorthand)
 		}
 	}
 	for _, vendor := range Vendors {
-		if vendor != nil && !SliceStringHas(blocklistBuylist, vendor.Info().Shorthand) && !vendor.Info().SealedMode {
+		if vendor != nil && !slices.Contains(blocklistBuylist, vendor.Info().Shorthand) && !vendor.Info().SealedMode {
 			allVendors = append(allVendors, vendor.Info().Shorthand)
 		}
 	}
@@ -260,7 +261,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	stores := r.Form["stores"]
 	if blMode {
 		for _, store := range stores {
-			if SliceStringHas(allVendors, store) {
+			if slices.Contains(allVendors, store) {
 				enabledStores = append(enabledStores, store)
 			}
 		}
@@ -270,7 +271,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			stores = Config.AffiliatesList
 		}
 		for _, store := range stores {
-			if SliceStringHas(allSellers, store) {
+			if slices.Contains(allSellers, store) {
 				enabledStores = append(enabledStores, store)
 			}
 		}
