@@ -343,6 +343,7 @@ var Config struct {
 var DevMode bool
 var SigCheck bool
 var SkipInitialRefresh bool
+var SkipPrices bool
 var BenchMode bool
 var LogDir string
 var LastUpdate string
@@ -523,12 +524,14 @@ func main() {
 	devMode := flag.Bool("dev", false, "Enable developer mode")
 	sigCheck := flag.Bool("sig", false, "Enable signature verification")
 	skipInitialRefresh := flag.Bool("skip", false, "Skip initial refresh")
+	noload := flag.Bool("noload", false, "Do not load price data")
 	logdir := flag.String("log", "logs", "Directory for scrapers logs")
 	port := flag.String("port", "", "Override server port")
 
 	flag.Parse()
 	DevMode = *devMode
 	SkipInitialRefresh = *skipInitialRefresh
+	SkipPrices = *noload
 	SigCheck = true
 	if DevMode {
 		SigCheck = *sigCheck

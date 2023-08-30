@@ -750,6 +750,10 @@ func loadOptions() {
 		ScraperMap = map[string]string{}
 	}
 	for key, opt := range ScraperOptions {
+		if SkipPrices {
+			ScraperOptions[key].DevEnabled = false
+		}
+
 		if DevMode && !opt.DevEnabled {
 			continue
 		}
@@ -887,6 +891,13 @@ func loadScrapers() {
 		Vendors = make([]mtgban.Vendor, len(newVendors))
 	}
 
+	updateStaticData()
+
+	if SkipPrices {
+		log.Println("no prices loaded as requested")
+		return
+	}
+
 	log.Println("Sellers table")
 	var msgS string
 	for i := range newSellers {
@@ -918,8 +929,6 @@ func loadScrapers() {
 	if BenchMode {
 		return
 	}
-
-	updateStaticData()
 
 	if init {
 		ServerNotify("init", "loading completed")
