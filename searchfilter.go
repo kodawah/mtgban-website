@@ -293,6 +293,20 @@ func sealedname2uuid(name string) string {
 	return res[0]
 }
 
+func cardobject2sources(co *mtgmatcher.CardObject) []string {
+	var values []string
+	if co.Sealed {
+		values = co.SourceProducts["sealed"]
+	} else if co.Etched {
+		values = co.SourceProducts["etched"]
+	} else if co.Foil {
+		values = co.SourceProducts["foil"]
+	} else {
+		values = co.SourceProducts["nonfoil"]
+	}
+	return values
+}
+
 func fixupPicks(code string) []string {
 	co, err := mtgmatcher.GetUUID(code)
 	if err != nil {
@@ -316,7 +330,8 @@ func fixupPicks(code string) []string {
 func fixupContents(code string) []string {
 	co, err := mtgmatcher.GetUUID(code)
 	if err != nil {
-		co, err = mtgmatcher.GetUUID(sealedname2uuid(code))
+		name := strings.TrimLeft(strings.TrimRight(code, "\" "), "\" ")
+		co, err = mtgmatcher.GetUUID(sealedname2uuid(name))
 		if err != nil {
 			return []string{}
 		}
@@ -326,6 +341,28 @@ func fixupContents(code string) []string {
 	}
 
 	return []string{co.UUID}
+}
+
+func fixupContainer(code string) []string {
+	co, err := mtgmatcher.GetUUID(code)
+	if err != nil {
+		results, err := mtgmatcher.SearchEquals(code)
+		if err != nil {
+			return []string{}
+		}
+
+		var sources []string
+		for _, result := range results {
+			co, err := mtgmatcher.GetUUID(result)
+			if err != nil {
+				continue
+			}
+			sources = append(sources, cardobject2sources(co)...)
+		}
+		return sources
+	}
+
+	return cardobject2sources(co)
 }
 
 func price4seller(cardId, shorthand string) float64 {
@@ -382,6 +419,7 @@ var FilterOperations = map[string][]string{
 	"color":     []string{":"},
 	"unpack":    []string{":"},
 	"contents":  []string{":"},
+	"container": []string{":"},
 	"ci":        []string{":"},
 	"identity":  []string{":"},
 	"cond":      []string{":"},
@@ -661,6 +699,12 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 				Negate: negate,
 				Values: fixupContents(code),
 			})
+		case "container":
+			filters = append(filters, FilterElem{
+				Name:   "idlookup",
+				Negate: negate,
+				Values: fixupContainer(code),
+			})
 
 		// Options that modify the searched scrapers
 		case "store", "seller", "aseller", "vendor":
@@ -902,16 +946,7 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 		return !SliceStringHas(filters, co.UUID)
 	},
 	"contents": func(filters []string, co *mtgmatcher.CardObject) bool {
-		var values []string
-		if co.Sealed {
-			values = co.SourceProducts["sealed"]
-		} else if co.Etched {
-			values = co.SourceProducts["etched"]
-		} else if co.Foil {
-			values = co.SourceProducts["foil"]
-		} else {
-			values = co.SourceProducts["nonfoil"]
-		}
+		values := cardobject2sources(co)
 		for _, filter := range filters {
 			if !SliceStringHas(values, filter) {
 				return true

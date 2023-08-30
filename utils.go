@@ -25,6 +25,7 @@ var Country2flag = map[string]string{
 }
 
 type GenericCard struct {
+	UUID      string
 	Name      string
 	Edition   string
 	SetCode   string
@@ -46,6 +47,8 @@ type GenericCard struct {
 	Date      string
 	Sealed    bool
 	Booster   bool
+
+	SourceSealed []string
 }
 
 func fileExists(filename string) bool {
@@ -370,6 +373,7 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 	}
 
 	return GenericCard{
+		UUID:      co.UUID,
 		Name:      co.Card.Name,
 		Edition:   co.Edition,
 		SetCode:   co.Card.SetCode,
@@ -391,6 +395,8 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 		Date:      co.OriginalReleaseDate,
 		Sealed:    isSealed,
 		Booster:   canBoosterGen,
+
+		SourceSealed: sourceSealed,
 	}
 }
 

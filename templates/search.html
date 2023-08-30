@@ -686,6 +686,10 @@
                                             <td rowspan=2>
                                                 <a href='/search?q=contents:"{{$card.Name}}"' title="Search what can be found in this product"><span class="emoji">🔎</span></a>
                                             </td>
+                                        {{else}}
+                                            <td rowspan=2>
+                                                <a href='/sealed?q=container:"{{$card.Name}}"' title="Search which products can contain a reprint"><span class="emoji">📖</span></a>
+                                            </td>
                                         {{end}}
                                         <td rowspan=2>
                                             <span class="emoji" style="cursor: pointer;" onclick="navigator.clipboard.writeText('{{$card.Name}}'); waithide(this)" title="Copy to clipboard">📝</span>
@@ -715,6 +719,9 @@
                                         <td>
                                             <h6>
                                                 <a href="?q=s:{{$card.SetCode}}{{if $card.Date}} date:{{$card.Date}}{{end}}">{{$card.Title}}</a>
+                                                {{if $card.SourceSealed}}
+                                                    - <a href="/sealed?q=container:{{$card.UUID}}">Found in {{len $card.SourceSealed}} product{{if gt (len $card.SourceSealed) 1}}s{{end}}</a>
+                                                {{end}}
                                             </h6>
                                         </td>
 
