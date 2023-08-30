@@ -290,21 +290,21 @@ func fixupPicks(code string) []string {
 		code = strings.TrimLeft(strings.TrimRight(code, "\" "), "\" ")
 		res, err := mtgmatcher.SearchSealedEquals(code)
 		if err != nil {
-			return nil
+			return []string{}
 		}
 		code = res[0]
 		co, err = mtgmatcher.GetUUID(code)
 		if err != nil {
-			return nil
+			return []string{}
 		}
 	}
 	if !co.Sealed {
-		return nil
+		return []string{}
 	}
 
 	picks, err := mtgmatcher.GetPicksForSealed(co.SetCode, code)
 	if err != nil {
-		return nil
+		return []string{}
 	}
 
 	return picks
