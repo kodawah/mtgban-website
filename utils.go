@@ -321,18 +321,13 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 				if product.UUID != co.UUID {
 					continue
 				}
-				switch product.Category {
-				case "Booster Box", "Case":
-					continue
-				}
-
-				var minKeysInContents int
-				_, found := product.Contents["other"]
-				if found {
-					minKeysInContents++
-				}
-				if len(product.Contents) > minKeysInContents {
-					canBoosterGen = true
+				for key, contents := range product.Contents {
+					for _ = range contents {
+						switch key {
+						case "pack", "variable":
+							canBoosterGen = true
+						}
+					}
 				}
 			}
 		}
