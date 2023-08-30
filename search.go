@@ -117,26 +117,21 @@ func Search(w http.ResponseWriter, r *http.Request) {
 
 	pageVars.SearchBest = (readCookie(r, "SearchListingPriority") == "prices")
 
-	canSealed, _ := strconv.ParseBool(GetParamFromSig(sig, "SearchSealed"))
-	canSealed = canSealed || (DevMode && !SigCheck)
-
 	pageVars.IsSealed = r.URL.Path == "/sealed"
 
 	canDownloadCSV, _ := strconv.ParseBool(GetParamFromSig(sig, "SearchDownloadCSV"))
 	canDownloadCSV = canDownloadCSV || (DevMode && !SigCheck)
 	pageVars.CanDownloadCSV = canDownloadCSV
 
-	if canSealed {
-		pageVars.Nav = insertNavBar("Sets", pageVars.Nav, []NavElem{
-			NavElem{
-				Name:   "Sealed",
-				Short:  "🧱",
-				Link:   "/sealed",
-				Active: pageVars.IsSealed,
-				Class:  "selected",
-			},
-		})
-	}
+	pageVars.Nav = insertNavBar("Sets", pageVars.Nav, []NavElem{
+		NavElem{
+			Name:   "Sealed",
+			Short:  "🧱",
+			Link:   "/sealed",
+			Active: pageVars.IsSealed,
+			Class:  "selected",
+		},
+	})
 
 	if len(query) > MaxSearchQueryLen {
 		pageVars.ErrorMessage = TooLongMessage
