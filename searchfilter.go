@@ -284,16 +284,19 @@ func fixupIDs(code string) []string {
 	return fields
 }
 
+func sealedname2uuid(name string) string {
+	name = strings.TrimLeft(strings.TrimRight(name, "\" "), "\" ")
+	res, err := mtgmatcher.SearchSealedEquals(name)
+	if err != nil {
+		return ""
+	}
+	return res[0]
+}
+
 func fixupPicks(code string) []string {
 	co, err := mtgmatcher.GetUUID(code)
 	if err != nil {
-		code = strings.TrimLeft(strings.TrimRight(code, "\" "), "\" ")
-		res, err := mtgmatcher.SearchSealedEquals(code)
-		if err != nil {
-			return []string{}
-		}
-		code = res[0]
-		co, err = mtgmatcher.GetUUID(code)
+		co, err = mtgmatcher.GetUUID(sealedname2uuid(code))
 		if err != nil {
 			return []string{}
 		}
@@ -302,12 +305,27 @@ func fixupPicks(code string) []string {
 		return []string{}
 	}
 
-	picks, err := mtgmatcher.GetPicksForSealed(co.SetCode, code)
+	picks, err := mtgmatcher.GetPicksForSealed(co.SetCode, co.UUID)
 	if err != nil {
 		return []string{}
 	}
 
 	return picks
+}
+
+func fixupContents(code string) []string {
+	co, err := mtgmatcher.GetUUID(code)
+	if err != nil {
+		co, err = mtgmatcher.GetUUID(sealedname2uuid(code))
+		if err != nil {
+			return []string{}
+		}
+	}
+	if !co.Sealed {
+		return []string{}
+	}
+
+	return []string{co.UUID}
 }
 
 func price4seller(cardId, shorthand string) float64 {
@@ -362,6 +380,7 @@ var FilterOperations = map[string][]string{
 	"f":         []string{":"},
 	"c":         []string{":"},
 	"color":     []string{":"},
+	"unpack":    []string{":"},
 	"contents":  []string{":"},
 	"ci":        []string{":"},
 	"identity":  []string{":"},
@@ -629,11 +648,18 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 				Negate: negate,
 				Values: fixupIDs(code),
 			})
-		case "contents":
+		case "unpack":
 			filters = append(filters, FilterElem{
 				Name:   "idlookup",
 				Negate: negate,
 				Values: fixupPicks(code),
+			})
+		case "contents":
+			config.SearchMode = "mixed"
+			filters = append(filters, FilterElem{
+				Name:   "contents",
+				Negate: negate,
+				Values: fixupContents(code),
 			})
 
 		// Options that modify the searched scrapers
@@ -874,6 +900,24 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 	},
 	"idlookup": func(filters []string, co *mtgmatcher.CardObject) bool {
 		return !SliceStringHas(filters, co.UUID)
+	},
+	"contents": func(filters []string, co *mtgmatcher.CardObject) bool {
+		var values []string
+		if co.Sealed {
+			values = co.SourceProducts["sealed"]
+		} else if co.Etched {
+			values = co.SourceProducts["etched"]
+		} else if co.Foil {
+			values = co.SourceProducts["foil"]
+		} else {
+			values = co.SourceProducts["nonfoil"]
+		}
+		for _, filter := range filters {
+			if !SliceStringHas(values, filter) {
+				return true
+			}
+		}
+		return false
 	},
 	"number": func(filters []string, co *mtgmatcher.CardObject) bool {
 		return !SliceStringHas(filters, strings.ToLower(co.Number))
