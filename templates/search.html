@@ -302,7 +302,9 @@
 
                     <li>You can access <b>historical data</b> from a few major vendors by clicking on 📊 for each card.</li>
                     <li>Data is refreshed periodically over the day.</li>
-                    <li>Entries are formatted as <i>card name (finish) - edition (collector #)</i>.</li>
+                    <li>Entries are formatted as <i>card name (finish) - edition (collector #) - # of prints</i>.</li>
+                    <li>It is possible to retrieve the source product of a card or a sealed product by pressing on the "Found in * products".</li>
+                    <li>Similarly, pressing on the 📖 button on a card will return every prossible products containing any kind of reprint of the given card.</li>
                     <li>The percentage found in buylist offers is the <b>price ratio</b>, the higher it is, the more a vendor is looking to purchase that card.</li>
                     <li>This percentage is available only if the seller is selling copies of the same card at the same conditions.</li>
                     <li>Inventory prices refer to the stated conditions (and their accuracy depends on the data provider).</li>
@@ -351,13 +353,13 @@
                     <li>
                         <h4>How is EV calculated?</h4>
                         <ul class="indent">
-                            For any product with a static decklist, the card values a just summed up and provided as is. For boosters and booster boxes, we generate as many boosters as needed to represent the product (typically 36 boosters), for 5000 times to even out any possible variance, and then run the mean and median of the results. Note that every product is individually run, so a booster box won't exactly be 36 times theprice of a booster pack.
+                            For any product with a static decklist, the card values a just summed up and provided as is. For boosters and booster boxes, we generate as many boosters as needed to represent the product (typically 36 boosters for a draft booster box), for 5000 times to even out any possible variance, and then run the mean and median of the results. Note that every product is individually run, so a booster box won't exactly be 36 times theprice of a booster pack.
                         </ul>
                     </li>
                     <li>
                         <h4>How do you emulate booster openings?</h4>
                         <ul class="indent">
-                            We use data from multiple projects, in paritcular we derive the collation information from the <a href="https://www.lethe.xyz/mtg/collation/">Lethe project</a>, the distribution of cards in the boosters from <a href="https://github.com/taw/magic-search-engine">mtg.wft search engine</a>, and the contents description from <a href="https://github.com/mtgjson/mtg-sealed-content/">MTGJSON repository</a>. Please refer to each proejct website to know more how estimations works.
+                            We use data from multiple projects, in paritcular we derive the collation information from the <a href="https://www.lethe.xyz/mtg/collation/">Lethe project</a>, the distribution of cards in the boosters from <a href="https://github.com/taw/magic-search-engine">mtg.wft search engine</a>, the contents description from <a href="https://github.com/mtgjson/mtg-sealed-content">MTGJSON</a>, and the decklists come from <a href="https://github.com/taw/magic-preconstructed-decks">this repository</a>. Please refer to each project website to know more how estimations works (and to help out with data ingestion).
                         </ul>
                     </li>
                     <li>
@@ -381,15 +383,18 @@
                         </ul>
                     </li>
                     <li>
-                        <h4>What's up with these odd prices for this just released reprint set?</h4>
+                        <h4>What's up with these odd prices for this just released set?</h4>
                         <ul class="indent">
                            Our EV prices reflect the price of the actual printing of the card, they do not reflect the value of the card before the reprint. As such it takes a few days for all the listings to be filled in and for prices to propagate to the calculator -- in particular, in case of Direct prices might look a bit off until the whole TCG Direct inventory appears, and in the meantime we'll do our best estimates using the market price. Also keep in mind that in the early days, the expected values will reflect preorder prices, which are almost always higher than normal.
                         </ul>
                     </li>
                     <li>
-                        <h4>What is the gift box next to product titles?</h4>
+                        <h4>What are the custom buttons next to product titles for (🎁 and 🔍)?</h4>
                         <ul class="indent">
-                           For products with a complete contents description, if you press 🎁 you will emulate opening one item of a single product - every run will be generated randomly, unless of static decklists. For larger products like cases or booster boxes, only the first few results will be displayed, paging through the results will generate new iterations. Once in this search page, you can add search terms normally to filter for color, rarities, and names using the common search syntax.
+                            These two buttons lead to different search options:<br>
+                            * the 🎁 (when available) will similuate opening a pack using the information available. Every run is fully randomized and unpredictable;<br>
+                            * the 🔍 will unpack a product and list all its possible contents (at most one copy per result). This means that a booster box will only list a single booster pack, while a booster pack will display all possible picks.<br>
+                            In both cases, once in the search page, you can add search terms normally to filter for color, rarities, and names using the common search syntax.
                         </ul>
                     </li>
                     <li>
