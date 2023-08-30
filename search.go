@@ -860,6 +860,13 @@ func searchAndFilter(config SearchConfig) ([]string, error) {
 		if err != nil {
 			uuids, err = mtgmatcher.SearchSealedContains(query)
 		}
+	case "mixed":
+		uuids, err = mtgmatcher.SearchSealedEquals(query)
+		if err != nil {
+			uuids, err = mtgmatcher.SearchSealedContains(query)
+		}
+		moreUUIDs, _ := mtgmatcher.SearchEquals(query)
+		uuids = append(uuids, moreUUIDs...)
 	default:
 		uuids, err = mtgmatcher.SearchEquals(query)
 		if err != nil {
