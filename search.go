@@ -541,6 +541,10 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				// If the reference is found, add a secondary price
 				// otherwise just leave it as is
 				if tcgEVIndex >= 0 {
+					// Skip if prices match
+					if indexArray[i].Price == tmp[tcgEVIndex].Price {
+						continue
+					}
 					tmp[tcgEVIndex].Secondary = indexArray[i].Price
 					tmp[tcgEVIndex].ScraperName = "TCG Low EV (Mean / Median)"
 					tmp[tcgEVIndex].IndexCombined = true
@@ -556,6 +560,10 @@ func Search(w http.ResponseWriter, r *http.Request) {
 				// If the reference is found, add a secondary price
 				// otherwise just leave it as is
 				if tcgEVDirctIndex >= 0 {
+					// Skip if prices match
+					if indexArray[i].Price == tmp[tcgEVDirctIndex].Price {
+						continue
+					}
 					tmp[tcgEVDirctIndex].Secondary = indexArray[i].Price
 					tmp[tcgEVDirctIndex].ScraperName = "Direct EV (Mean / Median)"
 					tmp[tcgEVDirctIndex].IndexCombined = true
