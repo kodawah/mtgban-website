@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"net/url"
 	"path"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -840,8 +839,6 @@ func mergeIdenticalEntries(uploadedData []UploadEntry) []UploadEntry {
 	return uploadedDataClean
 }
 
-var reHeader = regexp.MustCompile(`[0-9 ]*.+[0-9 \(\)]*[0-9 ]*`)
-
 func parseHeader(first []string) (map[string]int, error) {
 	if len(first) < 1 {
 		return nil, errors.New("too few fields")
@@ -852,21 +849,15 @@ func parseHeader(first []string) (map[string]int, error) {
 	// If there is a single element, try using a different mode
 	if len(first) == 1 {
 		indexMap["cardName"] = 0
+		log.Println("No Header map, decklist mode (single element)")
 		return indexMap, ErrUploadDecklist
 	}
 
-	// In case there was actually a single elmeent, but the comma appears in the card name
-	if len(first) == 2 && reHeader.MatchString(strings.Join(first, ",")) {
+	// In case there was actually a single element, but the comma appears in the card name
+	if strings.Contains(strings.Join(first, ","), ", ") {
 		indexMap["cardName"] = 0
+		log.Println("No Header map, decklist mode (comma in card name)")
 		return indexMap, ErrUploadDecklist
-	}
-	// For DFC cards, like "Nissa, Vastwood Seer // Nissa, Sage Animist"
-	if len(first) == 3 {
-		line := strings.Join(first, ",")
-		if strings.Contains(line, " // ") && reHeader.MatchString(line) {
-			indexMap["cardName"] = 0
-			return indexMap, ErrUploadDecklist
-		}
 	}
 
 	// Parse the header to understand where these fields are
