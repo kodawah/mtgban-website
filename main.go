@@ -11,9 +11,11 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"os/signal"
 	"path"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"database/sql"
@@ -684,7 +686,34 @@ func main() {
 	http.Handle("/api/cardkingdom/pricelist.json", noSigning(http.HandlerFunc(CKMirrorAPI)))
 	http.HandleFunc("/favicon.ico", Favicon)
 	http.HandleFunc("/auth", Auth)
-	log.Fatal(http.ListenAndServe(":"+Config.Port, nil))
+
+	srv := &http.Server{
+		Addr: ":" + Config.Port,
+	}
+
+	done := make(chan os.Signal, 1)
+	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		err := srv.ListenAndServe()
+		if err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
+		}
+	}()
+
+	<-done
+
+	// Close any zombie connection and perform any extra cleanup
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer func() {
+		cancel()
+		log.Println("BAN Server shut down")
+	}()
+
+	err = srv.Shutdown(ctx)
+	if err != nil {
+		log.Fatalf("Server Shutdown Failed: %s", err.Error())
+	}
+	log.Println("BAN Server shutting down...")
 }
 
 func render(w http.ResponseWriter, tmpl string, pageVars PageVars) {
