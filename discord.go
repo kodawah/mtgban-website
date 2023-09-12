@@ -52,9 +52,13 @@ const (
 
 var DiscordRetailBlocklist []string
 
+var dg *discordgo.Session
+
 func setupDiscord() error {
+	var err error
+
 	// Create a new Discord session using the provided bot token.
-	dg, err := discordgo.New("Bot " + Config.DiscordToken)
+	dg, err = discordgo.New("Bot " + Config.DiscordToken)
 	if err != nil {
 		return err
 	}
@@ -77,8 +81,12 @@ func setupDiscord() error {
 	}
 
 	return nil
-	// Cleanly close down the Discord session.
-	//dg.Close()
+}
+
+// Cleanly close down the Discord session.
+func cleanupDiscord() {
+	log.Println("Closing connection with Discord")
+	dg.Close()
 }
 
 // This function will be called every time the bot is invited to a discord

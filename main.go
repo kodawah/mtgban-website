@@ -705,6 +705,7 @@ func main() {
 	// Close any zombie connection and perform any extra cleanup
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer func() {
+		cleanupDiscord()
 		cancel()
 		log.Println("BAN Server shut down")
 	}()
