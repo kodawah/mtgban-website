@@ -45,6 +45,7 @@ const (
 var UploadIndexKeys = []string{TCG_LOW, TCG_MARKET, TCG_DIRECT, TCG_DIRECT_LOW}
 
 var ErrUploadDecklist = errors.New("decklist")
+var ErrReloadFirstRow = errors.New("firstrow")
 
 // Data coming from the user upload
 type UploadEntry struct {
@@ -928,8 +929,8 @@ func parseHeader(first []string) (map[string]int, error) {
 	}
 
 	// Set some default values for the mandatory fields
-	_, found := indexMap["cardName"]
-	if !found {
+	_, foundName := indexMap["cardName"]
+	if !foundName {
 		indexMap["cardName"] = 0
 		// Used by some formats that do not set a card name
 		i, found := indexMap["title"]
@@ -937,9 +938,15 @@ func parseHeader(first []string) (map[string]int, error) {
 			indexMap["cardName"] = i
 		}
 	}
-	_, found = indexMap["edition"]
-	if !found {
+	_, foundEdition := indexMap["edition"]
+	if !foundEdition {
 		indexMap["edition"] = 1
+	}
+
+	// If nothing at all was found, send an error to reprocess the first line
+	if !foundName && !foundEdition {
+		log.Println("Fake Header map:", indexMap)
+		return indexMap, ErrReloadFirstRow
 	}
 
 	log.Println("Header map:", indexMap)
@@ -1217,7 +1224,7 @@ func loadSpreadsheet(link string, maxRows int) ([]UploadEntry, error) {
 
 	var i int
 	indexMap, err := parseHeader(record)
-	if errors.Is(err, ErrUploadDecklist) {
+	if errors.Is(err, ErrUploadDecklist) || errors.Is(err, ErrReloadFirstRow) {
 		i-- // Parse the first line again
 	} else if err != nil {
 		return nil, err
@@ -1278,7 +1285,7 @@ func loadOldXls(reader io.ReadSeeker, maxRows int) ([]UploadEntry, error) {
 
 	var i int
 	indexMap, err := parseHeader(record)
-	if errors.Is(err, ErrUploadDecklist) {
+	if errors.Is(err, ErrUploadDecklist) || errors.Is(err, ErrReloadFirstRow) {
 		i-- // Parse the first line again
 	} else if err != nil {
 		return nil, err
@@ -1343,7 +1350,7 @@ func loadXlsx(reader io.Reader, maxRows int) ([]UploadEntry, error) {
 
 	var i int
 	indexMap, err := parseHeader(rows[0])
-	if errors.Is(err, ErrUploadDecklist) {
+	if errors.Is(err, ErrUploadDecklist) || errors.Is(err, ErrReloadFirstRow) {
 		i-- // Parse the first line again
 	} else if err != nil {
 		return nil, err
@@ -1405,16 +1412,18 @@ func loadCsv(reader io.ReadSeeker, comma rune, maxRows int) ([]UploadEntry, erro
 	}
 
 	indexMap, err := parseHeader(first)
-	if errors.Is(err, ErrUploadDecklist) {
+	if errors.Is(err, ErrUploadDecklist) || errors.Is(err, ErrReloadFirstRow) {
 		// Reload reader to catch the first name too
 		_, err = reader.Seek(0, io.SeekStart)
 		if err != nil {
 			return nil, err
 		}
 		csvReader = csv.NewReader(reader)
-		csvReader.Comma = '§' // fake comma to parse the whole line
-		csvReader.LazyQuotes = true
-		csvReader.FieldsPerRecord = 1
+		if errors.Is(err, ErrUploadDecklist) {
+			csvReader.Comma = '§' // fake comma to parse the whole line
+			csvReader.LazyQuotes = true
+			csvReader.FieldsPerRecord = 1
+		}
 	} else if err != nil {
 		return nil, err
 	}
