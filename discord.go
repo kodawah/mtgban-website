@@ -101,8 +101,10 @@ func guildCreate(s *discordgo.Session, gc *discordgo.GuildCreate) {
 		Description: "Looks like I'm not authorized to be here ⋋〳 ᵕ _ʖ ᵕ 〵⋌",
 		Footer:      &poweredByFooter,
 	})
-	UserNotify("bot", gc.Guild.Name+" attempted to install the bot", true)
-	log.Println("unauthorized installation attempt")
+
+	msg := fmt.Sprintf("%s (%s) attempted to install the bot", gc.Guild.Name, gc.Guild.ID)
+	UserNotify("bot", msg, true)
+	log.Println("unauthorized installation attempt:", msg)
 	s.GuildLeave(gc.Guild.ID)
 }
 
