@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/url"
@@ -57,6 +58,10 @@ var dg *discordgo.Session
 func setupDiscord() error {
 	var err error
 
+	if Config.DiscordToken == "" {
+		return errors.New("no discord token")
+	}
+
 	// Create a new Discord session using the provided bot token.
 	dg, err = discordgo.New("Bot " + Config.DiscordToken)
 	if err != nil {
@@ -85,6 +90,9 @@ func setupDiscord() error {
 
 // Cleanly close down the Discord session.
 func cleanupDiscord() {
+	if Config.DiscordToken == "" {
+		return
+	}
 	log.Println("Closing connection with Discord")
 	dg.Close()
 }
