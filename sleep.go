@@ -151,7 +151,7 @@ func Sleepers(w http.ResponseWriter, r *http.Request) {
 	// Log performance
 	user := GetParamFromSig(sig, "UserEmail")
 	msg := fmt.Sprintf("Sleepers call by %s with took %v", user, time.Since(start))
-	UserNotify("Sleepers", msg)
+	UserNotify("sleepers", msg)
 	LogPages["Sleepers"].Println(msg)
 	if DevMode {
 		log.Println(msg)
