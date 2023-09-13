@@ -141,6 +141,7 @@ var filteredEditions = []string{
 	"DRKITA",
 	"FBB",
 	"LEGITA",
+	"O90P",
 	"OC13",
 	"OC14",
 	"OC15",
