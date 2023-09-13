@@ -875,6 +875,50 @@ func parseCardDate(co *mtgmatcher.CardObject) (time.Time, error) {
 	return time.Parse("2006-01-02", cardDateStr)
 }
 
+func findCommanderInDeck(sealedUUID string) []string {
+	var output []string
+
+	sealed, err := mtgmatcher.GetUUID(sealedUUID)
+	if err != nil {
+		return nil
+	}
+
+	set, err := mtgmatcher.GetSet(sealed.SetCode)
+	if err != nil {
+		return nil
+	}
+
+	for _, product := range set.SealedProduct {
+		if product.UUID != sealed.UUID {
+			continue
+		}
+		contents, found := product.Contents["deck"]
+		if !found {
+			continue
+		}
+		for _, content := range contents {
+			subset, err := mtgmatcher.GetSet(content.Set)
+			if err != nil {
+				continue
+			}
+			for _, deck := range subset.Decks {
+				if deck.Name != content.Name {
+					continue
+				}
+				for _, card := range deck.Commander {
+					uuid, err := mtgmatcher.MatchId(card.UUID, card.IsFoil)
+					if err != nil {
+						continue
+					}
+					output = append(output, uuid)
+				}
+			}
+		}
+	}
+
+	return output
+}
+
 func compareReleaseDate(filters []string, co *mtgmatcher.CardObject, cmpFunc func(a, b time.Time) bool) bool {
 	if filters == nil {
 		return false
@@ -1081,6 +1125,14 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 			case "phyrexian", "ph":
 				if co.Language == mtgjson.LanguagePhyrexian {
 					return false
+				}
+			case "commander":
+				values := cardobject2sources(co)
+				for _, sealedUUID := range values {
+					res := findCommanderInDeck(sealedUUID)
+					if slices.Contains(res, co.UUID) {
+						return false
+					}
 				}
 			default:
 				// Adjust input for these known cases
