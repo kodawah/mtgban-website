@@ -628,8 +628,12 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			var errMsg string
 			ogFields, err = grabLastSold(searchRes.CardId, co.Language)
 			if err != nil {
-				errMsg = "Internal bot error ┏༼ ◉ ╭╮ ◉༽┓"
-				log.Println("Bot error:", err, "from", content)
+				if errors.Is(err, ErrMissingTCGId) {
+					errMsg = fmt.Sprintf("\"%s\" does not have any identifier set, I don't know what to do o͡͡͡╮༼ • ʖ̯ • ༽╭o͡͡͡", content)
+				} else {
+					errMsg = "Internal bot error ┏༼ ◉ ╭╮ ◉༽┓"
+					log.Println("Bot error:", err, "from", content)
+				}
 			} else if len(ogFields) == 0 {
 				errMsg = "No Last Sold Price available for \"" + content + "\" o͡͡͡╮༼ • ʖ̯ • ༽╭o͡͡͡"
 			}

@@ -156,6 +156,8 @@ func API(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+var ErrMissingTCGId = errors.New("tcg id not found")
+
 func getLastSold(cardId string) ([]tcgplayer.LatestSalesData, error) {
 	co, err := mtgmatcher.GetUUID(cardId)
 	if err != nil {
@@ -170,7 +172,7 @@ func getLastSold(cardId string) ([]tcgplayer.LatestSalesData, error) {
 		}
 	}
 	if tcgId == "" {
-		return nil, errors.New("tcg id not found")
+		return nil, ErrMissingTCGId
 	}
 
 	latestSales, err := tcgplayer.TCGLatestSales(tcgId, co.Foil || co.Etched)
