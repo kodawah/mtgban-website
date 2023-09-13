@@ -369,6 +369,13 @@ func search2fields(searchRes *searchResult) (fields []embedField) {
 	return
 }
 
+const (
+	emoteShurg = "o͡͡͡╮༼ • ʖ̯ • ༽╭o͡͡͡"
+	emoteSad   = "┏༼ ◉ ╭╮ ◉༽┓"
+	emoteSleep = "(-, – )…zzzZZZ"
+	emoteHappy = "ᕕ( ՞ ᗜ ՞ )ᕗ"
+)
+
 func grabLastSold(cardId string, lang string) ([]embedField, error) {
 	var fields []embedField
 
@@ -629,13 +636,13 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			ogFields, err = grabLastSold(searchRes.CardId, co.Language)
 			if err != nil {
 				if errors.Is(err, ErrMissingTCGId) {
-					errMsg = fmt.Sprintf("\"%s\" does not have any identifier set, I don't know what to do o͡͡͡╮༼ • ʖ̯ • ༽╭o͡͡͡", content)
+					errMsg = fmt.Sprintf("\"%s\" does not have any identifier set, I don't know what to do %s", content, emoteShurg)
 				} else {
-					errMsg = "Internal bot error ┏༼ ◉ ╭╮ ◉༽┓"
+					errMsg = "Internal bot error " + emoteSad
 					log.Println("Bot error:", err, "from", content)
 				}
 			} else if len(ogFields) == 0 {
-				errMsg = "No Last Sold Price available for \"" + content + "\" o͡͡͡╮༼ • ʖ̯ • ༽╭o͡͡͡"
+				errMsg = fmt.Sprintf("No Last Sold Price available for \"%s\" %s", content, emoteShurg)
 			}
 			embed := prepareCard(searchRes, ogFields, m.GuildID, lastSold)
 			if errMsg != "" {
@@ -647,7 +654,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	embed := prepareCard(searchRes, ogFields, m.GuildID, lastSold)
 	if lastSold {
-		embed.Description += "Grabbing last sold prices, hang tight ᕕ( ՞ ᗜ ՞ )ᕗ"
+		embed.Description += "Grabbing last sold prices, hang tight " + emoteHappy
 	}
 
 	out, err := s.ChannelMessageSendEmbed(m.ChannelID, embed)
@@ -664,7 +671,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			break
 		case <-time.After(LastSoldTimeout * time.Second):
 			edit = prepareCard(searchRes, ogFields, m.GuildID, lastSold)
-			edit.Description += "Connection time out (-, – )…zzzZZZ"
+			edit.Description += "Connection time out " + emoteSleep
 			break
 		}
 
