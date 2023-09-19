@@ -481,6 +481,7 @@ var ScraperOptions = map[string]*scraperOption{
 		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper := starcitygames.NewScraper(Config.Api["scg_guid"], Config.Api["scg_bearer"])
 			scraper.LogCallback = logger.Printf
+			scraper.Affiliate = Config.Affiliate["SCG"]
 			return scraper, nil
 		},
 		StashBuylist: true,
