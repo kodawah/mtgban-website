@@ -178,6 +178,13 @@
                                 <p class="h6inline">Ignore prices when loading data (<i>use TCG Low instead</i>)</p>
                             </label>
                             <br>
+                            <label for="customperc">
+                                <input type="checkbox" id="customperc" name="customperc" checked onClick="javascript:saveCheckbox('customperc')">
+                                <p class="h6inline">Show a visual indicator when spread is above</p>
+                                <input type="text" class="w3-border w3-round-small" id="custompercmax" name="custompercmax" value=100 size=1 style="text-align:center;" onchange="javascript:saveText('custompercmax')">
+                                <p class="h6inline">% wrt loaded price</p>
+                            </label>
+                            <br>
                             <label for="noresults">
                                 <input type="checkbox" id="noresults" name="noresults" onClick="javascript:saveCheckbox('noresults')">
                                 <p class="h6inline">Skip main results, only show Optimizer</p>
@@ -209,7 +216,15 @@
             }
 
             const checkboxes = [
-                "lowval", "highval", "lowvalabs", "highvalabs", "minmargin", "nocond", "noprice", "noresults",
+                "lowval",
+                "highval",
+                "lowvalabs",
+                "highvalabs",
+                "minmargin",
+                "nocond",
+                "noprice",
+                "noresults",
+                "customperc",
             ];
             checkboxes.forEach(element => {
                 var checked = JSON.parse(localStorage.getItem(element));
@@ -219,7 +234,13 @@
             })
 
             const textInputs = [
-                "percspread", "percspreadmax", "minval", "maxval", "margin", "sorting"
+                "percspread",
+                "percspreadmax",
+                "minval",
+                "maxval",
+                "margin",
+                "sorting",
+                "custompercmax",
             ];
             textInputs.forEach(element => {
                 var input = localStorage.getItem(element);
@@ -406,6 +427,7 @@
                     <li>If multiple store have a similar price offer, they will all appear in their own section - this might slightly skew highest total results.</li>
                     <li>In the stores breakdown, the store offering will be listed, next to the loaded price, or TCG Low in its absence. The percentage next to it represents the strength of the offer.</li>
                     <li>It is possible to skip low value offerings (less than 60% spread or less than $ 1) by selecting the checkboxes at the top.</li>
+                    <li>A visual indicator will appear next to entries above a certain customizable threshold.</li>
                     <li>By default, when multiple stores offer a similar price within a certain range (10% by default) they will be all selected, and found in the list result.</li>
                     <li>The above options can be modified by selecting "Show optimizer options".</li>
                 </ul>
@@ -745,7 +767,7 @@
                                                     </a>
                                                     {{if .Price}}
                                                         / $ {{printf "%.2f" .Price}}
-                                                        {{if lt .Price $price}}⚠️{{end}}
+                                                        {{if and $.CanFilterByPrice (lt .VisualPrice $price)}}⚠️{{end}}
                                                     {{end}}
                                                 </td>
                                                 <td>

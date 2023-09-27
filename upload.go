@@ -27,6 +27,7 @@ import (
 
 const (
 	MinLowValueSpread  = 60.0
+	VisualPercSpread   = 100.0
 	MinLowValueAbs     = 1.0
 	MaxHighValueSpread = 0.0
 	MaxHighValueAbs    = 0.0
@@ -99,6 +100,9 @@ type OptimizedUploadEntry struct {
 
 	// Quantity as found in the source data
 	Quantity int
+
+	// Price used to display a visual indicator
+	VisualPrice float64
 }
 
 func Upload(w http.ResponseWriter, r *http.Request) {
@@ -166,6 +170,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	canOptimize := (optimizerOpt || (DevMode && !SigCheck))
 	var skipLowValue, skipLowValueAbs, skipHighValue, skipHighValueAbs bool
 	var skipMargin, skipConds, skipPrices bool
+	var visualIndicator bool
 	if blMode && canOptimize {
 		skipLowValue = r.FormValue("lowval") != ""
 		skipLowValueAbs = r.FormValue("lowvalabs") != ""
@@ -174,6 +179,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		skipMargin = r.FormValue("minmargin") != ""
 		skipConds = r.FormValue("nocond") != ""
 		skipPrices = r.FormValue("noprice") != ""
+		visualIndicator = r.FormValue("customperc") != ""
 	}
 	sorting := r.FormValue("sorting")
 
@@ -209,6 +215,13 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			percMargin = 1 - customMargin/100.0
 		}
 	}
+
+	visualPerc := VisualPercSpread
+	customVisual, err := strconv.ParseFloat(r.FormValue("custompercmax"), 64)
+	if err == nil && customMin > 0 {
+		visualPerc = customVisual
+	}
+	pageVars.CanFilterByPrice = visualIndicator
 
 	// Set flags needed to show elements on the page ui
 	pageVars.IsBuylist = blMode
@@ -667,12 +680,13 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 				// Break down by store
 				optimizedResults[bestStore] = append(optimizedResults[bestStore], OptimizedUploadEntry{
-					CardId:    cardId,
-					Condition: conds,
-					Price:     comparePrice,
-					Spread:    spread,
-					BestPrice: price,
-					Quantity:  uploadedData[i].Quantity,
+					CardId:      cardId,
+					Condition:   conds,
+					Price:       comparePrice,
+					Spread:      spread,
+					BestPrice:   price,
+					Quantity:    uploadedData[i].Quantity,
+					VisualPrice: comparePrice * visualPerc / 100.0,
 				})
 
 				// Save totals
@@ -684,13 +698,14 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 				// Break down by edition
 				edition := pageVars.Metadata[cardId].SetCode
 				optimizedEditions[edition] = append(optimizedEditions[edition], OptimizedUploadEntry{
-					CardId:    cardId,
-					Store:     bestStore,
-					Condition: conds,
-					Price:     comparePrice,
-					Spread:    spread,
-					BestPrice: price,
-					Quantity:  uploadedData[i].Quantity,
+					CardId:      cardId,
+					Store:       bestStore,
+					Condition:   conds,
+					Price:       comparePrice,
+					Spread:      spread,
+					BestPrice:   price,
+					Quantity:    uploadedData[i].Quantity,
+					VisualPrice: comparePrice * visualPerc / 100.0,
 				})
 			}
 		}
