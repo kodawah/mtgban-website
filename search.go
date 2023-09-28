@@ -729,12 +729,6 @@ func searchSellersNG(cardIds []string, config SearchConfig) (foundSellers map[st
 					continue
 				}
 
-				// Check if the current entry has any condition
-				_, found = foundSellers[cardId][conditions]
-				if !found {
-					foundSellers[cardId][conditions] = []SearchEntry{}
-				}
-
 				icon := ""
 				name := seller.Info().Name
 				switch name {
@@ -757,6 +751,11 @@ func searchSellersNG(cardIds []string, config SearchConfig) (foundSellers map[st
 					NoQuantity:  seller.Info().NoQuantityInventory || seller.Info().MetadataOnly,
 					BundleIcon:  icon,
 					Country:     Country2flag[seller.Info().CountryFlag],
+				}
+
+				// Do not add the same data twice
+				if slices.Contains(foundSellers[cardId][conditions], res) {
+					continue
 				}
 
 				// Touchdown
@@ -806,10 +805,6 @@ func searchVendorsNG(cardIds []string, config SearchConfig) (foundVendors map[st
 				}
 
 				conditions := entry.Conditions
-				_, found = foundVendors[cardId][conditions]
-				if !found {
-					foundVendors[cardId][conditions] = []SearchEntry{}
-				}
 
 				icon := ""
 				name := vendor.Info().Name
@@ -832,6 +827,10 @@ func searchVendorsNG(cardIds []string, config SearchConfig) (foundVendors map[st
 					URL:         entry.URL,
 					BundleIcon:  icon,
 					Country:     Country2flag[vendor.Info().CountryFlag],
+				}
+
+				if slices.Contains(foundVendors[cardId][conditions], res) {
+					continue
 				}
 
 				foundVendors[cardId][conditions] = append(foundVendors[cardId][conditions], res)
