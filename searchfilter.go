@@ -888,7 +888,51 @@ func parseCardDate(co *mtgmatcher.CardObject) (time.Time, error) {
 	return time.Parse("2006-01-02", cardDateStr)
 }
 
-func findCommanderInDeck(sealedUUID string) []string {
+func dumpDecksCommander(setCode, deckName string) []string {
+	var output []string
+	subset, err := mtgmatcher.GetSet(setCode)
+	if err != nil {
+		return nil
+	}
+
+	for _, deck := range subset.Decks {
+		if deck.Name != deckName {
+			continue
+		}
+		for _, card := range deck.Commander {
+			uuid, err := mtgmatcher.MatchId(card.UUID, card.IsFoil)
+			if err != nil {
+				continue
+			}
+			output = append(output, uuid)
+		}
+	}
+	return output
+}
+
+func dumpDecksSideboard(setCode, deckName string) []string {
+	var output []string
+	subset, err := mtgmatcher.GetSet(setCode)
+	if err != nil {
+		return nil
+	}
+
+	for _, deck := range subset.Decks {
+		if deck.Name != deckName {
+			continue
+		}
+		for _, card := range deck.SideBoard {
+			uuid, err := mtgmatcher.MatchId(card.UUID, card.IsFoil)
+			if err != nil {
+				continue
+			}
+			output = append(output, uuid)
+		}
+	}
+	return output
+}
+
+func findInDeck(sealedUUID, opt string) []string {
 	var output []string
 
 	sealed, err := mtgmatcher.GetUUID(sealedUUID)
@@ -910,22 +954,14 @@ func findCommanderInDeck(sealedUUID string) []string {
 			continue
 		}
 		for _, content := range contents {
-			subset, err := mtgmatcher.GetSet(content.Set)
-			if err != nil {
-				continue
+			var res []string
+			switch opt {
+			case "commander":
+				res = dumpDecksCommander(content.Set, content.Name)
+			case "sideboard":
+				res = dumpDecksSideboard(content.Set, content.Name)
 			}
-			for _, deck := range subset.Decks {
-				if deck.Name != content.Name {
-					continue
-				}
-				for _, card := range deck.Commander {
-					uuid, err := mtgmatcher.MatchId(card.UUID, card.IsFoil)
-					if err != nil {
-						continue
-					}
-					output = append(output, uuid)
-				}
-			}
+			output = append(output, res...)
 		}
 	}
 
@@ -1142,7 +1178,18 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 			case "commander":
 				values := cardobject2sources(co)
 				for _, sealedUUID := range values {
-					res := findCommanderInDeck(sealedUUID)
+					res := findInDeck(sealedUUID, "commander")
+					if slices.Contains(res, co.UUID) {
+						return false
+					}
+				}
+			case "sldpromo":
+				if co.SetCode != "SLD" {
+					continue
+				}
+				values := cardobject2sources(co)
+				for _, sealedUUID := range values {
+					res := findInDeck(sealedUUID, "sideboard")
 					if slices.Contains(res, co.UUID) {
 						return false
 					}
