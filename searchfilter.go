@@ -331,8 +331,7 @@ func fixupPicks(code string) []string {
 func fixupContents(code string) []string {
 	co, err := mtgmatcher.GetUUID(code)
 	if err != nil {
-		name := strings.TrimLeft(strings.TrimRight(code, "\" "), "\" ")
-		co, err = mtgmatcher.GetUUID(sealedname2uuid(name))
+		co, err = mtgmatcher.GetUUID(sealedname2uuid(code))
 		if err != nil {
 			return []string{}
 		}
