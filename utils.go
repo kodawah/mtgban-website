@@ -322,22 +322,7 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 	path := "search"
 	if co.Sealed {
 		path = "sealed"
-		set, err := mtgmatcher.GetSet(co.SetCode)
-		if err == nil {
-			for _, product := range set.SealedProduct {
-				if product.UUID != co.UUID {
-					continue
-				}
-				for key, contents := range product.Contents {
-					for _ = range contents {
-						switch key {
-						case "pack", "variable":
-							canBoosterGen = true
-						}
-					}
-				}
-			}
-		}
+		canBoosterGen = mtgmatcher.SealedIsRandom(co.SetCode, co.UUID)
 	}
 
 	var sourceSealed []string
