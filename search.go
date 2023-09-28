@@ -910,63 +910,27 @@ func attemptMatch(query string) ([]string, error) {
 			// Unsupported case, give up
 			return nil, err
 		}
-
-		// Repeat for foil
-		uuid, err = mtgmatcher.Match(&mtgmatcher.Card{
-			Name: query,
-			Foil: true,
-		})
-		if err != nil {
-			if errors.As(err, &alias) {
-				uuids = append(uuids, alias.Probe()...)
-			}
-		} else {
-			uuids = append(uuids, uuid)
-		}
-
-		// Repeat for etched
-		uuid, err = mtgmatcher.Match(&mtgmatcher.Card{
-			Name:      query,
-			Variation: "Etched",
-		})
-		if err != nil {
-			if errors.As(err, &alias) {
-				uuids = append(uuids, alias.Probe()...)
-			}
-		} else {
-			uuids = append(uuids, uuid)
-		}
-
-		// Remove any duplicates
-		foundUUIDs := map[string]bool{}
-		var outUUIDs []string
-		for _, uuid := range uuids {
-			found := foundUUIDs[uuid]
-			if found {
-				continue
-			}
-			foundUUIDs[uuid] = true
-			outUUIDs = append(outUUIDs, uuid)
-		}
-		uuids = outUUIDs
 	} else {
 		uuids = append(uuids, uuid)
+	}
 
-		// Repeat for foil (only add if different than the main id found)
-		uuid, err = mtgmatcher.Match(&mtgmatcher.Card{
-			Name: query,
-			Foil: true,
-		})
-		if err == nil && uuid != uuids[0] {
-			uuids = append(uuids, uuid)
-		}
-
-		// Repeat for etched (only add if different than the main id found)
-		uuid, err = mtgmatcher.Match(&mtgmatcher.Card{
+	// Repeat for foil and etched (only add if not previously found)
+	// Add as needed depending on the previous query result
+	for _, tag := range []string{"Foil", "Etched"} {
+		uuid, suberr := mtgmatcher.Match(&mtgmatcher.Card{
 			Name:      query,
-			Variation: "Etched",
+			Variation: tag,
 		})
-		if err == nil && uuid != uuids[0] {
+		if err != nil && suberr != nil {
+			var alias *mtgmatcher.AliasingError
+			if errors.As(suberr, &alias) {
+				for _, extra := range alias.Probe() {
+					if !slices.Contains(uuids, extra) {
+						uuids = append(uuids, extra)
+					}
+				}
+			}
+		} else if !slices.Contains(uuids, uuid) {
 			uuids = append(uuids, uuid)
 		}
 	}
