@@ -420,6 +420,7 @@ var FilterOperations = map[string][]string{
 	"unpack":    []string{":"},
 	"contents":  []string{":"},
 	"container": []string{":"},
+	"decklist":  []string{":"},
 	"ci":        []string{":"},
 	"identity":  []string{":"},
 	"cond":      []string{":"},
@@ -591,6 +592,19 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 			case "chrono", "alpha", "retail", "buylist":
 				config.SortMode = code
 			}
+		// This option loads a specific set of uuids from a deck list, which is similar
+		// to "unpack", but with the difference that identical ids are not skipped
+		case "decklist":
+			uuids := fixupContents(code)
+			if len(uuids) < 1 {
+				continue
+			}
+			co, _ := mtgmatcher.GetUUID(uuids[0])
+			if mtgmatcher.SealedIsRandom(co.SetCode, co.UUID) {
+				continue
+			}
+			config.SearchMode = "hashing"
+			config.UUIDs, _ = mtgmatcher.GetPicksForSealed(co.SetCode, co.UUID)
 
 		// Options that modify the card searches
 		case "s", "edition":
