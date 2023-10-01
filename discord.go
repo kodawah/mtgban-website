@@ -474,6 +474,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			strings.Contains(m.Content, "coolstuffinc.com/p") ||
 			strings.Contains(m.Content, "gatherer.wizards.com") ||
 			strings.Contains(m.Content, "www.tcgplayer.com/product") ||
+			(strings.Contains(m.Content, "starcitygames.com/") && !strings.Contains(m.Content, "sellyourcards")) ||
 			(strings.Contains(m.Content, "amazon.com/") && !strings.Contains(m.Content, "images-amazon.com/images")) ||
 			(strings.Contains(m.Content, "shop.tcgplayer.com/") && !strings.Contains(m.Content, "shop.tcgplayer.com/seller")):
 			// Iterate over each segment of the message and look for known links
@@ -491,6 +492,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 					store = "WotC"
 				case strings.Contains(field, "amazon.com/"):
 					store = "AMZN"
+				case strings.Contains(field, "starcitygames.com/"):
+					store = "SCG"
 				default:
 					continue
 				}
@@ -507,6 +510,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				switch store {
 				case "CSI":
 					v.Set("utm_referrer", Config.Affiliate["CSI"])
+				case "SCG":
+					v.Set("aff", Config.Affiliate["SCG"])
 				case "CK", "TCG":
 					commonTag := Config.Affiliate["CK"]
 					v.Set("partner", commonTag)
