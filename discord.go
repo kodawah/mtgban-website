@@ -457,6 +457,13 @@ var AffiliateStores []AffiliateConfig = []AffiliateConfig{
 		Name:          "Cool Stuff Inc",
 		Handle:        "CSI",
 		DefaultFields: []string{"utm_referrer"},
+		TitleFunc: func(URLpath string) string {
+			base, err := url.QueryUnescape(path.Base(URLpath))
+			if err != nil {
+				return ""
+			}
+			return mtgmatcher.Title(base)
+		},
 	},
 	{
 		Trigger:       "tcgplayer.com",
@@ -497,6 +504,14 @@ var AffiliateStores []AffiliateConfig = []AffiliateConfig{
 		Name:          "Star City Games",
 		Handle:        "SCG",
 		DefaultFields: []string{"aff"},
+		TitleFunc: func(URLpath string) string {
+			urlpath := strings.ToLower(URLpath)
+			if strings.Contains(urlpath, "-sgl-") {
+				index := strings.Index(urlpath, "-sgl-")
+				return mtgmatcher.Title(strings.Replace(urlpath[1:index], "-", " ", -1))
+			}
+			return "Your search"
+		},
 	},
 	{
 		Trigger:       "amazon.com/",
@@ -505,6 +520,10 @@ var AffiliateStores []AffiliateConfig = []AffiliateConfig{
 		Handle:        "AMZN",
 		DefaultFields: []string{"tag"},
 		TitleFunc: func(URLpath string) string {
+			if strings.Contains(URLpath, "/dp/") {
+				fields := strings.Split(URLpath, "/")
+				return strings.Replace(fields[1], "-", " ", -1)
+			}
 			return "Your search"
 		},
 	},
