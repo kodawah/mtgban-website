@@ -440,6 +440,9 @@ type AffiliateConfig struct {
 
 	// Function to build the displayed title
 	TitleFunc func(string) string
+
+	// Whether to parse the entire URL or just its path
+	FullURL bool
 }
 
 var AffiliateStores []AffiliateConfig = []AffiliateConfig{
@@ -450,6 +453,29 @@ var AffiliateStores []AffiliateConfig = []AffiliateConfig{
 		DefaultFields: []string{"partner", "utm_source", "utm_campaign"},
 		CustomFields: map[string]string{
 			"utm_medium": "affiliate",
+		},
+	},
+	{
+		Trigger:       "cardkingdom.com/purchasing",
+		Name:          "Card Kingdom",
+		Handle:        "CK",
+		DefaultFields: []string{"partner", "utm_source", "utm_campaign"},
+		CustomFields: map[string]string{
+			"utm_medium": "affiliate",
+		},
+		FullURL: true,
+		TitleFunc: func(URL string) string {
+			title := "Your search"
+			u, err := url.Parse(URL)
+			if err != nil {
+				return title
+			}
+			name := u.Query().Get("filter[name]")
+			cleanName, err := url.QueryUnescape(name)
+			if err != nil {
+				return title
+			}
+			return mtgmatcher.Title(cleanName)
 		},
 	},
 	{
@@ -627,7 +653,11 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 					var customTitle string
 					if store.TitleFunc != nil {
-						customTitle = store.TitleFunc(u.Path)
+						if store.FullURL {
+							customTitle = store.TitleFunc(u.String())
+						} else {
+							customTitle = store.TitleFunc(u.Path)
+						}
 						if customTitle != "" {
 							title = customTitle
 						}
