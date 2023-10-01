@@ -419,6 +419,97 @@ func grabLastSold(cardId string, lang string) ([]embedField, error) {
 	return fields, nil
 }
 
+type AffiliateConfig struct {
+	// The text upon which the URL is detected
+	Trigger string
+
+	// Skip the identified URL if it contains this text
+	Skip string
+
+	// Name of the store (displayed in the title)
+	Name string
+
+	// Key to access the Config.Affiliate map
+	Handle string
+
+	// List of query parameters to be set to the same config value
+	DefaultFields []string
+
+	// Any custom query parameters to be set with the associated value
+	CustomFields map[string]string
+
+	// Function to build the displayed title
+	TitleFunc func(string) string
+}
+
+var AffiliateStores []AffiliateConfig = []AffiliateConfig{
+	{
+		Trigger:       "cardkingdom.com/mtg",
+		Name:          "Card Kingdom",
+		Handle:        "CK",
+		DefaultFields: []string{"partner", "utm_source", "utm_campaign"},
+		CustomFields: map[string]string{
+			"utm_medium": "affiliate",
+		},
+	},
+	{
+		Trigger:       "coolstuffinc.com/p",
+		Name:          "Cool Stuff Inc",
+		Handle:        "CSI",
+		DefaultFields: []string{"utm_referrer"},
+	},
+	{
+		Trigger:       "tcgplayer.com",
+		Skip:          "seller",
+		Name:          "TCGplayer",
+		Handle:        "TCG",
+		DefaultFields: []string{"partner", "utm_source", "utm_medium"},
+		CustomFields: map[string]string{
+			"utm_campaign": "affliate",
+		},
+		TitleFunc: func(URLpath string) string {
+			var title string
+			// The old style links do not have the product id and have an extra element
+			if strings.HasSuffix(URLpath, "/listing") {
+				title = mtgmatcher.Title(strings.Replace(path.Base(strings.TrimSuffix(URLpath, "/listing")), "-", " ", -1))
+			}
+			// Sometimes there is the product id embedded in the URL,
+			// try to find it and use it to decorate the title
+			productId := strings.TrimPrefix(URLpath, "/product/")
+
+			slashIndex := strings.Index(productId, "/")
+			if slashIndex != -1 {
+				productId = productId[:slashIndex]
+			}
+			productId = mtgmatcher.Tcg2UUID(productId)
+			// Finish is ignored here but it is preserved in the original URL
+			co, err := mtgmatcher.GetUUID(productId)
+			if err != nil {
+				return title
+			}
+			// Keep the edition first to mimic the normal style
+			return fmt.Sprintf("Magic %s %s", co.Edition, co.Name)
+		},
+	},
+	{
+		Trigger:       "starcitygames.com/",
+		Skip:          "sellyourcards",
+		Name:          "Star City Games",
+		Handle:        "SCG",
+		DefaultFields: []string{"aff"},
+	},
+	{
+		Trigger:       "amazon.com/",
+		Skip:          "images",
+		Name:          "Amazon",
+		Handle:        "AMZN",
+		DefaultFields: []string{"tag"},
+		TitleFunc: func(URLpath string) string {
+			return "Your search"
+		},
+	},
+}
+
 // This function will be called (due to AddHandler above) every time a new
 // message is created on any channel that the authenticated bot has access to.
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -492,93 +583,57 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				}
 			}
 		// Check if the message contains potential links
-		case strings.Contains(m.Content, "cardkingdom.com/mtg") ||
-			strings.Contains(m.Content, "coolstuffinc.com/p") ||
-			strings.Contains(m.Content, "www.tcgplayer.com/product") ||
-			(strings.Contains(m.Content, "starcitygames.com/") && !strings.Contains(m.Content, "sellyourcards")) ||
-			(strings.Contains(m.Content, "amazon.com/") && !strings.Contains(m.Content, "images-amazon.com/images")) ||
-			(strings.Contains(m.Content, "shop.tcgplayer.com/") && !strings.Contains(m.Content, "shop.tcgplayer.com/seller")):
-			// Iterate over each segment of the message and look for known links
-			fields := strings.Fields(m.Content)
-			for _, field := range fields {
-				store := ""
-				switch {
-				case strings.Contains(field, "cardkingdom.com/mtg"):
-					store = "CK"
-				case strings.Contains(field, "coolstuffinc.com/p"):
-					store = "CSI"
-				case strings.Contains(field, "tcgplayer.com/"):
-					store = "TCG"
-				case strings.Contains(field, "amazon.com/"):
-					store = "AMZN"
-				case strings.Contains(field, "starcitygames.com/"):
-					store = "SCG"
-				default:
+		default:
+			for _, store := range AffiliateStores {
+				if !strings.Contains(m.Content, store.Trigger) {
 					continue
 				}
-				u, err := url.Parse(field)
-				if err != nil {
+				if store.Skip != "" && strings.Contains(m.Content, store.Skip) {
 					continue
 				}
 
-				// Extract a sensible link title
-				title := mtgmatcher.Title(strings.Replace(path.Base(u.Path), "-", " ", -1))
-
-				// Add the MTGBAN affiliation
-				v := u.Query()
-				switch store {
-				case "CSI":
-					v.Set("utm_referrer", Config.Affiliate["CSI"])
-				case "SCG":
-					v.Set("aff", Config.Affiliate["SCG"])
-				case "CK", "TCG":
-					commonTag := Config.Affiliate["CK"]
-					v.Set("partner", commonTag)
-					v.Set("utm_source", commonTag)
-
-					// Adjust title
-					if store == "CK" {
-						v.Set("utm_campaign", commonTag)
-						v.Set("utm_medium", "affiliate")
-						title += " at Card Kingdom"
-					} else {
-						v.Set("utm_campaign", "affliate")
-						v.Set("utm_medium", commonTag)
-
-						// The old style links do not have the product id and have an extra element
-						if strings.HasSuffix(u.Path, "/listing") {
-							title = mtgmatcher.Title(strings.Replace(path.Base(strings.TrimSuffix(u.Path, "/listing")), "-", " ", -1))
-						}
-						// Sometimes there is the product id embedded in the URL,
-						// try to find it and use it to decorate the title
-						productId := strings.TrimPrefix(u.Path, "/product/")
-
-						slashIndex := strings.Index(productId, "/")
-						if slashIndex != -1 {
-							productId = productId[:slashIndex]
-						}
-						productId = mtgmatcher.Tcg2UUID(productId)
-						co, err := mtgmatcher.GetUUID(productId)
-						if err == nil {
-							// Keep the edition first to mimic the normal style
-							title = fmt.Sprintf("Magic %s %s", co.Edition, co.Name)
-						}
-						title += " at TCGplayer"
+				// Iterate over each segment of the message and look for known links
+				fields := strings.Fields(m.Content)
+				for _, field := range fields {
+					if !strings.Contains(field, store.Trigger) {
+						continue
 					}
-				case "AMZN":
-					v.Set("tag", Config.Affiliate["AMZN"])
-					title = "Your search at Amazon"
-				}
-				u.RawQuery = v.Encode()
+					u, err := url.Parse(field)
+					if err != nil {
+						continue
+					}
 
-				// Spam time!
-				_, err = s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
-					Title:       title,
-					URL:         u.String(),
-					Description: "Support **MTGBAN** by using this link",
-				})
-				if err != nil {
-					log.Println(err)
+					// Extract a sensible link title
+					title := mtgmatcher.Title(strings.Replace(path.Base(u.Path), "-", " ", -1))
+
+					var customTitle string
+					if store.TitleFunc != nil {
+						customTitle = store.TitleFunc(u.Path)
+						if customTitle != "" {
+							title = customTitle
+						}
+					}
+					title += " at " + store.Name
+
+					// Add the MTGBAN affiliation
+					v := u.Query()
+					for _, value := range store.DefaultFields {
+						v.Set(value, Config.Affiliate[store.Handle])
+					}
+					for storeField, value := range store.CustomFields {
+						v.Set(storeField, value)
+					}
+					u.RawQuery = v.Encode()
+
+					// Spam time!
+					_, err = s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+						Title:       title,
+						URL:         u.String(),
+						Description: "Support **MTGBAN** by using this link",
+					})
+					if err != nil {
+						log.Println(err)
+					}
 				}
 			}
 		}
