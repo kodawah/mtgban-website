@@ -469,10 +469,31 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				m.Content = "!" + strings.TrimRight(strings.TrimLeft(field, "{"), "}")
 				messageCreate(s, m)
 			}
+		// Check if we can intercept Gatherer requests
+		case strings.Contains(m.Content, "gatherer.wizards.com"):
+			fields := strings.Fields(m.Content)
+			for _, field := range fields {
+				if !strings.Contains(field, "gatherer.wizards.com") {
+					continue
+				}
+				u, err := url.Parse(field)
+				if err != nil {
+					continue
+				}
+				mid := u.Query().Get("multiverseid")
+				uuids := mtgmatcher.GetUUIDs()
+				for _, uuid := range uuids {
+					co, _ := mtgmatcher.GetUUID(uuid)
+					if co.Identifiers["multiverseId"] == mid {
+						m.Content = fmt.Sprintf("!%s|%s|%s", co.Name, co.SetCode, co.Number)
+						messageCreate(s, m)
+						return
+					}
+				}
+			}
 		// Check if the message contains potential links
 		case strings.Contains(m.Content, "cardkingdom.com/mtg") ||
 			strings.Contains(m.Content, "coolstuffinc.com/p") ||
-			strings.Contains(m.Content, "gatherer.wizards.com") ||
 			strings.Contains(m.Content, "www.tcgplayer.com/product") ||
 			(strings.Contains(m.Content, "starcitygames.com/") && !strings.Contains(m.Content, "sellyourcards")) ||
 			(strings.Contains(m.Content, "amazon.com/") && !strings.Contains(m.Content, "images-amazon.com/images")) ||
@@ -488,8 +509,6 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 					store = "CSI"
 				case strings.Contains(field, "tcgplayer.com/"):
 					store = "TCG"
-				case strings.Contains(field, "gatherer.wizards.com"):
-					store = "WotC"
 				case strings.Contains(field, "amazon.com/"):
 					store = "AMZN"
 				case strings.Contains(field, "starcitygames.com/"):
@@ -545,21 +564,6 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 							title = fmt.Sprintf("Magic %s %s", co.Edition, co.Name)
 						}
 						title += " at TCGplayer"
-					}
-				case "WotC":
-					u2, err := url.Parse(field)
-					if err != nil {
-						continue
-					}
-					mid := u2.Query().Get("multiverseid")
-					uuids := mtgmatcher.GetUUIDs()
-					for _, uuid := range uuids {
-						co, _ := mtgmatcher.GetUUID(uuid)
-						if co.Identifiers["multiverseId"] == mid {
-							m.Content = fmt.Sprintf("!%s|%s|%s", co.Name, co.SetCode, co.Number)
-							messageCreate(s, m)
-							return
-						}
 					}
 				case "AMZN":
 					v.Set("tag", Config.Affiliate["AMZN"])
