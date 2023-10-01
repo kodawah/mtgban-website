@@ -471,7 +471,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 		// Check if the message contains potential links
 		case strings.Contains(m.Content, "cardkingdom.com/mtg") ||
-			strings.Contains(m.Content, "coolstuffinc.com/page") ||
+			strings.Contains(m.Content, "coolstuffinc.com/p") ||
 			strings.Contains(m.Content, "gatherer.wizards.com") ||
 			strings.Contains(m.Content, "www.tcgplayer.com/product") ||
 			(strings.Contains(m.Content, "amazon.com/") && !strings.Contains(m.Content, "images-amazon.com/images")) ||
@@ -483,7 +483,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				switch {
 				case strings.Contains(field, "cardkingdom.com/mtg"):
 					store = "CK"
-				case strings.Contains(field, "coolstuffinc.com/page"):
+				case strings.Contains(field, "coolstuffinc.com/p"):
 					store = "CSI"
 				case strings.Contains(field, "tcgplayer.com/"):
 					store = "TCG"
