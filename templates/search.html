@@ -365,7 +365,7 @@
                     <li>
                         <h4>Can you describe the data sources available?</h4>
                         <ul class="indent">
-                            There are three EV-dependent data sources: <i>TCG Low</i>, which reflects the lowest possible value on TCG (excluding shipping), <i>TCG Direct</i>, which represents the Direct <u>price minus fees</u> that the cards could be sold at, and CK buylist, which shows how much a given set of cards could be sold to the vendor. Note that TCG Direct prices could be sometimes skewed due to ridiculous prices being set by sellers "parking" their cards - we try to work around this by capping the maximum value to twice as much as TCG Low when we're able to detect such an offset. <br>
+                            There are three EV-dependent data sources: <i>TCG Low</i>, which reflects the lowest possible value on TCG (excluding shipping), <i>TCG Direct</i>, which represents the Direct price <u>minus fees</u> that the cards could be sold at, and <i>CK buylist</i>, which shows how much a given set of cards could be sold to the vendor. Note that TCG Direct prices could be sometimes skewed due to ridiculous prices being set by sellers "parking" their cards - we try to work around this by capping the maximum value to twice as much as TCG Low when we're able to detect such an offset. <br>
                             The other prices shown under <i>Available offers</i> represent the prices of the sealed products as available from different stores.
                         </ul>
                     </li>
@@ -379,7 +379,7 @@
                     <li>
                         <h4>Why is this set missing?</h4>
                         <ul class="indent">
-                           Given there is a three way dependency on the source data, it might be that the information for the given set or product simply hasn't been filled and has not propagated to us yet. Retry in a few days or, if you're able to code, try contributing to one of the open source projects mentioned.
+                           Given there is a three way dependency on the source data, it might be that the information for the given set or product simply hasn't been filled and has not propagated to us yet. Retry in a few days or, if you're able to code, try contributing to one of the open source projects mentioned above.
                         </ul>
                     </li>
                     <li>
@@ -399,8 +399,9 @@
                         <ul class="indent">
                             These two buttons lead to different search options:<br>
                             * the 🎁 (when available) will similuate opening a pack using the information available. Every run is fully randomized and unpredictable;<br>
-                            * the 🔍 will unpack a product and list all its possible contents (at most one copy per result). This means that a booster box will only list a single booster pack, while a booster pack will display all possible picks.<br>
-                            In both cases, once in the search page, you can add search terms normally to filter for color, rarities, and names using the common search syntax.
+                            * the 🔍 will unpack a product and list all its possible contents. This means that a booster box will only list a single booster pack, while a booster pack will display all possible picks.<br>
+                            In both cases, once in the search page, you can add search terms normally to filter for color, rarities, and names using the common search syntax.<br>
+                            Note that depending on the content type, the search result might show you at most one copy per card or list the same card multiple times: this to show accurate and easy to import results for decklists and box sets, while displaying compact results for other sealed types.
                         </ul>
                     </li>
                     <li>
