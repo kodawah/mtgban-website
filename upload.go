@@ -813,6 +813,12 @@ func getPrice(banPrice *BanPrice, conds string) float64 {
 	return price
 }
 
+func getQuantity(qty string) (int, error) {
+	qty = strings.TrimSuffix(qty, "x")
+	qty = strings.TrimSpace(qty)
+	return strconv.Atoi(qty)
+}
+
 func mergeIdenticalEntries(uploadedData []UploadEntry) []UploadEntry {
 	var uploadedDataClean []UploadEntry
 	duplicatedHashes := map[string]bool{}
@@ -925,10 +931,21 @@ func parseHeader(first []string) (map[string]int, error) {
 			if !found {
 				indexMap["price"] = i
 			}
-		case (strings.Contains(field, "quantity") || strings.Contains(field, "qty") || strings.Contains(field, "stock") || strings.Contains(field, "count") || strings.Contains(field, "have")) && !strings.HasPrefix(field, "add") && !strings.HasPrefix(field, "set") && !strings.Contains(field, "pending"):
+		case (strings.Contains(field, "quantity") ||
+			strings.Contains(field, "qty") ||
+			strings.Contains(field, "stock") ||
+			strings.Contains(field, "count") ||
+			strings.Contains(field, "have")) &&
+			!strings.HasPrefix(field, "set") && !strings.Contains(field, "pending"):
+			// Keep headers like "Add To Quantity" as backup if nothing is found later
 			_, found := indexMap["quantity"]
-			if !found {
+			if !found && !strings.HasPrefix(field, "add") {
 				indexMap["quantity"] = i
+			} else {
+				_, found := indexMap["quantity_backup"]
+				if !found {
+					indexMap["quantity_backup"] = i
+				}
 			}
 		case strings.Contains(field, "title") && !strings.Contains(field, "variant"):
 			_, found := indexMap["title"]
@@ -940,6 +957,15 @@ func parseHeader(first []string) (map[string]int, error) {
 			if !found {
 				indexMap["notes"] = i
 			}
+		}
+	}
+
+	// If a clean quantity header was not found see if there is a backup option
+	_, foundQty := indexMap["quantity"]
+	if !foundQty {
+		i, found := indexMap["quantity_backup"]
+		if found {
+			indexMap["quantity"] = i
 		}
 	}
 
@@ -1036,10 +1062,14 @@ func parseRow(indexMap map[string]int, record []string) (UploadEntry, error) {
 	// Load quantity, and skip it if it's present and zero
 	idx, found := indexMap["quantity"]
 	if found {
-		qty := record[idx]
-		qty = strings.TrimSuffix(qty, "x")
-		qty = strings.TrimSpace(qty)
-		num, err := strconv.Atoi(qty)
+		num, err := getQuantity(record[idx])
+		if err != nil || num == 0 {
+			// Retry in the second quantity data if present
+			idx, found = indexMap["quantity_backup"]
+			if found {
+				num, err = getQuantity(record[idx])
+			}
+		}
 		if err == nil {
 			res.HasQuantity = true
 			res.Quantity = num
