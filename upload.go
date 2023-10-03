@@ -970,7 +970,6 @@ func parseHeader(first []string) (map[string]int, error) {
 
 func parseRow(indexMap map[string]int, record []string) (UploadEntry, error) {
 	var res UploadEntry
-	var found bool
 
 	// Skip empty lines
 	hasContent := false
@@ -1035,9 +1034,9 @@ func parseRow(indexMap map[string]int, record []string) (UploadEntry, error) {
 	}
 
 	// Load quantity, and skip it if it's present and zero
-	_, found = indexMap["quantity"]
+	idx, found := indexMap["quantity"]
 	if found {
-		qty := record[indexMap["quantity"]]
+		qty := record[idx]
 		qty = strings.TrimSuffix(qty, "x")
 		qty = strings.TrimSpace(qty)
 		num, err := strconv.Atoi(qty)
@@ -1050,36 +1049,36 @@ func parseRow(indexMap map[string]int, record []string) (UploadEntry, error) {
 		return res, errors.New("no stock")
 	}
 
-	_, found = indexMap["id"]
+	idx, found = indexMap["id"]
 	if found {
-		res.Card.Id = record[indexMap["id"]]
+		res.Card.Id = record[idx]
 	}
 
 	res.Card.Name = record[indexMap["cardName"]]
-	_, found = indexMap["edition"]
+	idx, found = indexMap["edition"]
 	if found {
-		res.Card.Edition = record[indexMap["edition"]]
+		res.Card.Edition = record[idx]
 	}
 
-	_, found = indexMap["variant"]
+	idx, found = indexMap["variant"]
 	if found {
-		res.Card.Variation = record[indexMap["variant"]]
+		res.Card.Variation = record[idx]
 	}
 
 	var sku string
-	_, found = indexMap["sku"]
+	idx, found = indexMap["sku"]
 	if found {
-		sku = strings.ToLower(record[indexMap["sku"]])
+		sku = strings.ToLower(record[idx])
 	}
 	var conditions string
-	_, found = indexMap["conditions"]
+	idx, found = indexMap["conditions"]
 	if found {
-		conditions = strings.ToLower(record[indexMap["conditions"]])
+		conditions = strings.ToLower(record[idx])
 	}
 	var printing string
-	_, found = indexMap["printing"]
+	idx, found = indexMap["printing"]
 	if found {
-		printing = strings.ToLower(record[indexMap["printing"]])
+		printing = strings.ToLower(record[idx])
 	}
 	switch printing {
 	case "y", "yes", "true", "t", "1", "x":
@@ -1095,9 +1094,9 @@ func parseRow(indexMap map[string]int, record []string) (UploadEntry, error) {
 		}
 	}
 
-	_, found = indexMap["price"]
+	idx, found = indexMap["price"]
 	if found {
-		res.OriginalPrice, _ = mtgmatcher.ParsePrice(record[indexMap["price"]])
+		res.OriginalPrice, _ = mtgmatcher.ParsePrice(record[idx])
 	}
 
 	switch {
@@ -1115,9 +1114,9 @@ func parseRow(indexMap map[string]int, record []string) (UploadEntry, error) {
 		res.OriginalCondition = "PO"
 	}
 
-	_, found = indexMap["notes"]
+	idx, found = indexMap["notes"]
 	if found {
-		notes := record[indexMap["notes"]]
+		notes := record[idx]
 		if len(notes) > 1024 {
 			notes = notes[:1024]
 		}
