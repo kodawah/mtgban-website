@@ -698,6 +698,33 @@ var ScraperOptions = map[string]*scraperOption{
 			}),
 		},
 	},
+	"cardtrader_sealed": &scraperOption{
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
+			scraper, err := cardtrader.NewScraperSealed(Config.Api["cardtrader"])
+			if err != nil {
+				return nil, err
+			}
+			scraper.LogCallback = logger.Printf
+			scraper.ShareCode = Config.Affiliate["CT"]
+			return scraper, nil
+		},
+	},
+	"starcitygames_sealed": &scraperOption{
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
+			scraper := starcitygames.NewScraperSealed(Config.Api["scg_guid"], Config.Api["scg_bearer"])
+			scraper.LogCallback = logger.Printf
+			scraper.Affiliate = Config.Affiliate["SCG"]
+			return scraper, nil
+		},
+	},
+	"coolstuffinc_sealed": &scraperOption{
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
+			scraper := coolstuffinc.NewScraperSealed()
+			scraper.LogCallback = logger.Printf
+			scraper.Partner = Config.Affiliate["CSI"]
+			return scraper, nil
+		},
+	},
 }
 
 // Associate Scraper shorthands to ScraperOptions keys
