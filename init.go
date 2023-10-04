@@ -17,18 +17,14 @@ import (
 	"golang.org/x/exp/slices"
 
 	"github.com/mtgban/go-mtgban/abugames"
-	"github.com/mtgban/go-mtgban/amazon"
-	"github.com/mtgban/go-mtgban/blueprint"
 	"github.com/mtgban/go-mtgban/cardkingdom"
 	"github.com/mtgban/go-mtgban/cardmarket"
-	"github.com/mtgban/go-mtgban/cardsphere"
 	"github.com/mtgban/go-mtgban/cardtrader"
 	"github.com/mtgban/go-mtgban/coolstuffinc"
 	"github.com/mtgban/go-mtgban/hareruya"
 	"github.com/mtgban/go-mtgban/magiccorner"
 	"github.com/mtgban/go-mtgban/mtgseattle"
 	"github.com/mtgban/go-mtgban/mtgstocks"
-	"github.com/mtgban/go-mtgban/mythicmtg"
 	"github.com/mtgban/go-mtgban/ninetyfive"
 	"github.com/mtgban/go-mtgban/sealedev"
 	"github.com/mtgban/go-mtgban/starcitygames"
@@ -555,20 +551,6 @@ var ScraperOptions = map[string]*scraperOption{
 			return scraper, nil
 		},
 	},
-	"blueprint": &scraperOption{
-		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
-			scraper := blueprint.NewScraper()
-			scraper.LogCallback = logger.Printf
-			return scraper, nil
-		},
-	},
-	"mythicmtg": &scraperOption{
-		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
-			scraper := mythicmtg.NewScraper()
-			scraper.LogCallback = logger.Printf
-			return scraper, nil
-		},
-	},
 	"cardmarket": &scraperOption{
 		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper, err := cardmarket.NewScraperIndex(Config.Api["mkm_app_token"], Config.Api["mkm_app_secret"])
@@ -590,24 +572,6 @@ var ScraperOptions = map[string]*scraperOption{
 				Addr: "localhost:6379",
 				DB:   DBs["mkm_trend"],
 			}),
-		},
-	},
-	"cardsphere": &scraperOption{
-		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
-			scraper, err := cardsphere.NewScraperFull(Config.Api["csphere_email"], Config.Api["csphere_password"])
-			if err != nil {
-				return nil, err
-			}
-			scraper.LogCallback = logger.Printf
-			scraper.MaxConcurrency = 3
-			return scraper, nil
-		},
-	},
-	"amazon": &scraperOption{
-		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
-			scraper := amazon.NewScraper(Config.Api["amz_token"])
-			scraper.LogCallback = logger.Printf
-			return scraper, nil
 		},
 	},
 	"cardtrader": &scraperOption{
