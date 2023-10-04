@@ -497,6 +497,7 @@ var ScraperOptions = map[string]*scraperOption{
 		},
 	},
 	"trollandtoad": &scraperOption{
+		OnlySeller: true,
 		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
 			scraper := trollandtoad.NewScraper()
 			scraper.LogCallback = logger.Printf
