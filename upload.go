@@ -1460,11 +1460,18 @@ func loadCsv(reader io.ReadSeeker, comma rune, maxRows int) ([]UploadEntry, erro
 	indexMap, err := parseHeader(first)
 	if errors.Is(err, ErrUploadDecklist) || errors.Is(err, ErrReloadFirstRow) {
 		// Reload reader to catch the first name too
-		_, err = reader.Seek(0, io.SeekStart)
-		if err != nil {
-			return nil, err
+		_, suberr := reader.Seek(0, io.SeekStart)
+		if suberr != nil {
+			return nil, suberr
 		}
+
+		// Rebuild the reader as previously used
 		csvReader = csv.NewReader(reader)
+		csvReader.Comma = comma
+		if comma != ',' {
+			csvReader.LazyQuotes = true
+		}
+
 		if errors.Is(err, ErrUploadDecklist) {
 			csvReader.Comma = '§' // fake comma to parse the whole line
 			csvReader.LazyQuotes = true
