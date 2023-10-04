@@ -875,13 +875,6 @@ func parseHeader(first []string) (map[string]int, error) {
 		return indexMap, ErrUploadDecklist
 	}
 
-	// In case there was actually a single element, but the comma appears in the card name
-	if strings.Contains(strings.Join(first, ","), ", ") {
-		indexMap["cardName"] = 0
-		log.Println("No Header map, decklist mode (comma in card name)")
-		return indexMap, ErrUploadDecklist
-	}
-
 	// Parse the header to understand where these fields are
 	for i, field := range first {
 		field = strings.ToLower(field)
@@ -958,6 +951,15 @@ func parseHeader(first []string) (map[string]int, error) {
 				indexMap["notes"] = i
 			}
 		}
+	}
+
+	// In case there was actually a single element, but the comma appears in the card name
+	// Performing this after processing the map in case of a weird header with spaces
+	// after the names
+	if len(indexMap) < 2 && strings.Contains(strings.Join(first, ","), ", ") {
+		indexMap["cardName"] = 0
+		log.Println("No Header map, decklist mode (comma in card name)")
+		return indexMap, ErrUploadDecklist
 	}
 
 	// If a clean quantity header was not found see if there is a backup option
