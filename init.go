@@ -56,8 +56,10 @@ const (
 	MKM_TREND = "MKM Trend"
 
 	// from CT
-	CT_STANDARD = "Card Trader"
-	CT_ZERO     = "Card Trader Zero"
+	CT_STANDARD        = "Card Trader"
+	CT_ZERO            = "Card Trader Zero"
+	CT_STANDARD_SEALED = "Card Trader Sealed"
+	CT_ZERO_SEALED     = "Card Trader Zero Sealed"
 
 	SkipRefreshCooldown    = 2 * time.Hour
 	DefaultUploaderTimeout = 60 * time.Second
@@ -707,6 +709,10 @@ var ScraperOptions = map[string]*scraperOption{
 			scraper.LogCallback = logger.Printf
 			scraper.ShareCode = Config.Affiliate["CT"]
 			return scraper, nil
+		},
+		Keepers: []string{
+			CT_STANDARD_SEALED,
+			CT_ZERO_SEALED,
 		},
 	},
 	"starcitygames_sealed": &scraperOption{
