@@ -21,6 +21,7 @@ const (
 	MinSpread       = 10.0
 	MaxSpreadGlobal = 1000
 	MinSpreadGlobal = 200.0
+	MinSpreadSealed = 1.0
 
 	MaxResultsGlobal      = 300
 	MaxResultsGlobalLimit = 50
@@ -255,7 +256,7 @@ func arbit(w http.ResponseWriter, r *http.Request, reverse bool) {
 
 	if allowlistSellersOpt == "ALL" || (DevMode && !SigCheck) {
 		for _, seller := range Sellers {
-			if seller == nil || seller.Info().SealedMode || seller.Info().MetadataOnly {
+			if seller == nil || seller.Info().MetadataOnly {
 				continue
 			}
 			allowlistSellers = append(allowlistSellers, seller.Info().Shorthand)
@@ -282,7 +283,7 @@ func arbit(w http.ResponseWriter, r *http.Request, reverse bool) {
 		// Load all available vendors
 		vendorKeys := make([]string, 0, len(blocklistVendors))
 		for _, vendor := range Vendors {
-			if vendor == nil || slices.Contains(blocklistVendors, vendor.Info().Shorthand) || vendor.Info().SealedMode {
+			if vendor == nil || slices.Contains(blocklistVendors, vendor.Info().Shorthand) {
 				continue
 			}
 			vendorKeys = append(vendorKeys, vendor.Info().Shorthand)
@@ -426,6 +427,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 					if seller == nil {
 						continue
 					}
+
 					if seller.Info().Shorthand == v[0] {
 						source = seller
 						break
@@ -497,7 +499,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 			Link:  link,
 		}
 
-		if scraper.Info().SealedMode {
+		if scraper.Info().SealedMode && !strings.Contains(nav.Name, "Sealed") {
 			nav.Name += " Sealed"
 		}
 
@@ -572,6 +574,10 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		opts.Editions = FilteredEditions
 	}
 
+	if source.Info().SealedMode {
+		opts.MinSpread = MinSpreadSealed
+	}
+
 	// The pool of scrapers that source will be compared against
 	var scrapers []mtgban.Scraper
 	if pageVars.GlobalMode || pageVars.ReverseMode {
@@ -579,6 +585,11 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 			if seller == nil {
 				continue
 			}
+			// Skip unactionable sellers
+			if seller.Info().SealedMode && seller.Info().MetadataOnly {
+				continue
+			}
+
 			scrapers = append(scrapers, seller)
 		}
 	} else {
@@ -679,8 +690,11 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		}
 
 		name := scraper.Info().Name
-		if name == "TCG Player Market" {
+		switch name {
+		case "TCG Player Market":
 			name = "TCG Player Trade-In"
+		case "Sealed EV Scraper":
+			name = "Cardkingdom Buylist"
 		}
 
 		entry := Arbitrage{
