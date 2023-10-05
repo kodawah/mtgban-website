@@ -225,7 +225,7 @@
                         <th class="stickyHeaderTiny">Edition</th>
                         <th class="stickyHeaderTiny"><center>#</center></th>
                         <th class="stickyHeaderTiny">Finish</th>
-                        {{if not .HasConditions}}
+                        {{if not .HasNoConds}}
                             <th class="stickyHeaderTiny">Conditions</th>
                         {{end}}
                         {{if not .HasNoQty}}
@@ -291,7 +291,7 @@
                                     <center title="Foil">✨</center>
                                 {{end}}
                             </td>
-                            {{if not $save.HasConditions}}
+                            {{if not $save.HasNoConds}}
                                 <td>
                                     <center>{{.InventoryEntry.Conditions}}</center>
                                 </td>
