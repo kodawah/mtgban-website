@@ -61,10 +61,9 @@ type PageVars struct {
 	CanShowAll       bool
 	CleanSearchQuery string
 
-	ScraperShort    string
-	HasAffiliate    bool
-	QtyNotAvailable bool
-	CanDownloadCSV  bool
+	ScraperShort   string
+	HasAffiliate   bool
+	CanDownloadCSV bool
 
 	Arb            []Arbitrage
 	ArbitOptKeys   []string
