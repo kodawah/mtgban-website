@@ -339,8 +339,13 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 	if len(sourceSealed) > 0 {
 		products += "<h4>"
 		for _, sealed := range sourceSealed {
-			co, _ := mtgmatcher.GetUUID(sealed)
-			products += "<a href=/sealed?q=" + sealed + ">" + co.Name + "</a><br>"
+			// The sealed uuids while known might have changed and we need to
+			// make sure they don't crash the system here
+			sealedCo, err := mtgmatcher.GetUUID(sealed)
+			if err != nil {
+				continue
+			}
+			products += "<a href=/sealed?q=" + sealed + ">" + sealedCo.Name + "</a><br>"
 		}
 		products += "</h4>"
 		if len(sourceSealed) > 5 {
