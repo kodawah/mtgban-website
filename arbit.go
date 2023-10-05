@@ -693,6 +693,9 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 			entry.HasCredit = false
 			entry.HasNoConds = source.Info().MetadataOnly
 		}
+		if source.Info().SealedMode {
+			entry.HasNoConds = scraper.Info().MetadataOnly
+		}
 
 		pageVars.Arb = append(pageVars.Arb, entry)
 		for i := range arbit {
