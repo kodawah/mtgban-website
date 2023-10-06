@@ -133,6 +133,10 @@ func fixupStoreCodeNG(code string) []string {
 			filters[i] = CT_STANDARD
 		case "CT0":
 			filters[i] = CT_ZERO
+		case "CTSealed":
+			filters[i] = CT_STANDARD_SEALED
+		case "CT0Sealed":
+			filters[i] = CT_ZERO_SEALED
 		case "MKM_LOW":
 			filters[i] = MKM_LOW
 		case "MKM_TREND":

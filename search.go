@@ -739,6 +739,11 @@ func searchSellersNG(cardIds []string, config SearchConfig) (foundSellers map[st
 					icon = "img/misc/direct.png"
 				case CT_ZERO:
 					icon = "img/misc/zero.png"
+				case CT_STANDARD_SEALED:
+					name = CT_STANDARD
+				case CT_ZERO_SEALED:
+					name = CT_ZERO
+					icon = "img/misc/zero.png"
 				}
 
 				// Prepare all the deets
