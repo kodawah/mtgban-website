@@ -1,57 +1,72 @@
 <!DOCTYPE html>
 <html>
+
 <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <link href='https://fonts.googleapis.com/css?family=Rosario:400' rel='stylesheet' type='text/css'>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//cdn.jsdelivr.net/npm/keyrune@latest/css/keyrune.css" rel="stylesheet" type="text/css"/>
     <link rel="stylesheet" type="text/css" href="../css/main.css">
-    <link href="//cdn.jsdelivr.net/npm/keyrune@latest/css/keyrune.css" rel="stylesheet" type="text/css" />
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip({ html: true });
+        });
+    </script>
     <title>{{.Title}}</title>
     {{if not .IsSealed}}
-        <script type="text/javascript" src="../js/autocomplete.js"></script>
-        <script type="text/javascript" src="../js/fetchnames.js"></script>
+    <script type="text/javascript" src="../js/autocomplete.js"></script>
+    <script type="text/javascript" src="../js/fetchnames.js"></script>
     {{end}}
     {{if not (eq .ChartID "")}}
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js"></script>
-        <script type="text/javascript" src="../js/chartopts.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js"></script>
+    <script type="text/javascript" src="../js/chartopts.js"></script>
     {{end}}
+    <style>
+        .tooltip-inner {
+            font-size: 15px;
+        }
+    </style>
 </head>
 
 <body class="light-theme">
-<script type="text/javascript" src="../js/themechecker.js"></script>
-<nav>
-    <ul>
-        <li><a href="https://www.patreon.com/ban_community"><img src="img/misc/patreon.png" width=48></a></li>
-        <li><a href="/discord"><img src="img/misc/discord.png" width=48></a></li>
-        {{range .Nav}}
+    <script type="text/javascript" src="../js/themechecker.js"></script>
+    <nav>
+        <ul>
+            <li><a href="https://www.patreon.com/ban_community"><img src="img/misc/patreon.png" width=48></a></li>
+            <li><a href="/discord"><img src="img/misc/discord.png" width=48></a></li>
+            {{range .Nav}}
             <li>
-                <a {{if .Active}}class="{{.Class}}"{{end}} href="{{.Link}}">
+                <a {{if .Active}}class="{{.Class}}" {{end}} href="{{.Link}}">
                     <span>{{.Short}} {{.Name}}</span>
                 </a>
             </li>
-        {{end}}
-        <li>
-            <label class="switch">
-                <div>
-                    <input type="checkbox"/>
-                    <span class="slider"></span>
-                </div>
-                <script type="text/javascript" src="../js/nightmode.js"></script>
-            </label>
-        </li>
-    </ul>
-</nav>
+            {{end}}
+            <li>
+                <label class="switch">
+                    <div>
+                        <input type="checkbox" />
+                        <span class="slider"></span>
+                    </div>
+                    <script type="text/javascript" src="../js/nightmode.js"></script>
+                </label>
+            </li>
+        </ul>
+    </nav>
 
-<div class="mainbody">
-    {{if ne .ErrorMessage ""}}
+    <div class="mainbody">
+        {{if ne .ErrorMessage ""}}
         <h1>{{.ErrorMessage}}</h1>
         {{if .ShowPromo}}
-            <img class="center" src="img/promo/search.jpg">
+        <img class="center" src="img/promo/search.jpg">
         {{end}}
-    {{else if eq .Title "Options"}}
+        {{else if eq .Title "Options"}}
         <script type="text/javascript" src="../js/cookies.js"></script>
         <br>
 
         <script type="text/javascript">
-            window.onload = function(e) {
+            window.onload = function (e) {
                 loadForm("SearchSellersList", "sellers");
                 loadForm("SearchVendorsList", "vendors");
                 loadForm("SearchMiscOpts", "miscOpts");
@@ -68,27 +83,28 @@
             <a class="btn warning" onclick="javascript:clearForm('sellers'); clearForm('vendors');"><b>CLEAR</b></a>
             <a class="btn success" onclick="javascript:selectAll('sellers');"><b>Select ALL Sellers</b></a>
             <a class="btn success" onclick="javascript:selectAll('vendors');"><b>Select ALL Vendors</b></a>
-            <a class="btn success" onclick="javascript:saveForm('SearchSellersList', 'sellers'); saveForm('SearchVendorsList', 'vendors'); window.location.href = '/search'"><b>SAVE</b></a>
+            <a class="btn success"
+                onclick="javascript:saveForm('SearchSellersList', 'sellers'); saveForm('SearchVendorsList', 'vendors'); window.location.href = '/search'"><b>SAVE</b></a>
         </div>
 
         <br>
         <div class="indent row">
             <div class="column" id="sellers">
                 {{range $i, $key := .SellerKeys}}
-                    <input type="checkbox" id="s{{$key}}" name="{{$key}}">
-                    <label for="s{{$key}}">
-                        {{scraper_name $key}}
-                    </label>
-                    <br>
+                <input type="checkbox" id="s{{$key}}" name="{{$key}}">
+                <label for="s{{$key}}">
+                    {{scraper_name $key}}
+                </label>
+                <br>
                 {{end}}
             </div>
             <div class="column" id="vendors">
                 {{range $i, $key := .VendorKeys}}
-                    <input type="checkbox" id="v{{$key}}" name="{{$key}}">
-                    <label for="v{{$key}}">
-                        {{scraper_name $key}}
-                    </label>
-                    <br>
+                <input type="checkbox" id="v{{$key}}" name="{{$key}}">
+                <label for="v{{$key}}">
+                    {{scraper_name $key}}
+                </label>
+                <br>
                 {{end}}
             </div>
         </div>
@@ -99,7 +115,8 @@
             Select how card results should be sorted by.
             <br>
 
-            <a class="btn success" onclick="javascript:saveRadio('SearchDefaultSort', 'defaultSort'); window.location.href = '/search'"><b>SAVE</b></a>
+            <a class="btn success"
+                onclick="javascript:saveRadio('SearchDefaultSort', 'defaultSort'); window.location.href = '/search'"><b>SAVE</b></a>
         </div>
 
         <br>
@@ -126,7 +143,8 @@
             Select how price results should be sorted by.
             <br>
 
-            <a class="btn success" onclick="javascript:saveRadio('SearchListingPriority', 'listingPriority'); window.location.href = '/search'"><b>SAVE</b></a>
+            <a class="btn success"
+                onclick="javascript:saveRadio('SearchListingPriority', 'listingPriority'); window.location.href = '/search'"><b>SAVE</b></a>
         </div>
 
         <br>
@@ -148,7 +166,8 @@
             <br>
 
             <a class="btn warning" onclick="javascript:clearForm('miscOpts');"><b>CLEAR</b></a>
-            <a class="btn success" onclick="javascript:saveForm('SearchMiscOpts', 'miscOpts'); window.location.href = '/search'"><b>SAVE</b></a>
+            <a class="btn success"
+                onclick="javascript:saveForm('SearchMiscOpts', 'miscOpts'); window.location.href = '/search'"><b>SAVE</b></a>
         </div>
 
         <br>
@@ -169,162 +188,344 @@
             </div>
         </div>
 
-    {{else}}
+        {{else}}
         <h1>
             Welcome to BAN {{if .IsSealed}}Sealed{{else}}{{if not (eq .ChartID "")}}Chart{{end}} Search{{end}}
 
             {{if .TotalUnique}}
-                -
-                <small><small><small>
-                    {{.TotalUnique}}
-                    {{if .IsSealed}}product{{else}}card{{end}}{{if gt (len .AllKeys) 1}}s{{end}} found
-                    {{if gt .TotalUnique (len .AllKeys)}}
+            -
+            <small><small><small>
+                        {{.TotalUnique}}
+                        {{if .IsSealed}}product{{else}}card{{end}}{{if gt (len .AllKeys) 1}}s{{end}} found
+                        {{if gt .TotalUnique (len .AllKeys)}}
                         ({{len .AllKeys}} shown)
-                    {{end}}
-                </small></small></small>
+                        {{end}}
+                    </small></small></small>
             {{end}}
         </h1>
 
         {{if .IsSealed}}
-            <img id="hoverImage" src="" style="position:absolute; z-index: 3; max-width: 360px; max-height: 360px;"/>
-            <script type="text/javascript" src="../js/followmouse.js"></script>
+        <img id="hoverImage" src="" style="position:absolute; z-index: 3; max-width: 360px; max-height: 360px;" />
+        <script type="text/javascript" src="../js/followmouse.js"></script>
         {{end}}
 
         <div class="indent sticky" style="top: 48px; background-color: var(--background); float:left">
             <form class="search autocomplete" action="" autocomplete="off" spellcheck="false" id="searchform">
                 <label style="clear: both; float: left; width: 110%" for="searchbox">
                     {{if not .SearchQuery}}
-                        Search for a {{if .IsSealed}}product{{else}}card{{end}}, or... <a class="btn info" href="/random{{if .IsSealed}}sealed{{end}}">surprise me</a>
+                    Search for a {{if .IsSealed}}product{{else}}card{{end}}, or... <a class="btn info"
+                        href="/random{{if .IsSealed}}sealed{{end}}">surprise me</a>
                     {{else}}
-                        Sort by
-                        {{if .NoSort}}
-                            syntax
-                        {{else}}
-                            <a class="btn info" href="?q={{.SearchQuery}}&sort=" title="Sort by chronological order">
-                                {{if or (eq .SearchSort "chrono") (not .SearchSort)}}<b>{{end}}chrono{{if or (eq .SearchSort "chrono") (not .SearchSort)}}</b>{{end}}
-                            </a>
-                            {{if or (eq .SearchSort "chrono") (not .SearchSort)}}
-                                <a href="?q={{.SearchQuery}}&sort=&reverse={{not .ReverseMode}}" title="Sort by reverse chronological order">🔄</a>
-                            {{end}}
-                            <a class="btn info" href="?q={{.SearchQuery}}&sort=alpha" title="Sort by alphabetical order">
-                                {{if eq .SearchSort "alpha"}}<b>{{end}}alpha{{if eq .SearchSort "alpha"}}</b>{{end}}
-                            </a>
-                            {{if eq .SearchSort "alpha"}}
-                                <a href="?q={{.SearchQuery}}&sort=alpha&reverse={{not .ReverseMode}}" title="Sort by reverse alphabetical order">🔄</a>
-                            {{end}}
-                            <a class="btn info" href="?q={{.SearchQuery}}&sort=retail" title="Sort by best retail price (off TCGplayer)">
-                                {{if eq .SearchSort "retail"}}<b>{{end}}retail{{if eq .SearchSort "retail"}}</b>{{end}}
-                            </a>
-                            {{if eq .SearchSort "retail"}}
-                                <a href="?q={{.SearchQuery}}&sort=retail&reverse={{not .ReverseMode}}" title="Sort by lowest retail price (off TCGplayer)">🔄</a>
-                            {{end}}
-                            <a class="btn info" href="?q={{.SearchQuery}}&sort=buylist" title="Sort by best buylits price (off Card Kingdom)">
-                                {{if eq .SearchSort "buylist"}}<b>{{end}}buylist{{if eq .SearchSort "buylist"}}</b>{{end}}
-                            </a>
-                            {{if eq .SearchSort "buylist"}}
-                                <a href="?q={{.SearchQuery}}&sort=buylist&reverse={{not .ReverseMode}}" title="Sort by lowest buylits price (off Card Kingdom)">🔄</a>
-                            {{end}}
-                        {{end}}
-                        <span class=emoji>
-                            <a class="btn info" title="...more surpises" href="/random{{if .IsSealed}}sealed{{end}}">🎰</a>
-                        </span>
+                    Sort by
+                    {{if .NoSort}}
+                    syntax
+                    {{else}}
+                    <a class="btn info" href="?q={{.SearchQuery}}&sort=" title="Sort by chronological order">
+                        {{if or (eq .SearchSort "chrono") (not .SearchSort)}}<b>{{end}}chrono{{if or (eq .SearchSort
+                            "chrono") (not .SearchSort)}}</b>{{end}}
+                    </a>
+                    {{if or (eq .SearchSort "chrono") (not .SearchSort)}}
+                    <a href="?q={{.SearchQuery}}&sort=&reverse={{not .ReverseMode}}"
+                        title="Sort by reverse chronological order">🔄</a>
+                    {{end}}
+                    <a class="btn info" href="?q={{.SearchQuery}}&sort=alpha" title="Sort by alphabetical order">
+                        {{if eq .SearchSort "alpha"}}<b>{{end}}alpha{{if eq .SearchSort "alpha"}}</b>{{end}}
+                    </a>
+                    {{if eq .SearchSort "alpha"}}
+                    <a href="?q={{.SearchQuery}}&sort=alpha&reverse={{not .ReverseMode}}"
+                        title="Sort by reverse alphabetical order">🔄</a>
+                    {{end}}
+                    <a class="btn info" href="?q={{.SearchQuery}}&sort=retail"
+                        title="Sort by best retail price (off TCGplayer)">
+                        {{if eq .SearchSort "retail"}}<b>{{end}}retail{{if eq .SearchSort "retail"}}</b>{{end}}
+                    </a>
+                    {{if eq .SearchSort "retail"}}
+                    <a href="?q={{.SearchQuery}}&sort=retail&reverse={{not .ReverseMode}}"
+                        title="Sort by lowest retail price (off TCGplayer)">🔄</a>
+                    {{end}}
+                    <a class="btn info" href="?q={{.SearchQuery}}&sort=buylist"
+                        title="Sort by best buylits price (off Card Kingdom)">
+                        {{if eq .SearchSort "buylist"}}<b>{{end}}buylist{{if eq .SearchSort "buylist"}}</b>{{end}}
+                    </a>
+                    {{if eq .SearchSort "buylist"}}
+                    <a href="?q={{.SearchQuery}}&sort=buylist&reverse={{not .ReverseMode}}"
+                        title="Sort by lowest buylits price (off Card Kingdom)">🔄</a>
+                    {{end}}
+                    {{end}}
+                    <span class=emoji>
+                        <a class="btn info" title="...more surpises" href="/random{{if .IsSealed}}sealed{{end}}">🎰</a>
+                    </span>
                     {{end}}
                     {{if not $.IsSealed}}
-                        <span class=emoji>
-                            <a href="?page=options" title="Search settings">⚙️</a>
-                        </span>
+                    <span class=emoji>
+                        <a href="?page=options" title="Search settings">⚙️</a>
+                    </span>
                     {{end}}
                 </label>
-                <input id="searchbox" class="w3-input w3-border w3-round-small search-input" onFocus="this.setSelectionRange(0, this.value.length)" type="text" name="q" placeholder="Enter a {{if .IsSealed}}product{{else}}card{{end}} name" value="{{.SearchQuery}}" maxlength="200" autofocus>
+                <input id="searchbox" class="w3-input w3-border w3-round-small search-input"
+                    onFocus="this.setSelectionRange(0, this.value.length)" type="text" name="q"
+                    placeholder="Enter a {{if .IsSealed}}product{{else}}card{{end}} name" value="{{.SearchQuery}}"
+                    maxlength="200" autofocus>
             </form>
 
-        {{if not .IsSealed}}
+            {{if not .IsSealed}}
             <script type="text/javascript">
                 autocomplete(document.getElementById("searchform"), document.getElementById("searchbox"));
             </script>
-        {{end}}
-        {{if and (eq .SearchQuery "") (not .IsSealed)}}
+            {{end}}
+            {{if and (eq .SearchQuery "") (not .IsSealed)}}
             <div class="indent">
-                <h2>Instructions</h2>
-                <br>
-                <ul class="indent">
-                    <li><h4><i>Syntax</i></h4>
-                        <ul class="indent">
-                            <li>You can search using the Pricefall bot notation: <pre>name[|code[|number]]{&amp;*~}</pre>.</li>
-                            <li>If you append a special character to any search, you can filter by finish: <pre>&amp;</pre> for nonfoil-only, <pre>*</pre> for foil-only, or <pre>~</pre> for etched-only results. Note that this syntax is disabled if you used a regular expression option to avoid aliasing.</li>
-                            <li>You can filter by <b>edition</b> using the Scryfall notation <pre>s:CODE</pre> and the full edition name (enclosed in quotes) <pre>s:"Aether Revolt"</pre>. Regular expressions are supported with the <pre>se</pre> option.</li>
-                            <li>You can filter by <b>collector number</b> using the Scryfall notation <pre>cn:NUMBER</pre>. For simple numbers (without any prefix or suffix) you may also filter with <pre>cn&gt;NUMBER</pre> and <pre>cn&lt;NUMBER</pre>. Regular expressions are also supported if you use <pre>cne:REGEXP</pre>.</li>
-                            <li>You can filter by <b>condition</b> with <pre>cond:COND</pre>, accepting <pre>NM</pre>, <pre>SP</pre>, <pre>MP</pre>, <pre>HP</pre>, and <pre>PO</pre>. You can be selective and filter only retail or buylist prices with <pre>condr:COND</pre> and <pre>condb:COND</pre> respectively.</li>
-                            <li>You can filter by <b>rarity</b> with <pre>r:RARITY</pre>, accepting <pre>mythic</pre>, <pre>rare</pre>, <pre>uncommon</pre>, <pre>common</pre>, <pre>special</pre>, <pre>token</pre>, and <pre>oversize</pre>. You can also use the first letter of the rarity as shorthand.</li>
-                            <li>You can filter by <b>color</b> and <b>color_identity</b >with <pre>c:COLOR</pre> and <pre>ci:COLOR</pre>, using standard WURGB letters, or guilds, shards, college, and quad color names.</li>
-                            <li>You can filter by <b>finish</b> with <pre>f:VALUE</pre>, accepting <pre>nonfoil</pre>, <pre>foil</pre>, and <pre>etched</pre>. Short form is available as <pre>nf</pre>, <pre>f</pre>, and <pre>e</pre>.</li>
-                            <li>You can filter by <b>card type</b> with <pre>t:VALUE</pre>, accepting any valid supertype, subtype, or type.</li>
-                            <li>You can filter by <b>release date</b> of the card or set <pre>date:VALUE</pre>, <pre>date&gt;VALUE</pre>, and <pre>date&lt;VALUE</pre>. The value may be a date in the ISO format (<pre>YYYY-MM-DD</pre>) or a set code.</li>
-                            <li>You can filter by <b>id</b> of the card with <pre>id:VALUE</pre>, support MTGBAN, MTGJSON, Scryfall, and TCGplayer Product Ids.</li>
-                            <li>
-                                You can filter by card properties using <pre>is:VALUE</pre> or <pre>not:VALUE</pre>, accepting these self-describing options:
-                                <ul class="indent">
-                                    <li>Generic properties: <i>reserved, token, oversize, funny, wcd, commander, sldpromo</i></li>
-                                    <li>Frame properties: <i>fullart (fa), extendedart (ea), showcase (sc), reskin, borderless (bd), gold, retro</i></li>
-                                    <li>Promo properties: <i>{{range $.PromoTags}}{{.}}, {{end}} promo</i></li>
-                                    <li>Language properties: <i>japanese (jp, jpn), phyrexian (ph)</i></li>
-                                    <li>Land sets: <i>dual, fastland, fetchland, painland, shockland, checkland</i></li>
+                <h2>BAN Search Guide</h2>
+                <div id="accordion">
+                    <div class="card" style="background-color: #222222; color: white;">
+                        <div class="card-header" style="background-color: #222222; color: white;">
+                            <a class="card-link" data-toggle="collapse" href="#collapse1" style="color: white;">
+                                Basic Syntax
+                            </a>
+                        </div>
+                        <div id="collapse1" class="collapse" data-parent="#accordion">
+                            <div class="card-body" style="background-color: #222222; color: white;">
+                                <li>You can set any option in any order, in any amount.</li>
+                                <li>Use Pricefall bot notation: <code>name[|code[|number]]{&amp;*~}</code> to search.
+                                </li>
+                                <li>Invert search parameters with a dash <code>-</code>, i.e<code> -is</code> is the
+                                    same as
+                                    <code>not</code>
+                                </li>
+                                <li>Filter <strong>explicitly</strong> by finish by using special characters:
+                                    <code>&amp;</code> for
+                                    nonfoil, <code>*</code>
+                                    for foil, or <code>~</code> for etched.</li>
+                                <li>Limited support for tags like <code>(Extended Art)</code>,
+                                    <code>(Borderless)</code>,
+                                    and<code> (Showcase)</code>.</li>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card Filters -->
+                    <div class="card" style="background-color: #222222; color: white;">
+                        <div class="card-header" style="background-color: #222222; color: white;">
+                            <a class="card-link" data-toggle="collapse" href="#collapse2" style="color: white;">
+                                Card Filters
+                            </a>
+                        </div>
+                        <div id="collapse2" class="collapse" data-parent="#accordion">
+                            <div class="card-body" style="background-color: #222222; color: white;">
+                                <ul>
+                                    <li>
+                                        <b>Edition</b>
+                                        <ul>
+                                            <p>You are able to use either a 3-letter set code, or full set name to
+                                                filter by edition.<br>
+                                                <code><span data-toggle="tooltip" title="<code>s:AER</code> or
+                                                <code>s:'Aether Revolt'</code>">Example</span></code>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <b>Collector Number</b>
+                                        <ul>
+                                            <p>Single number: <code> cn NUMBER</code><br>
+                                                Range of numbers: <code> cn&gt;NUMBER</code><br>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <b>Condition</b>
+                                    <ul>
+                                        <p>Use <code>cond:<span data-toggle=" tooltip"
+                                                    title="NM, SP, MP, HP, PO">COND </span></code>to filter by
+                                                condition.<br>
+                                                Use <code>cond<b>r</b>:</code> for retail or <code>cond<b>b</b>:</code>
+                                                for buylist.
+                                    </li>
                                 </ul>
-                                Of course <pre>not</pre> and <pre>-is</pre> are equivalent.
-                            </li>
-                            <li>There is limited support for human readable tags, for example if <pre>(Extended Art)</pre> is appended to a card name, the search will only show cards that are Extended Art (similar to the <pre>is:extendedart</pre> filter). Note that this syntax will not work with regexp search mode.</li>
-                            <li>You can change the <b>search mode</b> with <pre>sm:VALUE</pre>, accepting <pre>exact</pre> (default), <pre>prefix</pre>, <pre>any</pre>, or <pre>regexp</pre>:</li>
-                            <ul class="indent">
-                                <li>Normally a card is searched with an <b>exact</b> strategy, you will get only cards with exactly the same name as searched.
-                                    <br>For example <pre>Vesuva</pre> will return the card named Vesuva and no other Vesuvan counterpart.</li>
-                                <li>If you search in <b>prefix</b> mode, you will get all the cards with the name starting with what you searched.
-                                    <br>For example <pre>"Dragonlord"</pre> will return all the cards starting with "Dragonlord".</li>
-                                <li>If you search in in <b>any</b> mode, you will get all the cards containing any of the text present in card names.
-                                    <br>For example <pre>*Draco*</pre> will return the card named Draco and all the cards that have "draco" in their names.</li>
-                                <li>If you search in in <b>regexp</b> mode, you will get all the cards names matching the regular expresion.
-                                    <br>For example <pre>Cluestone$</pre> will return the card that end with Cluestone in their name. Note this search mode is case sensitive.</li>
-                            </ul>
-                            <li>You can change the <b>sort mode</b> with <pre>sort:VALUE</pre>, accepting <pre>chrono</pre> (chonologically by print date, default), <pre>alpha</pre> (for alphabetical order), <pre>retail</pre> (for TCG price order), or <pre>buylist</pre> (for CK buylist price order). Note that when this option is set, the sort UI will be disabled.<</li>
-                            <li>You can set any option in any order, in any amount. When filtering for a group of values you can use a comma <pre>,</pre> to separate values.</li>
-                            <li>You can invert filter results by prepending a <pre>-</pre> to the option name.</li>
-                            <li>You can filter by <b>seller/vendor name</b> with <pre>store:shorthand</pre>, or specific types of store with <pre>seller:shorthand</pre> and <pre>vendor:shorthand</pre>.</li>
-                            <ul class="indent">
-                                <li>For well known store names, you may use the following self-describing tags: <pre>TCG_LOW</pre>, <pre>TCG_MARKET</pre>, <pre>TCG_PLAYER</pre>, <pre>TCG_DIRECT</pre>, <pre>TCG_DIRECT_NET</pre>, <pre>MKM_LOW</pre>, <pre>MKM_TREND</pre>, <pre>CT</pre> and so on.</li>
-                                <li>You can filter results to include only retail or buylist prices with <pre>skip:retail</pre> and <pre>skip:buylist</pre>. You can also skip results that do not have retail or buylist prices, with <pre>skip:nosales</pre> and <pre>skip:nobuys</pre>, or results that do not have results at all, with <pre>skip:empty</pre>.</li>
-                                <li>You may filter by the store <b>region</b> with <pre>region:VALUE</pre> using <pre>us</pre>, <pre>eu</pre>, or <pre>jp</pre> options.</li>
-                                <li>Note that <pre>seller</pre> leave index results availabe - if you only want to look at the selected scraper(s) use the <pre>aseller</pre> option.</li>
-                            </ul>
-                            <li>You can filter by <b>price</b> with <pre>price&gt;VALUE</pre>, or <pre>price&lt;VALUE</pre> to exclude results that are above or below your range.</li>
-                            <li>You can check if a cards is on a particular list of card with <b>on</b> supporting <pre>mtgstocks</pre> and <pre>tcgsyp</pre>.</li>
-                        </ul>
-                    </li>
-                    <br>
+                                </li>
+                                <li>
+                                    <b>Rarity</b>
+                                    <ul>
+                                        <p>Filter by rarity using
+                                            <code>r:<span data-toggle="tooltip" title="mythic, rare, uncommon, common, special, token, oversize">RARITY</span></code><br>
+                                            You can also shorten your descriptor to just the <code><span data-toggle="tooltip" title="r:m, r:r, r:u, r:c, r:s, r:t, r:o">first</span></code> letter.
+                                        <p>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <b>Color and Color Identity</b>
+                                    <ul>
+                                        <p>
+                                            To filter by color use
+                                            <code>c:<span data-toggle="tooltip" title="
+                                                white, blue, black, red, green">COLOR </span></code>or switch to
+                                            <code>ci:COLOR</code> for color identity.<br>
+                                            you can also shorthand your selection using <code>c:/ci:<span data-toggle="tooltip" title="w, u, b, r, g">WUBRG</span>
+                                            </code>
+                                        </p>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <b>Finish</b>
+                                    <ul>
+                                        <p>Use <code>f:VALUE</code> for nonfoil, foil, and etched.</p>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <b>Card Type</b>
+                                    <ul>
+                                        <p>Use <code>t:VALUE</code> for any valid supertype, subtype, or type.</p>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <b>Release Date</b>
+                                    <ul>
+                                        <p>Use <code>date:VALUE, </code>
+                                            <code>date&gt;VALUE, </code>or<code> date<V></code>.</p>
+                                </li>
+                                </ul>
+                                </li>
+                                <li>
+                                    <b>Card ID</b>
+                                    <ul>
+                                        <p>Use <code>id:VALUE</code> which supports multiple ID types.</p>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <b>Card Properties</b>
+                                    <p> By using <code>is:VALUE</code> or <code>not:VALUE</code>, one is able to filter using the following descriptors:</p>
+                                    <p>
+                                        <span data-toggle="tooltip" title="
+                                                <b>Generic Properties:<b><br>
+                                                    <i>reserved<br> 
+                                                    token<br>
+                                                    oversize<br>
+                                                    funny<br>
+                                                    commander<i>
+                                                    <br>">Generic,</span>
+                                        <span data-toggle="tooltip"
+                                            title="<b>Frame Types:<b> <i>fullart (fa)<i><br> <b><i>extendedart (ea)<i><br> 
+                                                <b><i>showcase (sc)<i><br> <b><i>reskin<i><br> <b><i>borderless (bd)<i><br> 
+                                                    <b><i>gold<i><br> <b><i>retro<i>">Frame,
+                                        </span>
+                                        <span data-toggle="tooltip" title="
+                                                        <b>Promo Types:</b><br>
+                                                        <b><i>ampersand, arenaleague, boosterfun, bundle, buyabox, concept, confettifoil,<br>
+                                                        draculaseries, draftweekend, galaxyfoil, gameday, gilded, glossy, godzillaseries, halofoil,<br>
+                                                        intropack, judgegift, neonink, oilslick, playpromo, playerrewards, prerelease, promopack,<br>
+                                                        release, schinesealtart, serialized, starterdeck, stepandcompleat, surgefoil, textured, thick,<br>
+                                                        wizardsplaynetwork, promo</i></b>">Promo,</span>
+                                        <span data-toggle="tooltip"
+                                            title="<b>Language Tags:<b><br> <i>japanese(jp<i>, <b><i>jpn)<i><br> <b><i>phyrexian (ph)<i>">
+                                            Language,</span>
+                                        <span data-toggle="tooltip"
+                                            title="<b>Land Cycles:<b><br> <i>dual<i><br> <b><i>fastland<i><br> <b><i>fetchland<i><br> <b><i>painland<i><br> <b><i>shockland<i><br> <b><i>checkland<i>">
+                                            Land-Cycle</span>
 
-                    <li>You can access <b>historical data</b> from a few major vendors by clicking on 📊 for each card.</li>
-                    <li>Data is refreshed periodically over the day.</li>
-                    <li>Entries are formatted as <i>card name (finish) - edition (collector #) - # of prints</i>.</li>
-                    <li>It is possible to retrieve the source product of a card or a sealed product by pressing on the "Found in * products".</li>
-                    <li>Similarly, pressing on the 📖 button on a card will return every possible products containing any kind of reprint of the given card.</li>
-                    <li>The percentage found in buylist offers is the <b>price ratio</b>, the higher it is, the more a vendor is looking to purchase that card.</li>
-                    <li>This percentage is available only if the seller is selling copies of the same card at the same conditions.</li>
-                    <li>Inventory prices refer to the stated conditions (and their accuracy depends on the data provider).</li>
-                    <li>Buylist prices are always referring to NM conditions.</li>
-                    <li>TCG Low is a special value referring to TCG algorithms that may differ from quantity and quality of listings.</li>
-                    <li>If you hover on a buylist price, a small tooltip will appear displaying the corresponding trade-in price, if available.</li>
-                    <li>In case of mistakes or incongruities, please notify the devs in the BAN Discord.</li>
-                    <li>Should you find this content useful, consider clicking on one of the provided links to make a purchase on the website, and directly support BAN.</li>
-                </ul>
-             </div>
-        {{else if and (eq .SearchQuery "") (.IsSealed)}}
-            <p style="max-width: 70%">
-                Jump to
-                {{range $key := .EditionSort}}
+                                    </p>
+                                </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Search Modes -->
+                    <div class="card" style="background-color: #222222; color: white;">
+                        <div class="card-header" style="background-color: #222222; color: white;">
+                            <a class="card-link" data-toggle="collapse" href="#collapse3" style="color: white;">
+                                Search Modes
+                            </a>
+                        </div>
+                        <div id="collapse3" class="collapse" data-parent="#accordion">
+                            <div class="card-body" style="background-color: #222222; color: white;">
+                                <li>Use <code>sm:VALUE</code> to set the search mode.</li>
+                                <li><code>exact</code>: Default, matches the exact name.</li>
+                                <li><code>prefix</code>: Matches names starting with your query.</li>
+                                <li><code>any</code>: Matches any occurrence in the name.</li>
+                                <li><code>regexp</code>: Uses regular expressions for matching.</li>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sort Options -->
+                    <div class="card" style="background-color: #222222; color: white;">
+                        <div class="card-header" style="background-color: #222222; color: white;">
+                            <a class="card-link" data-toggle="collapse" href="#collapse4" style="color: white;">
+                                Sort Options
+                            </a>
+                        </div>
+                        <div id="collapse4" class="collapse" data-parent="#accordion">
+                            <div class="card-body" style="background-color: #222222; color: white;">
+                                <li>Use <code>sort:VALUE</code> to sort results.</li>
+                                <li><code>chrono</code>: By print date (default).</li>
+                                <li><code>alpha</code>: Alphabetically.</li>
+                                <li><code>retail</code>: By TCG price.</li>
+                                <li><code>buylist</code>: By CK buylist price.</li>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seller and Vendor Filters -->
+                    <div class="card" style="background-color: #222222; color: white;">
+                        <div class="card-header" style="background-color: #222222; color: white;">
+                            <a class="card-link" data-toggle="collapse" href="#collapse5" style="color: white;">
+                                Seller and Vendor Filters
+                            </a>
+                        </div>
+                        <div id="collapse5" class="collapse" data-parent="#accordion">
+                            <div class="card-body" style="background-color: #222222; color: white;">
+                                <li>Use <code>store:shorthand</code> to filter by specific sellers or stores.</li>
+                                <li>Use <code>seller:shorthand</code> and <code>vendor:shorthand</code> for specific
+                                    types of stores.</li>
+                                <li>Well-known store names have special tags like <code>TCG_LOW</code>,
+                                    <code>TCG_MARKET</code>,
+                                    etc.
+                                </li>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Price and Availability -->
+                    <div class="card" style="background-color: #222222; color: white;">
+                        <div class="card-header" style="background-color: #222222; color: white;">
+                            <a class="card-link" data-toggle="collapse" href="#collapse6" style="color: white;">
+                                Price and Availability
+                            </a>
+                        </div>
+                        <div id="collapse6" class="collapse" data-parent="#accordion">
+                            <div class="card-body" style="background-color: #222222; color: white;">
+                                <li>Use <code>price&gt;VALUE</code> or <code>price<V></code> to filter by price range.
+                                </li>
+                                <li>Use <code>skip:retail</code> and <code>skip:buylist</code> to include/exclude
+                                    specific prices.</li>
+                                <li>Filter by store region using <code>region:VALUE</code> such
+                                    as:<code> us, eu, or jp</code></li>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Additional Features -->
+                    <div class="card" style="background-color: #222222; color: white;">
+                        <div class="card-header" style="background-color: #222222; color: white;">
+                            <a class="card-link" data-toggle="collapse" href="#collapse7" style="color: white;">
+                                Additional Features
+                            </a>
+                        </div>
+                        <div id="collapse7" class="collapse" data-parent="#accordion">
+                            <div class="card-body" style="background-color: #222222; color: white;">
+                                <li>Click on 📊 for historical data.</li>
+                                <li>Press 📖 to see all products containing a reprint of a given card.</li>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    $(function () { $('[data-toggle="tooltip"]').tooltip() })
+                </script>
+                {{else if and (eq .SearchQuery "") (.IsSealed)}}
+                <p style="max-width: 70%">
+                    Jump to
+                    {{range $key := .EditionSort}}
                     <a class="btn normal" href="#{{.}}">{{.}}</a>
-                {{end}}
-                <a class="btn normal" href="#faq">F.A.Q.</a>
-            </p>
+                    {{end}}
+                    <a class="btn normal" href="#faq">F.A.Q.</a>
+                </p>
 
-            {{range $key := .EditionSort}}
+                {{range $key := .EditionSort}}
                 <div class="sticky" style="top: 48px; background-color: var(--background);">
                     <span class="anchor" id="{{.}}"></span>
                     <h3 class="storename">{{.}}</a></h3>
@@ -334,573 +535,716 @@
                 <div class="indent" style="max-width: 85%; padding-top:10px">
                     {{$editionList := index $.EditionList $key }}
                     {{range $editionList}}
-                        <nobr>
-                            <i class="ss ss-{{.Keyrune}} ss-2x ss-fw"></i>
-                            <a class="btn normal" href="/sealed?q=s:{{.Code}}">
-                                {{.Name}}
-                            </a>
-                        </nobr>
+                    <nobr>
+                        <i class="ss ss-{{.Keyrune}} ss-2x ss-fw"></i>
+                        <a class="btn normal" href="/sealed?q=s:{{.Code}}">
+                            {{.Name}}
+                        </a>
+                    </nobr>
                     {{end}}
                 </div>
                 <br>
-            {{end}}
+                {{end}}
 
-            <div style="max-width: 85%; padding-top:10px">
-                <span class="anchor" id="faq"></span>
-                <h3>F.A.Q.</h3>
-                <br>
-                <ul class="indent">
-                    <li>
-                        <h4>How is EV calculated?</h4>
-                        <ul class="indent">
-                            For any product with a static decklist, the card values a just summed up and provided as is. For boosters and booster boxes, we generate as many boosters as needed to represent the product (typically 36 boosters for a draft booster box), for 5000 times to even out any possible variance, and then run the mean and median of the results. Note that every product is individually run, so a booster box won't exactly be 36 times theprice of a booster pack.
-                        </ul>
-                    </li>
-                    <li>
-                        <h4>How do you emulate booster openings?</h4>
-                        <ul class="indent">
-                            We use data from multiple projects, in paritcular we derive the collation information from the <a href="https://www.lethe.xyz/mtg/collation/">Lethe project</a>, the distribution of cards in the boosters from <a href="https://github.com/taw/magic-search-engine">mtg.wft search engine</a>, the contents description from <a href="https://github.com/mtgjson/mtg-sealed-content">MTGJSON</a>, and the decklists come from <a href="https://github.com/taw/magic-preconstructed-decks">this repository</a>. Please refer to each project website to know more how estimations works (and to help out with data ingestion).
-                        </ul>
-                    </li>
-                    <li>
-                        <h4>Can you describe the data sources available?</h4>
-                        <ul class="indent">
-                            There are three EV-dependent data sources: <i>TCG Low</i>, which reflects the lowest possible value on TCG (excluding shipping), <i>TCG Direct</i>, which represents the Direct price <u>minus fees</u> that the cards could be sold at, and <i>CK buylist</i>, which shows how much a given set of cards could be sold to the vendor. Note that TCG Direct prices could be sometimes skewed due to ridiculous prices being set by sellers "parking" their cards - we try to work around this by capping the maximum value to twice as much as TCG Low when we're able to detect such an offset. <br>
-                            The other prices shown under <i>Available offers</i> represent the prices of the sealed products as available from different stores.
-                        </ul>
-                    </li>
-                    <li>
-                        <h4>What's the difference between mean and median?</h4>
-                        <ul class="indent">
-                            From <a href="https://www.khanacademy.org/math/cc-sixth-grade-math/cc-6th-data-statistics/mean-and-median/v/statistics-intro-mean-median-and-mode">Khan Academy</a>: "The mean (average) of a data set is found by adding all numbers in the data set and then dividing by the number of values in the set. The median is the middle value when a data set is ordered from least to greatest."
-                            Also from <a href="https://towardsdatascience.com/mean-or-median-choose-based-on-the-decision-not-the-distribution-f951215c1376">towardsdatascience</a>: "The mean is typically better when the data follow a symmetric distribution. When the data are skewed, the median is more useful because the mean will be distorted by outliers."
-                        </ul>
-                    </li>
-                    <li>
-                        <h4>Why is this set missing?</h4>
-                        <ul class="indent">
-                           Given there is a three way dependency on the source data, it might be that the information for the given set or product simply hasn't been filled and has not propagated to us yet. Retry in a few days or, if you're able to code, try contributing to one of the open source projects mentioned above.
-                        </ul>
-                    </li>
-                    <li>
-                        <h4>What's up with these odd prices for this just released set?</h4>
-                        <ul class="indent">
-                           Our EV prices reflect the price of the actual printing of the card, they do not reflect the value of the card before the reprint. As such it takes a few days for all the listings to be filled in and for prices to propagate to the calculator -- in particular, in case of Direct prices might look a bit off until the whole TCG Direct inventory appears, and in the meantime we'll do our best estimates using the market price. Also keep in mind that in the early days, the expected values will reflect preorder prices, which are almost always higher than normal.
-                        </ul>
-                    </li>
-                    <li>
-                        <h4>How is Set Value computed and why does it differs from buylist?</h4>
-                        <ul class="indent">
-                            The set value is the daily sum of every single printing of every single card within the same set, for nonfoil and foil printings when available. It may be considered as indicating the value of the entire collection in NM condition. As such the set value is not affected by any element of randomness, which is instead taken into account by the listed entry.
-                        </ul>
-                    </li>
-                    <li>
-                        <h4>What are the custom buttons next to product titles for (🎁 and 🔍)?</h4>
-                        <ul class="indent">
-                            These two buttons lead to different search options:<br>
-                            * the 🎁 (when available) will similuate opening a pack using the information available. Every run is fully randomized and unpredictable;<br>
-                            * the 🔍 will unpack a product and list all its possible contents. This means that a booster box will only list a single booster pack, while a booster pack will display all possible picks.<br>
-                            In both cases, once in the search page, you can add search terms normally to filter for color, rarities, and names using the common search syntax.<br>
-                            Note that depending on the content type, the search result might show you at most one copy per card or list the same card multiple times: this to show accurate and easy to import results for decklists and box sets, while displaying compact results for other sealed types.
-                        </ul>
-                    </li>
-                    <li>
-                        <h4>Is there a minimum value for a card to be considered?</h4>
-                        <ul class="indent">
-                           No, every single price found is added up, there is no mimum threshold. The multiple runs should take care of the variance for EV computation, and the impact of low value cards should be nullified in this way. For buylists, bulk prices are considered too.
-                        </ul>
-                    </li>
-                    <li>
-                        <h4>Do you consider The List cards, boxtoppers, variations etc when computing a box EV?</h4>
-                        <ul class="indent">
-                           Yes.
-                        </ul>
-                    </li>
-                </ul>
-            </div>
+                <div style="max-width: 85%; padding-top:10px">
+                    <span class="anchor" id="faq"></span>
+                    <h3>F.A.Q.</h3>
+                    <br>
+                    <div id="accordion">
+                        <!-- How is EV calculated? -->
+                        <div class="card" style="background-color: #222222; color: white;">
+                            <div class="card-header" style="background-color: #222222; color: white;">
+                                <a class="card-link" data-toggle="collapse" href="#collapse1" style="color: white;">
+                                    How is EV calculated?
+                                </a>
+                            </div>
+                            <div id="collapse1" class="collapse" data-parent="#accordion">
+                                <div class="card-body" style="background-color: #222222; color: white;">
+                                    <p>
+                                        For any product with a static decklist, the card values are just summed up and
+                                        displayed.
+                                        For Booster based products, a simulation is created to emulate actually opening
+                                        that product.
+                                        To smooth variance, we run this simulation thousands of times - and return the
+                                        mean and median
+                                        of the result.
+                                        Note that every product is individually run, so a booster box won't exactly be
+                                        36 times theprice
+                                        of a booster pack.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- How do you emulate booster openings? -->
+                        <div class="card" style="background-color: #222222; color: white;">
+                            <div class="card-header" style="background-color: #222222; color: white;">
+                                <a class="card-link" data-toggle="collapse" href="#collapse2" style="color: white;">
+                                    How do you emulate booster openings?
+                                </a>
+                            </div>
+                            <div id="collapse2" class="collapse" data-parent="#accordion">
+                                <div class="card-body" style="background-color: #222222; color: white;">
+                                    <p>We use data from multiple projects, in paritcular we derive the collation
+                                        information from the <a href="https://www.lethe.xyz/mtg/collation/">Lethe
+                                            project</a>,
+                                        the distribution of cards in the boosters from <a
+                                            href="https://github.com/taw/magic-search-engine">mtg.wft search engine</a>,
+                                        the contents description from <a
+                                            href="https://github.com/mtgjson/mtg-sealed-content">MTGJSON</a>,
+                                        and the decklists come from <a
+                                            href="https://github.com/taw/magic-preconstructed-decks">this
+                                            repository</a>.
+                                        Please refer to each project website to know more how estimations works (and to
+                                        help out with
+                                        data ingestion).</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Can you describe the data sources available? -->
+                        <div class="card" style="background-color: #222222; color: white;">
+                            <div class="card-header" style="background-color: #222222; color: white;">
+                                <a class="card-link" data-toggle="collapse" href="#collapse3" style="color: white;">
+                                    Can you describe the data sources available?
+                                </a>
+                            </div>
+                            <div id="collapse3" class="collapse" data-parent="#accordion">
+                                <div class="card-body" style="background-color: #222222; color: white;">
+                                    <p>There are three EV-dependent data sources:</p>
+                                    <ul>
+                                        <li><i>TCG Low</i>, which reflects the lowest possible value on TCG (excluding
+                                            shipping),
+                                        <li><i>TCG Direct</i>, which represents the Direct <u>price minus fees</u> that
+                                            the cards could
+                                            be sold at, and
+                                        <li><i>CK Buylist, which shows how much a given set of cards could be sold to
+                                                the vendor.
+                                                <p>Note that TCG Direct prices could be sometimes skewed due to
+                                                    ridiculous prices being
+                                                    set by sellers "parking" their cards - we try to work around this by
+                                                    capping the
+                                                    maximum value to twice as much as TCG Low when we're able to detect
+                                                    such an offset.
+                                                    <br>
+                                                    The other prices shown under <i>Available offers</i> represent the
+                                                    prices of the
+                                                    sealed products as available from different stores.
+                                                </p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- What's the difference between mean and median? -->
+                        <div class="card" style="background-color: #222222; color: white;">
+                            <div class="card-header" style="background-color: #222222; color: white;">
+                                <a class="card-link" data-toggle="collapse" href="#collapse4" style="color: white;">
+                                    What's the difference between mean and median?
+                                </a>
+                            </div>
+                            <div id="collapse4" class="collapse" data-parent="#accordion">
+                                <div class="card-body" style="background-color: #222222; color: white;">
+                                    <p>
+                                        From <a
+                                            href="https://www.khanacademy.org/math/cc-sixth-grade-math/cc-6th-data-statistics/mean-and-median/v/statistics-intro-mean-median-and-mode">Khan
+                                            Academy</a>: "The mean (average) of a data set is found by adding all
+                                        numbers in the data
+                                        set and then dividing by the number of values in the set.<br>
+                                        The median is the middle value when a data set is ordered from least to
+                                        greatest."
+                                        Also from <a
+                                            href="https://towardsdatascience.com/mean-or-median-choose-based-on-the-decision-not-the-distribution-f951215c1376">towardsdatascience</a>:
+                                        "The mean is typically better when the data follow a symmetric distribution.
+                                        When the data is
+                                        skewed, the median is more useful because the mean will be distorted by
+                                        outliers."</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card" style="background-color: #222222; color: white;">
+                            <div class="card-header" style="background-color: #222222; color: white;">
+                                <a class="card-link" data-toggle="collapse" href="#collapse4" style="color: white;">
+                                    What are the custom buttons next to product titles for (🎁 and 🔍)?
+                                </a>
+                            </div>
+                            <div id="collapse4" class="collapse" data-parent="#accordion">
+                                <div class="card-body" style="background-color: #222222; color: white;">
+                                    <p>
+                                        These two buttons lead to different search options:<br>
+                                        * the 🎁 (when available) will similuate opening a pack using the information
+                                        available. Every
+                                        run is fully randomized and unpredictable;<br>
+                                        * the 🔍 will unpack a product and list all its possible contents (at most one
+                                        copy per result).
+                                        This means that a booster box will only list a single booster pack, while a
+                                        booster pack will
+                                        display all possible picks.<br>
+                                        In both cases, once in the search page, you can add search terms normally to
+                                        filter for color,
+                                        rarities, and names using the common search syntax.</p>
+                                </div>
+                            </div>
+                        </div>
 
-        {{else}}
-            <script type="text/javascript" src="../js/copy2clip.js"></script>
+                        {{else}}
+                        <script type="text/javascript" src="../js/copy2clip.js"></script>
 
-            <script type="text/javascript">
-                function updateSidebar(src, printings, products) {
-                    {{if not .IsSealed}}
-                        document.getElementById('cardImage').src=src;
-                    {{else}}
-                        document.getElementById('hoverImage').src=src;
-                    {{end}}
-                    document.getElementById('printings').innerHTML = printings;
+                        <script type="text/javascript">
+                            function updateSidebar(src, printings, products) {
+                                { { if not.IsSealed} }
+                                document.getElementById('cardImage').src = src;
+                                { {else } }
+                                document.getElementById('hoverImage').src = src;
+                                { { end } }
+                                document.getElementById('printings').innerHTML = printings;
 
-                    if (products === "") {
-                        products = "n/a"
-                    }
-                    document.getElementById('products').innerHTML = products;
-                }
+                                if (products === "") {
+                                    products = "n/a"
+                                }
+                                document.getElementById('products').innerHTML = products;
+                            }
 
-                function getLastSold(uuid) {
-                    fetch('/api/tcgplayer/lastsold/' + uuid)
-                    .then((response) => response.json())
-                    .then((data) => {
-                        document.getElementById('lastsolda' + uuid).setAttribute("href", "javascript:void(0)");
-                        let table = document.getElementById(uuid);
-                        table.style.display = "";
-                        document.getElementById('lastsalesth').style.display = "";
+                            function getLastSold(uuid) {
+                                fetch('/api/tcgplayer/lastsold/' + uuid)
+                                    .then((response) => response.json())
+                                    .then((data) => {
+                                        document.getElementById('lastsolda' + uuid).setAttribute("href", "javascript:void(0)");
+                                        let table = document.getElementById(uuid);
+                                        table.style.display = "";
+                                        document.getElementById('lastsalesth').style.display = "";
 
-                        if (data.length == 0) {
-                            table.innerHTML = ' \
+                                        if (data.length == 0) {
+                                            table.innerHTML = ' \
                                 <tr style="background-color:rgba(0, 0, 0, 0);"> \
                                     <td colspan="4"> <center> N/A </center> </td> \
                                 </tr>';
-                        }
-                        data.forEach(element => {
-                            let newRow = table.insertRow()
+                                        }
+                                        data.forEach(element => {
+                                            let newRow = table.insertRow()
 
-                            let orderCell = newRow.insertCell();
-                            let formatDate = new Date(element.orderDate);
-                            let timestamp = formatDate.toISOString().slice(0, 10) + " " + formatDate.toLocaleTimeString();
-                            let anchor = document.createElement("a")
-                            anchor.classList.add("btn", "default");
-                            anchor.innerText = timestamp;
-                            orderCell.appendChild(anchor);
+                                            let orderCell = newRow.insertCell();
+                                            let formatDate = new Date(element.orderDate);
+                                            let timestamp = formatDate.toISOString().slice(0, 10) + " " + formatDate.toLocaleTimeString();
+                                            let anchor = document.createElement("a")
+                                            anchor.classList.add("btn", "default");
+                                            anchor.innerText = timestamp;
+                                            orderCell.appendChild(anchor);
 
-                            let condCell = newRow.insertCell();
-                            condCell.style.textAlign = "center";
-                            let condText = document.createTextNode(element.condition.replace(/[^A-Z]/g, '').replace('LP', 'SP'));
-                            condCell.appendChild(condText);
+                                            let condCell = newRow.insertCell();
+                                            condCell.style.textAlign = "center";
+                                            let condText = document.createTextNode(element.condition.replace(/[^A-Z]/g, '').replace('LP', 'SP'));
+                                            condCell.appendChild(condText);
 
-                            let priceCell = newRow.insertCell();
-                            priceCell.style.textAlign = "center";
-                            let priceText = document.createTextNode("$ " + (element.purchasePrice + element.shippingPrice).toFixed(2));
-                            priceCell.appendChild(priceText);
+                                            let priceCell = newRow.insertCell();
+                                            priceCell.style.textAlign = "center";
+                                            let priceText = document.createTextNode("$ " + (element.purchasePrice + element.shippingPrice).toFixed(2));
+                                            priceCell.appendChild(priceText);
 
-                            let qtyCell = newRow.insertCell();
-                            qtyCell.style.textAlign = "center";
-                            let qtyText = document.createTextNode(element.quantity + "x");
-                            qtyCell.appendChild(qtyText);
-                        });
-                    });
-                }
-            </script>
+                                            let qtyCell = newRow.insertCell();
+                                            qtyCell.style.textAlign = "center";
+                                            let qtyText = document.createTextNode(element.quantity + "x");
+                                            qtyCell.appendChild(qtyText);
+                                        });
+                                    });
+                            }
+                        </script>
 
-            {{$emptyImg := "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"}}
-            <div>
-                <table style="float: left; background-color: var(--background); width:354px">
-                    {{if .IsSealed}}
-                        <tr class="no-hover" style="background-color: var(--background)">
-                            <td>
-                                <div id="printings" style="text-align: center; max-width:354px; display: block;"></div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <center>
-                                    <h4>Available in</h4>
-                                </center>
-                                <div id="products" style="text-align: center; max-width:354px; display: block;"></div>
-                            </td>
-                        </tr>
-                    {{else}}
-                        <tr class="no-hover" style="background-color: var(--background)">
-                            <td>
-                                <img id="cardImage" src="" width="354" height="493"/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div id="printings" style="text-align: center; max-width:354px; display: block;"></div>
-                                {{if .CanShowAll}}
-                                    <center>
-                                        <a class="btn info" href="search?q={{.CleanSearchQuery}}">Show all versions</a>
-                                    </center>
+                        {{$emptyImg := "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ybBAEAAAAALAAAAAABAAEAAAIBRAA7"}}
+                        <div>
+                            <table style="float: left; background-color: var(--background); width:354px">
+                                {{if .IsSealed}}
+                                <tr class="no-hover" style="background-color: var(--background)">
+                                    <td>
+                                        <div id="printings"
+                                            style="text-align: center; max-width:354px; display: block;"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <center>
+                                            <h4>Available in</h4>
+                                        </center>
+                                        <div id="products" style="text-align: center; max-width:354px; display: block;">
+                                        </div>
+                                    </td>
+                                </tr>
+                                {{else}}
+                                <tr class="no-hover" style="background-color: var(--background)">
+                                    <td>
+                                        <img id="cardImage" src="" width="354" height="493" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div id="printings"
+                                            style="text-align: center; max-width:354px; display: block;"></div>
+                                        {{if .CanShowAll}}
+                                        <center>
+                                            <a class="btn info" href="search?q={{.CleanSearchQuery}}">Show all
+                                                versions</a>
+                                        </center>
+                                        {{end}}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <center>
+                                            <h4>Available in</h4>
+                                        </center>
+                                        <div id="products" style="text-align: center; max-width:354px; display: block;">
+                                        </div>
+                                    </td>
+                                </tr>
+                                {{if not (eq .Alternative "")}}
+                                <tr>
+                                    <td>
+                                        <center>
+                                            <a class="btn warning" href="/search?chart={{.Alternative}}">Switch
+                                                Foil/Non-Foil</a>
+                                        </center>
+                                    </td>
+                                </tr>
                                 {{end}}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <center>
-                                    <h4>Available in</h4>
-                                </center>
-                                <div id="products" style="text-align: center; max-width:354px; display: block;"></div>
-                            </td>
-                        </tr>
-                        {{if not (eq .Alternative "")}}
-                            <tr>
-                                <td>
-                                    <center>
-                                        <a class="btn warning" href="/search?chart={{.Alternative}}">Switch Foil/Non-Foil</a>
-                                    </center>
-                                </td>
-                            </tr>
-                        {{end}}
-                        {{if not (eq .AltEtchedId "")}}
-                            <tr>
-                                <td>
-                                    <center>
-                                        <a class="btn warning" href="/search?chart={{.AltEtchedId}}">Switch Etched/Non-Etched</a>
-                                    </center>
-                                </td>
-                            </tr>
-                        {{end}}
-                        {{if not (eq .StocksURL "")}}
-                            <tr>
-                                <td>
-                                    <center>
-                                        <a class="btn success" href="{{.StocksURL}}" target="_blank">Check MTGStocks charts</a>
-                                    </center>
-                                </td>
-                            </tr>
-                        {{end}}
-                        {{if .CanDownloadCSV}}
-                            <tr>
-                                <td>
-                                    <center>
-                                        Download prices as CSV<br>
-                                        <a class="btn success" href="search?q={{.SearchQuery}}&downloadCSV=retail" target="_blank">Retail</a>
-                                        <a class="btn warning" href="search?q={{.SearchQuery}}&downloadCSV=buylist" target="_blank">Buylist</a>
-                                    </center>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <center>
-                                        Load search in Uploader<br>
-                                        <form action="/upload" method="post">
-                                            <input id="mode" type="hidden" name="mode" value="false"/>
-                                            {{range .CardHashes}}
-                                                <input type="hidden" name="hashes" value="{{.}}"/>
-                                            {{end}}
-                                            <a class="btn success" style="text-align: center;" onclick='document.getElementById("mode").value=false; this.parentNode.submit(); return false;'>Retail</a>
-                                            <a class="btn warning" style="text-align: center;" onclick='document.getElementById("mode").value=true; this.parentNode.submit(); return false;'>Buylist</a>
-                                            <noscript>
-                                                <input type="submit" value="Check Uploader!" />
-                                            </noscript>
-                                        </form>
-                                    </center>
-                                </td>
-                            </tr>
-                        {{end}}
-                    {{end}}
-                    <tr>
-                        <td style="background-color: var(--background);">
-                            {{if .HasReserved}}
-                                <h4>
-                                    {{if not (eq .ChartID "")}}<center>{{else}}* ={{end}}
-                                    Part of the <a href="https://mtg.gamepedia.com/Reserved_List">Reserved List</a>
-                                    {{if not (eq .ChartID "")}}</center>{{end}}
-                                </h4>
-                            {{end}}
-                            {{if .HasStocks}}
-                                <h4>
-                                    {{if not (eq .ChartID "")}}<center>{{else}}• ={{end}}
-                                    On <a href="https://mtgstocks.com/interests">MTGStocks Interests</a> page
-                                    {{if not (eq .ChartID "")}}</center>{{end}}
-                                </h4>
-                            {{end}}
-                            {{if .HasSypList}}
-                                <h4>
-                                    {{if not (eq .ChartID "")}}<center>{{else}}† ={{end}}
-                                    Found in the <a href="https://help.tcgplayer.com/hc/en-us/articles/360054178934-Store-Your-Products-SYP-Pull-Sheet">SYP Pull Sheet</a>
-                                    {{if not (eq .ChartID "")}}</center>{{end}}
-                                </h4>
-                            {{end}}
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-
-            <div class="indent sticky">
-                {{$firstImg := ""}}
-                {{$firstPrint := ""}}
-                {{$firstProduct := ""}}
-
-                {{if not (eq .ChartID "")}}
-                    <div style="margin-left: 10px; float: left;">
-                        <canvas id="cardChart" width="740" height="420"></canvas>
-                        <br>
-                        <hr>
-                        <br>
+                                {{if not (eq .AltEtchedId "")}}
+                                <tr>
+                                    <td>
+                                        <center>
+                                            <a class="btn warning" href="/search?chart={{.AltEtchedId}}">Switch
+                                                Etched/Non-Etched</a>
+                                        </center>
+                                    </td>
+                                </tr>
+                                {{end}}
+                                {{if not (eq .StocksURL "")}}
+                                <tr>
+                                    <td>
+                                        <center>
+                                            <a class="btn success" href="{{.StocksURL}}" target="_blank">Check MTGStocks
+                                                charts</a>
+                                        </center>
+                                    </td>
+                                </tr>
+                                {{end}}
+                                {{if .CanDownloadCSV}}
+                                <tr>
+                                    <td>
+                                        <center>
+                                            Download prices as CSV<br>
+                                            <a class="btn success" href="search?q={{.SearchQuery}}&downloadCSV=retail"
+                                                target="_blank">Retail</a>
+                                            <a class="btn warning" href="search?q={{.SearchQuery}}&downloadCSV=buylist"
+                                                target="_blank">Buylist</a>
+                                        </center>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <center>
+                                            Load search in Uploader<br>
+                                            <form action="/upload" method="post">
+                                                <input id="mode" type="hidden" name="mode" value="false" />
+                                                {{range .CardHashes}}
+                                                <input type="hidden" name="hashes" value="{{.}}" />
+                                                {{end}}
+                                                <a class="btn success" style="text-align: center;"
+                                                    onclick='document.getElementById("mode").value=false; this.parentNode.submit(); return false;'>Retail</a>
+                                                <a class="btn warning" style="text-align: center;"
+                                                    onclick='document.getElementById("mode").value=true; this.parentNode.submit(); return false;'>Buylist</a>
+                                                <noscript>
+                                                    <input type="submit" value="Check Uploader!" />
+                                                </noscript>
+                                            </form>
+                                        </center>
+                                    </td>
+                                </tr>
+                                {{end}}
+                                {{end}}
+                                <tr>
+                                    <td style="background-color: var(--background);">
+                                        {{if .HasReserved}}
+                                        <h4>
+                                            {{if not (eq .ChartID "")}}<center>{{else}}* ={{end}}
+                                                Part of the <a href="https://mtg.gamepedia.com/Reserved_List">Reserved
+                                                    List</a>
+                                                {{if not (eq .ChartID "")}}</center>{{end}}
+                                        </h4>
+                                        {{end}}
+                                        {{if .HasStocks}}
+                                        <h4>
+                                            {{if not (eq .ChartID "")}}<center>{{else}}• ={{end}}
+                                                On <a href="https://mtgstocks.com/interests">MTGStocks Interests</a>
+                                                page
+                                                {{if not (eq .ChartID "")}}</center>{{end}}
+                                        </h4>
+                                        {{end}}
+                                        {{if .HasSypList}}
+                                        <h4>
+                                            {{if not (eq .ChartID "")}}<center>{{else}}† ={{end}}
+                                                Found in the <a
+                                                    href="https://help.tcgplayer.com/hc/en-us/articles/360054178934-Store-Your-Products-SYP-Pull-Sheet">SYP
+                                                    Pull Sheet</a>
+                                                {{if not (eq .ChartID "")}}</center>{{end}}
+                                        </h4>
+                                        {{end}}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
                     </div>
-                    <script>
-                        var ctx = document.getElementById('cardChart').getContext('2d');
-                        var cardChart = new Chart(ctx, {
-                            type: 'banWithLine',
-                            data: {
-                                labels: {{.AxisLabels}},
-                                datasets: [
-                                    {{range .Datasets}}
-                                        {
-                                            label: {{.Name}},
-                                            data: {{.Data}},
-                                            hidden: {{.Hidden}},
-                                            backgroundColor: {{.Color}},
-                                            borderColor: {{.Color}},
-                                            fill: false,
-                                            pointRadius: 0,
+
+                    <div class="indent sticky">
+                        {{$firstImg := ""}}
+                        {{$firstPrint := ""}}
+                        {{$firstProduct := ""}}
+
+                        {{if not (eq .ChartID "")}}
+                        <div style="margin-left: 10px; float: left;">
+                            <canvas id="cardChart" width="740" height="420"></canvas>
+                            <br>
+                            <hr>
+                            <br>
+                        </div>
+                        <script>
+                            var ctx = document.getElementById('cardChart').getContext('2d');
+                            var cardChart = new Chart(ctx, {
+                                type: 'banWithLine',
+                                data: {
+                                    labels: {{.AxisLabels }},
+                            datasets: [
+                                {{ range .Datasets }}
+                                {
+                                    label: {{.Name }},
+                                data: {{.Data }},
+                                hidden: {{.Hidden }},
+                                backgroundColor: {{.Color }},
+                                borderColor: {{.Color }},
+                                fill: false,
+                                pointRadius: 0,
                                         },
-                                    {{end}}
-                                ]
+                                {{ end }}
+                            ]
                             },
-                            options: getChartOpts({{len .AxisLabels}}),
+                            options: getChartOpts({{ len .AxisLabels }}),
                         });
-                    </script>
-                {{end}}
+                        </script>
+                        {{end}}
 
-                <table style="background-color: var(--background); float:left;" {{if .IsSealed}}onmouseout="document.getElementById('hoverImage').src='{{$emptyImg}}';"{{end}}>
-                    {{if .AllKeys}}
-                        <tr>
-                            <th class="stickyCategory"><h2 align=center>Sellers</h2></th>
-                            <th class="stickyCategory"><h2 align=center>Buyers</h2></th>
-                            <th class="stickyCategory"><h2 align=center style="display:none" id="lastsalesth">Last Sales</h2></th>
-                        </tr>
-                    {{end}}
+                        <table style="background-color: var(--background); float:left;" {{if
+                            .IsSealed}}onmouseout="document.getElementById('hoverImage').src='{{$emptyImg}}';" {{end}}>
+                            {{if .AllKeys}}
+                            <tr>
+                                <th class="stickyCategory">
+                                    <h2 align=center>Sellers</h2>
+                                </th>
+                                <th class="stickyCategory">
+                                    <h2 align=center>Buyers</h2>
+                                </th>
+                                <th class="stickyCategory">
+                                    <h2 align=center style="display:none" id="lastsalesth">Last Sales</h2>
+                                </th>
+                            </tr>
+                            {{end}}
 
-                    {{range $cardId := .AllKeys}}
-                        {{$card := (index $.Metadata $cardId)}}
-                        {{if eq $firstImg ""}}
+                            {{range $cardId := .AllKeys}}
+                            {{$card := (index $.Metadata $cardId)}}
+                            {{if eq $firstImg ""}}
                             {{$firstImg = $card.ImageURL}}
                             {{$firstPrint = $card.Printings}}
                             {{$firstProduct = $card.Products}}
-                        {{end}}
+                            {{end}}
 
-                        <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}}, {{$card.Products}});" title="{{$card.Title}}">
-                            <th colspan="3" class="wrap stickyHeader" style="text-align: left; vertical-align: middle;">
-                                <table style="margin:0 0 0 18">
-                                    <tr style="background-color:rgba(0, 0, 0, 0);">
-                                        <td rowspan=2>
-                                            <a href="search?q=s:{{$card.SetCode}}">
-                                                <i class="ss {{$card.Keyrune}} ss-2x ss-fw"></i>
-                                            </a>
-                                        </td>
-                                        <td width=100%>
-                                            <a href="{{$card.SearchURL}}">
-                                                {{$card.Name}}
-                                            </a>
-                                            {{if ne $card.Variant ""}}
+                            <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}}, {{$card.Products}});"
+                                title="{{$card.Title}}">
+                                <th colspan="3" class="wrap stickyHeader"
+                                    style="text-align: left; vertical-align: middle;">
+                                    <table style="margin:0 0 0 18">
+                                        <tr style="background-color:rgba(0, 0, 0, 0);">
+                                            <td rowspan=2>
+                                                <a href="search?q=s:{{$card.SetCode}}">
+                                                    <i class="ss {{$card.Keyrune}} ss-2x ss-fw"></i>
+                                                </a>
+                                            </td>
+                                            <td width=100%>
+                                                <a href="{{$card.SearchURL}}">
+                                                    {{$card.Name}}
+                                                </a>
+                                                {{if ne $card.Variant ""}}
                                                 <i>({{$card.Variant}})</i>
-                                            {{end}}
-                                            {{if $card.Reserved}}
+                                                {{end}}
+                                                {{if $card.Reserved}}
                                                 *
-                                            {{end}}
-                                            {{if $card.Stocks}}
+                                                {{end}}
+                                                {{if $card.Stocks}}
                                                 •
-                                            {{end}}
-                                            {{if $card.SypList}}
+                                                {{end}}
+                                                {{if $card.SypList}}
                                                 †
-                                            {{end}}
-                                        </td>
-                                        {{if $card.Sealed}}
+                                                {{end}}
+                                            </td>
+                                            {{if $card.Sealed}}
                                             {{if $card.Booster}}
-                                                <td rowspan=2>
-                                                    <a href='/search?q=unpack:"{{$card.Name}}"' title="Simulate opening a booster pack"><span class="emoji">🎁</span></a>
-                                                </td>
+                                            <td rowspan=2>
+                                                <a href='/search?q=unpack:"{{$card.Name}}"'
+                                                    title="Simulate opening a booster pack"><span
+                                                        class="emoji">🎁</span></a>
+                                            </td>
                                             {{end}}
                                             <td rowspan=2>
-                                                <a href='/search?q={{if $card.Booster}}contents{{else}}decklist{{end}}:"{{$card.Name}}"' title="Search what can be found in this product"><span class="emoji">🔎</span></a>
+                                                <a href='/search?q={{if $card.Booster}}contents{{else}}decklist{{end}}:"{{$card.Name}}"'
+                                                    title="Search what can be found in this product"><span
+                                                        class="emoji">🔎</span></a>
                                             </td>
-                                        {{else}}
+                                            {{else}}
                                             <td rowspan=2>
-                                                <a href='/sealed?q=container:"{{$card.Name}}"' title="Search which products can contain a reprint"><span class="emoji">📖</span></a>
+                                                <a href='/sealed?q=container:"{{$card.Name}}"'
+                                                    title="Search which products can contain a reprint"><span
+                                                        class="emoji">📖</span></a>
                                             </td>
-                                        {{end}}
-                                        <td rowspan=2>
-                                            <span class="emoji" style="cursor: pointer;" onclick="navigator.clipboard.writeText('{{$card.Name}}'); waithide(this)" title="Copy to clipboard">📝</span>
-                                        </td>
-                                        {{if not $.IsSealed}}
+                                            {{end}}
                                             <td rowspan=2>
-                                                <a href="https://scryfall.com/card/{{tolower $card.SetCode}}/{{$card.Number}}" title="Check this card on Scryfall.com" target=_blank><img width=28 src="img/logo/scryfall.svg"></a>
+                                                <span class="emoji" style="cursor: pointer;"
+                                                    onclick="navigator.clipboard.writeText('{{$card.Name}}'); waithide(this)"
+                                                    title="Copy to clipboard">📝</span>
                                             </td>
-                                        {{end}}
-                                        {{if $card.TCGId}}
+                                            {{if not $.IsSealed}}
                                             <td rowspan=2>
-                                                    <a href="https://store.tcgplayer.com/admin/product/manage/{{$card.TCGId}}" title="Manage your TCGplayer inventory" target=_blank><img width=22 src="img/logo/tcgapp.png"></a>
+                                                <a href="https://scryfall.com/card/{{tolower $card.SetCode}}/{{$card.Number}}"
+                                                    title="Check this card on Scryfall.com" target=_blank><img width=28
+                                                        src="img/logo/scryfall.svg"></a>
+                                            </td>
+                                            {{end}}
+                                            {{if $card.TCGId}}
+                                            <td rowspan=2>
+                                                <a href="https://store.tcgplayer.com/admin/product/manage/{{$card.TCGId}}"
+                                                    title="Manage your TCGplayer inventory" target=_blank><img width=22
+                                                        src="img/logo/tcgapp.png"></a>
                                             </td>
                                             <td rowspan=2>
-                                                <a href="javascript:getLastSold('{{$cardId}}')" title="Retrieve last sales on TCG" id="lastsolda{{$cardId}}"><span class="emoji">💸</span></a>
+                                                <a href="javascript:getLastSold('{{$cardId}}')"
+                                                    title="Retrieve last sales on TCG" id="lastsolda{{$cardId}}"><span
+                                                        class="emoji">💸</span></a>
                                             </td>
-                                        {{end}}
-                                        {{if eq $.ChartID ""}}
+                                            {{end}}
+                                            {{if eq $.ChartID ""}}
                                             <td rowspan=2>
                                                 <span class="emoji">
                                                     <a href="?chart={{$cardId}}" title="See historical data">📊</a>
                                                 </span>
                                             </td>
-                                        {{end}}
-                                    </tr>
-                                    <tr style="background-color:rgba(0, 0, 0, 0); margin-bottom: 0px;">
-                                        <td>
-                                            <h6>
-                                                <a href="?q=s:{{$card.SetCode}}{{if $card.Date}} date:{{$card.Date}}{{end}}">{{$card.Title}}</a>
-                                                {{if $card.SourceSealed}}
-                                                    - <a href="/sealed?q=container:{{$card.UUID}}">Found in {{len $card.SourceSealed}} product{{if gt (len $card.SourceSealed) 1}}s{{end}}</a>
-                                                {{end}}
-                                            </h6>
-                                        </td>
+                                            {{end}}
+                                        </tr>
+                                        <tr style="background-color:rgba(0, 0, 0, 0); margin-bottom: 0px;">
+                                            <td>
+                                                <h6>
+                                                    <a
+                                                        href="?q=s:{{$card.SetCode}}{{if $card.Date}} date:{{$card.Date}}{{end}}">{{$card.Title}}</a>
+                                                    {{if $card.SourceSealed}}
+                                                    - <a href="/sealed?q=container:{{$card.UUID}}">Found in {{len
+                                                        $card.SourceSealed}} product{{if gt (len $card.SourceSealed)
+                                                        1}}s{{end}}</a>
+                                                    {{end}}
+                                                </h6>
+                                            </td>
 
-                                    </tr>
-                                </table>
-                            </th>
-                        </tr>
+                                        </tr>
+                                    </table>
+                                </th>
+                            </tr>
 
-                        <tr class="no-hover" style="background-color:rgba(0,0,0,0);" onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}}, {{$card.Products}});" style="background-color:rgba(0, 0, 0, 0);">
-                            {{$condsEntry := (index $.FoundSellers $cardId)}}
-                            <td style="vertical-align: {{if not $condsEntry}}middle{{else}}top{{end}}; padding: 0; margin: 0;">
-                                <table class="searchResults" style="margin: 0 6px 0 12px;">
-                                    {{if not $condsEntry}}
-                                        <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}}, {{$card.Products}});" style="background-color:rgba(0, 0, 0, 0);">
+                            <tr class="no-hover" style="background-color:rgba(0,0,0,0);"
+                                onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}}, {{$card.Products}});"
+                                style="background-color:rgba(0, 0, 0, 0);">
+                                {{$condsEntry := (index $.FoundSellers $cardId)}}
+                                <td
+                                    style="vertical-align: {{if not $condsEntry}}middle{{else}}top{{end}}; padding: 0; margin: 0;">
+                                    <table class="searchResults" style="margin: 0 6px 0 12px;">
+                                        {{if not $condsEntry}}
+                                        <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}}, {{$card.Products}});"
+                                            style="background-color:rgba(0, 0, 0, 0);">
                                             <td colspan="4">
                                                 <center>
                                                     <i>No offers</i>
                                                 </center>
                                             </td>
                                         </tr>
-                                    {{end}}
-                                    {{range $conditions := $.CondKeys}}
+                                        {{end}}
+                                        {{range $conditions := $.CondKeys}}
                                         {{$entries := (index $condsEntry $conditions)}}
                                         {{if ne $conditions "INDEX"}}
-                                            {{if $entries}}
-                                                <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}});">
-                                                    <td colspan="4" style="padding-top: 8px; padding-bottom: 8px"><i>{{if $.IsSealed}}Available offers{{else}}Conditions: {{$conditions}}{{end}}</i></td>
-                                                </tr>
-                                            {{end}}
+                                        {{if $entries}}
+                                        <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}});">
+                                            <td colspan="4" style="padding-top: 8px; padding-bottom: 8px"><i>{{if
+                                                    $.IsSealed}}Available offers{{else}}Conditions:
+                                                    {{$conditions}}{{end}}</i></td>
+                                        </tr>
+                                        {{end}}
                                         {{end}}
                                         {{range $entries}}
-                                            <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}});">
-                                                <td>
-                                                    {{if eq .URL ""}}
-                                                        <a class="btn default">
+                                        <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}});">
+                                            <td>
+                                                {{if eq .URL ""}}
+                                                <a class="btn default">
                                                     {{else}}
-                                                        <a class="btn normal" href="{{.URL}}" target="_blank" rel="nofollow">
-                                                    {{end}}
+                                                    <a class="btn normal" href="{{.URL}}" target="_blank"
+                                                        rel="nofollow">
+                                                        {{end}}
                                                         {{.ScraperName}}
                                                         {{if ne $conditions "INDEX"}}
-                                                            {{.Country}}
+                                                        {{.Country}}
                                                         {{end}}
                                                     </a>
-                                                </td>
-                                                <td style="text-align: center; vertical-align: middle;">
-                                                    $ {{printf "%.2f" .Price}}
-                                                </td>
-                                                {{if .IndexCombined}}
-                                                    <td style="text-align: center; vertical-align: middle;">
-                                                        /
-                                                    </td>
-                                                    <td style="text-align: center; vertical-align: middle;">
-                                                        $ {{printf "%.2f" .Secondary}}
-                                                    </td>
-                                                {{else}}
-                                                    <td>
-                                                    </td>
-                                                    <td style="text-align: center; vertical-align: middle;">
-                                                        {{if .BundleIcon}}
-                                                            <img style="padding-top:4px;" src="{{.BundleIcon}}">
-                                                        {{else if not .NoQuantity}}
-                                                            {{.Quantity}}
-                                                        {{end}}
-                                                    </td>
+                                            </td>
+                                            <td style="text-align: center; vertical-align: middle;">
+                                                $ {{printf "%.2f" .Price}}
+                                            </td>
+                                            {{if .IndexCombined}}
+                                            <td style="text-align: center; vertical-align: middle;">
+                                                /
+                                            </td>
+                                            <td style="text-align: center; vertical-align: middle;">
+                                                $ {{printf "%.2f" .Secondary}}
+                                            </td>
+                                            {{else}}
+                                            <td>
+                                            </td>
+                                            <td style="text-align: center; vertical-align: middle;">
+                                                {{if .BundleIcon}}
+                                                <img style="padding-top:4px;" src="{{.BundleIcon}}">
+                                                {{else if not .NoQuantity}}
+                                                {{.Quantity}}
                                                 {{end}}
-                                            </tr>
+                                            </td>
+                                            {{end}}
+                                        </tr>
                                         {{end}}
-                                    {{end}}
-                                </table>
-                            </td>
+                                        {{end}}
+                                    </table>
+                                </td>
 
-                            {{$condsEntry := (index $.FoundVendors $cardId)}}
-                            <td style="vertical-align: {{if not $condsEntry}}middle{{else}}top{{end}}; padding: 0; margin: 0;">
-                                <table class="searchResults" style="margin: 0 6px 0 12px;">
-                                    {{if not $condsEntry}}
-                                        <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}}, {{$card.Products}});" style="background-color:rgba(0, 0, 0, 0);">
+                                {{$condsEntry := (index $.FoundVendors $cardId)}}
+                                <td
+                                    style="vertical-align: {{if not $condsEntry}}middle{{else}}top{{end}}; padding: 0; margin: 0;">
+                                    <table class="searchResults" style="margin: 0 6px 0 12px;">
+                                        {{if not $condsEntry}}
+                                        <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}}, {{$card.Products}});"
+                                            style="background-color:rgba(0, 0, 0, 0);">
                                             <td colspan="4">
                                                 <center>
                                                     <i>No offers</i>
                                                 </center>
                                             </td>
                                         </tr>
-                                    {{end}}
-                                    {{range $conditions := $.CondKeys}}
+                                        {{end}}
+                                        {{range $conditions := $.CondKeys}}
                                         {{$entries := (index $condsEntry $conditions)}}
                                         {{if ne $conditions "INDEX"}}
-                                            {{if $entries }}
-                                                <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}}, {{$card.Products}});">
-                                                    <td colspan="4" style="padding-top: 8px; padding-bottom: 8px"><i>{{if $.IsSealed}}Available offers{{else}}Conditions: {{$conditions}}{{end}}</i></td>
-                                                </tr>
-                                            {{end}}
+                                        {{if $entries }}
+                                        <tr
+                                            onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}}, {{$card.Products}});">
+                                            <td colspan="4" style="padding-top: 8px; padding-bottom: 8px"><i>{{if
+                                                    $.IsSealed}}Available offers{{else}}Conditions:
+                                                    {{$conditions}}{{end}}</i></td>
+                                        </tr>
+                                        {{end}}
                                         {{end}}
                                         {{range $entries}}
-                                            <tr onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}}, {{$card.Products}});">
-                                                <td>
-                                                    {{if eq .URL ""}}
-                                                        <a class="btn default">
+                                        <tr
+                                            onmouseover="updateSidebar({{$card.ImageURL}}, {{$card.Printings}}, {{$card.Products}});">
+                                            <td>
+                                                {{if eq .URL ""}}
+                                                <a class="btn default">
                                                     {{else}}
-                                                        <a class="btn normal" href="{{.URL}}" target="_blank" rel="nofollow">
-                                                    {{end}}
+                                                    <a class="btn normal" href="{{.URL}}" target="_blank"
+                                                        rel="nofollow">
+                                                        {{end}}
                                                         {{.ScraperName}} {{.Country}}
                                                     </a>
-                                                </td>
-                                                <td {{if .Credit}}title="Credit: $ {{printf "%.2f" .Credit}}"{{end}}>
-                                                    $ {{printf "%.2f" .Price}}
-                                                </td>
-                                                <td style="text-align: center; vertical-align: middle;">
-                                                    {{if eq $conditions "NM"}}
-                                                        {{if ne .Ratio 0.0}}{{printf "%.2f" .Ratio}} %{{end}}
-                                                    {{end}}
-                                                </td>
-                                                <td style="text-align: center; vertical-align: middle;">
-                                                    {{if and .Quantity (eq $conditions "NM")}}
-                                                        {{.Quantity}}
-                                                    {{end}}
-                                                </td>
-                                            </tr>
+                                            </td>
+                                            <td {{if .Credit}}title="Credit: $ {{printf " %.2f" .Credit}}"{{end}}>
+                                                $ {{printf "%.2f" .Price}}
+                                            </td>
+                                            <td style="text-align: center; vertical-align: middle;">
+                                                {{if eq $conditions "NM"}}
+                                                {{if ne .Ratio 0.0}}{{printf "%.2f" .Ratio}} %{{end}}
+                                                {{end}}
+                                            </td>
+                                            <td style="text-align: center; vertical-align: middle;">
+                                                {{if and .Quantity (eq $conditions "NM")}}
+                                                {{.Quantity}}
+                                                {{end}}
+                                            </td>
+                                        </tr>
                                         {{end}}
-                                    {{end}}
-                                </table>
-                            </td>
+                                        {{end}}
+                                    </table>
+                                </td>
 
-                            <td style="vertical-align: top; padding: 0; margin: 0;">
-                                <table class="searchResults" style="margin: 0 12px 0 6px; display:none" id="{{$cardId}}">
-                                </table>
-                            </td>
-                        </tr>
+                                <td style="vertical-align: top; padding: 0; margin: 0;">
+                                    <table class="searchResults" style="margin: 0 12px 0 6px; display:none"
+                                        id="{{$cardId}}">
+                                    </table>
+                                </td>
+                            </tr>
+                            {{end}}
+                            {{if .CurrentIndex}}
+                            <tr style="background-color: var(--headerbackground);">
+                                <td colspan="3" style="text-align: center; vertical-align: middle;">
+                                    <p style="display: inline;">
+                                        {{if ne .CurrentIndex 1}}
+                                        <a class="pagination"
+                                            href="?q={{.SearchQuery}}&p=1&sort={{.SearchSort}}&reverse={{.ReverseMode}}">
+                                            <<> <a class="pagination"
+                                                    href="?q={{.SearchQuery}}&p={{.PrevIndex}}&sort={{.SearchSort}}&reverse={{.ReverseMode}}"><i
+                                                        class="arrow left"></i></a>
+                                                {{end}}
+                                                {{.CurrentIndex}} / {{.TotalIndex}}
+                                                {{if ne .CurrentIndex .TotalIndex}}
+                                                <a class="pagination"
+                                                    href="?q={{.SearchQuery}}&p={{.NextIndex}}&sort={{.SearchSort}}&reverse={{.ReverseMode}}"><i
+                                                        class="arrow right"></i></a>
+                                                <a class="pagination"
+                                                    href="?q={{.SearchQuery}}&p={{.TotalIndex}}&sort={{.SearchSort}}&reverse={{.ReverseMode}}">&gt;</a>
+                                                {{end}}
+                                    </p>
+                                </td>
+                            </tr>
+                            {{end}}
+                            {{if ne .InfoMessage ""}}
+                            <tr>
+                                <td colspan="2" style="text-align: center; vertical-align: middle;">
+                                    <h4 class="indent"><i>{{.InfoMessage}}</i></h4>
+                                </td>
+                            </tr>
+                            {{end}}
+                        </table>
+                        {{if eq $firstImg ""}}
+                        {{$firstImg = "https://cards.scryfall.io/back.png"}}
+                        {{end}}
+                        {{if .IsSealed}}
+                        {{$firstImg = $emptyImg}}
+                        {{end}}
+                        <script type="text/javascript">
+                            updateSidebar({{ $firstImg }}, {{ $firstPrint }}, {{ $firstProduct }});
+                        </script>
+                        <script>
+                            var coll = document.getElementsByClassName("collapsible");
+                            var i;
+
+                            for (i = 0; i < coll.length; i++) {
+                                coll[i].addEventListener("click", function () {
+                                    this.classList.toggle("active");
+                                    var content = this.nextElementSibling;
+                                    if (content.style.display === "block") {
+                                        content.style.display = "none";
+                                    } else {
+                                        content.style.display = "block";
+                                    }
+                                });
+                            }
+                        </script>
+                    </div>
                     {{end}}
-                    {{if .CurrentIndex}}
-                        <tr style="background-color: var(--headerbackground);">
-                            <td colspan="3" style="text-align: center; vertical-align: middle;">
-                                <p style="display: inline;">
-                                    {{if ne .CurrentIndex 1}}
-                                        <a class="pagination" href="?q={{.SearchQuery}}&p=1&sort={{.SearchSort}}&reverse={{.ReverseMode}}">&lt;</a>
-                                        <a class="pagination" href="?q={{.SearchQuery}}&p={{.PrevIndex}}&sort={{.SearchSort}}&reverse={{.ReverseMode}}"><i class="arrow left"></i></a>
-                                    {{end}}
-                                    {{.CurrentIndex}} / {{.TotalIndex}}
-                                    {{if ne .CurrentIndex .TotalIndex}}
-                                        <a class="pagination" href="?q={{.SearchQuery}}&p={{.NextIndex}}&sort={{.SearchSort}}&reverse={{.ReverseMode}}"><i class="arrow right"></i></a>
-                                        <a class="pagination" href="?q={{.SearchQuery}}&p={{.TotalIndex}}&sort={{.SearchSort}}&reverse={{.ReverseMode}}">&gt;</a>
-                                    {{end}}
-                                </p>
-                            </td>
-                        </tr>
+                    <div style="clear:both;"></div>
                     {{end}}
-                    {{if ne .InfoMessage ""}}
-                        <tr>
-                            <td colspan="2" style="text-align: center; vertical-align: middle;">
-                                <h4 class="indent"><i>{{.InfoMessage}}</i></h4>
-                            </td>
-                        </tr>
-                    {{end}}
-                </table>
-                {{if eq $firstImg ""}}
-                    {{$firstImg = "https://cards.scryfall.io/back.png"}}
-                {{end}}
-                {{if .IsSealed}}
-                    {{$firstImg = $emptyImg}}
-                {{end}}
-                <script type="text/javascript">
-                    updateSidebar({{$firstImg}}, {{$firstPrint}}, {{$firstProduct}});
-                </script>
-            </div>
-        {{end}}
-        <div style="clear:both;"></div>
-    {{end}}
-    <br>
-</div>
+                    <br>
+                </div>
 </body>
+
 </html>
