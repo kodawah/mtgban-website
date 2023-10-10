@@ -694,7 +694,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		case "TCG Player Market":
 			name = "TCG Player Trade-In"
 		case "Sealed EV Scraper":
-			name = "Cardkingdom Buylist"
+			name = "Card Kingdom Singles Buylist"
 		}
 
 		entry := Arbitrage{
