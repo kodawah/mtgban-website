@@ -23,6 +23,7 @@ import (
 	"github.com/mtgban/go-mtgban/coolstuffinc"
 	"github.com/mtgban/go-mtgban/hareruya"
 	"github.com/mtgban/go-mtgban/magiccorner"
+	"github.com/mtgban/go-mtgban/miniaturemarket"
 	"github.com/mtgban/go-mtgban/mtgseattle"
 	"github.com/mtgban/go-mtgban/mtgstocks"
 	"github.com/mtgban/go-mtgban/ninetyfive"
@@ -728,6 +729,13 @@ var ScraperOptions = map[string]*scraperOption{
 			scraper := coolstuffinc.NewScraperSealed()
 			scraper.LogCallback = logger.Printf
 			scraper.Partner = Config.Affiliate["CSI"]
+			return scraper, nil
+		},
+	},
+	"miniaturemarket_sealed": &scraperOption{
+		Init: func(logger *log.Logger) (mtgban.Scraper, error) {
+			scraper := miniaturemarket.NewScraperSealed()
+			scraper.LogCallback = logger.Printf
 			return scraper, nil
 		},
 	},
