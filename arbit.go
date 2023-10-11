@@ -226,6 +226,7 @@ var ShinyEditionRanges = map[string][2]int{
 
 type Arbitrage struct {
 	Name       string
+	Key        string
 	Arbit      []mtgban.ArbitEntry
 	HasCredit  bool
 	HasNoQty   bool
@@ -699,6 +700,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 
 		entry := Arbitrage{
 			Name:      name,
+			Key:       scraper.Info().Shorthand,
 			Arbit:     arbit,
 			HasCredit: !scraper.Info().NoCredit,
 			HasNoQty:  scraper.Info().MetadataOnly || scraper.Info().NoQuantityInventory,
