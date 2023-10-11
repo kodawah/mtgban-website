@@ -114,36 +114,33 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(MaxUploadFileSize)
 
 	// See if we need to download the ck csv only
-	ckhashes := r.Form["CKhashes"]
-	hashesQtys := r.Form["hashesQtys"]
-	if ckhashes != nil {
-		w.Header().Set("Content-Type", "text/csv")
-		w.Header().Set("Content-Disposition", "attachment; filename=\"mtgban_ck.csv\"")
-		csvWriter := csv.NewWriter(w)
+	hashTag := r.FormValue("tag")
+	switch hashTag {
+	case "CK", "SCG":
+		hashes := r.Form[hashTag+"hashes"]
+		hashesQtys := r.Form[hashTag+"hashesQtys"]
+		if hashes != nil {
+			w.Header().Set("Content-Type", "text/csv")
+			w.Header().Set("Content-Disposition", "attachment; filename=\"mtgban_"+strings.ToLower(hashTag)+".csv\"")
+			csvWriter := csv.NewWriter(w)
 
-		err := UUID2CKCSV(csvWriter, ckhashes, hashesQtys)
-		if err != nil {
-			w.Header().Del("Content-Type")
-			UserNotify("upload", err.Error())
-			pageVars.InfoMessage = "Unable to download CSV right now"
-			render(w, "upload.html", pageVars)
+			var err error
+			switch hashTag {
+			case "CK":
+				err = UUID2CKCSV(csvWriter, hashes, hashesQtys)
+			case "SCG":
+				err = UUID2SCGCSV(csvWriter, hashes, hashesQtys)
+			}
+			if err != nil {
+				w.Header().Del("Content-Type")
+				UserNotify("upload", err.Error())
+				pageVars.InfoMessage = "Unable to download CSV right now"
+				render(w, "upload.html", pageVars)
+			}
+			return
 		}
-		return
-	}
-	// Same for scg csv
-	scghashes := r.Form["SCGhashes"]
-	if scghashes != nil {
-		w.Header().Set("Content-Type", "text/csv")
-		w.Header().Set("Content-Disposition", "attachment; filename=\"mtgban_scg.csv\"")
-		csvWriter := csv.NewWriter(w)
-
-		err := UUID2SCGCSV(csvWriter, scghashes, hashesQtys)
-		if err != nil {
-			w.Header().Del("Content-Type")
-			UserNotify("upload", err.Error())
-			pageVars.InfoMessage = "Unable to download CSV right now"
-			render(w, "upload.html", pageVars)
-		}
+		pageVars.ErrorMessage = "Invalid tag option: " + hashTag
+		render(w, "upload.html", pageVars)
 		return
 	}
 
