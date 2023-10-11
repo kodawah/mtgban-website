@@ -548,7 +548,7 @@ var AffiliateStores []AffiliateConfig = []AffiliateConfig{
 		TitleFunc: func(URLpath string) string {
 			if strings.Contains(URLpath, "/dp/") {
 				fields := strings.Split(URLpath, "/")
-				return strings.Replace(fields[1], "-", " ", -1)
+				return strings.Replace(fields[2], "-", " ", -1)
 			}
 			return "Your search"
 		},
