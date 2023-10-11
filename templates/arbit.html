@@ -224,6 +224,18 @@
                         {{$sourceKey = $arb.Key}}
                     {{end}}
                     {{$entries := $arb.Arbit}}
+
+                    {{if eq $sourceKey "CK"}}
+                        <form action="https://www.cardkingdom.com/builder?utm_campaign={{load_partner $sourceKey}}&utm_medium=arbit&utm_source={{load_partner $sourceKey}}" method="post" id="{{$sourceKey}}{{$scraperKey}}deckbuilder" style="display: inline;" target="_blank">
+                            <input type="hidden" name="partner" value="{{load_partner $sourceKey}}"/>
+                            <input type="hidden" name="c" value="{{range $entries}}{{.Quantity}} {{(index $.Metadata .CardId).Name}}||{{end}}"/>
+                            <a class="btn success" style="text-align: center;" href='javascript:void(0)' onclick='document.getElementById("{{$sourceKey}}{{$scraperKey}}deckbuilder").submit();'>Load at {{$sourceKey}}</a>
+                            <noscript>
+                                <input type="submit" value="Loat at {{$sourceKey}}"/>
+                            </noscript>
+                        </form>
+                    {{end}}
+
                     {{if or (eq $scraperKey "CK") (eq $scraperKey "SCG")}}
                         <form action="/upload" method="post" id="{{$scraperKey}}{{$sourceKey}}hashes" style="display: inline;">
                             <input type="hidden" name="tag" value="{{$scraperKey}}"/>

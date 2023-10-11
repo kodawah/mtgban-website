@@ -750,6 +750,9 @@ func render(w http.ResponseWriter, tmpl string, pageVars PageVars) {
 		"tolower": func(s string) string {
 			return strings.ToLower(s)
 		},
+		"load_partner": func(s string) string {
+			return Config.Affiliate[s]
+		},
 	}
 
 	// Give each template a name
