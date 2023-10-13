@@ -231,7 +231,7 @@
                             <input type="hidden" name="c" value="{{range $entries}}{{.Quantity}} {{(index $.Metadata .CardId).Name}}||{{end}}"/>
                             <a class="btn success" style="text-align: center;" href='javascript:void(0)' onclick='document.getElementById("{{$sourceKey}}{{$scraperKey}}deckbuilder").submit();'>Load at {{$sourceKey}}</a>
                             <noscript>
-                                <input type="submit" value="Loat at {{$sourceKey}}"/>
+                                <input type="submit" value="Load at {{$sourceKey}}"/>
                             </noscript>
                         </form>
                     {{end}}
