@@ -234,6 +234,23 @@
                                 <input type="submit" value="Load at {{$sourceKey}}"/>
                             </noscript>
                         </form>
+                    {{else if eq $sourceKey "CSI"}}
+                        <form action="https://www.coolstuffinc.com/main_deckBuilder.php" method="post" id="{{$sourceKey}}{{$scraperKey}}deckbuilder" style="display: inline;" target="_blank">
+                            <input type="hidden" name="partner" value="{{load_partner $sourceKey}}"/>
+                            <input type="hidden" name="sList" value="{{range $entries}}{{.Quantity}} {{(index $.Metadata .CardId).Name}}|{{end}}"/>
+                            <a class="btn success" style="text-align: center;" href='javascript:void(0)' onclick='document.getElementById("{{$sourceKey}}{{$scraperKey}}deckbuilder").submit();'>Load at {{$sourceKey}}</a>
+                            <noscript>
+                                <input type="submit" value="Load at {{$sourceKey}}"/>
+                            </noscript>
+                        </form>
+                    {{else if has_prefix $sourceKey "TCG"}}
+                        <form action='https://api.tcgplayer.com/massentry?partner={{load_partner "TCG"}}&utm_campaign=affiliate&utm_medium={{load_partner "TCG"}}&utm_source={{load_partner "TCG"}}' method="post" id="{{$sourceKey}}{{$scraperKey}}deckbuilder" style="display: inline;" target="_blank">
+                            <input type="hidden" name="c" value="{{range $entries}}{{.Quantity}}-{{uuid2tcgid .CardId}}||{{end}}"/>
+                            <a class="btn success" style="text-align: center;" href='javascript:void(0)' onclick='document.getElementById("{{$sourceKey}}{{$scraperKey}}deckbuilder").submit();'>Load at TCG</a>
+                            <noscript>
+                                <input type="submit" value="Load at TCG"/>
+                            </noscript>
+                        </form>
                     {{end}}
 
                     {{if eq $scraperKey "CK"}}
