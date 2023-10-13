@@ -401,6 +401,11 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				continue
 			}
+			scryfallId, found := co.Identifiers["scryfallId"]
+			if !found {
+				continue
+			}
+
 			var cond string
 			if uploadedData[i].OriginalCondition != "" {
 				cond = map[string]string{
@@ -417,7 +422,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			}
 
 			items = append(items, CCItem{
-				ScryfallID: co.Identifiers["scryfallId"],
+				ScryfallID: scryfallId,
 				Condition:  cond,
 				Quantity:   qty,
 				IsFoil:     co.Foil,
