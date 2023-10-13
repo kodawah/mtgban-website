@@ -86,9 +86,6 @@ type OptimizedUploadEntry struct {
 	// Condition as found in the source data
 	Condition string
 
-	// Shorthand of the store offering the price
-	Store string
-
 	// Price of the card provided in the source data (or TCG_LOW)
 	Price float64
 
@@ -534,13 +531,11 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	var optimizedResults map[string][]OptimizedUploadEntry
 	var optimizedTotals map[string]float64
-	var optimizedEditions map[string][]OptimizedUploadEntry
 	var highestTotal float64
 
 	if canOptimize && blMode {
 		optimizedResults = map[string][]OptimizedUploadEntry{}
 		optimizedTotals = map[string]float64{}
-		optimizedEditions = map[string][]OptimizedUploadEntry{}
 	}
 
 	missingCounts := map[string]int{}
@@ -696,19 +691,6 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 				if j == 0 {
 					highestTotal += bestPrice
 				}
-
-				// Break down by edition
-				edition := pageVars.Metadata[cardId].SetCode
-				optimizedEditions[edition] = append(optimizedEditions[edition], OptimizedUploadEntry{
-					CardId:      cardId,
-					Store:       bestStore,
-					Condition:   conds,
-					Price:       comparePrice,
-					Spread:      spread,
-					BestPrice:   price,
-					Quantity:    uploadedData[i].Quantity,
-					VisualPrice: comparePrice * visualPerc / 100.0,
-				})
 			}
 		}
 	}
@@ -735,30 +717,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		// Keep edition list sorted in the same way
-		for code := range optimizedEditions {
-			switch sorting {
-			case "highprice":
-				sort.Slice(optimizedEditions[code], func(i, j int) bool {
-					return optimizedEditions[code][i].BestPrice > optimizedEditions[code][j].BestPrice
-				})
-			case "highspread":
-				sort.Slice(optimizedEditions[code], func(i, j int) bool {
-					return optimizedEditions[code][i].Spread > optimizedEditions[code][j].Spread
-				})
-			case "alphabetical":
-				sort.Slice(optimizedEditions[code], func(i, j int) bool {
-					return sortSetsAlphabeticalSet(optimizedEditions[code][i].CardId, optimizedEditions[code][j].CardId)
-				})
-			default:
-				sort.Slice(optimizedEditions[code], func(i, j int) bool {
-					return sortSets(optimizedEditions[code][i].CardId, optimizedEditions[code][j].CardId)
-				})
-			}
-		}
-
 		pageVars.Optimized = optimizedResults
-		pageVars.OptimizedEditions = optimizedEditions
 		pageVars.OptimizedTotals = optimizedTotals
 		pageVars.HighestTotal = highestTotal
 		pageVars.Editions = AllEditionsKeys
