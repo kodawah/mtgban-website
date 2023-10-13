@@ -159,13 +159,11 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		canChangeStores = true
 	}
 
-	// Enable optimizer calculation if allowed for buylists
-	optimizerOpt, _ := strconv.ParseBool(GetParamFromSig(sig, "UploadOptimizer"))
-	canOptimize := (optimizerOpt || (DevMode && !SigCheck))
+	// Enable optimizer customization
 	var skipLowValue, skipLowValueAbs, skipHighValue, skipHighValueAbs bool
 	var skipMargin, skipConds, skipPrices bool
 	var visualIndicator bool
-	if blMode && canOptimize {
+	if blMode {
 		skipLowValue = r.FormValue("lowval") != ""
 		skipLowValueAbs = r.FormValue("lowvalabs") != ""
 		skipHighValue = r.FormValue("highval") != ""
@@ -220,7 +218,6 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	// Set flags needed to show elements on the page ui
 	pageVars.IsBuylist = blMode
 	pageVars.CanBuylist = canBuylist
-	pageVars.CanOptimize = canOptimize
 	pageVars.CanChangeStores = canChangeStores
 
 	blocklistRetail, blocklistBuylist := getDefaultBlocklists(sig)
@@ -345,14 +342,19 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	start := time.Now()
 
+	// Set upload limit
 	maxRows := MaxUploadEntries
-	if canOptimize {
+
+	// Increase upload limit if allowed
+	optimizerOpt, _ := strconv.ParseBool(GetParamFromSig(sig, "UploadOptimizer"))
+	increaseMaxRows := optimizerOpt || (DevMode && !SigCheck)
+	if increaseMaxRows {
 		maxRows = MaxUploadProEntries
 	}
 	// Allow a larger upload limit if set, if dev, or if it's an external call
 	limitOpt, _ := strconv.ParseBool(GetParamFromSig(sig, "UploadNoLimit"))
 	uploadNoLimit := limitOpt || (DevMode && !SigCheck) || estimate
-	if uploadNoLimit && ((canBuylist && !blMode) || canOptimize) {
+	if uploadNoLimit {
 		maxRows = MaxUploadTotalEntries
 	}
 
@@ -388,7 +390,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	uploadedData = mergeIdenticalEntries(uploadedData)
 
 	// Allow estimating on a separate page
-	if estimate && ((canBuylist && !blMode) || canOptimize) {
+	if estimate {
 		var items []CCItem
 		for i := range uploadedData {
 			if uploadedData[i].CardId == "" {
@@ -471,7 +473,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	// Allow downloading data as CSV
 	download, _ := strconv.ParseBool(r.FormValue("download"))
-	if download && ((canBuylist && !blMode) || canOptimize) {
+	if download && canBuylist {
 		w.Header().Set("Content-Type", "text/csv")
 		w.Header().Set("Content-Disposition", "attachment; filename=\"mtgban_prices.csv\"")
 		csvWriter := csv.NewWriter(w)
@@ -529,14 +531,10 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var optimizedResults map[string][]OptimizedUploadEntry
-	var optimizedTotals map[string]float64
 	var highestTotal float64
 
-	if canOptimize && blMode {
-		optimizedResults = map[string][]OptimizedUploadEntry{}
-		optimizedTotals = map[string]float64{}
-	}
+	optimizedResults := map[string][]OptimizedUploadEntry{}
+	optimizedTotals := map[string]float64{}
 
 	missingCounts := map[string]int{}
 	missingPrices := map[string]float64{}
@@ -620,10 +618,6 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 				pageVars.TotalEntries[shorthand] += price
 			}
 
-			if !(canOptimize && blMode) {
-				continue
-			}
-
 			// Save the lowest or highest price depending on mode
 			// If price is tied, or within a set % difference, save them all
 			if len(bestPrices) == 0 || (blMode && price*percMargin > bestPrices[0]) || (!blMode && price*percMargin < bestPrices[0]) {
@@ -635,66 +629,63 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		if canOptimize && blMode {
-			for j, bestPrice := range bestPrices {
-				bestStore := bestStores[j]
+		for j, bestPrice := range bestPrices {
+			bestStore := bestStores[j]
 
-				var spread float64
-				conds := uploadedData[i].OriginalCondition
-				if skipConds {
-					conds = ""
-				}
-				cardId := uploadedData[i].CardId
+			var spread float64
+			conds := uploadedData[i].OriginalCondition
+			if skipConds {
+				conds = ""
+			}
+			cardId := uploadedData[i].CardId
 
-				// Load comparison price, either the loaded one or tcg low
-				comparePrice := uploadedData[i].OriginalPrice
-				if comparePrice == 0 || skipPrices {
-					comparePrice = getPrice(indexResults[cardId][TCG_LOW], "")
-				}
+			// Load comparison price, either the loaded one or tcg low
+			comparePrice := uploadedData[i].OriginalPrice
+			if comparePrice == 0 || skipPrices {
+				comparePrice = getPrice(indexResults[cardId][TCG_LOW], "")
+			}
 
-				// Load the single item priceprice
-				price := resultPrices[cardId+conds][bestStore]
+			// Load the single item priceprice
+			price := resultPrices[cardId+conds][bestStore]
 
-				// Skip if needed
-				if skipLowValueAbs && price < minLowVal {
+			// Skip if needed
+			if skipLowValueAbs && price < minLowVal {
+				continue
+			}
+			if skipHighValueAbs && maxHighVal != 0 && price >= maxHighVal {
+				continue
+			}
+
+			// Compute spread (and skip if needed)
+			if comparePrice != 0 {
+				spread = price / comparePrice * 100
+
+				if skipLowValue && spread < percSpread {
 					continue
 				}
-				if skipHighValueAbs && maxHighVal != 0 && price >= maxHighVal {
+				if skipHighValue && percSpreadMax != 0 && spread >= percSpreadMax {
 					continue
-				}
-
-				// Compute spread (and skip if needed)
-				if comparePrice != 0 {
-					spread = price / comparePrice * 100
-
-					if skipLowValue && spread < percSpread {
-						continue
-					}
-					if skipHighValue && percSpreadMax != 0 && spread >= percSpreadMax {
-						continue
-					}
-				}
-
-				// Break down by store
-				optimizedResults[bestStore] = append(optimizedResults[bestStore], OptimizedUploadEntry{
-					CardId:      cardId,
-					Condition:   conds,
-					Price:       comparePrice,
-					Spread:      spread,
-					BestPrice:   price,
-					Quantity:    uploadedData[i].Quantity,
-					VisualPrice: comparePrice * visualPerc / 100.0,
-				})
-
-				// Save totals
-				optimizedTotals[bestStore] += bestPrice
-				if j == 0 {
-					highestTotal += bestPrice
 				}
 			}
+
+			// Break down by store
+			optimizedResults[bestStore] = append(optimizedResults[bestStore], OptimizedUploadEntry{
+				CardId:      cardId,
+				Condition:   conds,
+				Price:       comparePrice,
+				Spread:      spread,
+				BestPrice:   price,
+				Quantity:    uploadedData[i].Quantity,
+				VisualPrice: comparePrice * visualPerc / 100.0,
+			})
+
+			// Save totals
+			optimizedTotals[bestStore] += bestPrice
+			if j == 0 {
+				highestTotal += bestPrice
+			}
 		}
-	}
-	if canOptimize && blMode {
+
 		// Keep cards sorted by edition, following the same rules of search
 		for store := range optimizedResults {
 			switch sorting {

@@ -147,7 +147,6 @@ type PageVars struct {
 	EnabledSellers  []string
 	EnabledVendors  []string
 	CanBuylist      bool
-	CanOptimize     bool
 	CanChangeStores bool
 	RemoteLinkURL   string
 	TotalQuantity   int

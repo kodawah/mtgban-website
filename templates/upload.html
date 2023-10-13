@@ -264,11 +264,7 @@
                         fields.forEach(element => {
                             var btn = document.getElementById(element);
                             if (btn) {
-                                {{if .CanOptimize}}
-                                    btn.style.display = "inline"
-                                {{else}}
-                                    btn.style.display = "none"
-                                {{end}}
+                                btn.style.display = "inline"
                             }
                         })
 
@@ -684,10 +680,10 @@
 
                 <div class="indent sticky">
                     <span class="anchor" id="top"></span>
-                    <h2>Buylist Optimizer</h2>
+                    <h2>Upload Optimizer</h2>
                     <br>
                     <p>
-                        {{len .Optimized}} different buylists for a theoretical maximum of $ {{printf "%.2f" .HighestTotal}}
+                    {{len .Optimized}} different {{if $.IsBuylist}}buylists{{else}}results{{end}} for a theoretical maximum of $ {{printf "%.2f" .HighestTotal}}
                     </p>
                     <p>
                         {{range .ScraperKeys}}
@@ -695,7 +691,7 @@
                             {{$entries := index $.Optimized $scraperKey}}
                             {{if $entries}}
                                 <a class="btn default" href="#{{$scraperKey}}">
-                                    {{len $entries}} cards to <b>{{scraper_name $scraperKey}}</b>: $ {{printf "%.2f" (index $.OptimizedTotals $scraperKey)}}
+                                    {{len $entries}} cards {{if $.IsBuylist}}to{{else}}at{{end}} <b>{{scraper_name $scraperKey}}</b>: $ {{printf "%.2f" (index $.OptimizedTotals $scraperKey)}}
                                 </a>
                                 <br>
                             {{end}}
@@ -713,7 +709,7 @@
                                         <b>{{scraper_name $scraperKey}}</b> - $ {{printf "%.2f" (index $.OptimizedTotals $scraperKey)}}
                                     </a>
 
-                                    {{if eq $scraperKey "CK"}}
+                                    {{if and $.IsBuylist (eq $scraperKey "CK")}}
                                         <form action="https://www.cardkingdom.com/sellcart/partner_import" method="post" id="{{$scraperKey}}blhashes" style="display: inline;" target="_blank">
                                             <input type="hidden" name="json" value='
                                                 {"contents": [
@@ -733,7 +729,7 @@
                                         </form>
                                     {{end}}
 
-                                    {{if or (eq $scraperKey "CK") (eq $scraperKey "SCG")}}
+                                    {{if and $.IsBuylist (or (eq $scraperKey "CK") (eq $scraperKey "SCG"))}}
                                         <form action="/upload" method="post" id="{{$scraperKey}}hashes">
                                             <input type="hidden" name="tag" value="{{$scraperKey}}"/>
                                             <input type="hidden" name="mode" value="false"/>
