@@ -236,6 +236,26 @@
                         </form>
                     {{end}}
 
+                    {{if eq $scraperKey "CK"}}
+                        <form action="https://www.cardkingdom.com/sellcart/partner_import" method="post" id="{{$scraperKey}}blhashes" style="display: inline;" target="_blank">
+                            <input type="hidden" name="json" value='
+                                {"contents": [
+                                    {{range $entries}}
+                                    {
+                                       "id": {{uuid2ckid .CardId}},
+                                       "qty": {{.Quantity}}
+                                    },
+                                    {{end}}
+                                    {}
+                                ]}'/>
+                            <input type="hidden" name="partner" value="{{load_partner $scraperKey}}"/>
+                            <a class="btn warning" style="text-align: center;" href='javascript:void(0)' onclick='document.getElementById("{{$scraperKey}}blhashes").submit();'>Load buylist at {{$scraperKey}}</a>
+                            <noscript>
+                                <input type="submit" value="Download {{$scraperKey}} CSV"/>
+                            </noscript>
+                        </form>
+                    {{end}}
+
                     {{if or (eq $scraperKey "CK") (eq $scraperKey "SCG")}}
                         <form action="/upload" method="post" id="{{$scraperKey}}{{$sourceKey}}hashes" style="display: inline;">
                             <input type="hidden" name="tag" value="{{$scraperKey}}"/>

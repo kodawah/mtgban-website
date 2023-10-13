@@ -753,6 +753,23 @@ func render(w http.ResponseWriter, tmpl string, pageVars PageVars) {
 		"load_partner": func(s string) string {
 			return Config.Affiliate[s]
 		},
+		"uuid2ckid": func(s string) string {
+			for _, vendor := range Vendors {
+				if vendor == nil || vendor.Info().Shorthand != "CK" {
+					continue
+				}
+				bl, err := vendor.Buylist()
+				if err != nil {
+					return ""
+				}
+				entries, found := bl[s]
+				if !found {
+					return ""
+				}
+				return entries[0].CustomFields["CKID"]
+			}
+			return ""
+		},
 	}
 
 	// Give each template a name
