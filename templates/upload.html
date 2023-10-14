@@ -709,6 +709,28 @@
                                         <b>{{scraper_name $scraperKey}}</b> - $ {{printf "%.2f" (index $.OptimizedTotals $scraperKey)}}
                                     </a>
 
+                                    {{$sourceKey := $scraperKey}}
+                                    {{if and (not $.IsBuylist) (eq $sourceKey "CK")}}
+                                        <form action="https://www.cardkingdom.com/builder?utm_campaign={{load_partner $sourceKey}}&utm_medium=arbit&utm_source={{load_partner $sourceKey}}" method="post" id="{{$sourceKey}}deckbuilder" style="display: inline;" target="_blank">
+                                            <input type="hidden" name="partner" value="{{load_partner $sourceKey}}"/>
+                                            <input type="hidden" name="c" value="{{range $entries}}{{.Quantity}} {{(index $.Metadata .CardId).Name}}||{{end}}"/>
+                                            <a class="btn success" style="text-align: center;" href='javascript:void(0)' onclick='document.getElementById("{{$sourceKey}}deckbuilder").submit();'>Load at {{$sourceKey}}</a>
+                                            <noscript>
+                                                <input type="submit" value="Load at {{$sourceKey}}"/>
+                                            </noscript>
+                                        </form>
+                                    {{end}}
+                                    {{if and (not $.IsBuylist) (eq $sourceKey "CSI")}}
+                                        <form action="https://www.coolstuffinc.com/main_deckBuilder.php" method="post" id="{{$sourceKey}}deckbuilder" style="display: inline;" target="_blank">
+                                            <input type="hidden" name="partner" value="{{load_partner $sourceKey}}"/>
+                                            <input type="hidden" name="sList" value="{{range $entries}}{{.Quantity}} {{(index $.Metadata .CardId).Name}}|{{end}}"/>
+                                            <a class="btn success" style="text-align: center;" href='javascript:void(0)' onclick='document.getElementById("{{$sourceKey}}deckbuilder").submit();'>Load at {{$sourceKey}}</a>
+                                            <noscript>
+                                                <input type="submit" value="Load at {{$sourceKey}}"/>
+                                            </noscript>
+                                        </form>
+                                    {{end}}
+
                                     {{if and $.IsBuylist (eq $scraperKey "CK")}}
                                         <form action="https://www.cardkingdom.com/sellcart/partner_import" method="post" id="{{$scraperKey}}blhashes" style="display: inline;" target="_blank">
                                             <input type="hidden" name="json" value='
