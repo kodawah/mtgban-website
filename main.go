@@ -30,6 +30,7 @@ import (
 	cron "gopkg.in/robfig/cron.v2"
 
 	"github.com/mtgban/go-mtgban/mtgban"
+	"github.com/mtgban/go-mtgban/mtgmatcher"
 )
 
 type PageVars struct {
@@ -740,6 +741,9 @@ func render(w http.ResponseWriter, tmpl string, pageVars PageVars) {
 		"slice_has": func(s []string, p string) bool {
 			return slices.Contains(s, p)
 		},
+		"has_prefix": func(s, p string) bool {
+			return strings.HasPrefix(s, p)
+		},
 		"triple_column_start": func(i int, length int) bool {
 			return i == 0 || i == length/3 || i == length*2/3
 		},
@@ -768,6 +772,20 @@ func render(w http.ResponseWriter, tmpl string, pageVars PageVars) {
 				return entries[0].CustomFields["CKID"]
 			}
 			return ""
+		},
+		"uuid2tcgid": func(s string) string {
+			co, err := mtgmatcher.GetUUID(s)
+			if err != nil {
+				return ""
+			}
+			tcgId := co.Identifiers["tcgplayerProductId"]
+			if co.Etched {
+				id, found := co.Identifiers["tcgplayerEtchedProductId"]
+				if found {
+					tcgId = id
+				}
+			}
+			return tcgId
 		},
 	}
 
