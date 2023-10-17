@@ -744,6 +744,9 @@ func render(w http.ResponseWriter, tmpl string, pageVars PageVars) {
 		"has_prefix": func(s, p string) bool {
 			return strings.HasPrefix(s, p)
 		},
+		"contains": func(s, p string) bool {
+			return strings.Contains(s, p)
+		},
 		"triple_column_start": func(i int, length int) bool {
 			return i == 0 || i == length/3 || i == length*2/3
 		},

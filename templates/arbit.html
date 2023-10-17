@@ -22,16 +22,35 @@
             </li>
         {{end}}
         {{if .ExtraNav}}
+            {{$showSealedMenu := false}}
             <li>
                 <div class="dropdown">
                     <button class="dropbtn">Select store</button>
                     <div class="dropdown-content">
                         {{range .ExtraNav}}
-                            <a href="{{.Link}}">{{.Name}}</a>
+                            {{if not (contains .Name "Sealed")}}
+                                <a href="{{.Link}}">{{.Name}}</a>
+                            {{else}}
+                                {{$showSealedMenu = true}}
+                            {{end}}
                         {{end}}
                     </div>
                 </div>
             </li>
+            {{if $showSealedMenu}}
+                <li>
+                    <div class="dropdown">
+                        <button class="dropbtn">Select sealed</button>
+                        <div class="dropdown-content">
+                            {{range .ExtraNav}}
+                                {{if contains .Name "Sealed"}}
+                                    <a href="{{.Link}}">{{.Name}}</a>
+                                {{end}}
+                            {{end}}
+                        </div>
+                    </div>
+                </li>
+            {{end}}
         {{end}}
         <li>
             <label class="switch">
