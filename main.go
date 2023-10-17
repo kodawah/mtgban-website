@@ -525,18 +525,18 @@ func main() {
 	config := flag.String("cfg", DefaultConfigPath, "Load configuration file")
 	devMode := flag.Bool("dev", false, "Enable developer mode")
 	sigCheck := flag.Bool("sig", false, "Enable signature verification")
-	skipInitialRefresh := flag.Bool("skip", false, "Skip initial refresh")
+	skipInitialRefresh := flag.Bool("skip", true, "Skip initial refresh")
 	noload := flag.Bool("noload", false, "Do not load price data")
 	logdir := flag.String("log", "logs", "Directory for scrapers logs")
 	port := flag.String("port", "", "Override server port")
 
 	flag.Parse()
 	DevMode = *devMode
-	SkipInitialRefresh = *skipInitialRefresh
 	SkipPrices = *noload
 	SigCheck = true
 	if DevMode {
 		SigCheck = *sigCheck
+		SkipInitialRefresh = *skipInitialRefresh
 	}
 	LogDir = *logdir
 
