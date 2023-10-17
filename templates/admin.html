@@ -60,7 +60,7 @@
                             {{range $j, $cell := $row}}
                                 <td>
                                     {{if eq $j 0}}
-                                        <a href="?refresh_sellers={{index $row 2}}" onclick="return confirm('Are you sure you want to refresh {{$cell}}?')">{{$cell}}</a>
+                                        <a href="#" onclick="if (confirm('Are you sure you want to refresh {{$cell}}?')) { location.replace('/api/bq/refresh/{{index $row 2}}?redir=true&sig={{$.DemoKey}}'); return true; } else { return false; } ">{{$cell}}</a>
                                     {{else if eq $j 1}}
                                         {{$cell}}
                                     {{else}}

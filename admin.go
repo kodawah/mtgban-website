@@ -56,27 +56,6 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 	var doReboot bool
 	var v url.Values
 
-	for _, scraperGroup := range []string{"sellers", "vendors"} {
-		refresh := r.FormValue("refresh_" + scraperGroup)
-		if refresh != "" {
-			v = url.Values{}
-			v.Set("msg", "Refreshing "+refresh+" in the background...")
-			doReboot = true
-
-			go func() {
-				now := time.Now()
-				log.Println("Refreshing", refresh)
-				err := updateScraper(refresh)
-				if err != nil {
-					ServerNotify("refresh", err.Error())
-					return
-				}
-				log.Println(refresh, "took", time.Since(now))
-			}()
-			break
-		}
-	}
-
 	spoof := r.FormValue("spoof")
 	if spoof != "" {
 		baseURL := getBaseURL(r)

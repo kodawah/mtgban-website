@@ -689,6 +689,7 @@ func main() {
 	http.Handle("/sets", enforceSigning(http.HandlerFunc(Search)))
 	http.Handle("/sealed", enforceSigning(http.HandlerFunc(Search)))
 
+	http.Handle("/api/bq/refresh/", enforceAPISigning(http.HandlerFunc(RefreshTable)))
 	http.Handle("/api/mtgban/", enforceAPISigning(http.HandlerFunc(PriceAPI)))
 	http.Handle("/api/mtgjson/ck.json", enforceAPISigning(http.HandlerFunc(API)))
 	http.Handle("/api/tcgplayer/lastsold/", enforceSigning(http.HandlerFunc(TCGLastSoldAPI)))
