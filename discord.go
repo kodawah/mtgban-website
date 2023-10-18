@@ -423,8 +423,8 @@ type AffiliateConfig struct {
 	// The text upon which the URL is detected
 	Trigger string
 
-	// Skip the identified URL if it contains this text
-	Skip string
+	// Skip the identified URL if it contains any of the text
+	Skip []string
 
 	// Name of the store (displayed in the title)
 	Name string
@@ -493,7 +493,7 @@ var AffiliateStores []AffiliateConfig = []AffiliateConfig{
 	},
 	{
 		Trigger:       "tcgplayer.com",
-		Skip:          "seller",
+		Skip:          []string{"seller", "help"},
 		Name:          "TCGplayer",
 		Handle:        "TCG",
 		DefaultFields: []string{"partner", "utm_source", "utm_medium"},
@@ -526,7 +526,7 @@ var AffiliateStores []AffiliateConfig = []AffiliateConfig{
 	},
 	{
 		Trigger:       "starcitygames.com/",
-		Skip:          "sellyourcards",
+		Skip:          []string{"sellyourcards"},
 		Name:          "Star City Games",
 		Handle:        "SCG",
 		DefaultFields: []string{"aff"},
@@ -541,7 +541,7 @@ var AffiliateStores []AffiliateConfig = []AffiliateConfig{
 	},
 	{
 		Trigger:       "amazon.com/",
-		Skip:          "images",
+		Skip:          []string{"images"},
 		Name:          "Amazon",
 		Handle:        "AMZN",
 		DefaultFields: []string{"tag"},
@@ -633,7 +633,14 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				if !strings.Contains(m.Content, store.Trigger) {
 					continue
 				}
-				if store.Skip != "" && strings.Contains(m.Content, store.Skip) {
+				shouldSkip := false
+				for _, skip := range store.Skip {
+					if strings.Contains(m.Content, skip) {
+						shouldSkip = true
+						break
+					}
+				}
+				if shouldSkip {
 					continue
 				}
 
