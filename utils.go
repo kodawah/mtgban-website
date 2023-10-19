@@ -248,6 +248,14 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 	}
 	variant = strings.TrimSpace(variant)
 
+	name := co.Name
+	if co.FlavorName != "" {
+		if variant != "" {
+			variant = " - " + variant
+		}
+		variant = fmt.Sprintf("\"%s\" %s", co.FlavorName, variant)
+	}
+
 	query := co.Name
 	if !co.Sealed {
 		query = fmt.Sprintf("%s s:%s cn:%s", co.Name, co.SetCode, co.Number)
@@ -362,7 +370,7 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 
 	return GenericCard{
 		UUID:      co.UUID,
-		Name:      co.Card.Name,
+		Name:      name,
 		Edition:   co.Edition,
 		SetCode:   co.Card.SetCode,
 		Number:    co.Card.Number,
