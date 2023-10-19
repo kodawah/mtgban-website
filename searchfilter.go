@@ -926,8 +926,12 @@ func findInDeck(sealedUUID, opt string) []string {
 
 				var board []mtgjson.DeckCard
 				switch opt {
+				case "bonus":
+					board = deck.Bonus
 				case "commander":
 					board = deck.Commander
+				case "main":
+					board = deck.MainBoard
 				case "sideboard":
 					board = deck.SideBoard
 				}
