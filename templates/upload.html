@@ -761,7 +761,7 @@
                                     {{end}}
 
                                     {{if and $.IsBuylist (or (eq $scraperKey "CK") (eq $scraperKey "SCG"))}}
-                                        <form action="/upload" method="post" id="{{$scraperKey}}hashes">
+                                        <form action="/upload" method="post" id="{{$scraperKey}}hashes" style="display: inline;">
                                             <input type="hidden" name="tag" value="{{$scraperKey}}"/>
                                             <input type="hidden" name="mode" value="false"/>
                                             {{range $entries}}
