@@ -780,7 +780,7 @@
                                             {{$card := (index $.Metadata .CardId)}}
                                             <tr onmouseover="document.getElementById('hoverImage').src={{$card.ImageURL}};">
                                                 <td>
-                                                    <span class="emoji" style="cursor: pointer;" onclick="navigator.clipboard.writeText('{{$card.Name}}'); waithide(this)" title="Copy to clipboard">📝</span>&nbsp;
+                                                    <span class="emoji" style="cursor: pointer;" onclick="copyAndBlink(this, '{{$card.Name}}')" title="Copy to clipboard">📝</span>&nbsp;
                                                     <a href="{{$card.SearchURL}}" target="_blank">{{$card.Name}}</a>
                                                     {{if not (or (eq .Condition "") (eq .Condition "NM"))}} ({{.Condition}}){{end}}
                                                     {{if $card.Reserved}} *{{end}}

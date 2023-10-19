@@ -704,7 +704,7 @@
                                             </td>
                                         {{end}}
                                         <td rowspan=2>
-                                            <span class="emoji" style="cursor: pointer;" onclick="navigator.clipboard.writeText('{{$card.Name}}'); waithide(this)" title="Copy to clipboard">📝</span>
+                                            <span class="emoji" style="cursor: pointer;" onclick="copyAndBlink(this, '{{$card.Name}}')" title="Copy to clipboard">📝</span>
                                         </td>
                                         {{if not $.IsSealed}}
                                             <td rowspan=2>

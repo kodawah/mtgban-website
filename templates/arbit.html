@@ -361,7 +361,7 @@
                     {{range .Arbit}}
                         <tr onmouseover="document.getElementById('hoverImage').src={{(index $.Metadata .CardId).ImageURL}};">
                             <td>
-                                <span class="emoji" style="cursor: pointer;" onclick="navigator.clipboard.writeText('{{(index $.Metadata .CardId).Name}}'); waithide(this)" title="Copy to clipboard">📝</span>&nbsp;
+                                <span class="emoji" style="cursor: pointer;" onclick="copyAndBlink(this, '{{(index $.Metadata .CardId).Name}}')" title="Copy to clipboard">📝</span>&nbsp;
                                 <a href="{{(index $.Metadata .CardId).SearchURL}}">{{(index $.Metadata .CardId).Name}}</a>
                                 {{if (index $.Metadata .CardId).Reserved}} *{{end}}
                                 {{if (index $.Metadata .CardId).Stocks}} •{{end}}

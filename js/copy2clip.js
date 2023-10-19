@@ -1,4 +1,5 @@
-function waithide(obj) {
+function copyAndBlink(obj, str) {
+    navigator.clipboard.writeText(str);
     obj.style.opacity = '0';
     window.setTimeout(
     function restore() {
