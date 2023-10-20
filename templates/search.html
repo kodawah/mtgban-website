@@ -353,7 +353,7 @@
                     <li>
                         <h4>How is EV calculated?</h4>
                         <ul class="indent">
-                            For any product with a static decklist, the card values a just summed up and provided as is. For boosters and booster boxes, we generate as many boosters as needed to represent the product (typically 36 boosters for a draft booster box), for 5000 times to even out any possible variance, and then run the mean and median of the results. Note that every product is individually run, so a booster box won't exactly be 36 times theprice of a booster pack.
+                            For any product with a static decklist, the card values a just summed up and provided as is. For boosters and booster boxes, we generate as many boosters as needed to represent the product (typically 36 boosters for a draft booster box), for 5000 times to even out any possible variance, and then run the mean and median of the results. Note that every product is individually run, so a booster box won't exactly be 36 times the price of a booster pack. Also note that even if the content search (explained below) only list one card, the presented EVs definitely take into account the possibility of opening multiple copies of the same card.
                         </ul>
                     </li>
                     <li>
@@ -401,7 +401,8 @@
                             * the 🎁 (when available) will similuate opening a pack using the information available. Every run is fully randomized and unpredictable;<br>
                             * the 🔍 will unpack a product and list all its possible contents. This means that a booster box will only list a single booster pack, while a booster pack will display all possible picks.<br>
                             In both cases, once in the search page, you can add search terms normally to filter for color, rarities, and names using the common search syntax.<br>
-                            Note that depending on the content type, the search result might show you at most one copy per card or list the same card multiple times: this to show accurate and easy to import results for decklists and box sets, while displaying compact results for other sealed types.
+                            Note that depending on the content type, the search result might show you at most one copy per card or list the same card multiple times: this to show accurate and easy to import results for decklists and box sets, while displaying compact results for other sealed types.<br>
+                            Note that, as mentioned above, the list you visualize is different than the list used to compute the actual EV, in which (potential) multiple copies of the same card are taken into account.
                         </ul>
                     </li>
                     <li>
