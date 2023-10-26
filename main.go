@@ -315,6 +315,7 @@ var Config struct {
 	AffiliatesList         []string          `json:"affiliates_list"`
 	Api                    map[string]string `json:"api"`
 	DiscordToken           string            `json:"discord_token"`
+	IgnoreChannel          string 		 `json:"ignore_channel"`
 	DiscordAllowList       []string          `json:"discord_allowlist"`
 	DevSellers             []string          `json:"dev_sellers"`
 	ArbitDefaultSellers    []string          `json:"arbit_default_sellers"`
