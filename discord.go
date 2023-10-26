@@ -573,6 +573,10 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	if m.ChannelID == Config.IgnoreChannel {
+        	return
+    	}
+
 	// Ignore too short messages
 	if len(m.Content) < 2 {
 		return
