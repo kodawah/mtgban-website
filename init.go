@@ -624,11 +624,11 @@ var ScraperOptions = map[string]*scraperOption{
 		RDBs: map[string]*redis.Client{
 			"retail": redis.NewClient(&redis.Options{
 				Addr: "localhost:6379",
-				DB:   0,
+				DB:   DBs["ck_retail"],
 			}),
 			"buylist": redis.NewClient(&redis.Options{
 				Addr: "localhost:6379",
-				DB:   1,
+				DB:   DBs["ck_buylist"],
 			}),
 		},
 	},
@@ -645,7 +645,7 @@ var ScraperOptions = map[string]*scraperOption{
 		RDBs: map[string]*redis.Client{
 			"retail": redis.NewClient(&redis.Options{
 				Addr: "localhost:6379",
-				DB:   2,
+				DB:   DBs["tcg_low"],
 			}),
 		},
 	},
@@ -663,7 +663,7 @@ var ScraperOptions = map[string]*scraperOption{
 		RDBs: map[string]*redis.Client{
 			"retail": redis.NewClient(&redis.Options{
 				Addr: "localhost:6379",
-				DB:   4,
+				DB:   DBs["mkm_low"],
 			}),
 		},
 	},
