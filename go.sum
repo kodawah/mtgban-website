@@ -188,8 +188,8 @@ github.com/montanaflynn/stats v0.7.1 h1:etflOAAHORrCC44V+aR6Ftzort912ZU+YLiSTuV8
 github.com/montanaflynn/stats v0.7.1/go.mod h1:etXPPgVO6n31NxCd9KQUMvCM+ve0ruNzt6R8Bnaayow=
 github.com/mroth/weightedrand/v2 v2.1.0 h1:o1ascnB1CIVzsqlfArQQjeMy1U0NcIbBO5rfd5E/OeU=
 github.com/mroth/weightedrand/v2 v2.1.0/go.mod h1:f2faGsfOGOwc1p94wzHKKZyTpcJUW7OJ/9U4yfiNAOU=
-github.com/mtgban/go-mtgban v0.0.0-20231107043925-09d5e2b5cd31 h1:rnWR3zeAMA2v7c2cex0Y0SawkaSv65reWZhdxwdyExs=
-github.com/mtgban/go-mtgban v0.0.0-20231107043925-09d5e2b5cd31/go.mod h1:DKYUT+EgFFzzdIkJyUOx2DO0bjZH7UCj+dyPNRzYC08=
+github.com/mtgban/go-mtgban v0.0.0-20231116163123-a70ba5785485 h1:FOk0nVFw2YVjf9rxt/kQVo2q6peBVDG08CT13gT/1kc=
+github.com/mtgban/go-mtgban v0.0.0-20231116163123-a70ba5785485/go.mod h1:DKYUT+EgFFzzdIkJyUOx2DO0bjZH7UCj+dyPNRzYC08=
 github.com/nxadm/tail v1.4.8 h1:nPr65rt6Y5JFSKQO7qToXr7pePgD6Gwiw05lkbyAQTE=
 github.com/onsi/ginkgo v1.16.5 h1:8xi0RTUf59SOSfEtZMvwTvXYMzG4gV23XVHOZiXNtnE=
 github.com/onsi/gomega v1.27.10 h1:naR28SdDFlqrG6kScpT8VWpu1xWY5nJRCF3XaYyBjhI=
