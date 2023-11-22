@@ -2,59 +2,76 @@ package main
 
 import (
 	"context"
-	"encoding/base64"
+	"encoding/json"
 	"fmt"
-	"log"
+	"os"
 
-	"google.golang.org/api/secretmanager/v1"
+	secretmanager "cloud.google.com/go/secretmanager/apiv1"
+	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
+	"cloud.google.com/go/storage"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/option"
 )
 
-var SecretsClient *secretmanager.Service
-
-func initSecretClient(ctx context.Context, projectId string) error {
-	var err error
-	SecretsClient, err = secretmanager.NewService(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to create secretmanager client: %v", err)
-	}
-	return nil
+type SecretsConfig struct {
+	Type                    string `json:"type"`
+	ProjectID               string `json:"project_id"`
+	PrivateKeyID            string `json:"private_key_id"`
+	PrivateKey              string `json:"private_key"`
+	ClientEmail             string `json:"client_email"`
+	ClientID                string `json:"client_id"`
+	AuthURI                 string `json:"auth_uri"`
+	TokenURI                string `json:"token_uri"`
+	AuthProviderX509CertURL string `json:"auth_provider_x509_cert_url"`
+	ClientX509CertURL       string `json:"client_x509_cert_url"`
 }
 
-func accessSecret(ctx context.Context, projectID, secretID string) ([]byte, error) {
-	accessReq := fmt.Sprintf("projects/%s/secrets/%s/versions/latest", projectID, secretID)
-	log.Printf("Access Request for Secret: %s", accessReq)
+func getSecret() (*SecretsConfig, error) {
+	projectID := Config.ProjectId
+	secretID := os.Getenv("SECRET_ID")
 
-	result, err := SecretsClient.Projects.Secrets.Versions.Access(accessReq).Context(ctx).Do()
+	ctx := context.Background()
+	client, err := secretmanager.NewClient(ctx)
 	if err != nil {
-		log.Printf("failed to access secret: %v", err)
-		return nil, err
+		return nil, fmt.Errorf("failed to setup client: %w", err)
 	}
 
-	decodedData, err := base64.StdEncoding.DecodeString(result.Payload.Data)
+	secretName := fmt.Sprintf("projects/%s/secrets/%s/versions/latest", projectID, secretID)
+	request := &secretmanagerpb.AccessSecretVersionRequest{Name: secretName}
+
+	result, err := client.AccessSecretVersion(ctx, request)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to access secret version: %w", err)
 	}
-	return decodedData, nil
+
+	var config SecretsConfig
+	if err := json.Unmarshal(result.Payload.Data, &config); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal secret to service account key: %w", err)
+	}
+
+	return &config, nil
 }
 
-func updateSecret(ctx context.Context, projectID, secretID, payload string) error {
-	parent := fmt.Sprintf("projects/%s/secrets/%s", projectID, secretID)
-	log.Printf("Parent ID for adding new secret version: %s", parent)
-
-	encodedPayload := base64.StdEncoding.EncodeToString([]byte(payload))
-
-	secretPayload := &secretmanager.AddSecretVersionRequest{
-		Payload: &secretmanager.SecretPayload{
-			Data: encodedPayload,
-		},
-	}
-
-	_, err := SecretsClient.Projects.Secrets.AddVersion(parent, secretPayload).Context(ctx).Do()
+func accessSecret() (*storage.Client, error) {
+	config, err := getSecret()
 	if err != nil {
-		log.Printf("failed to add secret version: %v", err)
-		return err
+		return nil, fmt.Errorf("failed to get secret: %w", err)
 	}
 
-	log.Printf("new version of %s added", secretID)
-	return nil
+	jsonKey, err := json.Marshal(config)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal config to JSON: %w", err)
+	}
+
+	creds, err := google.CredentialsFromJSON(context.Background(), jsonKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create credentials from JSON: %w", err)
+	}
+
+	client, err := storage.NewClient(context.Background(), option.WithCredentials(creds))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create storage client: %w", err)
+	}
+
+	return client, nil
 }
