@@ -551,6 +551,17 @@ func enforceSigning(next http.Handler) http.Handler {
 			if valid == expectedSig && expires < time.Now().Unix() {
 				pageVars.ErrorMessage = ErrMsgExpired
 				pageVars.PatreonLogin = true
+				if DevMode {
+					pageVars.ErrorMessage += " - sig expired"
+				}
+			}
+
+			if DevMode {
+				if err != nil {
+					pageVars.ErrorMessage += " - " + err.Error()
+				} else {
+					pageVars.ErrorMessage += " - wrong host"
+				}
 			}
 
 			render(w, "home.html", pageVars)
