@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"path"
@@ -21,6 +22,9 @@ type ScraperConfig struct {
 
 // Retrieve the list of Scrapers and their configuration
 func downloadScrapersConfig(path string) (map[string]*ScraperConfig, error) {
+	if GCSBucketClient == nil {
+		return nil, errors.New("no bucket configuration")
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultUploaderTimeout)
 	defer cancel()
 
@@ -250,6 +254,9 @@ func downloadVendors(configs []ScraperConfig) ([]mtgban.Vendor, error) {
 }
 
 func downloadVendor(path string) (mtgban.Vendor, error) {
+	if GCSBucketClient == nil {
+		return nil, errors.New("no bucket configuration")
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultUploaderTimeout)
 	defer cancel()
 
