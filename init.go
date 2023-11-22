@@ -103,6 +103,9 @@ func loadSellerFromFile(fname string) (mtgban.Seller, error) {
 }
 
 func uploadSeller(seller mtgban.Seller, currentDir string) error {
+	if GCSBucketClient == nil {
+		return errors.New("no bucket configuration")
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultUploaderTimeout)
 	defer cancel()
 
@@ -132,6 +135,9 @@ func uploadSeller(seller mtgban.Seller, currentDir string) error {
 }
 
 func uploadVendor(vendor mtgban.Vendor, currentDir string) error {
+	if GCSBucketClient == nil {
+		return errors.New("no bucket configuration")
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultUploaderTimeout)
 	defer cancel()
 
