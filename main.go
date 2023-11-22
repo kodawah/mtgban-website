@@ -309,6 +309,7 @@ var Config struct {
 	Port                   string            `json:"port"`
 	DBAddress              string            `json:"db_address"`
 	RedisAddr              string            `json:"redis_addr"`
+	ProjectId              string            `json:"project_id"`
 	DiscordHook            string            `json:"discord_hook"`
 	DiscordNotifHook       string            `json:"discord_notif_hook"`
 	DiscordInviteLink      string            `json:"discord_invite_link"`

@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	cloud.google.com/go/bigquery v1.56.0
+	cloud.google.com/go/secretmanager v1.11.2
 	cloud.google.com/go/storage v1.33.0
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/PuerkitoBio/goquery v1.8.1
