@@ -569,7 +569,11 @@ func main() {
 
 	GCSBucketClient, err = storage.NewClient(context.Background(), option.WithCredentialsFile(Config.Uploader.ServiceAccount))
 	if err != nil {
-		log.Fatalln("error creating the GCSBucketClient:", err)
+		if DevMode {
+			log.Println("error creating the GCSBucketClient:", err)
+		} else {
+			log.Fatalln("error creating the GCSBucketClient:", err)
+		}
 	}
 
 	err = openDBs()
