@@ -441,7 +441,7 @@ var ScraperOptions = map[string]*scraperOption{
 		StashBuylist: true,
 		RDBs: map[string]*redis.Client{
 			"buylist": redis.NewClient(&redis.Options{
-				Addr: "localhost:6379",
+				Addr: Config.RedisAddr,
 				DB:   DBs["abugames"],
 			}),
 		},
@@ -458,11 +458,11 @@ var ScraperOptions = map[string]*scraperOption{
 		StashBuylist:   true,
 		RDBs: map[string]*redis.Client{
 			"retail": redis.NewClient(&redis.Options{
-				Addr: "localhost:6379",
+				Addr: Config.RedisAddr,
 				DB:   DBs["ck_retail"],
 			}),
 			"buylist": redis.NewClient(&redis.Options{
-				Addr: "localhost:6379",
+				Addr: Config.RedisAddr,
 				DB:   DBs["ck_buylist"],
 			}),
 		},
@@ -492,7 +492,7 @@ var ScraperOptions = map[string]*scraperOption{
 		StashBuylist: true,
 		RDBs: map[string]*redis.Client{
 			"buylist": redis.NewClient(&redis.Options{
-				Addr: "localhost:6379",
+				Addr: Config.RedisAddr,
 				DB:   DBs["starcitygames"],
 			}),
 		},
@@ -542,11 +542,11 @@ var ScraperOptions = map[string]*scraperOption{
 		StashMarkets: true,
 		RDBs: map[string]*redis.Client{
 			TCG_LOW: redis.NewClient(&redis.Options{
-				Addr: "localhost:6379",
+				Addr: Config.RedisAddr,
 				DB:   DBs["tcg_low"],
 			}),
 			TCG_MARKET: redis.NewClient(&redis.Options{
-				Addr: "localhost:6379",
+				Addr: Config.RedisAddr,
 				DB:   DBs["tcg_market"],
 			}),
 		},
@@ -575,11 +575,11 @@ var ScraperOptions = map[string]*scraperOption{
 		StashMarkets: true,
 		RDBs: map[string]*redis.Client{
 			MKM_LOW: redis.NewClient(&redis.Options{
-				Addr: "localhost:6379",
+				Addr: Config.RedisAddr,
 				DB:   DBs["mkm_low"],
 			}),
 			MKM_TREND: redis.NewClient(&redis.Options{
-				Addr: "localhost:6379",
+				Addr: Config.RedisAddr,
 				DB:   DBs["mkm_trend"],
 			}),
 		},
@@ -629,11 +629,11 @@ var ScraperOptions = map[string]*scraperOption{
 		StashBuylist:   true,
 		RDBs: map[string]*redis.Client{
 			"retail": redis.NewClient(&redis.Options{
-				Addr: "localhost:6379",
+				Addr: Config.RedisAddr,
 				DB:   DBs["ck_retail"],
 			}),
 			"buylist": redis.NewClient(&redis.Options{
-				Addr: "localhost:6379",
+				Addr: Config.RedisAddr,
 				DB:   DBs["ck_buylist"],
 			}),
 		},
@@ -650,7 +650,7 @@ var ScraperOptions = map[string]*scraperOption{
 		StashInventory: true,
 		RDBs: map[string]*redis.Client{
 			"retail": redis.NewClient(&redis.Options{
-				Addr: "localhost:6379",
+				Addr: Config.RedisAddr,
 				DB:   DBs["tcg_low"],
 			}),
 		},
@@ -668,7 +668,7 @@ var ScraperOptions = map[string]*scraperOption{
 		StashInventory: true,
 		RDBs: map[string]*redis.Client{
 			"retail": redis.NewClient(&redis.Options{
-				Addr: "localhost:6379",
+				Addr: Config.RedisAddr,
 				DB:   DBs["mkm_low"],
 			}),
 		},
@@ -702,7 +702,7 @@ var ScraperOptions = map[string]*scraperOption{
 		StashMarkets: true,
 		RDBs: map[string]*redis.Client{
 			"TCG Low EV Median": redis.NewClient(&redis.Options{
-				Addr: "localhost:6379",
+				Addr: Config.RedisAddr,
 				DB:   DBs["tcglow_median"],
 			}),
 		},

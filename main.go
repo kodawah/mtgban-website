@@ -308,6 +308,7 @@ func init() {
 var Config struct {
 	Port                   string            `json:"port"`
 	DBAddress              string            `json:"db_address"`
+	RedisAddr              string            `json:"redis_addr"`
 	DiscordHook            string            `json:"discord_hook"`
 	DiscordNotifHook       string            `json:"discord_notif_hook"`
 	DiscordInviteLink      string            `json:"discord_invite_link"`
