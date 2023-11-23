@@ -354,8 +354,6 @@ var Config struct {
 
 var DevMode bool
 var SigCheck bool
-var SkipInitialRefresh bool
-var SkipPrices bool
 var BenchMode bool
 var LogDir string
 var LastUpdate string
@@ -535,18 +533,16 @@ func main() {
 	config := flag.String("cfg", DefaultConfigPath, "Load configuration file")
 	devMode := flag.Bool("dev", false, "Enable developer mode")
 	sigCheck := flag.Bool("sig", false, "Enable signature verification")
-	skipInitialRefresh := flag.Bool("skip", true, "Skip initial refresh")
-	noload := flag.Bool("noload", false, "Do not load price data")
+	skipInitialRefresh := flag.Bool("skip", false, "Skip initial refresh")
+	noloadCache := flag.Bool("noload", false, "Do not load cached price data")
 	logdir := flag.String("log", "logs", "Directory for scrapers logs")
 	port := flag.String("port", "", "Override server port")
 
 	flag.Parse()
 	DevMode = *devMode
-	SkipPrices = *noload
 	SigCheck = true
 	if DevMode {
 		SigCheck = *sigCheck
-		SkipInitialRefresh = *skipInitialRefresh
 	}
 	LogDir = *logdir
 
@@ -605,12 +601,22 @@ func main() {
 			}
 		}()
 
+		// Try loading prices
+		if *noloadCache {
+			log.Println("Skipping cache loading as requested")
+			DatabaseLoaded = true
+			return
+		}
 		log.Println("Loading cache")
 		err := startup()
 		if err != nil {
 			log.Fatalln("error loading cache:", err)
 		}
 
+		if *skipInitialRefresh {
+			log.Println("Skipping prices refresh as requested")
+			return
+		}
 		log.Println("Loading BQ")
 		err = loadBQ()
 		if err != nil {
