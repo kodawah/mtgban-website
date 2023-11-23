@@ -27,6 +27,7 @@ var PatreonHost string
 const (
 	DefaultHost              = "www.mtgban.com"
 	DefaultSignatureDuration = 11 * 24 * time.Hour
+	FreeSignatureDuration    = 10 * 365 * 24 * time.Hour
 )
 
 const (
@@ -307,6 +308,11 @@ func signHMACSHA1Base64(key []byte, data []byte) string {
 }
 
 func getSignatureFromCookies(r *http.Request) string {
+	// If no signature is provided, use a default one, with no expiration check
+	if Config.FreeEnable {
+		return FreeSignature
+	}
+
 	var sig string
 	for _, cookie := range r.Cookies() {
 		if cookie.Name == "MTGBAN" {
@@ -333,6 +339,11 @@ func getSignatureFromCookies(r *http.Request) string {
 }
 
 func putSignatureInCookies(w http.ResponseWriter, r *http.Request, sig string) {
+	// Nothing in cookies for the free run, so that we don't have to deal with expiration
+	if sig == FreeSignature {
+		return
+	}
+
 	baseURL := getBaseURL(r)
 
 	year, month, _ := time.Now().Date()
@@ -669,7 +680,11 @@ func sign(link string, tierTitle string, userData *PatreonUserData) string {
 		v.Set("UserTier", tierTitle)
 	}
 
-	expires := time.Now().Add(DefaultSignatureDuration)
+	duration := DefaultSignatureDuration
+	if Config.FreeEnable {
+		duration = FreeSignatureDuration
+	}
+	expires := time.Now().Add(duration)
 	data := fmt.Sprintf("GET%d%s%s", expires.Unix(), link, v.Encode())
 	key := os.Getenv("BAN_SECRET")
 	sig := signHMACSHA1Base64([]byte(key), []byte(data))

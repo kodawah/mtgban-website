@@ -41,6 +41,7 @@ type PageVars struct {
 	PatreonURL   string
 	PatreonLogin bool
 	ShowPromo    bool
+	EnableFree   bool
 
 	Title          string
 	ErrorMessage   string
@@ -334,6 +335,10 @@ var Config struct {
 
 	ACL map[string]map[string]map[string]string `json:"acl"`
 
+	FreeEnable   bool   `json:"free_enable"`
+	FreeLevel    string `json:"free_level"`
+	FreeHostname string `json:"free_hostname"`
+
 	Uploader struct {
 		ServiceAccount string `json:"service_account"`
 		BucketName     string `json:"bucket_name"`
@@ -355,6 +360,7 @@ var Config struct {
 var DevMode bool
 var SigCheck bool
 var BenchMode bool
+var FreeSignature string
 var LogDir string
 var LastUpdate string
 var DatabaseLoaded bool
@@ -439,6 +445,7 @@ func genPageNav(activeTab, sig string) PageVars {
 		PatreonId:    PatreonClientId,
 		PatreonURL:   PatreonHost,
 		PatreonLogin: showPatreonLogin,
+		EnableFree:   Config.FreeEnable,
 	}
 
 	// Allocate a new navigation bar
@@ -553,6 +560,22 @@ func main() {
 	}
 	if *port != "" {
 		Config.Port = *port
+	}
+
+	// Cache a  signature
+	if Config.FreeEnable {
+		host := Config.FreeHostname
+		level := Config.FreeLevel
+		if host == "" || level == "" {
+			log.Fatalln("missing parameter for free level")
+		}
+		host += ":" + Config.Port
+		_, found := Config.ACL[level]
+		if !found {
+			log.Fatalln("level", level, "not found in the ACL config")
+		}
+		FreeSignature = sign(host, level, nil)
+		log.Println("Running in free mode")
 	}
 
 	_, err = os.Stat(LogDir)
