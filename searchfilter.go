@@ -1191,6 +1191,11 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 					value = "judgegift"
 				case "confetti", "galaxy", "halo":
 					value += "foil"
+				case "ampersand":
+					if co.SetCode != "PAFR" {
+						continue
+					}
+					value = mtgjson.PromoTypeEmbossed
 				}
 
 				// Fall back to any promo type currently supported
