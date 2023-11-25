@@ -585,6 +585,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 
 	if source.Info().SealedMode {
 		opts.MinSpread = MinSpreadSealed
+		opts.MinDiff = MinDiffNegative
 	}
 
 	// The pool of scrapers that source will be compared against
