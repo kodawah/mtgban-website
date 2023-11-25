@@ -74,6 +74,7 @@ type FilterOpt struct {
 
 	ArbitOnly bool
 	BetaFlag  bool
+	NoSealed  bool
 }
 
 // User-readable option name and associated function/visibility option
@@ -83,24 +84,28 @@ var FilterOptConfig = map[string]FilterOpt{
 		Func: func(opts *mtgban.ArbitOpts) {
 			opts.Conditions = BadConditions
 		},
+		NoSealed: true,
 	},
 	"nofoil": {
 		Title: "only non-Foil",
 		Func: func(opts *mtgban.ArbitOpts) {
 			opts.NoFoil = true
 		},
+		NoSealed: true,
 	},
 	"onlyfoil": {
 		Title: "only Foil",
 		Func: func(opts *mtgban.ArbitOpts) {
 			opts.OnlyFoil = true
 		},
+		NoSealed: true,
 	},
 	"nocomm": {
 		Title: "only Rare/Mythic",
 		Func: func(opts *mtgban.ArbitOpts) {
 			opts.Rarities = UCRarity
 		},
+		NoSealed: true,
 	},
 	"nononrl": {
 		Title: "only RL",
@@ -108,6 +113,7 @@ var FilterOptConfig = map[string]FilterOpt{
 			opts.OnlyReserveList = true
 		},
 		BetaFlag: true,
+		NoSealed: true,
 	},
 	"nononabu4h": {
 		Title: "only ABU4H",
@@ -116,6 +122,7 @@ var FilterOptConfig = map[string]FilterOpt{
 		},
 		ArbitOnly: true,
 		BetaFlag:  true,
+		NoSealed:  true,
 	},
 	"onlyshiny": {
 		Title: "only Shinies",
@@ -124,6 +131,7 @@ var FilterOptConfig = map[string]FilterOpt{
 			opts.OnlyCollectorNumberRanges = ShinyEditionRanges
 		},
 		BetaFlag: true,
+		NoSealed: true,
 	},
 	"noposi": {
 		Title: "only Negative",
@@ -139,6 +147,7 @@ var FilterOptConfig = map[string]FilterOpt{
 		Func: func(opts *mtgban.ArbitOpts) {
 			opts.MinPrice = 1
 		},
+		NoSealed: true,
 	},
 	"nobuypenny": {
 		Title: "only BuyBucks+",
@@ -146,6 +155,7 @@ var FilterOptConfig = map[string]FilterOpt{
 			opts.MinBuyPrice = 1
 		},
 		ArbitOnly: true,
+		NoSealed:  true,
 	},
 	"nolow": {
 		Title: "only Yield+",
@@ -449,6 +459,10 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 			if !anyOptionEnabled && FilterOptConfig[k].BetaFlag {
 				continue
 			}
+			// Skip sealed options when on sealed
+			if source != nil && source.Info().SealedMode && FilterOptConfig[k].NoSealed {
+				continue
+			}
 			arbitFilters[k], _ = strconv.ParseBool(v[0])
 		}
 	}
@@ -526,6 +540,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		return
 	}
 
+	pageVars.IsSealed = source.Info().SealedMode
 	pageVars.ScraperShort = source.Info().Shorthand
 	pageVars.HasAffiliate = slices.Contains(Config.AffiliatesList, source.Info().Shorthand)
 	pageVars.ArbitFilters = arbitFilters
