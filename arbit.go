@@ -140,6 +140,7 @@ var FilterOptConfig = map[string]FilterOpt{
 			opts.MaxSpread = MinSpread
 		},
 		ArbitOnly: true,
+		NoSealed:  true,
 	},
 	"nopenny": {
 		Title: "only Bucks+",

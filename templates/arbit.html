@@ -194,7 +194,7 @@
                         {{$key := .}}
                         {{$skipIfTesting := and (index $.ArbitOptConfig .).BetaFlag (not $.CanShowAll)}}
                         {{$skipIfGlobal := and (index $.ArbitOptConfig .).ArbitOnly $.GlobalMode}}
-                        {{$skipIfSealed := and (index $.ArbitOptConfig .).NoSealed ($.IsSealed)}}
+                        {{$skipIfSealed := and (index $.ArbitOptConfig .).NoSealed $.IsSealed}}
                         {{if and (and (not $skipIfTesting) (not $skipIfGlobal)) (not $skipIfSealed) }}
                             {{$cfg := index $.ArbitOptConfig .}}
                             {{if $cfg}}
