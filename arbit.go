@@ -65,15 +65,17 @@ var FilterOptKeys = []string{
 	"nodiff",
 	"nodiffplus",
 	"noqty",
+	"norand",
 }
 
 type FilterOpt struct {
 	Title string
 	Func  func(*mtgban.ArbitOpts)
 
-	ArbitOnly bool
-	BetaFlag  bool
-	NoSealed  bool
+	ArbitOnly  bool
+	BetaFlag   bool
+	NoSealed   bool
+	SealedOnly bool
 }
 
 // User-readable option name and associated function/visibility option
@@ -181,6 +183,13 @@ var FilterOptConfig = map[string]FilterOpt{
 			opts.MinQuantity = 1
 		},
 		ArbitOnly: true,
+	},
+	"norand": {
+		Title: "only Decklists+",
+		Func: func(opts *mtgban.ArbitOpts) {
+			opts.SealedDecklist = true
+		},
+		SealedOnly: true,
 	},
 }
 
@@ -461,6 +470,9 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 			}
 			// Skip sealed options when on sealed
 			if source != nil && source.Info().SealedMode && FilterOptConfig[k].NoSealed {
+				continue
+			}
+			if source != nil && !source.Info().SealedMode && FilterOptConfig[k].SealedOnly {
 				continue
 			}
 			arbitFilters[k], _ = strconv.ParseBool(v[0])
