@@ -21,7 +21,6 @@ const (
 	MinSpread       = 10.0
 	MaxSpreadGlobal = 1000
 	MinSpreadGlobal = 200.0
-	MinSpreadSealed = 1.0
 
 	MaxResultsGlobal      = 300
 	MaxResultsGlobalLimit = 50
@@ -584,7 +583,7 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	}
 
 	if source.Info().SealedMode {
-		opts.MinSpread = MinSpreadSealed
+		opts.MinSpread = MinSpreadNegative
 		opts.MinDiff = MinDiffNegative
 	}
 
