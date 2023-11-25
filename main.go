@@ -70,7 +70,6 @@ type PageVars struct {
 	ArbitOptKeys   []string
 	ArbitOptConfig map[string]FilterOpt
 	ArbitFilters   map[string]bool
-	ArbitOptNoGlob map[string]bool
 	ArbitOptTests  map[string]bool
 	SortOption     string
 	GlobalMode     bool

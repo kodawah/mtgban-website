@@ -71,9 +71,12 @@ var FilterOptKeys = []string{
 type FilterOpt struct {
 	Title string
 	Func  func(*mtgban.ArbitOpts)
+
+	ArbitOnly bool
+	BetaFlag  bool
 }
 
-// User-readable option name (may be a subset of the options)
+// User-readable option name and associated function/visibility option
 var FilterOptConfig = map[string]FilterOpt{
 	"nocond": {
 		Title: "only NM/SP",
@@ -104,12 +107,15 @@ var FilterOptConfig = map[string]FilterOpt{
 		Func: func(opts *mtgban.ArbitOpts) {
 			opts.OnlyReserveList = true
 		},
+		BetaFlag: true,
 	},
 	"nononabu4h": {
 		Title: "only ABU4H",
 		Func: func(opts *mtgban.ArbitOpts) {
 			opts.OnlyEditions = ABU4H
 		},
+		ArbitOnly: true,
+		BetaFlag:  true,
 	},
 	"onlyshiny": {
 		Title: "only Shinies",
@@ -117,6 +123,7 @@ var FilterOptConfig = map[string]FilterOpt{
 			opts.OnlyEditions = ShinyEditions
 			opts.OnlyCollectorNumberRanges = ShinyEditionRanges
 		},
+		BetaFlag: true,
 	},
 	"noposi": {
 		Title: "only Negative",
@@ -125,6 +132,7 @@ var FilterOptConfig = map[string]FilterOpt{
 			opts.MinDiff = MinDiffNegative
 			opts.MaxSpread = MinSpread
 		},
+		ArbitOnly: true,
 	},
 	"nopenny": {
 		Title: "only Bucks+",
@@ -137,6 +145,7 @@ var FilterOptConfig = map[string]FilterOpt{
 		Func: func(opts *mtgban.ArbitOpts) {
 			opts.MinBuyPrice = 1
 		},
+		ArbitOnly: true,
 	},
 	"nolow": {
 		Title: "only Yield+",
@@ -161,22 +170,8 @@ var FilterOptConfig = map[string]FilterOpt{
 		Func: func(opts *mtgban.ArbitOpts) {
 			opts.MinQuantity = 1
 		},
+		ArbitOnly: true,
 	},
-}
-
-// Arbit-only options
-var FilterOptNoGlobal = map[string]bool{
-	"nononabu4h": true,
-	"nobuypenny": true,
-	"noposi":     true,
-	"noqty":      true,
-}
-
-// Experimental options
-var FilterOptTests = map[string]bool{
-	"nononrl":    true,
-	"nononabu4h": true,
-	"onlyshiny":  true,
 }
 
 var BadConditions = []string{"MP", "HP", "PO"}
@@ -262,7 +257,7 @@ func arbit(w http.ResponseWriter, r *http.Request, reverse bool) {
 			}
 			allowlistSellers = append(allowlistSellers, seller.Info().Shorthand)
 		}
-		// Enable any option under FilterOptTests
+		// Enable any option with BetaFlag
 		anyOptionEnabled = true
 	} else if allowlistSellersOpt == "DEV" {
 		allowlistSellers = append(Config.ArbitDefaultSellers, Config.DevSellers...)
@@ -391,6 +386,8 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	limitedResults := len(flags) > 0 && !flags[0]
 	anyOptionEnabled := len(flags) > 1 && flags[1]
 
+	pageVars.CanShowAll = anyOptionEnabled
+
 	// Set these flags for global, since it's likely users will want them
 	if pageVars.GlobalMode {
 		arbitFilters["nopenny"] = !arbitFilters["nopenny"]
@@ -445,11 +442,11 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 		// Assume anything else is a boolean option
 		default:
 			// Skip options reserved for arbit-only
-			if pageVars.GlobalMode && FilterOptNoGlobal[k] {
+			if pageVars.GlobalMode && FilterOptConfig[k].ArbitOnly {
 				continue
 			}
 			// Skip experimental options
-			if !anyOptionEnabled && FilterOptTests[k] {
+			if !anyOptionEnabled && FilterOptConfig[k].BetaFlag {
 				continue
 			}
 			arbitFilters[k], _ = strconv.ParseBool(v[0])
@@ -534,10 +531,6 @@ func scraperCompare(w http.ResponseWriter, r *http.Request, pageVars PageVars, a
 	pageVars.ArbitFilters = arbitFilters
 	pageVars.ArbitOptKeys = FilterOptKeys
 	pageVars.ArbitOptConfig = FilterOptConfig
-	pageVars.ArbitOptNoGlob = FilterOptNoGlobal
-	if !anyOptionEnabled {
-		pageVars.ArbitOptTests = FilterOptTests
-	}
 
 	pageVars.Arb = []Arbitrage{}
 	pageVars.Metadata = map[string]GenericCard{}
