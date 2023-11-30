@@ -441,6 +441,9 @@ type AffiliateConfig struct {
 	// Function to build the displayed title
 	TitleFunc func(string) string
 
+	// Function to build the complete URL
+	URLFunc func(*url.URL) *url.URL
+
 	// Whether to parse the entire URL or just its path
 	FullURL bool
 }
@@ -492,36 +495,26 @@ var AffiliateStores []AffiliateConfig = []AffiliateConfig{
 		},
 	},
 	{
-		Trigger:       "tcgplayer.com",
-		Skip:          []string{"seller", "help"},
-		Name:          "TCGplayer",
-		Handle:        "TCG",
-		DefaultFields: []string{"partner", "utm_source", "utm_medium"},
-		CustomFields: map[string]string{
-			"utm_campaign": "affliate",
-		},
-		TitleFunc: func(URLpath string) string {
-			var title string
-			// The old style links do not have the product id and have an extra element
-			if strings.HasSuffix(URLpath, "/listing") {
-				title = mtgmatcher.Title(strings.Replace(path.Base(strings.TrimSuffix(URLpath, "/listing")), "-", " ", -1))
+		Trigger: "tcgplayer.com",
+		Skip:    []string{"seller", "help"},
+		Name:    "TCGplayer",
+		URLFunc: func(u *url.URL) *url.URL {
+			// Work around wrong tcgplayer defaults
+			v := u.Query()
+			if v.Get("Language") == "" {
+				v.Set("Language", "all")
 			}
-			// Sometimes there is the product id embedded in the URL,
-			// try to find it and use it to decorate the title
-			productId := strings.TrimPrefix(URLpath, "/product/")
+			u.RawQuery = v.Encode()
 
-			slashIndex := strings.Index(productId, "/")
-			if slashIndex != -1 {
-				productId = productId[:slashIndex]
-			}
-			productId = mtgmatcher.Tcg2UUID(productId)
-			// Finish is ignored here but it is preserved in the original URL
-			co, err := mtgmatcher.GetUUID(productId)
-			if err != nil {
-				return title
-			}
-			// Keep the edition first to mimic the normal style
-			return fmt.Sprintf("Magic %s %s", co.Edition, co.Name)
+			link := u.String()
+			u, _ = u.Parse(fmt.Sprintf(tcgplayer.PartnerProductURL, Config.Affiliate["TCG"]))
+			v = url.Values{}
+			v.Set("u", link)
+			u.RawQuery = v.Encode()
+			return u
+		},
+		TitleFunc: func(_ string) string {
+			return "Your search"
 		},
 	},
 	{
@@ -653,6 +646,11 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 					u, err := url.Parse(field)
 					if err != nil {
 						continue
+					}
+
+					// Tweak base URL if necessary
+					if store.URLFunc != nil {
+						u = store.URLFunc(u)
 					}
 
 					// Extract a sensible link title
