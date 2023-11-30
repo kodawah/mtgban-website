@@ -3,13 +3,10 @@ package main
 import (
 	"math/rand"
 	"net/http"
-	"net/url"
 	"strings"
 
 	"github.com/mtgban/go-mtgban/mtgmatcher"
 )
-
-const UTM_BOT = "banbot"
 
 func Redirect(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/go/")
@@ -43,21 +40,8 @@ func Redirect(w http.ResponseWriter, r *http.Request) {
 						}
 					}
 
-					if len(entries) > 0 {
-						entry := entries[0]
-						link := entry.URL
-						// Change the utm default query param to improve tracking
-						if strings.HasPrefix(store, "TCG") {
-							u, err := url.Parse(link)
-							if err != nil {
-								break
-							}
-							v := u.Query()
-							v.Set("utm_medium", UTM_BOT)
-							u.RawQuery = v.Encode()
-							link = u.String()
-						}
-						http.Redirect(w, r, link, http.StatusFound)
+					for _, entry := range entries {
+						http.Redirect(w, r, entry.URL, http.StatusFound)
 						return
 					}
 				}
