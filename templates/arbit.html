@@ -265,7 +265,8 @@
                             </noscript>
                         </form>
                     {{else if has_prefix $sourceKey "TCG"}}
-                        <form action='https://api.tcgplayer.com/massentry?partner={{load_partner "TCG"}}&utm_campaign=affiliate&utm_medium={{load_partner "TCG"}}&utm_source={{load_partner "TCG"}}' method="post" id="{{$sourceKey}}{{$scraperKey}}deckbuilder" style="display: inline;" target="_blank">
+                        <form action='https://api.tcgplayer.com/massentry' method="post" id="{{$sourceKey}}{{$scraperKey}}deckbuilder" style="display: inline;" target="_blank">
+                            <input type="hidden" name="affiliateurl" value='https://tcgplayer.pxf.io/c/{{load_partner "TCG"}}/1830156/21018'/>
                             <input type="hidden" name="c" value="{{range $entries}}{{if .Quantity}}{{.Quantity}}{{else}}1{{end}}-{{uuid2tcgid .CardId}}||{{end}}"/>
                             <a class="btn success" style="text-align: center;" href='javascript:void(0)' onclick='document.getElementById("{{$sourceKey}}{{$scraperKey}}deckbuilder").submit();'>Load at TCG</a>
                             <noscript>
