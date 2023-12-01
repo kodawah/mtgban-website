@@ -53,18 +53,23 @@
 
     <br>
     <div class="indent">
-        {{if .PatreonLogin}}
-            <script type="text/javascript">
-                function getPatreonURL () {
-                    return "http://www.patreon.com/oauth2/authorize?response_type=code&client_id={{.PatreonId}}&redirect_uri={{.PatreonURL}}&scope=identity%20identity%5Bemail%5D%20campaigns%20campaigns.members&state=" + encodeURIComponent(window.location.href)
-                }
-            </script>
-
-            <a href="javascript:location.replace(getPatreonURL())">
-                <img src="../img/misc/login.png" width=360 height=60>
-            </a>
+        {{if .EnableFree}}
+            <h2>
+                This is an <strong>experimental</strong> public release. To experience enhanced functionality, head over to www.mtgban.com by subscribing <a href="stripe-pricing.html">here</a>!
+            </h2>
         {{else}}
-            <a href="/?errmsg=logout"><img src="../img/misc/logout.png" width=236 height=60></a>
+            {{if .PatreonLogin}}
+                <script type="text/javascript">
+                    function getPatreonURL () {
+                        return "http://www.patreon.com/oauth2/authorize?response_type=code&client_id={{.PatreonId}}&redirect_uri={{.PatreonURL}}&scope=identity%20identity%5Bemail%5D%20campaigns%20campaigns.members&state=" + encodeURIComponent(window.location.href)
+                    }
+                </script>
+                <a href="javascript:location.replace(getPatreonURL())">
+                    <img src="../img/misc/login.png" width=360 height=60>
+                </a>
+            {{else}}
+                <a href="/?errmsg=logout"><img src="../img/misc/logout.png" width=236 height=60></a>
+            {{end}}
         {{end}}
     </div>
 </body>
