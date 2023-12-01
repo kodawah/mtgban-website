@@ -709,6 +709,10 @@ func main() {
 		handleRequest(ctx, w, r, authClient, fsClient)
 	})
 
+	if port, exists := os.LookupEnv("PORT"); exists {
+		Config.Port = port
+	}
+
 	srv := &http.Server{
 		Addr: ":" + Config.Port,
 	}
