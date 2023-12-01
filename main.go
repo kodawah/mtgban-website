@@ -692,6 +692,10 @@ func main() {
 	http.HandleFunc("/favicon.ico", Favicon)
 	http.HandleFunc("/auth", Auth)
 
+	if port, exists := os.LookupEnv("PORT"); exists {
+		Config.Port = port
+	}
+
 	srv := &http.Server{
 		Addr: ":" + Config.Port,
 	}
