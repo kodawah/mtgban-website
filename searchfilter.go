@@ -982,6 +982,9 @@ var isKnownPromo = map[string]string{
 	"galaxy":    mtgjson.PromoTypeGalaxyFoil,
 	"halo":      mtgjson.PromoTypeHaloFoil,
 	"ampersand": mtgjson.PromoTypeEmbossed,
+	"wpn":       mtgjson.PromoTypeWPN,
+	"pp":        mtgjson.PromoTypePromoPack,
+	"neon":      mtgjson.PromoTypeNeonInk,
 }
 
 var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObject) bool{
