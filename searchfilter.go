@@ -969,6 +969,21 @@ func compareReleaseDate(filters []string, co *mtgmatcher.CardObject, cmpFunc fun
 	return cmpFunc(cardDate, releaseDate)
 }
 
+var isKnownPromo = map[string]string{
+	"bf":        mtgjson.PromoTypeBoosterfun,
+	"v":         mtgjson.PromoTypeBoosterfun,
+	"rewards":   mtgjson.PromoTypePlayerRewards,
+	"mpr":       mtgjson.PromoTypePlayerRewards,
+	"bab":       mtgjson.PromoTypeBuyABox,
+	"buy-a-box": mtgjson.PromoTypeBuyABox,
+	"arena":     mtgjson.PromoTypeArenaLeague,
+	"judge":     mtgjson.PromoTypeJudgeGift,
+	"confetti":  mtgjson.PromoTypeConfettiFoil,
+	"galaxy":    mtgjson.PromoTypeGalaxyFoil,
+	"halo":      mtgjson.PromoTypeHaloFoil,
+	"ampersand": mtgjson.PromoTypeEmbossed,
+}
+
 var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObject) bool{
 	"edition": func(filters []string, co *mtgmatcher.CardObject) bool {
 		return !slices.Contains(filters, co.SetCode)
@@ -1178,24 +1193,9 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 				}
 			default:
 				// Adjust input for these known cases
-				switch value {
-				case "bf", "v":
-					value = "boosterfun"
-				case "rewards", "mpr":
-					value = "playerrewards"
-				case "bab", "buy-a-box":
-					value = "buyabox"
-				case "arena":
-					value = "arenaleague"
-				case "judge":
-					value = "judgegift"
-				case "confetti", "galaxy", "halo":
-					value += "foil"
-				case "ampersand":
-					if co.SetCode != "PAFR" {
-						continue
-					}
-					value = mtgjson.PromoTypeEmbossed
+				newValue, found := isKnownPromo[value]
+				if found {
+					value = newValue
 				}
 
 				// Fall back to any promo type currently supported
