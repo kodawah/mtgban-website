@@ -406,15 +406,15 @@
                         </ul>
                     </li>
                     <li>
-                        <h4>Is there a minimum value for a card to be considered?</h4>
+                        <h4>Is there a minimum or maxumum value for a card to be considered?</h4>
                         <ul class="indent">
-                           No, every single price found is added up, there is no mimum threshold. The multiple runs should take care of the variance for EV computation, and the impact of low value cards should be nullified in this way. For buylists, bulk prices are considered too.
+                           Yes. Initially we considered every single price found and added it up, but we found out that counting up "worthless cards" and "extremely expensive cards" skew the results even on repeated runs. So we're now excluding all bulk (sub $0.30) and all serialized cards, since the odds of opening are low, but impact the EV result too optimistically. The multiple runs should take care of the variance for EV computation for all other cards.
                         </ul>
                     </li>
                     <li>
                         <h4>Do you consider The List cards, boxtoppers, variations etc when computing a box EV?</h4>
                         <ul class="indent">
-                           Yes.
+                           Yes (with the exclusion of outliers as mentioned above).
                         </ul>
                     </li>
                 </ul>
