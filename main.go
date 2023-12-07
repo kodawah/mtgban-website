@@ -216,6 +216,7 @@ var OptionalFields = []string{
 	"UploadBuylistEnabled",
 	"UploadChangeStoresEnabled",
 	"UploadOptimizer",
+	"UploadNoLimit",
 	"AnyEnabled",
 	"AnyExperimentsEnabled",
 	"APImode",
