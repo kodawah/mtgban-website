@@ -147,8 +147,25 @@ func API(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"error": "empty list"}`))
 		return
 	}
+	outputMap := CKAPIOutput
 
-	err := json.NewEncoder(w).Encode(CKAPIOutput)
+	// Only scryfall and mtgjson ids are supported due to the unification of finishes
+	// mtgjson is the default, perform a key conversion if scryfall is requested
+	idMode := r.FormValue("id")
+	if idMode == "scryfall" {
+		altMap := map[string]*ck2id{}
+		for uuid, meta := range CKAPIOutput {
+			co, err := mtgmatcher.GetUUID(uuid)
+			if err != nil {
+				continue
+			}
+			id := getIdFunc(idMode)(co)
+			altMap[id] = meta
+		}
+		outputMap = altMap
+	}
+
+	err := json.NewEncoder(w).Encode(outputMap)
 	if err != nil {
 		log.Println(err)
 		w.Write([]byte(`{"error": "` + err.Error() + `"}`))
