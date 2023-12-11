@@ -787,3 +787,12 @@ div.stores-select {
     resize: both;
     overflow: auto;
 }
+
+img.hoverImage {
+    position: absolute;
+    z-index: 3;
+    width: auto;
+    width: auto;
+    max-width: 640px;
+    max-height: 360px;
+}
