@@ -1048,6 +1048,15 @@ var specialTags = map[string]string{
 	"Sulfur Falls":        "checkland",
 	"Sunpetal Grove":      "checkland",
 	"Woodland Cemetery":   "checkland",
+	"Ancestral Recall":    "power9",
+	"Black Lotus":         "power9",
+	"Mox Emerald":         "power9",
+	"Mox Jet":             "power9",
+	"Mox Pearl":           "power9",
+	"Mox Ruby":            "power9",
+	"Mox Sapphire":        "power9",
+	"Timetwister":         "power9",
+	"Time Walk":           "power9",
 }
 
 var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObject) bool{
