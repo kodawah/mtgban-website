@@ -832,7 +832,7 @@ func parseHeader(first []string) (map[string]int, error) {
 		field = strings.ToLower(field)
 		switch {
 		// Skip "tcgplayer id" because it could mean SKU or Product, and the two systems often overlap
-		case field == "id" || (strings.Contains(field, "id") && field != "tcgplayer id" && (strings.Contains(field, "tcg") || strings.Contains(field, "scryfall"))):
+		case field == "id" || strings.Contains(field, "uuid") || (strings.Contains(field, "id") && field != "tcgplayer id" && (strings.Contains(field, "tcg") || strings.Contains(field, "scryfall"))):
 			_, found := indexMap["id"]
 			if !found {
 				indexMap["id"] = i
@@ -923,23 +923,27 @@ func parseHeader(first []string) (map[string]int, error) {
 		}
 	}
 
+	// If this field is present we don't need safe defaults
+	_, foundId := indexMap["id"]
+
 	// Set some default values for the mandatory fields
 	_, foundName := indexMap["cardName"]
-	if !foundName {
+	if !foundName && !foundId {
 		indexMap["cardName"] = 0
 		// Used by some formats that do not set a card name
 		i, found := indexMap["title"]
 		if found {
 			indexMap["cardName"] = i
+			foundName = true
 		}
 	}
 	_, foundEdition := indexMap["edition"]
-	if !foundEdition {
+	if !foundEdition && !foundId {
 		indexMap["edition"] = 1
 	}
 
 	// If nothing at all was found, send an error to reprocess the first line
-	if !foundName && !foundEdition {
+	if !foundName && !foundEdition && !foundId {
 		log.Println("Fake Header map:", indexMap)
 		return indexMap, ErrReloadFirstRow
 	}
