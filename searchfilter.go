@@ -987,6 +987,69 @@ var isKnownPromo = map[string]string{
 	"neon":      mtgjson.PromoTypeNeonInk,
 }
 
+var specialTags = map[string]string{
+	"Badlands":            "dual",
+	"Bayou":               "dual",
+	"Plateau":             "dual",
+	"Savannah":            "dual",
+	"Scrubland":           "dual",
+	"Taiga":               "dual",
+	"Tropical Island":     "dual",
+	"Tundra":              "dual",
+	"Underground Sea":     "dual",
+	"Volcanic Island":     "dual",
+	"Blackcleave Cliffs":  "fastland",
+	"Blooming Marsh":      "fastland",
+	"Botanical Sanctum":   "fastland",
+	"Concealed Courtyard": "fastland",
+	"Copperline Gorge":    "fastland",
+	"Darkslick Shores":    "fastland",
+	"Inspiring Vantage":   "fastland",
+	"Razorverge Thicket":  "fastland",
+	"Seachrome Coast":     "fastland",
+	"Spirebluff Canal":    "fastland",
+	"Arid Mesa":           "fetchland",
+	"Bloodstained Mire":   "fetchland",
+	"Flooded Strand":      "fetchland",
+	"Marsh Flats":         "fetchland",
+	"Misty Rainforest":    "fetchland",
+	"Polluted Delta":      "fetchland",
+	"Scalding Tarn":       "fetchland",
+	"Verdant Catacombs":   "fetchland",
+	"Windswept Heath":     "fetchland",
+	"Wooded Foothills":    "fetchland",
+	"Adarkar Wastes":      "painland",
+	"Battlefield Forge":   "painland",
+	"Brushland":           "painland",
+	"Caves of Koilos":     "painland",
+	"Karplusan Forest":    "painland",
+	"Llanowar Wastes":     "painland",
+	"Shivan Reef":         "painland",
+	"Sulfurous Springs":   "painland",
+	"Underground River":   "painland",
+	"Yavimaya Coast":      "painland",
+	"Blood Crypt":         "shockland",
+	"Breeding Pool":       "shockland",
+	"Godless Shrine":      "shockland",
+	"Hallowed Fountain":   "shockland",
+	"Overgrown Tomb":      "shockland",
+	"Sacred Foundry":      "shockland",
+	"Steam Vents":         "shockland",
+	"Stomping Ground":     "shockland",
+	"Temple Garden":       "shockland",
+	"Watery Grave":        "shockland",
+	"Clifftop Retreat":    "checkland",
+	"Dragonskull Summit":  "checkland",
+	"Drowned Catacomb":    "checkland",
+	"Glacial Fortress":    "checkland",
+	"Hinterland Harbor":   "checkland",
+	"Isolated Chapel":     "checkland",
+	"Rootbound Crag":      "checkland",
+	"Sulfur Falls":        "checkland",
+	"Sunpetal Grove":      "checkland",
+	"Woodland Cemetery":   "checkland",
+}
+
 var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObject) bool{
 	"edition": func(filters []string, co *mtgmatcher.CardObject) bool {
 		return !slices.Contains(filters, co.SetCode)
@@ -1209,7 +1272,7 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 				}
 
 				// Finally check any leftover tags
-				customTag, found := co.Identifiers["customTag"]
+				customTag, found := specialTags[co.Name]
 				if found && customTag == value {
 					return false
 				}
