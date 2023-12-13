@@ -1059,6 +1059,16 @@ var specialTags = map[string]string{
 	"Time Walk":           "power9",
 }
 
+var specialEditionTags = map[string]string{
+	"LEA": "abu4h",
+	"LEB": "abu4h",
+	"2ED": "abu4h",
+	"ARN": "abu4h",
+	"ATQ": "abu4h",
+	"LEG": "abu4h",
+	"DRK": "abu4h",
+}
+
 var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObject) bool{
 	"edition": func(filters []string, co *mtgmatcher.CardObject) bool {
 		return !slices.Contains(filters, co.SetCode)
@@ -1282,6 +1292,12 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 
 				// Finally check any leftover tags
 				customTag, found := specialTags[co.Name]
+				if found && customTag == value {
+					return false
+				}
+
+				// same for set code tags
+				customTag, found = specialEditionTags[co.SetCode]
 				if found && customTag == value {
 					return false
 				}
