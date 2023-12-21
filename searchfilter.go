@@ -427,9 +427,9 @@ var FilterOperations = map[string][]string{
 	"decklist":  []string{":"},
 	"ci":        []string{":"},
 	"identity":  []string{":"},
-	"cond":      []string{":"},
-	"condr":     []string{":"},
-	"condb":     []string{":"},
+	"cond":      []string{":", ">", "<"},
+	"condr":     []string{":", ">", "<"},
+	"condb":     []string{":", ">", "<"},
 	"id":        []string{":"},
 	"is":        []string{":"},
 	"not":       []string{":"},
@@ -767,8 +767,14 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 
 		// Pricing Options
 		case "cond", "condr", "condb":
+			opt := "condition"
+			if operation == ">" {
+				opt = "condition_greater_than"
+			} else if operation == "<" {
+				opt = "condition_less_than"
+			}
 			filterEntries = append(filterEntries, FilterEntryElem{
-				Name:          "condition",
+				Name:          opt,
 				Negate:        negate,
 				Values:        strings.Split(strings.ToUpper(code), ","),
 				OnlyForSeller: option == "condr",
@@ -1507,9 +1513,31 @@ func shouldSkipPriceNG(cardId string, entry mtgban.GenericEntry, filters []Filte
 	return false
 }
 
+var conditionMap = map[string]int{
+	"NM": 4,
+	"SP": 3,
+	"MP": 2,
+	"HP": 1,
+	"PO": 0,
+}
+
 var FilterEntryFuncs = map[string]func(filters []string, entry mtgban.GenericEntry) bool{
 	"condition": func(filters []string, entry mtgban.GenericEntry) bool {
 		return !slices.Contains(filters, entry.Condition())
+	},
+	"condition_greater_than": func(filters []string, entry mtgban.GenericEntry) bool {
+		condIndex, found := conditionMap[filters[0]]
+		if !found {
+			return true
+		}
+		return condIndex >= conditionMap[entry.Condition()]
+	},
+	"condition_less_than": func(filters []string, entry mtgban.GenericEntry) bool {
+		condIndex, found := conditionMap[filters[0]]
+		if !found {
+			return true
+		}
+		return condIndex <= conditionMap[entry.Condition()]
 	},
 }
 
