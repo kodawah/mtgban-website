@@ -416,7 +416,7 @@ var FilterOperations = map[string][]string{
 	"cn":        []string{":", ">", "<"},
 	"cne":       []string{":"},
 	"date":      []string{":", ">", "<"},
-	"r":         []string{":"},
+	"r":         []string{":", ">", "<"},
 	"t":         []string{":"},
 	"f":         []string{":"},
 	"c":         []string{":"},
@@ -643,8 +643,14 @@ func parseSearchOptionsNG(query string, blocklistRetail, blocklistBuylist []stri
 				Values: []string{code},
 			})
 		case "r":
+			opt := "rarity"
+			if operation == ">" {
+				opt = "rarity_greater_than"
+			} else if operation == "<" {
+				opt = "rarity_less_than"
+			}
 			filters = append(filters, FilterElem{
-				Name:   "rarity",
+				Name:   opt,
 				Negate: negate,
 				Values: fixupRarityNG(code),
 			})
@@ -1069,6 +1075,14 @@ var specialEditionTags = map[string]string{
 	"DRK": "abu4h",
 }
 
+var rarityMap = map[string]int{
+	"common":   0,
+	"uncommon": 1,
+	"rare":     2,
+	"mythic":   3,
+	"special":  4,
+}
+
 var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObject) bool{
 	"edition": func(filters []string, co *mtgmatcher.CardObject) bool {
 		return !slices.Contains(filters, co.SetCode)
@@ -1079,6 +1093,20 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 	},
 	"rarity": func(filters []string, co *mtgmatcher.CardObject) bool {
 		return !slices.Contains(filters, co.Rarity)
+	},
+	"rarity_greater_than": func(filters []string, co *mtgmatcher.CardObject) bool {
+		rarityIndex, found := rarityMap[filters[0]]
+		if !found {
+			return true
+		}
+		return rarityIndex >= rarityMap[co.Rarity]
+	},
+	"rarity_less_than": func(filters []string, co *mtgmatcher.CardObject) bool {
+		rarityIndex, found := rarityMap[filters[0]]
+		if !found {
+			return true
+		}
+		return rarityIndex <= rarityMap[co.Rarity]
 	},
 	"type": func(filters []string, co *mtgmatcher.CardObject) bool {
 		for _, value := range filters {
