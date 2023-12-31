@@ -1,11 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <link href='https://fonts.googleapis.com/css?family=Rosario:400' rel='stylesheet' type='text/css'>
+    <link href='https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css' rel='stylesheet'>
     <link rel="stylesheet" type="text/css" href="../css/main.css">
     <link href="//cdn.jsdelivr.net/npm/keyrune@latest/css/keyrune.css" rel="stylesheet" type="text/css" />
+    <script>$(document).ready(function() {$('[data-toggle="tooltip"]').tooltip({html: true});});</script>
     <title>{{.Title}}</title>
     {{if not .IsSealed}}
+        <script type="text/javascript" src="../js/suggest.js"></script>
         <script type="text/javascript" src="../js/autocomplete.js"></script>
         <script type="text/javascript" src="../js/fetchnames.js"></script>
     {{end}}
@@ -13,6 +19,7 @@
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js"></script>
         <script type="text/javascript" src="../js/chartopts.js"></script>
     {{end}}
+    <style> .tooltip-inner { font-size: 15px; } .tooltip-inner { max-width: 350px; } .tooltip-inner { text-align: left;}</style>
 </head>
 
 <body class="light-theme">
@@ -245,8 +252,47 @@
         {{end}}
         {{if and (eq .SearchQuery "") (not .IsSealed)}}
             <div class="indent">
-                <h2>Instructions</h2>
-                <br>
+                <div class="accordion" id="searchGuideAccordion">
+                    <!-- Basic Syntax Card -->
+                    <div class="card">
+                        <div class="card-header" id="headingBasicSearch">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link" data-toggle="collapse" data-target="#collapseBasicSearch" aria-expanded="true" aria-controls="collapseBasicSearch">
+                                    Basic Search
+                                </button>
+                            </h5>
+                        </div>
+                        <div id="collapseBasicSearch" class="collapse show" aria-labelledby="headingBasicSearch" data-parent="#searchGuideAccordion">
+                            <div class="card-body">
+                                <p>
+                                    You can search using the Pricefall bot notation: name[|code[|number]]{&*~}
+                                    If you append a special character to any search, you can filter by finish: & for nonfoil-only, * for foil-only, ~ for etched-only results.
+                                    There is limited support for human-readable tags, for example if (Extended Art) is appended to a card name. (13)
+                                    You can set any option in any order, in any amount. (16)
+                                    You can invert filter results by prepending a - to the option name. (17) 
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <!-- Advanced Features Card -->
+                    <div class="card">
+                        <div class="card-header" id="headingAdvancedFeatures">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseAdvancedFeatures" aria-expanded="false" aria-controls="collapseAdvancedFeatures">
+                                    Advanced Features
+                                </button>
+                            </h5>
+                        </div>
+                        <div id="collapseAdvancedFeatures" class="collapse" aria-labelledby="headingAdvancedFeatures" data-parent="#searchGuideAccordion">
+                            <div class="card-body">
+                                <ul>
+                                    <!-- Your Advanced Features <li> elements here -->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <ul class="indent">
                     <li><h4><i>Syntax</i></h4>
                         <ul class="indent">
