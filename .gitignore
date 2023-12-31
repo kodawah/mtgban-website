@@ -34,3 +34,6 @@ logs/
 compose-dev.yaml
 dockerfile
 .dockerignore
+
+# node dependencies
+node_modules/
