@@ -189,6 +189,10 @@ type NavElem struct {
 	CanPOST bool
 }
 
+type LoginResponse struct {
+	Message string `json:"message"`
+}
+
 var startTime = time.Now()
 
 var DefaultNav = []NavElem{
@@ -329,10 +333,10 @@ var Config struct {
 		Secret map[string]string `json:"secret"`
 		Emails map[string]string `json:"emails"`
 	} `json:"patreon"`
-	ApiUserSecrets    map[string]string `json:"api_user_secrets"`
-	GoogleCredentials string            `json:"google_credentials"`
-
-	ACL map[string]map[string]map[string]string `json:"acl"`
+	ApiUserSecrets    map[string]string                       `json:"api_user_secrets"`
+	GoogleCredentials string                                  `json:"google_credentials"`
+	GoogleProject     string                                  `json:"project_id"`
+	ACL               map[string]map[string]map[string]string `json:"acl"`
 
 	Uploader struct {
 		ServiceAccount string `json:"service_account"`
@@ -683,7 +687,7 @@ func main() {
 
 	http.Handle("/sets", enforceSigning(http.HandlerFunc(Search)))
 	http.Handle("/sealed", enforceSigning(http.HandlerFunc(Search)))
-
+	http.
 	http.Handle("/api/mtgban/", enforceAPISigning(http.HandlerFunc(PriceAPI)))
 	http.Handle("/api/mtgjson/ck.json", enforceAPISigning(http.HandlerFunc(API)))
 	http.Handle("/api/tcgplayer/lastsold/", enforceSigning(http.HandlerFunc(TCGLastSoldAPI)))

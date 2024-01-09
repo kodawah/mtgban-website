@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTGBAN Subscription</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Custom CSS cause SOMEBODY put images as background AT ROOT -->
+    <style>
+        .wrapper {
+            background-color: rgb(18, 17, 17);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            max-height: 100vh;
+        }
+        .container {
+            max-width: 100vh
+        }
+        .stripe-pricing-table-container .back-btn {
+            float: left;
+        }
+
+        .navbar-brand {
+            background-color: rgb(48, 37, 37);
+
+        }
+
+        .nav-item {
+        color: #861212; /* Set the text color of the brand text */
+        font-size: 18px; /* Set the font size of the brand text */
+        }
+        
+
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#"></a>
+            <img src="/img/logo/ban-round.png" alt="logo" style="width: 90px; padding-inline: 10px;">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+         <!-- Back Button -->
+         <button class="btn btn-info"onclick="history.back()">Back</button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/templates/home.html">🏠 Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/templates/pricing.html">🫰Subscribe</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/templates/search.html">🔍 Search</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/templates/sleep.html">💤 Sleepers</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/templates/news.html">🗞️ Newspaper</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/templates/upload.html">🚢 Upload</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/templates/arbit.html .html">🌍 Global</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/templates/arbit.html">📈 Arbitrage</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/templates/arbit.html">📉 Reverse</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/templates/admin.html">❌ Admin</a>
+                </li>
+                <li>
+                    <label class="switch">
+                        <div>
+                            <input type="checkbox"/>
+                            <span class="slider"></span>
+                        </div>
+                        <script type="text/javascript" src="../js/nightmode.js"></script>
+                    </label>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <!-- Stripe Pricing Table -->
+    <div class="wrapper">
+        <div class="container text-center">
+            <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
+            <stripe-pricing-table pricing-table-id="prctbl_1NxLEfCH5ISknTrDcW5Q8UUg"
+            publishable-key="pk_test_51Mt9ljCH5ISknTrDOTYlYLQROTcGLEEccvQljztV15I8ptx2pYGeMLZvHwCaehXwphBimXX5hjZpAXGhSvuB60RJ00VVAPmy67">
+            </stripe-pricing-table>
+        </div>
+    </div>
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
