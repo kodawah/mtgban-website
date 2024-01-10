@@ -75,7 +75,7 @@ func initFirebase(ctx context.Context, projectId, secretId string) (*auth.Client
 func authenticateUser(ctx context.Context, client *auth.Client, idToken string) (*auth.UserRecord, error) {
 	token, err := client.VerifyIDToken(ctx, idToken)
 	if err != nil {
-		return nil, fmt.Errorf("error verifying ID token: %v\n", err)
+		return nil, fmt.Errorf("error verifying ID token: %v", err)
 	}
 
 	
