@@ -188,11 +188,6 @@ type NavElem struct {
 	// Allow to receive POST requests
 	CanPOST bool
 }
-
-type LoginResponse struct {
-	Message string `json:"message"`
-}
-
 var startTime = time.Now()
 
 var DefaultNav = []NavElem{
@@ -704,7 +699,10 @@ func main() {
 	http.Handle("/api/cardkingdom/pricelist.json", noSigning(http.HandlerFunc(CKMirrorAPI)))
 	http.HandleFunc("/favicon.ico", Favicon)
 	http.HandleFunc("/auth", Auth)
-
+	// login handler
+	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+		loginHandler(w, r, authClient)
+	})
 	// Firebase handler
 	http.HandleFunc("/firebase", func(w http.ResponseWriter, r *http.Request) {
 		handleRequest(ctx, w, r, authClient, fsClient)
