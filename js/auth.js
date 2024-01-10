@@ -41,7 +41,12 @@ signinForm.addEventListener('submit', (e) => {
             console.error("Error signing in:", error);
         });
 });
-
+/**
+ *  by setting a reference field in the users document 
+ *  we can easily access associated document values, like the ACL...
+ *  or traditional 'cookies' data - but we can persist it
+ *  in firebase to the benefit of our users
+ */
 async function getCookie(uid, key) {
     try {
         const docRef = db.collection('users').doc(uid);
