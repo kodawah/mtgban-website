@@ -527,6 +527,7 @@ func loadGoogleCredentials(credentials string) (*http.Client, error) {
 const DefaultConfigPath = "config.json"
 
 func main() {
+	ctx := context.Background()
 	config := flag.String("cfg", DefaultConfigPath, "Load configuration file")
 	devMode := flag.Bool("dev", false, "Enable developer mode")
 	sigCheck := flag.Bool("sig", false, "Enable signature verification")
@@ -562,7 +563,7 @@ func main() {
 		log.Fatalln("unable to create necessary folders", err)
 	}
 	LogPages = map[string]*log.Logger{}
-
+	
 	GoogleDocsClient, err = loadGoogleCredentials(Config.GoogleCredentials)
 	if err != nil {
 		if DevMode {
@@ -589,6 +590,16 @@ func main() {
 			log.Fatalln("error opening databases:", err)
 		}
 	}
+	// retrieve Firebase SA
+	secretData, err := accessSecret(ctx, Config.GoogleProject, "firebase_sa")
+		if err != nil {
+			log.Println("error accessing secret:", err)
+		}
+	// Initialize Firebase clients	
+	authClient, fsClient, err := initFirebase(ctx, Config.GoogleProject, string(secretData))
+		if err != nil {
+			log.Println("error initializing Firebase:", err)
+		}
 
 	// load website up
 	go func() {
@@ -687,13 +698,17 @@ func main() {
 
 	http.Handle("/sets", enforceSigning(http.HandlerFunc(Search)))
 	http.Handle("/sealed", enforceSigning(http.HandlerFunc(Search)))
-	http.
 	http.Handle("/api/mtgban/", enforceAPISigning(http.HandlerFunc(PriceAPI)))
 	http.Handle("/api/mtgjson/ck.json", enforceAPISigning(http.HandlerFunc(API)))
 	http.Handle("/api/tcgplayer/lastsold/", enforceSigning(http.HandlerFunc(TCGLastSoldAPI)))
 	http.Handle("/api/cardkingdom/pricelist.json", noSigning(http.HandlerFunc(CKMirrorAPI)))
 	http.HandleFunc("/favicon.ico", Favicon)
 	http.HandleFunc("/auth", Auth)
+
+	// Firebase handler
+	http.HandleFunc("/firebase", func(w http.ResponseWriter, r *http.Request) {
+		handleRequest(ctx, w, r, authClient, fsClient)
+	})
 
 	srv := &http.Server{
 		Addr: ":" + Config.Port,
