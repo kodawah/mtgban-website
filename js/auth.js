@@ -1,11 +1,11 @@
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-const signupForm = document.getElementById('signup-form');
-const signinForm = document.getElementById('signin-form');
+const loginForm = document.getElementById('loginForm');
+const signupForm = document.getElementById('signupForm');
 
 // Listen for sign-up form submission events
-signupForm.addEventListener('submit', (e) => {
+signupFormElement.addEventListener('submit', (e) => {
     e.preventDefault();
     const email = signupForm['email'].value;
     const password = signupForm['password'].value;
@@ -28,17 +28,17 @@ signupForm.addEventListener('submit', (e) => {
 });
 
 // listen for login form submission events
-signinForm.addEventListener('submit', (e) => {
+loginFormElement.addEventListener('submit', (e) => {
     e.preventDefault();
-    const email = signupForm['email'].value;
-    const password = signupForm['password'].value;
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
 
     auth.signInWithEmailAndPassword(email, password)
         .then(userCredential => {
             return userCredential.user.getIdToken();
         })
         .then(idToken => {
-            fetch('backend/endpoint - TODO', {
+            fetch('/auth', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
