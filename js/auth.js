@@ -38,7 +38,21 @@ signinForm.addEventListener('submit', (e) => {
             return userCredential.user.getIdToken();
         })
         .then(idToken => {
-            console.log('ID Token:', idToken);
+            fetch('backend/endpoint - TODO', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': idToken,
+                },
+            })
+                .then(response => response.text())
+                .then(data => {
+                    console.log('Response from backend:', data);
+                })
+                .catch(error => {
+                    console.error('Error communicating with backend:', error);
+                });
+
             signinForm.reset();
         })
         .catch(error => {
