@@ -698,12 +698,12 @@ func main() {
 	http.Handle("/api/tcgplayer/lastsold/", enforceSigning(http.HandlerFunc(TCGLastSoldAPI)))
 	http.Handle("/api/cardkingdom/pricelist.json", noSigning(http.HandlerFunc(CKMirrorAPI)))
 	http.HandleFunc("/favicon.ico", Favicon)
-	http.HandleFunc("/auth", Auth)
-	// login handler
-	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-		loginHandler(w, r, authClient)
+	http.HandleFunc("/auth", func(w http.ResponseWriter, r *http.Request) {
+		handleRequest(ctx, w, r, authClient, fsClient)
 	})
-	// Firebase handler
+	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+		handleLogin(w, r, authClient)
+	})
 	http.HandleFunc("/firebase", func(w http.ResponseWriter, r *http.Request) {
 		handleRequest(ctx, w, r, authClient, fsClient)
 	})
