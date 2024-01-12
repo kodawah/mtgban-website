@@ -1,46 +1,64 @@
 const auth = firebase.auth();
 const db = firebase.firestore();
+
 const signupForm = document.getElementById('signup-form');
 const signinForm = document.getElementById('signin-form');
 
 // Listen for sign-up form submission events
 signupForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const email = e.target.elements.email.value;
-    const password = e.target.elements.password.value;
+    const email = signupForm['email'].value;
+    const password = signupForm['password'].value;
+
     // Create a new user with the provided email and password
     auth.createUserWithEmailAndPassword(email, password)
         .then(userCredential => {
             // Save the user's email and password in Firestore
-            const user = userCredential.user;
-            return db.collection('users').doc(user.uid).set({
-                email: user.email,
-                password: user.password
+            return db.collection('users').doc(userCredential.user.uid).set({
+                email: userCredential.user.email,
             });
         })
         .then(() => {
             console.log('User signed up and data stored.');
+            signupForm.reset();
         })
         .catch(error => {
-            console.error('Error signing up:', error);
+            console.error('Error signing up:', error.message);
         });
 });
+
 // listen for login form submission events
 signinForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const email = e.target.elements.email.value;
-    const password = e.target.elements.password.value;
-    // Authenticate the user
+    const email = signupForm['email'].value;
+    const password = signupForm['password'].value;
+
     auth.signInWithEmailAndPassword(email, password)
         .then(userCredential => {
-            // User is now signed in.
-            const user = userCredential.user;
-            const token = user.getIdToken();
+            return userCredential.user.getIdToken();
+        })
+        .then(idToken => {
+            console.log('ID Token:', idToken);
+            signinForm.reset();
         })
         .catch(error => {
-            console.error("Error signing in:", error);
+            console.error("Error signing in:", error.message);
         });
 });
+
+async function getUserData(uid) {
+    try {
+        const docRef = db.collection('users').doc(uid);
+        const doc = await docRef.get();
+        if (doc.exists) {
+            return doc.data();
+        } else {
+            console.log('no user data found');
+        }
+    } catch (error) {
+        console.error('Error retrieving user data:', error);
+    }
+}
 /**
  *  by setting a reference field in the users document 
  *  we can easily access associated document values, like the ACL...
