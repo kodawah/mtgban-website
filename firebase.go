@@ -11,12 +11,23 @@ import (
 	"google.golang.org/api/option"
 )
 
+type SubscriptionDetails struct {
+	Tier   string `firestore:"tier"`
+	Status string `firestore:"status"`
+}
 
 func handleRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, authClient *auth.Client, fsClient *firestore.Client) {
 	idToken := r.FormValue("idToken")
 	user, err := authenticateUser(ctx, authClient, idToken)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Authentication error: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Get user's subscription deets from Firestore
+	_, err = getUserSubscriptionDetails(ctx, fsClient, user.UID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to retrieve sub details: %v", err), http.StatusInternalServerError)
 		return
 	}
 
@@ -30,7 +41,7 @@ func handleRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 		http.Error(w, fmt.Sprintf("Failed to set document: %v", err), http.StatusInternalServerError)
         return
 	}
-	// this can be combined with call above for less latency (just fyi)
+	// set default website cookies (so Monroe quits complaining about having to redo them after Patreon auth resets)
 	_, err = docRef.Update(ctx, []firestore.Update{
 		{
 			Path:  "preference", 
@@ -41,6 +52,21 @@ func handleRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, 
 		http.Error(w, fmt.Sprintf("Failed to update document: %v", err), http.StatusInternalServerError)
         return
 	}
+}
+
+func getUserSubscriptionDetails(ctx context.Context, fsClient *firestore.Client, userID string) (*SubscriptionDetails, error) {
+	docRef := fsClient.Collection("subscriptions").Doc(userID)
+	docSnapshot, err := docRef.Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var details SubscriptionDetails
+	if err := docSnapshot.DataTo(&details); err != nil {
+		return nil, err
+	}
+
+	return &details, nil
 }
 
 func initFirebase(ctx context.Context, projectId, secretId string) (*auth.Client, *firestore.Client, error) {
