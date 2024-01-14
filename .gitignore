@@ -30,5 +30,10 @@ logs/
 # Finder metadata
 .DS_Store
 
-#dev container stuff
+# container stuff
 compose-dev.yaml
+dockerfile
+.dockerignore
+
+# node dependencies
+node_modules/

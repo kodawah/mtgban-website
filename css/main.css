@@ -788,11 +788,100 @@ div.stores-select {
     overflow: auto;
 }
 
-img.hoverImage {
-    position: absolute;
-    z-index: 3;
-    width: auto;
-    width: auto;
-    max-width: 640px;
-    max-height: 360px;
+/*Search page accordion settings */
+.accordion {
+  background-color: var(--background);
+  color: var(--normal);
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 16px;
+  transition: 0.4s;
 }
+
+.accordion:hover {
+  background-color: var(--hover);
+}
+
+.accordion:after {
+  content: '\002B';
+  color: var(--normal);
+  font-weight: bold;
+  float: right;
+  margin-left: 5px;
+}
+
+.active-accordion:after {
+  content: "\2212";
+}
+
+/* The accordion cards/panels. Note: hidden by default */
+.card {
+  background-color: var(--background);
+  color: var(--normal);
+  padding: 0 18px;
+  margin-bottom: 10px;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 16px;
+  transition: 0.4s;
+}
+
+.card:hover {
+  background-color: var(--hover);
+}
+
+.card:after {
+  content: '\002B';
+  color: var(--normal);
+  font-weight: bold;
+  float: right;
+  margin-left: 5px;
+}
+
+.active-card:after {
+  content: "\2212";
+}
+
+.card-header {
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 0;
+  background-color: var(--background);
+  border-bottom: 1px solid var(--normal);
+}
+
+.card-body {
+  padding: 0.75rem 1.25rem;
+  background-color: var(--background);
+  border-bottom: 1px solid var(--normal);
+}
+
+.card-body ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.card-body li {
+  padding: 0.75rem 1.25rem;
+  background-color: var(--background);
+  border-bottom: 1px solid var(--normal);
+}
+
+.card-body li:last-child {
+  border-bottom: none;
+}
+
+.card-body li a {
+  color: var(--normal);
+  text-decoration: underline;
+}
+
+.card-body li a:hover {
+  color: var(--activetext);
+}
+
