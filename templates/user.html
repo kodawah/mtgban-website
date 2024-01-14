@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="../css/main.css">
+    <link href='https://fonts.googleapis.com/css?family=Rosario:400' rel='stylesheet' type='text/css'>
+    <meta name='impact-site-verification' value='77b54a05-53ed-42d4-b087-cb40fa950018' />
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+    <title>{{.Title}}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .card {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ced4da;
+            border-radius: 3px;
+        }
+
+        .form-group button {
+            padding: 7px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+
+        .form-group span {
+            display: block;
+            margin-top: 5px;
+            font-size: 14px;
+            color: #dc3545;
+        }
+    </style>
+</head>
+
+<body class="light-theme">
+    <script type="text/javascript" src="../js/themechecker.js"></script>
+    <nav>
+        <ul>
+            <li><a href="/discord"><img src="img/misc/discord.png" width=48></a></li>
+            {{range .Nav}}
+            <li>
+                <a {{if .Active}}class="{{.Class}}" {{end}} href="{{.Link}}">
+                    <span>{{.Short}} {{.Name}}</span>
+                </a>
+            </li>
+            {{end}}
+            <li>
+                <label class="switch">
+                    <div>
+                        <input type="checkbox" />
+                        <span class="slider"></span>
+                    </div>
+                    <script type="text/javascript" src="../js/nightmode.js"></script>
+                </label>
+            </li>
+        </ul>
+    </nav>
+    <div class="card">
+        <form id="signupForm">
+            <!-- signup form -->
+            <div class="form-group">
+                <label for="signup-email">Email:</label>
+                <input type="email" id="signup-email" required>
+            </div>
+            <div class="form-group">
+                <label for="signup-password">Password:</label>
+                <input type="password" id="signup-password" required>
+            </div>
+            <div class="form-group">
+                <button type="submit">Sign-up</button>
+            </div>
+            <!-- -->
+        </form>
+        <form id="loginForm">
+            <!-- login Form-->
+            <div class="form-group">
+                <label for="login-email">Email:</label>
+                <input type="email" id="login-email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="signin-password">Password:</label>
+                <input type="password" id="signin-password" required>
+            </div>
+            <div class="form-group">
+                <button type="submit">Login</button>
+            </div>
+            <!-- -->
+        </form>
+    </div>
+    <div class="footer">&copy; 2019-2024 MTGBAN Limited<br></div>
+
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+        import { GoogleAuthProvider } from "firebase/auth"
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3NJHS3hDkXyw0TFuBsGWB6A4o8PghimQ",
+            authDomain: "ban-on-fire.firebaseapp.com",
+            projectId: "ban-on-fire",
+            storageBucket: "ban-on-fire.appspot.com",
+            messagingSenderId: "500521386178",
+            appId: "1:500521386178:web:8bfb5f9032c040a162bb5b",
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const analytics = getAnalytics(app);
+        const signupFormElement = document.getElementById('signupForm');
+        signupFormElement.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    console.log('New User signed up: ', userCredential.user);
+                    window.location.href = '/home';
+                })
+                .catch((error) => {
+                    console.error('Error signing up:', error);
+                });
+        });
+
+        const loginFormElement = document.getElementById('loginForm');
+        loginFormElement.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    console.log('Login successful:', userCredential.user);
+                    window.location.href = '/home';  // TODO-Elmo(future) would like to do user dashboards
+                })
+                .catch((error) => {
+                    console.error('Error logging in:', error);
+                });
+        });
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
+</body>
+
+</html>
