@@ -450,7 +450,8 @@ func init() {
 	var opts []string
 
 	for key := range FilterOperations {
-		opts = append(opts, key)
+		// convert keys to lowercase before appending
+		opts = append(opts, strings.ToLower(key))
 	}
 	// Sort keys by shorter and alphabetical (since they may be the more common)
 	sort.Slice(opts, func(i, j int) bool {
