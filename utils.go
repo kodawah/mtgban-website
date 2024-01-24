@@ -232,7 +232,7 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 		case co.BorderColor == mtgjson.BorderColorBorderless:
 			variant = "Borderless "
 		case co.FrameVersion == "1997":
-			variant = "Retro Frame"
+			variant = "Retro Frame "
 		}
 	}
 	// Loop through the supported promo types, skipping Boosterfun already processed above
