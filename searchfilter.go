@@ -993,7 +993,6 @@ var isKnownPromo = map[string]string{
 	"confetti":  mtgjson.PromoTypeConfettiFoil,
 	"galaxy":    mtgjson.PromoTypeGalaxyFoil,
 	"halo":      mtgjson.PromoTypeHaloFoil,
-	"ampersand": mtgjson.PromoTypeEmbossed,
 	"wpn":       mtgjson.PromoTypeWPN,
 	"pp":        mtgjson.PromoTypePromoPack,
 	"neon":      mtgjson.PromoTypeNeonInk,
@@ -1309,6 +1308,13 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 					if slices.Contains(res, co.UUID) {
 						return false
 					}
+				}
+			case "ampersand":
+				if co.SetCode != "PAFR" {
+					continue
+				}
+				if co.HasPromoType(mtgjson.PromoTypeEmbossed) {
+					return false
 				}
 			default:
 				// Adjust input for these known cases
