@@ -81,7 +81,6 @@ function saveRadio(cookieName, containerName) {
     const sellers = document.querySelector('#' + containerName);
     var radios = sellers.querySelectorAll('input');
     for (var i = 0; i < radios.length; i++) {
-        console.log( radios[i].name);
         if (radios[i].checked) {
             out = radios[i].value;
             break;
