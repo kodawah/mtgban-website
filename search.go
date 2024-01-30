@@ -27,6 +27,9 @@ const (
 	TooManyMessage    = "More results available, try adjusting your filters"
 	NoResultsMessage  = "No results found"
 	NoCardsMessage    = "No cards found"
+
+	defaultSellerPriorityOpt = TCG_MARKET
+	defaultVendorPriorityOpt = "CK"
 )
 
 type SearchEntry struct {
@@ -388,12 +391,22 @@ func Search(w http.ResponseWriter, r *http.Request) {
 			return sortSetsAlphabetical(allKeys[i], allKeys[j])
 		})
 	case "retail":
+		retSeller := readCookie(r, "SearchSellersPriority")
+		if retSeller == "" {
+			retSeller = defaultSellerPriorityOpt
+		}
+
 		sort.Slice(allKeys, func(i, j int) bool {
-			return sortSetsByRetail(allKeys[i], allKeys[j])
+			return sortSetsByRetail(allKeys[i], allKeys[j], retSeller)
 		})
 	case "buylist":
+		blVendor := readCookie(r, "SearchVendorsPriority")
+		if blVendor == "" {
+			blVendor = defaultVendorPriorityOpt
+		}
+
 		sort.Slice(allKeys, func(i, j int) bool {
-			return sortSetsByBuylist(allKeys[i], allKeys[j])
+			return sortSetsByBuylist(allKeys[i], allKeys[j], blVendor)
 		})
 	default:
 		sort.Slice(allKeys, func(i, j int) bool {
@@ -1121,14 +1134,15 @@ func sortSetsAlphabeticalSet(uuidI, uuidJ string) bool {
 	return cI.Edition < cJ.Edition
 }
 
-// Sort cards by their prices according to TCG MARKET, fallbacking to TCG LOW
+// Sort cards by their prices according to the passed in seller,
+// fallbacking to TCG LOW if missing
 // If same price is found, sort as normal
-func sortSetsByRetail(uuidI, uuidJ string) bool {
-	priceI := price4seller(uuidI, TCG_MARKET)
+func sortSetsByRetail(uuidI, uuidJ, retSeller string) bool {
+	priceI := price4seller(uuidI, retSeller)
 	if priceI == 0 {
 		priceI = price4seller(uuidI, TCG_LOW)
 	}
-	priceJ := price4seller(uuidJ, TCG_MARKET)
+	priceJ := price4seller(uuidJ, retSeller)
 	if priceJ == 0 {
 		priceJ = price4seller(uuidJ, TCG_LOW)
 	}
@@ -1140,14 +1154,14 @@ func sortSetsByRetail(uuidI, uuidJ string) bool {
 	return priceI > priceJ
 }
 
-// Sort cards by their prices according to CK
-// If same price is found, sort by retail price
-func sortSetsByBuylist(uuidI, uuidJ string) bool {
-	priceI := price4vendor(uuidI, "CK")
-	priceJ := price4vendor(uuidJ, "CK")
+// Sort cards by their prices according to the passed in vendor
+// If same price is found, sort by the default retail price
+func sortSetsByBuylist(uuidI, uuidJ, blVendor string) bool {
+	priceI := price4vendor(uuidI, blVendor)
+	priceJ := price4vendor(uuidJ, blVendor)
 
 	if priceI == priceJ {
-		return sortSetsByRetail(uuidI, uuidJ)
+		return sortSetsByRetail(uuidI, uuidJ, defaultSellerPriorityOpt)
 	}
 
 	return priceI > priceJ

@@ -105,3 +105,31 @@ function loadRadio(cookieName, containerName) {
         }
     }
 }
+
+function saveDropdown(cookieName, containerName) {
+    var out = "";
+    const drops = document.querySelector('#' + containerName);
+    for (var i = 0; i < drops.length; i++) {
+        if (drops.options[i].selected && !drops.options[i].disabled) {
+            out = drops.options[i].value;
+            break;
+        }
+    }
+
+    setCookie(cookieName, out, 1000);
+}
+
+function loadDropdown(cookieName, containerName) {
+    var list = getCookie(cookieName);
+    if (list == "") {
+        return;
+    }
+
+    const drops = document.querySelector('#' + containerName);
+    for (var j = 0; j < drops.length; j++) {
+        drops[j].selected = false;
+        if (drops[j].value == list) {
+            drops[j].selected = true;
+        }
+    }
+}

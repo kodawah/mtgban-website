@@ -57,6 +57,8 @@
                 loadForm("SearchMiscOpts", "miscOpts");
                 loadRadio("SearchDefaultSort", "defaultSort");
                 loadRadio("SearchListingPriority", "listingPriority");
+                loadDropdown("SearchSellersPriority", "sellersPriority");
+                loadDropdown("SearchVendorsPriority", "vendorsPriority");
             }
         </script>
 
@@ -117,6 +119,36 @@
                 <input type="radio" id="buylist" name="sort" value="buylist">
                 <label for="buylist">By best buylist price (off Card Kingdom)</label>
                 <br>
+            </div>
+        </div>
+
+        <br>
+        <div class="indent">
+            <h2>Preferred retail/buylist sort option</h2>
+            Select which retail and buylist stores should sort  by.
+            <br>
+
+            <a class="btn success" onclick="javascript:saveDropdown('SearchSellersPriority', 'sellersPriority'); saveDropdown('SearchVendorsPriority', 'vendorsPriority'); window.location.href = '/search'"><b>SAVE</b></a>
+        </div>
+
+        <br>
+        <div class="indent row">
+            <div class="column" id="sortPriority">
+                <label for="sellersPriority">Retail priority</label>
+                <select id="sellersPriority" class="select-css">
+                    <option selected disabled hidden>&nbsp;&nbsp;&nbsp;Pick a store</option>
+                    {{range $i, $key := .SellerKeys}}
+                        <option value="{{$key}}">&nbsp;&nbsp;&nbsp;{{scraper_name $key}}</option>
+                    {{end}}
+                </select>
+
+                <label for="vendorsPriority">Buylist priority</label>
+                <select id="vendorsPriority" class="select-css">
+                    <option selected disabled hidden>&nbsp;&nbsp;&nbsp;Pick a store</option>
+                    {{range $i, $key := .VendorKeys}}
+                        <option value="{{$key}}">&nbsp;&nbsp;&nbsp;{{scraper_name $key}}</option>
+                    {{end}}
+                </select>
             </div>
         </div>
 
