@@ -1324,7 +1324,7 @@ var FilterCardFuncs = map[string]func(filters []string, co *mtgmatcher.CardObjec
 				}
 
 				// Fall back to any promo type currently supported
-				if slices.Contains(mtgjson.AllPromoTypes, value) {
+				if slices.Contains(mtgmatcher.AllPromoTypes(), value) {
 					if co.HasPromoType(value) {
 						return false
 					}

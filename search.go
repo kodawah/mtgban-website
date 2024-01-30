@@ -62,7 +62,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	query := r.FormValue("q")
 
 	pageVars.IsSets = r.URL.Path == "/sets"
-	pageVars.PromoTags = mtgjson.AllPromoTypes
+	pageVars.PromoTags = mtgmatcher.AllPromoTypes()
 
 	pageVars.Nav = insertNavBar("Search", pageVars.Nav, []NavElem{
 		NavElem{

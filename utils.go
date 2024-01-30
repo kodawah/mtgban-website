@@ -237,7 +237,7 @@ func uuid2card(cardId string, flags ...bool) GenericCard {
 	}
 	// Loop through the supported promo types, skipping Boosterfun already processed above
 	for _, promoType := range co.PromoTypes {
-		if slices.Contains(mtgjson.AllPromoTypes, promoType) && promoType != mtgjson.PromoTypeBoosterfun {
+		if slices.Contains(mtgmatcher.AllPromoTypes(), promoType) && promoType != mtgjson.PromoTypeBoosterfun {
 			variant += mtgmatcher.Title(promoType) + " "
 		}
 	}
