@@ -308,11 +308,6 @@ func signHMACSHA1Base64(key []byte, data []byte) string {
 }
 
 func getSignatureFromCookies(r *http.Request) string {
-	// If no signature is provided, use a default one, with no expiration check
-	if Config.FreeEnable {
-		return FreeSignature
-	}
-
 	var sig string
 	for _, cookie := range r.Cookies() {
 		if cookie.Name == "MTGBAN" {
@@ -324,6 +319,11 @@ func getSignatureFromCookies(r *http.Request) string {
 	querySig := r.FormValue("sig")
 	if sig == "" && querySig != "" {
 		sig = querySig
+	}
+
+	// If no signature is provided, use a default one, with no expiration check
+	if sig == "" && Config.FreeEnable {
+		return FreeSignature
 	}
 
 	exp := GetParamFromSig(sig, "Expires")
