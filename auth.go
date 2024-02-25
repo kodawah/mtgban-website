@@ -218,9 +218,18 @@ func getUserTier(tc *http.Client, userId string) (string, error) {
 func getBaseURL(r *http.Request) string {
 	host := r.Host
 	if host == "localhost:"+fmt.Sprint(Config.Port) && !DevMode {
-		host = DefaultHost
+		if Config.FreeEnable {
+			host = Config.FreeHostname
+		} else {
+			host = DefaultHost
+		}
 	}
-	baseURL := "http://" + host
+	baseURL := ""
+	if strings.Contains(host, "http") {
+		baseURL = host
+	} else {
+		baseURL = "http://" + host
+	}
 	if r.TLS != nil {
 		baseURL = strings.Replace(baseURL, "http", "https", 1)
 	}
@@ -459,7 +468,7 @@ func enforceAPISigning(next http.Handler) http.Handler {
 			q.Set("Expires", exp)
 		}
 
-		data := fmt.Sprintf("%s%s%s%s", r.Method, exp, getBaseURL(r), q.Encode())
+		data := fmt.Sprintf("%s%d%s%s", r.Method, expires, getBaseURL(r), q.Encode())
 		valid := signHMACSHA1Base64([]byte(secret), []byte(data))
 
 		if SigCheck && (valid != sig || (exp != "" && (expires < time.Now().Unix()))) {
