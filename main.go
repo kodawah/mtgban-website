@@ -534,7 +534,7 @@ func loadGoogleCredentials(credentials string) (*http.Client, error) {
 	return conf.Client(context.Background()), nil
 }
 
-const DefaultConfigPath = "config.json"
+const DefaultConfigPath = "/mnt/config.json"
 
 func main() {
 	config := flag.String("cfg", DefaultConfigPath, "Load configuration file")
@@ -574,7 +574,7 @@ func main() {
 		if !found {
 			log.Fatalln("level", level, "not found in the ACL config")
 		}
-		FreeSignature = sign(host, level, nil)
+		FreeSignature = sign(Config.FreeHostname, level, nil)
 		log.Println("Running in free mode")
 	}
 
