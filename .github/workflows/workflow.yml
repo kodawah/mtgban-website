@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
@@ -37,3 +38,5 @@ jobs:
             --platform managed \
             --allow-unauthenticated
             --update-secrets=/mnt/config=banconfig:latest, ENV=config
+            --update-secrets=/mnt/credentials.json=firebase_sa:latest, ENV=credentials
+            --update-secrets=mnt/creds.json=cloudrunner:latest, ENV=creds

@@ -16,25 +16,31 @@ COPY . /src
 RUN CGO_ENABLED=0 GOOS=linux go build -o /mtgbantu-website -v -x
 
 # Second stage: Run Go binary
-FROM alpine:latest AS build-release-stage
-
-RUN apk update && apk add --no-cache sudo
+FROM alpine:3.19 AS build-release-stage
 
 RUN mkdir -p /app/bantu
-
 WORKDIR /app/bantu
 
-COPY --from=build /mtgban-website .
-COPY --from=build /src/config.json .
-COPY --from=build /src/credentials.json .
-COPY --from=build /src/creds.json .
-COPY --from=build /src/allprintings5.json .
-COPY --from=build /src/templates ./templates
-COPY --from=build /src/css ./css
-COPY --from=build /src/js ./js
-COPY --from=build /src/img ./img
+RUN apk update && apk add --no-cache sudo bash curl xz jq
 
-EXPOSE 8050
+# Create and execute the script in one RUN command to reduce layers
+RUN echo $'#!/bin/sh\n\
+curl -O "https://mtgjson.com/api/v5/AllPrintings.json.xz"\n\
+xz -dc AllPrintings.json.xz | jq > /tmp/allprintings5.json.new\n\
+if [ $? -eq 0 ]; then\n\
+    mv /tmp/allprintings5.json.new ./allprintings5.json\n\
+fi\n\
+rm AllPrintings.json.xz\n' > get-mtgjson.sh && \ 
+chmod +x get-mtgjson.sh && \ 
+./get-mtgjson.sh
+
+COPY --from=build /mtgbantu-website .
+COPY /templates ./templates
+COPY /css ./css
+COPY /js ./js
+COPY /img ./img
+
+EXPOSE 8080
 
 ENTRYPOINT ["/app/bantu/mtgbantu-website"]
 CMD []

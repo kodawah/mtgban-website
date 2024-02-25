@@ -1,0 +1,5 @@
+get-mtgjson.sh
+*.exe
+*.txt
+.github/*
+*.json
